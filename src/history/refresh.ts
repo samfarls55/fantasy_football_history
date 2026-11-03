@@ -98,10 +98,11 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     seasons: [], people: [], franchises: [], contests: [], performances: [], players: [],
     transactions: [], drafts: [], coverage: [], source: {},
   };
+  const sourceResponses = new Map<string, unknown>();
   async function get(path: string): Promise<unknown> {
     try {
       const value = await provider.get(path);
-      archive.source[path] = value;
+      sourceResponses.set(path, value);
       return value;
     } catch (error) { throw new Error(`${path}: ${error instanceof Error ? error.message : String(error)}`); }
   }
@@ -283,6 +284,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     await importOwnershipInputs(archive, season, get, playerSource);
     next = previousLeagueId;
   }
+  archive.source = Object.fromEntries(sourceResponses);
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
   const benchGaps = archive.coverage.filter(issue => issue.blocks.includes('benched-player'));
   if (previous && !previous.coverage.some(issue => issue.blocks.includes('benched-player')) && benchGaps.length) {

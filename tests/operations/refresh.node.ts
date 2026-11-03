@@ -90,7 +90,7 @@ test('HTTP routes show unavailable history before the first refresh and preserve
       await publish(storePath, await fixture());
       const zero = await fetch(`${base}/managers/person-800000000000000001/players/901/?season=2021`);
       assert.equal(zero.status, 200);
-      assert.match((await zero.text()).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' '), /starts 0/i);
+      assert.match((await zero.text()).replace(/<[^<>]*>/g, ' ').replace(/\s+/g, ' '), /starts 0/i);
       const noMeetings = await fetch(`${base}/rivalries/?a=person-472580465006473216&b=${sebastian}`);
       assert.equal(noMeetings.status, 200);
       assert.match(await noMeetings.text(), /No meetings in this selection\./);

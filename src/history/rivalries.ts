@@ -79,7 +79,7 @@ export async function readRivalriesPage(options: HistorySelection & { a?: string
   const b = people.find(person => person.id === options.b);
   const comparison = a && b && a.id !== b.id ? rivalry(archive, a, b, options) : null;
   const games = options.limit === 'all' ? comparison?.games ?? [] : comparison?.games.slice(0, 10) ?? [];
-  return { people, years: archive.seasons.map(season => season.year).sort().reverse(), a: a?.id ?? '', b: b?.id ?? '', comparison, games,
+  return { people, years: archive.seasons.map(season => season.year).sort((a, b) => b.localeCompare(a)), a: a?.id ?? '', b: b?.id ?? '', comparison, games,
     nextHref: comparison && comparison.meetings > games.length ? rivalryHref(comparison.a.id, comparison.b.id, { ...options, limit: 'all' }) : null };
 }
 

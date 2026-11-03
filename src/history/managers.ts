@@ -17,6 +17,12 @@ type TeamSeason = { season: Season; team: SeasonTeam };
 
 export function recordedRange(start: string, end: string) { return start === end ? start : `${start}–${end}`; }
 
+export function extendTenure(tenure: Tenure, year: string, team: SeasonTeam, previousTeam: SeasonTeam): void {
+  tenure.end = year;
+  tenure.range = recordedRange(tenure.start, tenure.end);
+  if (team.nameSource === 'historical-roster' && team.name !== previousTeam.name) tenure.events.push({ year, kind: 'name', label: previousTeam.nameSource === 'historical-roster' ? `Renamed ${team.name}` : `Team name: ${team.name}`, predecessor: null });
+}
+
 function personSeasons(archive: Archive, personId: string): TeamSeason[] {
   return archive.seasons.flatMap(season => season.teams.filter(team => team.personId === personId).map(team => ({ season, team }))).sort((a, b) => a.season.year.localeCompare(b.season.year));
 }
@@ -36,9 +42,7 @@ function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
       if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Team name: ${team.name}`, predecessor: null });
       tenures.push({ franchiseId: team.franchiseId, start: season.year, end: season.year, range: season.year, events });
     } else {
-      const tenure = tenures.at(-1)!;
-      tenure.end = season.year; tenure.range = recordedRange(tenure.start, tenure.end);
-      if (team.nameSource === 'historical-roster' && team.name !== previous.team.name) tenure.events.push({ year: season.year, kind: 'name', label: previous.team.nameSource === 'historical-roster' ? `Renamed ${team.name}` : `Team name: ${team.name}`, predecessor: null });
+      extendTenure(tenures.at(-1)!, season.year, team, previous.team);
     }
   }
   return tenures;

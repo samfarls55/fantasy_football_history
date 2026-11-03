@@ -52,7 +52,7 @@ export function startGame(archive: Archive, start: RecordedStart, scope: Scope) 
 }
 function summarize(archive: Archive, starts: RecordedStart[]) {
   const metric = exactSum(starts.map(row => row.points));
-  const years = [...new Set(starts.map(row => row.performance.year))].sort();
+  const years = [...new Set(starts.map(row => row.performance.year))].sort((a, b) => a.localeCompare(b));
   const owners = [...new Set(starts.map(row => row.performance.personId))].map(id => archive.people.find(person => person.id === id)!);
   return { metric, points: metric.toNumber(), starts: starts.length, range: years.length ? years[0] === years.at(-1) ? years[0] : `${years[0]}–${years.at(-1)}` : '—', owners };
 }
