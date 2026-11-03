@@ -54,7 +54,7 @@ test('unknown years use a real shared not-found page and invalid query state nor
 test('an omitted historical playoff-place setting displays an unknown fact', async ({ page }) => {
   await page.goto('/seasons/2021/');
   await page.getByText('Season format', { exact: true }).click();
-  await expect(page.locator('.season-format dl > div').filter({ has: page.locator('dt', { hasText: 'Playoff places' }) }).locator('dd')).toHaveText('—');
+  await expect(page.locator('.season-format dl > div').filter({ has: page.locator('dt', { hasText: 'Playoff places' }) }).locator('dd')).toHaveText('Not recorded');
 });
 
 test('phone Menu restores focus and standings retain readable labels without overflow', async ({ page }) => {
@@ -102,7 +102,7 @@ test('season comparisons retain their signed values, closed format and shared so
   await page.goto('/records/dominant-season/?season=2019');
   await expect(page.getByRole('heading', { name: 'Most dominant season', exact: true })).toBeVisible();
   await expect(page.locator('.leading-value')).toHaveText('73.8%');
-  await expect(page.locator('.record-ranking .record-when').first()).toHaveText('Week 4 · 2019');
+  await expect(page.locator('.record-ranking .record-when').first()).toHaveText('2019 season');
   await expect(page.getByRole('columnheader', { name: 'Scoring vs league' })).toBeAttached();
   for (const width of [1440, 320]) {
     await page.setViewportSize({ width, height: 900 });

@@ -16,6 +16,7 @@ export default async function setup() {
   fixture.responses['league/900000000000002020/rosters'][0].metadata = { team_name: 'Harbor Crew' };
   fixture.responses['league/900000000000002021/rosters'][2].metadata = { team_name: 'Buccaneers' };
   delete fixture.responses['league/900000000000002021'].settings.playoff_teams;
+  delete fixture.responses['league/900000000000002019'].settings.playoff_round_type;
   fixture.responses['league/900000000000002020/matchups/1'][0].players.push('90');
   const native = JSON.parse(await readFile(new URL('./fixtures/playoff-type-1.json', import.meta.url), 'utf8'));
   const rivalry = rivalriesSource(fixture.seedLeagueId);
