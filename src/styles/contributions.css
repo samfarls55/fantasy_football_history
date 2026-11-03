@@ -1,0 +1,44 @@
+.contributor-heading, .contribution-games-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-block: 12px 20px; }
+.contributor-heading h2, .contribution-games-heading h2 { font-size: 36px; }
+.contributor-heading > a { font-size: 22px; }
+.contributors-table th:first-child { width: 46%; }
+.contributors-table th:nth-child(2) { width: 23%; }
+.contributor-owners { display: block; color: var(--muted); font-size: 20px; margin-top: 4px; font-weight: 500; overflow-wrap: anywhere; }
+.contributor-owners a { color: var(--muted); }
+.contribution-heading { display: block; margin-bottom: 20px; }
+.contribution-heading h1 { overflow-wrap: anywhere; }
+.contribution-heading p { color: var(--muted); font-size: 27px; margin-top: 10px; }
+.contribution-heading p a { color: var(--ink); font-weight: 700; }
+.contribution-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 32px; margin: 24px 0; }
+.contribution-facts { display: flex; flex-wrap: wrap; gap: 16px 26px; margin: 0; }
+.contribution-facts > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; font-size: 28px; font-weight: 700; }
+.contribution-facts > div + div { border-left: 1px solid #c8b5f4; padding-left: 26px; }
+.contribution-facts dt { order: 2; }
+.contribution-facts dd { margin: 0; }
+.franchise-contributions-link { font-size: 24px; }
+.contribution-scope { margin-bottom: 22px; justify-content: flex-end; }
+.contribution-seasons th:first-child { width: 40%; }
+.contribution-games-heading { margin-top: 34px; }
+.contribution-games th:first-child { width: 18%; }
+.contribution-games th:nth-child(2) { width: 32%; }
+.contribution-games th:nth-child(3) { width: 22%; }
+.contribution-games th:last-child { width: 28%; }
+@media (max-width: 600px) {
+  .contributor-heading h2, .contribution-games-heading h2 { font-size: 30px; }
+  .contributors-table, .contributors-table tbody, .contribution-seasons, .contribution-seasons tbody, .contribution-games, .contribution-games tbody { display: block; }
+  .contributors-table thead, .contribution-seasons thead, .contribution-games thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .contributors-table tr, .contribution-seasons tr, .contribution-games tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 18px 14px; border-top: 1px solid #e8e1f1; }
+  .contributors-table tr:first-child, .contribution-seasons tr:first-child, .contribution-games tr:first-child { border: 0; }
+  .contributors-table tbody th, .contributors-table tbody td, .contribution-seasons tbody th, .contribution-seasons tbody td, .contribution-games tbody th, .contribution-games tbody td { width: auto; border: 0; padding: 0; font-size: 22px; min-width: 0; }
+  .contributors-table th:first-child, .contribution-seasons th:first-child, .contribution-games th:first-child { width: auto; }
+  .contributors-table tbody th, .contribution-seasons tbody th, .contribution-games tbody th, .contribution-games tbody td:nth-child(2) { grid-column: 1 / -1; }
+  .contributors-table td, .contribution-seasons td, .contribution-games td:nth-child(n+3) { display: flex; flex-direction: column; gap: 4px; }
+  .contributors-table td::before, .contribution-seasons td::before, .contribution-games td:nth-child(n+3)::before { content: attr(data-label); font-size: 17px; color: var(--muted); font-weight: 400; }
+  .contribution-heading p { font-size: 23px; }
+  .contribution-facts { gap: 12px; }
+  .contribution-facts > div { font-size: 24px; }
+  .contribution-facts > div + div { padding-left: 12px; }
+  .contribution-scope { margin-bottom: 22px; }
+  .contribution-games-heading .profile-controls { padding-top: 0; }
+  .contribution-games td:last-child { grid-column: 1 / -1; }
+}

@@ -3,20 +3,25 @@ import MuseumLayout from '../../layouts/MuseumLayout.astro';
 import TeamImage from '../../components/TeamImage.astro';
 import SeasonMatchups from '../../components/SeasonMatchups.astro';
 import SeasonBracket from '../../components/SeasonBracket.astro';
-import { readSeasonMatchups, readSeasonBracket, gameScopes, bracketScopes, type BracketScope } from '../../history/read';
+import Contributors from '../../components/Contributors.astro';
+import { readContributors } from '../../history/contributions';
+import { readSeasonMatchups, readSeasonBracket, gameScopes, competitionLabels, bracketScopes, type BracketScope } from '../../history/read';
+import '../../styles/profiles.css';
 import type { Scope } from '../../history/types';
 import { readSeason, readSeasons, standingSorts, type StandingSort } from '../../history/read';
 const { year = '' } = Astro.params;
 const seasons = await readSeasons();
 const selected = Astro.url.searchParams;
 const sort = standingSorts.includes(selected.get('sort') as StandingSort) ? selected.get('sort') as StandingSort : 'standing';
-const tab = ['matchups', 'playoffs'].includes(selected.get('tab')!) ? selected.get('tab')! : 'standings';
+const tab = ['matchups', 'playoffs', 'players'].includes(selected.get('tab')!) ? selected.get('tab')! : 'standings';
 const scope = tab === 'playoffs' ? bracketScopes.includes(selected.get('scope') as BracketScope) ? selected.get('scope') as BracketScope : 'playoffs' : gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
 const matchups = tab === 'matchups' ? await readSeasonMatchups(year, { scope, week: Number(selected.get('week')) }) : null;
 const bracket = tab === 'playoffs' ? await readSeasonBracket(year, { scope: scope as BracketScope }) : null;
 const season = await readSeason(year, { sort });
+const players = tab === 'players' && season ? await readContributors({}, { scope, season: year }) : null;
 if (!season) Astro.response.status = 404;
-if (season && (selected.has('tab') && !['standings', 'matchups', 'playoffs'].includes(selected.get('tab')!) || tab === 'standings' && selected.has('sort') && selected.get('sort') !== sort)) return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
+if (season && (selected.has('tab') && !['standings', 'matchups', 'playoffs', 'players'].includes(selected.get('tab')!) || tab === 'standings' && selected.has('sort') && selected.get('sort') !== sort)) return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
+if (players && selected.has('scope') && selected.get('scope') !== scope) return Astro.redirect(`/seasons/${year}/?tab=players&scope=${scope}`, 302);
 if (matchups && (selected.has('scope') && selected.get('scope') !== scope || selected.has('week') && selected.get('week') !== String(matchups.week))) return Astro.redirect(`/seasons/${year}/?tab=matchups&scope=${scope}&week=${matchups.week}`, 302);
 if (bracket && (selected.has('scope') && selected.get('scope') !== scope || !bracket.availableScopes.includes(scope as BracketScope) && scope !== 'playoffs')) return Astro.redirect(`/seasons/${year}/?tab=playoffs&scope=playoffs`, 302);
 const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
@@ -44,8 +49,11 @@ const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximu
         {Object.entries(season.scoring).map(([key, value]) => <div><dt>{({ rec: 'Reception', pass_td: 'Passing touchdown' } as Record<string, string>)[key] ?? key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}
       </dl>
     </details>
-    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=playoffs&scope=${tab === 'playoffs' ? scope : 'playoffs'}`} aria-current={tab === 'playoffs' ? 'page' : undefined}>Playoffs</a></nav>
-    {matchups ? <SeasonMatchups selection={matchups} /> : bracket ? <SeasonBracket selection={bracket} /> : <>
+    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=playoffs&scope=${tab === 'playoffs' ? scope : 'playoffs'}`} aria-current={tab === 'playoffs' ? 'page' : undefined}>Playoffs</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
+    {matchups ? <SeasonMatchups selection={matchups} /> : bracket ? <SeasonBracket selection={bracket} /> : players ? <>
+      <form method="get" class="profile-controls season-player-controls"><input type="hidden" name="tab" value="players" /><label for="season-player-scope">Game scope</label><select id="season-player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show players</button></form>
+      <Contributors selection={players} />
+    </> : <>
     <div class="table-toolbar"><p>Regular season</p><form method="get">
       <input type="hidden" name="tab" value="standings" />
       <label for="standing-sort">Sort standings</label>

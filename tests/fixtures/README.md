@@ -61,3 +61,7 @@ Boundary tests mutate only provider responses to create partial seasons, null st
 ## Career ranking boundaries
 
 `records-source.ts` constructs controlled provider responses for regular-season career records. It supplies complete roster-week coverage while letting tests specify official scores and explicit unpaired byes. It does not write a normalized archive. Worked cases observed after real refresh and persisted visitor reads include `0.1 + 0.2 = 0.3`, distinct `100.12001` and `100.12` totals, `1/3 = 2/6` win rates, three entries sharing tenth place, and three sharing twentieth place. The latter pages contain 12 and 22 rows respectively; sorting retains those canonical places.
+
+## Scoped starting contributions
+
+Player `107` contributes **15.5 points / 1 start** to Woody's regular-season career and **58 / 4** to Tim's (20 in 2020 plus 15 + 14 + 9 in 2021). Their continuous franchise has **73.5 / 5**, retaining each owner. Combined regular/playoffs gives Tim **88.5 / 5**; his 2020 season is **50.5 / 2**, although the official override makes the two team scores total 56. Player `901` has **zero starts and starting points** despite three 50-point bench performances. Player `103` has one actual zero-point regular-season start in 2019. Null/`'0'` slots and unplayed 2021 week-4 zero rows add no start. Contribution tests observe these values and correction/failure retention through the real refresh and persisted visitor reads; browser screenshots labelled `ticket-12-synthetic-*` use this illustrative input rather than live league statistics.

@@ -1,0 +1,19 @@
+---
+import type { readContributors } from '../history/contributions';
+import { formatRecordValue } from '../history/records';
+import '../styles/contributions.css';
+interface Props { selection: NonNullable<Awaited<ReturnType<typeof readContributors>>> }
+const { selection } = Astro.props;
+const attribution = selection.context?.kind !== 'person';
+const rankings = new URLSearchParams({ scope: selection.scope });
+if (selection.season) rankings.set('season', selection.season);
+---
+<div class="contributor-heading"><h2>Starting contributors</h2><a href={`/records/player-contributions/?${rankings}`}>View rankings</a></div>
+{selection.rows.length ? <table class="history-table contributors-table">
+  <caption class="visually-hidden">Starting player contributions</caption>
+  <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Starting points</th><th scope="col">Starts</th><th scope="col">Seasons</th></tr></thead>
+  <tbody>{selection.rows.map(row => <tr>
+    <th scope="row"><a href={row.href}>{row.name}</a>{attribution && <span class="contributor-owners">{row.owners.map((owner, index) => <>{index > 0 && <span aria-hidden="true"> · </span>}<a href={`/managers/${owner.id}/?tab=players&scope=${selection.scope}${selection.season ? `&season=${selection.season}` : ''}`}>{owner.name}</a></>)}</span>}</th>
+    <td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td><td data-label="Seasons">{row.range}</td>
+  </tr>)}</tbody>
+</table> : <p class="empty-history">No recorded starts for this selection.</p>}
