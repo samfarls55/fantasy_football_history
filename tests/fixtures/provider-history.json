@@ -1,0 +1,2392 @@
+{
+  "schemaVersion": 1,
+  "description": "Entirely synthetic controlled provider responses. Account transitions reproduce the two confirmed replacements; no scores or event dates are live history. See README.md.",
+  "seedLeagueId": "900000000000002021",
+  "now": "2021-09-29T12:00:00Z",
+  "responses": {
+    "league/900000000000002019": {
+      "league_id": "900000000000002019",
+      "previous_league_id": null,
+      "season": "2019",
+      "season_type": "regular",
+      "sport": "nfl",
+      "status": "complete",
+      "name": "Synthetic history 2019",
+      "total_rosters": 6,
+      "roster_positions": [
+        "QB",
+        "BN"
+      ],
+      "scoring_settings": {
+        "pass_td": 4,
+        "rec": 0.5
+      },
+      "settings": {
+        "num_teams": 6,
+        "start_week": 1,
+        "playoff_week_start": 2,
+        "playoff_teams": 6,
+        "playoff_round_type": 0,
+        "last_scored_leg": 4,
+        "leg": 4,
+        "max_keepers": 1
+      }
+    },
+    "league/900000000000002019/users": [
+      {
+        "user_id": "800000000000000001",
+        "display_name": "Manager 1",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "800000000000000002",
+        "display_name": "Manager 2",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "800000000000000003",
+        "display_name": "Manager 3",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "800000000000000004",
+        "display_name": "Manager 4",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "472580465006473216",
+        "display_name": "Woody14",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "473910025325113344",
+        "display_name": "alecswartout",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      }
+    ],
+    "league/900000000000002019/rosters": [
+      {
+        "roster_id": 1,
+        "owner_id": "800000000000000001",
+        "league_id": "900000000000002019",
+        "players": [
+          "101"
+        ],
+        "starters": [
+          "101"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 2,
+        "owner_id": "800000000000000002",
+        "league_id": "900000000000002019",
+        "players": [
+          "102"
+        ],
+        "starters": [
+          "102"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 3,
+        "owner_id": "800000000000000003",
+        "league_id": "900000000000002019",
+        "players": [
+          "103"
+        ],
+        "starters": [
+          "103"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 4,
+        "owner_id": "800000000000000004",
+        "league_id": "900000000000002019",
+        "players": [
+          "104"
+        ],
+        "starters": [
+          "104"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 7,
+        "owner_id": "472580465006473216",
+        "league_id": "900000000000002019",
+        "players": [
+          "107"
+        ],
+        "starters": [
+          "107"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 10,
+        "owner_id": "473910025325113344",
+        "league_id": "900000000000002019",
+        "players": [
+          "110"
+        ],
+        "starters": [
+          "110"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      }
+    ],
+    "league/900000000000002019/winners_bracket": [
+      {
+        "m": 1,
+        "r": 1,
+        "t1": 3,
+        "t2": 7,
+        "w": 3,
+        "l": 7
+      },
+      {
+        "m": 2,
+        "r": 1,
+        "t1": 4,
+        "t2": 10,
+        "w": 10,
+        "l": 4
+      },
+      {
+        "m": 3,
+        "r": 2,
+        "t1": 1,
+        "t2": 3,
+        "w": 1,
+        "l": 3,
+        "t2_from": {
+          "w": 1
+        }
+      },
+      {
+        "m": 4,
+        "r": 2,
+        "t1": 2,
+        "t2": 10,
+        "w": 10,
+        "l": 2,
+        "t2_from": {
+          "w": 2
+        }
+      },
+      {
+        "m": 5,
+        "r": 2,
+        "t1": 7,
+        "t2": 4,
+        "w": 7,
+        "l": 4,
+        "t1_from": {
+          "l": 1
+        },
+        "t2_from": {
+          "l": 2
+        },
+        "p": 5
+      },
+      {
+        "m": 6,
+        "r": 3,
+        "t1": 1,
+        "t2": 10,
+        "w": 10,
+        "l": 1,
+        "t1_from": {
+          "w": 3
+        },
+        "t2_from": {
+          "w": 4
+        },
+        "p": 1
+      },
+      {
+        "m": 7,
+        "r": 3,
+        "t1": 3,
+        "t2": 2,
+        "w": 3,
+        "l": 2,
+        "t1_from": {
+          "l": 3
+        },
+        "t2_from": {
+          "l": 4
+        },
+        "p": 3
+      }
+    ],
+    "league/900000000000002019/losers_bracket": [],
+    "league/900000000000002019/drafts": [
+      {
+        "draft_id": "9000000000000020191",
+        "league_id": "900000000000002019",
+        "season": "2019",
+        "sport": "nfl",
+        "season_type": "regular",
+        "type": "snake",
+        "status": "complete",
+        "settings": {
+          "teams": 6,
+          "rounds": 1
+        },
+        "slot_to_roster_id": {
+          "1": 1,
+          "2": 2,
+          "3": 3,
+          "4": 4,
+          "5": 7,
+          "6": 10
+        }
+      }
+    ],
+    "draft/9000000000000020191/picks": [
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "101",
+        "roster_id": 1,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 1,
+        "pick_no": 1,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "102",
+        "roster_id": 2,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 2,
+        "pick_no": 2,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "103",
+        "roster_id": 3,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 3,
+        "pick_no": 3,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "104",
+        "roster_id": 4,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 4,
+        "pick_no": 4,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "107",
+        "roster_id": 7,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 5,
+        "pick_no": 5,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020191",
+        "player_id": "110",
+        "roster_id": 10,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 6,
+        "pick_no": 6,
+        "is_keeper": null,
+        "metadata": {}
+      }
+    ],
+    "league/900000000000002019/matchups/1": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 10.25,
+        "custom_points": null,
+        "starters": [
+          "101"
+        ],
+        "players": [
+          "101"
+        ],
+        "starters_points": [
+          10.25
+        ],
+        "players_points": {
+          "101": 10.25
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 10.25,
+        "custom_points": null,
+        "starters": [
+          "102"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          10.25
+        ],
+        "players_points": {
+          "102": 10.25
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 2,
+        "points": 0,
+        "custom_points": null,
+        "starters": [
+          "103"
+        ],
+        "players": [
+          "103"
+        ],
+        "starters_points": [
+          0
+        ],
+        "players_points": {
+          "103": 0
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 2,
+        "points": 8,
+        "custom_points": null,
+        "starters": [
+          "104"
+        ],
+        "players": [
+          "104"
+        ],
+        "starters_points": [
+          8
+        ],
+        "players_points": {
+          "104": 8
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 3,
+        "points": 15.5,
+        "custom_points": null,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          15.5
+        ],
+        "players_points": {
+          "107": 15.5
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 3,
+        "points": 9.5,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          9.5
+        ],
+        "players_points": {
+          "110": 9.5
+        }
+      }
+    ],
+    "league/900000000000002019/matchups/2": [
+      {
+        "roster_id": 1,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "101"
+        ],
+        "players": [
+          "101"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "101": 99
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": null,
+        "points": 98,
+        "custom_points": null,
+        "starters": [
+          "102"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          98
+        ],
+        "players_points": {
+          "102": 98
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 1,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "103"
+        ],
+        "players": [
+          "103"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "103": 20
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 1,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          10
+        ],
+        "players_points": {
+          "107": 10
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 2,
+        "points": 12,
+        "custom_points": null,
+        "starters": [
+          "104"
+        ],
+        "players": [
+          "104"
+        ],
+        "starters_points": [
+          12
+        ],
+        "players_points": {
+          "104": 12
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 22,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          22
+        ],
+        "players_points": {
+          "110": 22
+        }
+      }
+    ],
+    "league/900000000000002019/matchups/3": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "101"
+        ],
+        "players": [
+          "101"
+        ],
+        "starters_points": [
+          30
+        ],
+        "players_points": {
+          "101": 30
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 1,
+        "points": 25,
+        "custom_points": null,
+        "starters": [
+          "103"
+        ],
+        "players": [
+          "103"
+        ],
+        "starters_points": [
+          25
+        ],
+        "players_points": {
+          "103": 25
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 2,
+        "points": 18,
+        "custom_points": null,
+        "starters": [
+          "102"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          18
+        ],
+        "players_points": {
+          "102": 18
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 28,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          28
+        ],
+        "players_points": {
+          "110": 28
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 3,
+        "points": 17,
+        "custom_points": null,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          17
+        ],
+        "players_points": {
+          "107": 17
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 3,
+        "points": 11,
+        "custom_points": null,
+        "starters": [
+          "104"
+        ],
+        "players": [
+          "104"
+        ],
+        "starters_points": [
+          11
+        ],
+        "players_points": {
+          "104": 11
+        }
+      }
+    ],
+    "league/900000000000002019/matchups/4": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 35.25,
+        "custom_points": null,
+        "starters": [
+          "101"
+        ],
+        "players": [
+          "101"
+        ],
+        "starters_points": [
+          35.25
+        ],
+        "players_points": {
+          "101": 35.25
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 1,
+        "points": 40.5,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          40.5
+        ],
+        "players_points": {
+          "110": 40.5
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 2,
+        "points": 23,
+        "custom_points": null,
+        "starters": [
+          "103"
+        ],
+        "players": [
+          "103"
+        ],
+        "starters_points": [
+          23
+        ],
+        "players_points": {
+          "103": 23
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 2,
+        "points": 21,
+        "custom_points": null,
+        "starters": [
+          "102"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          21
+        ],
+        "players_points": {
+          "102": 21
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": null,
+        "points": 9,
+        "custom_points": null,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          9
+        ],
+        "players_points": {
+          "107": 9
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": null,
+        "points": 8,
+        "custom_points": null,
+        "starters": [
+          "104"
+        ],
+        "players": [
+          "104"
+        ],
+        "starters_points": [
+          8
+        ],
+        "players_points": {
+          "104": 8
+        }
+      }
+    ],
+    "league/900000000000002019/transactions/0": [],
+    "league/900000000000002019/transactions/1": [],
+    "league/900000000000002019/transactions/2": [],
+    "league/900000000000002019/transactions/3": [],
+    "league/900000000000002019/transactions/4": [],
+    "league/900000000000002019/transactions/5": [],
+    "league/900000000000002019/transactions/6": [],
+    "league/900000000000002019/transactions/7": [],
+    "league/900000000000002019/transactions/8": [],
+    "league/900000000000002019/transactions/9": [],
+    "league/900000000000002019/transactions/10": [],
+    "league/900000000000002019/transactions/11": [],
+    "league/900000000000002019/transactions/12": [],
+    "league/900000000000002019/transactions/13": [],
+    "league/900000000000002019/transactions/14": [],
+    "league/900000000000002019/transactions/15": [],
+    "league/900000000000002019/transactions/16": [],
+    "league/900000000000002019/transactions/17": [],
+    "league/900000000000002019/transactions/18": [],
+    "league/900000000000002020": {
+      "league_id": "900000000000002020",
+      "previous_league_id": "900000000000002019",
+      "season": "2020",
+      "season_type": "regular",
+      "sport": "nfl",
+      "status": "complete",
+      "name": "Synthetic history 2020",
+      "total_rosters": 2,
+      "roster_positions": [
+        "QB",
+        "BN"
+      ],
+      "scoring_settings": {
+        "pass_td": 4,
+        "rec": 1
+      },
+      "settings": {
+        "num_teams": 2,
+        "start_week": 1,
+        "playoff_week_start": 2,
+        "playoff_teams": 2,
+        "playoff_round_type": 0,
+        "last_scored_leg": 2,
+        "leg": 2,
+        "max_keepers": 1
+      }
+    },
+    "league/900000000000002020/users": [
+      {
+        "user_id": "608473907007143936",
+        "display_name": "Timh17",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "473910025325113344",
+        "display_name": "alecswartout",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      }
+    ],
+    "league/900000000000002020/rosters": [
+      {
+        "roster_id": 7,
+        "owner_id": "608473907007143936",
+        "league_id": "900000000000002020",
+        "players": [
+          "107"
+        ],
+        "starters": [
+          "107"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 10,
+        "owner_id": "473910025325113344",
+        "league_id": "900000000000002020",
+        "players": [
+          "110"
+        ],
+        "starters": [
+          "110"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      }
+    ],
+    "league/900000000000002020/winners_bracket": [
+      {
+        "m": 1,
+        "r": 1,
+        "t1": 7,
+        "t2": 10,
+        "w": 7,
+        "l": 10,
+        "p": 1
+      }
+    ],
+    "league/900000000000002020/losers_bracket": [],
+    "league/900000000000002020/drafts": [
+      {
+        "draft_id": "9000000000000020201",
+        "league_id": "900000000000002020",
+        "season": "2020",
+        "sport": "nfl",
+        "season_type": "regular",
+        "type": "snake",
+        "status": "complete",
+        "settings": {
+          "teams": 2,
+          "rounds": 1
+        },
+        "slot_to_roster_id": {
+          "1": 7,
+          "2": 10
+        }
+      }
+    ],
+    "draft/9000000000000020201/picks": [
+      {
+        "draft_id": "9000000000000020201",
+        "player_id": "107",
+        "roster_id": 7,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 1,
+        "pick_no": 1,
+        "is_keeper": true,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020201",
+        "player_id": "110",
+        "roster_id": 10,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 2,
+        "pick_no": 2,
+        "is_keeper": null,
+        "metadata": {}
+      }
+    ],
+    "league/900000000000002020/matchups/1": [
+      {
+        "roster_id": 7,
+        "matchup_id": 1,
+        "points": 20,
+        "custom_points": 25.5,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "107": 20
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 1,
+        "points": 24.25,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          24.25
+        ],
+        "players_points": {
+          "110": 24.25
+        }
+      }
+    ],
+    "league/900000000000002020/matchups/2": [
+      {
+        "roster_id": 7,
+        "matchup_id": 1,
+        "points": 30.5,
+        "custom_points": null,
+        "starters": [
+          "107"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          30.5
+        ],
+        "players_points": {
+          "107": 30.5
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 1,
+        "points": 25.25,
+        "custom_points": null,
+        "starters": [
+          "110"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          25.25
+        ],
+        "players_points": {
+          "110": 25.25
+        }
+      }
+    ],
+    "league/900000000000002020/transactions/0": [],
+    "league/900000000000002020/transactions/1": [],
+    "league/900000000000002020/transactions/2": [],
+    "league/900000000000002020/transactions/3": [],
+    "league/900000000000002020/transactions/4": [],
+    "league/900000000000002020/transactions/5": [],
+    "league/900000000000002020/transactions/6": [],
+    "league/900000000000002020/transactions/7": [],
+    "league/900000000000002020/transactions/8": [],
+    "league/900000000000002020/transactions/9": [],
+    "league/900000000000002020/transactions/10": [],
+    "league/900000000000002020/transactions/11": [],
+    "league/900000000000002020/transactions/12": [],
+    "league/900000000000002020/transactions/13": [],
+    "league/900000000000002020/transactions/14": [],
+    "league/900000000000002020/transactions/15": [],
+    "league/900000000000002020/transactions/16": [],
+    "league/900000000000002020/transactions/17": [],
+    "league/900000000000002020/transactions/18": [],
+    "league/900000000000002021": {
+      "league_id": "900000000000002021",
+      "previous_league_id": "900000000000002020",
+      "season": "2021",
+      "season_type": "regular",
+      "sport": "nfl",
+      "status": "in_season",
+      "name": "Synthetic history 2021",
+      "total_rosters": 4,
+      "roster_positions": [
+        "QB",
+        "FLEX",
+        "BN"
+      ],
+      "scoring_settings": {
+        "pass_td": 4,
+        "rec": 1
+      },
+      "settings": {
+        "num_teams": 4,
+        "start_week": 1,
+        "playoff_week_start": 5,
+        "playoff_teams": 4,
+        "playoff_round_type": 0,
+        "last_scored_leg": 3,
+        "leg": 3,
+        "max_keepers": 1
+      }
+    },
+    "league/900000000000002021/users": [
+      {
+        "user_id": "800000000000000001",
+        "display_name": "Manager 1",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "800000000000000002",
+        "display_name": "Manager 2",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "608473907007143936",
+        "display_name": "Timh17",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      },
+      {
+        "user_id": "740265931783245824",
+        "display_name": "sebastian12",
+        "avatar": null,
+        "metadata": {
+          "team_name": "Present-day label: not dated history"
+        }
+      }
+    ],
+    "league/900000000000002021/rosters": [
+      {
+        "roster_id": 1,
+        "owner_id": "800000000000000001",
+        "league_id": "900000000000002021",
+        "players": [
+          "101",
+          "901"
+        ],
+        "starters": [
+          "101",
+          "0"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 2,
+        "owner_id": "800000000000000002",
+        "league_id": "900000000000002021",
+        "players": [
+          "102"
+        ],
+        "starters": [
+          "102",
+          "0"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 7,
+        "owner_id": "608473907007143936",
+        "league_id": "900000000000002021",
+        "players": [
+          "107",
+          "50"
+        ],
+        "starters": [
+          "107",
+          "50"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      },
+      {
+        "roster_id": 10,
+        "owner_id": "740265931783245824",
+        "league_id": "900000000000002021",
+        "players": [
+          "110",
+          "60"
+        ],
+        "starters": [
+          "110",
+          "60"
+        ],
+        "settings": {
+          "wins": 0,
+          "losses": 0,
+          "ties": 0,
+          "fpts": 0,
+          "fpts_decimal": 0
+        },
+        "metadata": null
+      }
+    ],
+    "league/900000000000002021/winners_bracket": [
+      {
+        "m": 1,
+        "r": 1,
+        "t1": null,
+        "t2": null,
+        "w": null,
+        "l": null
+      },
+      {
+        "m": 2,
+        "r": 1,
+        "t1": null,
+        "t2": null,
+        "w": null,
+        "l": null
+      },
+      {
+        "m": 3,
+        "r": 2,
+        "t1": null,
+        "t2": null,
+        "w": null,
+        "l": null,
+        "t1_from": {
+          "w": 1
+        },
+        "t2_from": {
+          "w": 2
+        },
+        "p": 1
+      }
+    ],
+    "league/900000000000002021/losers_bracket": [],
+    "league/900000000000002021/drafts": [
+      {
+        "draft_id": "9000000000000020211",
+        "league_id": "900000000000002021",
+        "season": "2021",
+        "sport": "nfl",
+        "season_type": "regular",
+        "type": "snake",
+        "status": "complete",
+        "settings": {
+          "teams": 4,
+          "rounds": 1
+        },
+        "slot_to_roster_id": {
+          "1": 1,
+          "2": 2,
+          "3": 7,
+          "4": 10
+        }
+      }
+    ],
+    "draft/9000000000000020211/picks": [
+      {
+        "draft_id": "9000000000000020211",
+        "player_id": "101",
+        "roster_id": 1,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 1,
+        "pick_no": 1,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020211",
+        "player_id": "102",
+        "roster_id": 2,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 2,
+        "pick_no": 2,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020211",
+        "player_id": "107",
+        "roster_id": 7,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 3,
+        "pick_no": 3,
+        "is_keeper": null,
+        "metadata": {}
+      },
+      {
+        "draft_id": "9000000000000020211",
+        "player_id": "60",
+        "roster_id": 10,
+        "picked_by": "",
+        "round": 1,
+        "draft_slot": 4,
+        "pick_no": 4,
+        "is_keeper": null,
+        "metadata": {}
+      }
+    ],
+    "league/900000000000002021/matchups/1": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "101",
+          "0"
+        ],
+        "players": [
+          "101",
+          "901"
+        ],
+        "starters_points": [
+          10,
+          0
+        ],
+        "players_points": {
+          "101": 10,
+          "901": 50
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "102",
+          "0"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          30,
+          0
+        ],
+        "players_points": {
+          "102": 30
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 2,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "107",
+          "50"
+        ],
+        "players": [
+          "50",
+          "107"
+        ],
+        "starters_points": [
+          15,
+          5
+        ],
+        "players_points": {
+          "50": 5,
+          "107": 15
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "110",
+          "60"
+        ],
+        "players": [
+          "60",
+          "110"
+        ],
+        "starters_points": [
+          36,
+          4
+        ],
+        "players_points": {
+          "60": 4,
+          "110": 36
+        }
+      }
+    ],
+    "league/900000000000002021/matchups/2": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "101",
+          "0"
+        ],
+        "players": [
+          "101",
+          "901"
+        ],
+        "starters_points": [
+          10,
+          0
+        ],
+        "players_points": {
+          "101": 10,
+          "901": 50
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "102",
+          "0"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          30,
+          0
+        ],
+        "players_points": {
+          "102": 30
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 2,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "107",
+          "60"
+        ],
+        "players": [
+          "60",
+          "107"
+        ],
+        "starters_points": [
+          14,
+          6
+        ],
+        "players_points": {
+          "60": 6,
+          "107": 14
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "110",
+          "50"
+        ],
+        "players": [
+          "50",
+          "110"
+        ],
+        "starters_points": [
+          33,
+          7
+        ],
+        "players_points": {
+          "50": 7,
+          "110": 33
+        }
+      }
+    ],
+    "league/900000000000002021/matchups/3": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "101",
+          "0"
+        ],
+        "players": [
+          "101",
+          "901"
+        ],
+        "starters_points": [
+          10,
+          0
+        ],
+        "players_points": {
+          "101": 10,
+          "901": 50
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "102",
+          "0"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          30,
+          0
+        ],
+        "players_points": {
+          "102": 30
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 2,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "107",
+          "50"
+        ],
+        "players": [
+          "50",
+          "107"
+        ],
+        "starters_points": [
+          9,
+          11
+        ],
+        "players_points": {
+          "50": 11,
+          "107": 9
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "110",
+          "60"
+        ],
+        "players": [
+          "60",
+          "110"
+        ],
+        "starters_points": [
+          32,
+          8
+        ],
+        "players_points": {
+          "60": 8,
+          "110": 32
+        }
+      }
+    ],
+    "league/900000000000002021/matchups/4": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 0,
+        "custom_points": null,
+        "starters": [
+          "101",
+          "0"
+        ],
+        "players": [
+          "101"
+        ],
+        "starters_points": [
+          0,
+          0
+        ],
+        "players_points": {
+          "101": 0
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 0,
+        "custom_points": null,
+        "starters": [
+          "102",
+          "0"
+        ],
+        "players": [
+          "102"
+        ],
+        "starters_points": [
+          0,
+          0
+        ],
+        "players_points": {
+          "102": 0
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 2,
+        "points": 0,
+        "custom_points": null,
+        "starters": [
+          "107",
+          "0"
+        ],
+        "players": [
+          "107"
+        ],
+        "starters_points": [
+          0,
+          0
+        ],
+        "players_points": {
+          "107": 0
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 2,
+        "points": 0,
+        "custom_points": null,
+        "starters": [
+          "110",
+          "0"
+        ],
+        "players": [
+          "110"
+        ],
+        "starters_points": [
+          0,
+          0
+        ],
+        "players_points": {
+          "110": 0
+        }
+      }
+    ],
+    "league/900000000000002021/transactions/0": [],
+    "league/900000000000002021/transactions/1": [
+      {
+        "transaction_id": "910000000000000001",
+        "type": "waiver",
+        "status": "complete",
+        "leg": 1,
+        "created": 1630000001000,
+        "status_updated": 1630000001500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "50": 7
+        },
+        "drops": null,
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000002",
+        "type": "free_agent",
+        "status": "complete",
+        "leg": 1,
+        "created": 1630000002000,
+        "status_updated": 1630000002500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7
+        ],
+        "consenter_ids": [],
+        "adds": null,
+        "drops": {
+          "50": 7
+        },
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000003",
+        "type": "waiver",
+        "status": "failed",
+        "leg": 1,
+        "created": 1630000003000,
+        "status_updated": 1630000003500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "90": 7
+        },
+        "drops": null,
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      }
+    ],
+    "league/900000000000002021/transactions/2": [
+      {
+        "transaction_id": "910000000000000004",
+        "type": "free_agent",
+        "status": "complete",
+        "leg": 2,
+        "created": 1630000004000,
+        "status_updated": 1630000004500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          10
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "50": 10
+        },
+        "drops": null,
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000005",
+        "type": "trade",
+        "status": "complete",
+        "leg": 2,
+        "created": 1630000005000,
+        "status_updated": 1630000005500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7,
+          10
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "60": 7
+        },
+        "drops": {
+          "60": 10
+        },
+        "draft_picks": [
+          {
+            "season": "2022",
+            "round": 1,
+            "roster_id": 7,
+            "previous_owner_id": 7,
+            "owner_id": 10
+          }
+        ],
+        "waiver_budget": [
+          {
+            "sender": 7,
+            "receiver": 10,
+            "amount": 5
+          }
+        ],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000006",
+        "type": "free_agent",
+        "status": "complete",
+        "leg": 2,
+        "created": 1630000006000,
+        "status_updated": 1630000006500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          10
+        ],
+        "consenter_ids": [],
+        "adds": null,
+        "drops": {
+          "50": 10
+        },
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      }
+    ],
+    "league/900000000000002021/transactions/3": [
+      {
+        "transaction_id": "910000000000000007",
+        "type": "waiver",
+        "status": "complete",
+        "leg": 3,
+        "created": 1630000007000,
+        "status_updated": 1630000007500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "50": 7
+        },
+        "drops": null,
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000008",
+        "type": "trade",
+        "status": "complete",
+        "leg": 3,
+        "created": 1630000008000,
+        "status_updated": 1630000008500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          7,
+          10
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "60": 10
+        },
+        "drops": {
+          "60": 7
+        },
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      },
+      {
+        "transaction_id": "910000000000000009",
+        "type": "waiver",
+        "status": "pending",
+        "leg": 3,
+        "created": 1630000009000,
+        "status_updated": 1630000009500,
+        "creator": "608473907007143936",
+        "roster_ids": [
+          10
+        ],
+        "consenter_ids": [],
+        "adds": {
+          "90": 10
+        },
+        "drops": null,
+        "draft_picks": [],
+        "waiver_budget": [],
+        "settings": {},
+        "metadata": null
+      }
+    ],
+    "league/900000000000002021/transactions/4": [],
+    "league/900000000000002021/transactions/5": [],
+    "league/900000000000002021/transactions/6": [],
+    "league/900000000000002021/transactions/7": [],
+    "league/900000000000002021/transactions/8": [],
+    "league/900000000000002021/transactions/9": [],
+    "league/900000000000002021/transactions/10": [],
+    "league/900000000000002021/transactions/11": [],
+    "league/900000000000002021/transactions/12": [],
+    "league/900000000000002021/transactions/13": [],
+    "league/900000000000002021/transactions/14": [],
+    "league/900000000000002021/transactions/15": [],
+    "league/900000000000002021/transactions/16": [],
+    "league/900000000000002021/transactions/17": [],
+    "league/900000000000002021/transactions/18": [],
+    "state/nfl": {
+      "season": "2021",
+      "season_type": "regular",
+      "week": 4,
+      "leg": 4,
+      "display_week": 3
+    },
+    "players/nfl": {
+      "101": {
+        "player_id": "101",
+        "first_name": "Synthetic",
+        "last_name": "101",
+        "full_name": "Synthetic Player 101",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "102": {
+        "player_id": "102",
+        "first_name": "Synthetic",
+        "last_name": "102",
+        "full_name": "Synthetic Player 102",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "103": {
+        "player_id": "103",
+        "first_name": "Synthetic",
+        "last_name": "103",
+        "full_name": "Synthetic Player 103",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "104": {
+        "player_id": "104",
+        "first_name": "Synthetic",
+        "last_name": "104",
+        "full_name": "Synthetic Player 104",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "107": {
+        "player_id": "107",
+        "first_name": "Synthetic",
+        "last_name": "107",
+        "full_name": "Synthetic Player 107",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "110": {
+        "player_id": "110",
+        "first_name": "Synthetic",
+        "last_name": "110",
+        "full_name": "Synthetic Player 110",
+        "position": "QB",
+        "fantasy_positions": [
+          "QB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "50": {
+        "player_id": "50",
+        "first_name": "Synthetic",
+        "last_name": "50",
+        "full_name": "Synthetic Player 50",
+        "position": "RB",
+        "fantasy_positions": [
+          "RB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "60": {
+        "player_id": "60",
+        "first_name": "Synthetic",
+        "last_name": "60",
+        "full_name": "Synthetic Player 60",
+        "position": "RB",
+        "fantasy_positions": [
+          "RB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "90": {
+        "player_id": "90",
+        "first_name": "Synthetic",
+        "last_name": "90",
+        "full_name": "Synthetic Player 90",
+        "position": "RB",
+        "fantasy_positions": [
+          "RB"
+        ],
+        "team": "TST",
+        "active": true
+      },
+      "901": {
+        "player_id": "901",
+        "first_name": "Synthetic",
+        "last_name": "901",
+        "full_name": "Synthetic Player 901",
+        "position": "RB",
+        "fantasy_positions": [
+          "RB"
+        ],
+        "team": "TST",
+        "active": true
+      }
+    }
+  },
+  "variants": {
+    "correctedOfficialScore": {
+      "responseOverrides": {
+        "league/900000000000002020/matchups/1": [
+          {
+            "roster_id": 7,
+            "matchup_id": 1,
+            "points": 20,
+            "custom_points": 23.5,
+            "starters": [
+              "107"
+            ],
+            "players": [
+              "107"
+            ],
+            "starters_points": [
+              20
+            ],
+            "players_points": {
+              "107": 20
+            }
+          },
+          {
+            "roster_id": 10,
+            "matchup_id": 1,
+            "points": 24.25,
+            "custom_points": null,
+            "starters": [
+              "110"
+            ],
+            "players": [
+              "110"
+            ],
+            "starters_points": [
+              24.25
+            ],
+            "players_points": {
+              "110": 24.25
+            }
+          }
+        ]
+      }
+    },
+    "missingStarterScore": {
+      "responseOverrides": {
+        "league/900000000000002021/matchups/2": [
+          {
+            "roster_id": 1,
+            "matchup_id": 1,
+            "points": 10,
+            "custom_points": null,
+            "starters": [
+              "101",
+              "0"
+            ],
+            "players": [
+              "101",
+              "901"
+            ],
+            "starters_points": [
+              10,
+              0
+            ],
+            "players_points": {
+              "101": 10,
+              "901": 50
+            }
+          },
+          {
+            "roster_id": 2,
+            "matchup_id": 1,
+            "points": 30,
+            "custom_points": null,
+            "starters": [
+              "102",
+              "0"
+            ],
+            "players": [
+              "102"
+            ],
+            "starters_points": [
+              30,
+              0
+            ],
+            "players_points": {
+              "102": 30
+            }
+          },
+          {
+            "roster_id": 7,
+            "matchup_id": 2,
+            "points": 20,
+            "custom_points": null,
+            "starters": [
+              "107",
+              "60"
+            ],
+            "players": [
+              "60",
+              "107"
+            ],
+            "starters_points": [
+              14,
+              6
+            ],
+            "players_points": {
+              "60": 6,
+              "107": 14
+            }
+          },
+          {
+            "roster_id": 10,
+            "matchup_id": 2,
+            "points": 40,
+            "custom_points": null,
+            "starters": [
+              "110",
+              "50"
+            ],
+            "players": [
+              "50",
+              "110"
+            ],
+            "starters_points": [
+              33,
+              null
+            ],
+            "players_points": {
+              "110": 33
+            }
+          }
+        ]
+      }
+    },
+    "missingResponse": {
+      "responseOverrides": {
+        "league/900000000000002020/matchups/1": null
+      }
+    },
+    "failedRequest": {
+      "requestFailures": [
+        {
+          "path": "league/900000000000002020/matchups/1",
+          "message": "Synthetic provider timeout"
+        }
+      ]
+    },
+    "multiweekFinal": {
+      "responseOverrides": {
+        "league/900000000000002020": {
+          "league_id": "900000000000002020",
+          "previous_league_id": "900000000000002019",
+          "season": "2020",
+          "season_type": "regular",
+          "sport": "nfl",
+          "status": "complete",
+          "name": "Synthetic history 2020",
+          "total_rosters": 2,
+          "roster_positions": [
+            "QB",
+            "BN"
+          ],
+          "scoring_settings": {
+            "pass_td": 4,
+            "rec": 1
+          },
+          "settings": {
+            "num_teams": 2,
+            "start_week": 1,
+            "playoff_week_start": 2,
+            "playoff_teams": 2,
+            "playoff_round_type": 99,
+            "last_scored_leg": 3,
+            "leg": 3,
+            "max_keepers": 1
+          }
+        },
+        "league/900000000000002020/winners_bracket": [
+          {
+            "m": 1,
+            "r": 1,
+            "t1": 7,
+            "t2": 10,
+            "w": 10,
+            "l": 7,
+            "p": 1
+          }
+        ],
+        "league/900000000000002020/matchups/2": [
+          {
+            "roster_id": 7,
+            "matchup_id": 1,
+            "points": 30.5,
+            "custom_points": null,
+            "starters": [
+              "107"
+            ],
+            "players": [
+              "107"
+            ],
+            "starters_points": [
+              30.5
+            ],
+            "players_points": {
+              "107": 30.5
+            }
+          },
+          {
+            "roster_id": 10,
+            "matchup_id": 1,
+            "points": 25.25,
+            "custom_points": null,
+            "starters": [
+              "110"
+            ],
+            "players": [
+              "110"
+            ],
+            "starters_points": [
+              25.25
+            ],
+            "players_points": {
+              "110": 25.25
+            }
+          }
+        ],
+        "league/900000000000002020/matchups/3": [
+          {
+            "roster_id": 7,
+            "matchup_id": 1,
+            "points": 10,
+            "custom_points": null,
+            "starters": [
+              "107"
+            ],
+            "players": [
+              "107"
+            ],
+            "starters_points": [
+              10
+            ],
+            "players_points": {
+              "107": 10
+            }
+          },
+          {
+            "roster_id": 10,
+            "matchup_id": 1,
+            "points": 20,
+            "custom_points": null,
+            "starters": [
+              "110"
+            ],
+            "players": [
+              "110"
+            ],
+            "starters_points": [
+              20
+            ],
+            "players_points": {
+              "110": 20
+            }
+          }
+        ]
+      },
+      "adapterEvidence": {
+        "kind": "synthetic-contest-weeks",
+        "source": "Controlled fixture format adapter; not a Sleeper response or mapping for playoff_round_type 99.",
+        "contests": [
+          {
+            "leagueId": "900000000000002020",
+            "bracket": "winners",
+            "match": 1,
+            "weeks": [
+              2,
+              3
+            ]
+          }
+        ]
+      }
+    },
+    "supportedMoveOrdering": {
+      "adapterEvidence": {
+        "kind": "synthetic-event-start-ordering",
+        "source": "Controlled fixture evidence adapter. Ordinals attest actual execution/start order, not transaction created/status_updated semantics.",
+        "order": [
+          {
+            "ordinal": 1,
+            "transactionId": "910000000000000001"
+          },
+          {
+            "ordinal": 2,
+            "start": {
+              "leagueId": "900000000000002021",
+              "week": 1,
+              "rosterId": 7,
+              "playerId": "50"
+            }
+          },
+          {
+            "ordinal": 3,
+            "transactionId": "910000000000000002"
+          },
+          {
+            "ordinal": 4,
+            "transactionId": "910000000000000004"
+          },
+          {
+            "ordinal": 5,
+            "transactionId": "910000000000000005"
+          },
+          {
+            "ordinal": 6,
+            "start": {
+              "leagueId": "900000000000002021",
+              "week": 2,
+              "rosterId": 10,
+              "playerId": "50"
+            }
+          },
+          {
+            "ordinal": 7,
+            "start": {
+              "leagueId": "900000000000002021",
+              "week": 2,
+              "rosterId": 7,
+              "playerId": "60"
+            }
+          },
+          {
+            "ordinal": 8,
+            "transactionId": "910000000000000006"
+          },
+          {
+            "ordinal": 9,
+            "transactionId": "910000000000000007"
+          },
+          {
+            "ordinal": 10,
+            "transactionId": "910000000000000008"
+          },
+          {
+            "ordinal": 11,
+            "start": {
+              "leagueId": "900000000000002021",
+              "week": 3,
+              "rosterId": 7,
+              "playerId": "50"
+            }
+          },
+          {
+            "ordinal": 12,
+            "start": {
+              "leagueId": "900000000000002021",
+              "week": 3,
+              "rosterId": 10,
+              "playerId": "60"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
