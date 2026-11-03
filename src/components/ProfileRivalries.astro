@@ -1,0 +1,22 @@
+---
+import { streakLabel, type readRivalry } from '../history/rivalries';
+import { formatRecordValue } from '../history/records';
+import '../styles/rivalries.css';
+type Rivalry = NonNullable<Awaited<ReturnType<typeof readRivalry>>>;
+interface Props { rows: Array<Rivalry & { year?: string }>; nemeses?: Rivalry[]; franchise?: boolean }
+const { rows, nemeses = [], franchise = false } = Astro.props;
+const margin = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : ''}${formatRecordValue(value)}`;
+const groups = franchise ? Object.groupBy(rows, row => `${row.year}-${row.a.id}`) : { opponents: rows };
+---
+{nemeses.length > 0 && <section class="profile-nemeses" aria-label={nemeses.length === 1 ? 'Nemesis' : 'Nemeses'}>
+  <h2>{nemeses.length === 1 ? 'Nemesis' : 'Nemeses'}</h2>
+  <ul>{nemeses.map(row => <li><a href={row.href}>{row.b.name}</a> <span>({row.record} · {row.meetings} {row.meetings === 1 ? 'meeting' : 'meetings'})</span></li>)}</ul>
+</section>}
+{rows.length ? <table class:list={['history-table', 'profile-rivalries', { 'franchise-rivalries': franchise }]}>
+  <caption class="visually-hidden">{franchise ? 'Franchise opponent history' : 'Opponent history'}</caption>
+  <thead><tr><th scope="col">{franchise ? 'Owner / year / opponent' : 'Opponent'}</th><th scope="col">W–L–T</th><th scope="col">Meetings</th><th scope="col">Average margin</th><th scope="col">Current streak</th></tr></thead>
+  {Object.values(groups).map(group => <tbody>{group?.map(row => <tr>
+    <th scope="row">{franchise && <p class="franchise-rivalry-owner"><a href={`/managers/${row.a.id}/seasons/${row.year}/?scope=${row.scope}`}>{row.a.name} · {row.year}</a></p>}<a href={row.href}>{row.b.name}</a></th>
+    <td data-label="W–L–T">{row.record}</td><td data-label="Meetings">{row.meetings}</td><td data-label="Average margin">{margin(row.averageMargin)}</td><td data-label="Current streak">{streakLabel(row)}</td>
+  </tr>)}</tbody>)}
+</table> : <p class="empty-history">No meetings in this selection.</p>}

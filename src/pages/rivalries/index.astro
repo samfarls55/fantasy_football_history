@@ -1,0 +1,65 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import { readRivalriesPage, rivalryHref, streakLabel } from '../../history/rivalries';
+import { gameScopes, competitionLabels } from '../../history/scope';
+import { formatRecordValue } from '../../history/records';
+import type { Scope } from '../../history/types';
+import '../../styles/rivalries.css';
+const selected = Astro.url.searchParams;
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const season = selected.get('season') || undefined;
+const limit = selected.get('limit') === 'all' ? 'all' : undefined;
+const view = await readRivalriesPage({ a: selected.get('a') ?? '', b: selected.get('b') ?? '', season, scope, limit });
+const validSeason = view?.years.includes(season!) ? season : undefined;
+if (view && (selected.has('scope') && selected.get('scope') !== scope || season !== validSeason || selected.has('limit') && selected.get('limit') !== limit || selected.get('a') && selected.get('a') !== view.a || selected.get('b') && selected.get('b') !== view.b)) {
+  const query = new URLSearchParams({ a: view.a, b: view.b });
+  if (validSeason) query.set('season', validSeason);
+  query.set('scope', scope);
+  if (limit) query.set('limit', limit);
+  return Astro.redirect(`/rivalries/?${query}`, 302);
+}
+if (!view) Astro.response.status = 503;
+const comparison = view?.comparison;
+const margin = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : ''}${formatRecordValue(value)}`;
+---
+<MuseumLayout title="Rivalries" section="Rivalries">
+  <h1 class:list={[comparison ? 'visually-hidden' : 'page-heading']}>Rivalries</h1>
+  {view ? <>
+    <form method="get" class="rivalry-controls">
+      {(['a', 'b'] as const).map((key, index) => {
+        const person = view.people.find(person => person.id === view[key]);
+        return <div class="rivalry-person">
+          {person && <TeamImage name={person.name} src={person.avatar} />}
+          <div><label for={`rivalry-${key}`}>{index ? 'Second manager' : 'First manager'}</label>
+            <select id={`rivalry-${key}`} name={key}><option value="">Choose manager</option>{view.people.map(person => <option value={person.id} selected={view[key] === person.id}>{person.name}</option>)}</select>
+          </div>
+        </div>;
+      })}
+      <div class="rivalry-filter"><label for="rivalry-season">Season</label><select id="rivalry-season" name="season"><option value="" selected={!season}>All seasons</option>{view.years.map(year => <option value={year} selected={year === season}>{year}</option>)}</select></div>
+      <div class="rivalry-filter"><label for="rivalry-scope">Game scope</label><select id="rivalry-scope" name="scope">{gameScopes.map(value => <option value={value} selected={value === scope}>{competitionLabels[value]}</option>)}</select></div>
+      {limit && <input type="hidden" name="limit" value={limit} />}
+      <button type="submit">Compare managers</button>
+    </form>
+    {comparison ? <>
+      <div class="rivalry-actions"><a href={rivalryHref(comparison.b.id, comparison.a.id, { scope, season, limit })}>Reverse pair</a></div>
+      <dl class="rivalry-summary" aria-label="Head-to-head summary">
+        <div><dt>Head-to-head</dt><dd>{comparison.record}</dd></div>
+        <div><dt class="visually-hidden">Meetings</dt><dd>{comparison.meetings} {comparison.meetings === 1 ? 'meeting' : 'meetings'}</dd></div>
+        <div><dt>Average margin</dt><dd>{margin(comparison.averageMargin)}{comparison.averageMargin !== null && ' points'}</dd></div>
+        <div><dt>Current streak</dt><dd>{streakLabel(comparison)}</dd></div>
+      </dl>
+      {comparison.meetings ? <table class="history-table rivalry-games">
+        <caption class="visually-hidden">Head-to-head games</caption>
+        <thead><tr><th scope="col">When</th><th scope="col">{comparison.a.name} score</th><th scope="col">{comparison.b.name} score</th><th scope="col">Margin for {comparison.a.name}</th></tr></thead>
+        <tbody>{view.games.map(game => <tr>
+          <th scope="row"><a href={game.href}>{game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.week}` : `Week ${game.week}`} · {game.year}</a></th>
+          <td data-label={comparison.a.name}>{formatRecordValue(game.side.points)}</td>
+          <td data-label={comparison.b.name}>{formatRecordValue(game.opponent.points)}</td>
+          <td data-label="Margin">{margin(game.margin)}</td>
+        </tr>)}</tbody>
+      </table> : <p class="empty-history">No meetings in this selection.</p>}
+      {view.nextHref && <a class="rivalry-show-all" href={view.nextHref}>Show all {comparison.meetings} games</a>}
+    </> : <p class="empty-history">Choose two different managers to compare.</p>}
+  </> : <p class="empty-history">League history is unavailable.</p>}
+</MuseumLayout>
