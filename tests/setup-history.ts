@@ -1,6 +1,7 @@
 import { readFile, rm } from 'node:fs/promises';
 import { refresh } from '../src/history/refresh.ts';
 import { rivalriesSource } from './fixtures/rivalries-source.ts';
+import { recordReadabilitySource } from './fixtures/record-readability-source.ts';
 
 export default async function setup() {
   const fixture = JSON.parse(await readFile(new URL('./fixtures/provider-history.json', import.meta.url), 'utf8'));
@@ -19,9 +20,11 @@ export default async function setup() {
   delete fixture.responses['league/900000000000002019'].settings.playoff_round_type;
   fixture.responses['league/900000000000002020/matchups/1'][0].players.push('90');
   const native = JSON.parse(await readFile(new URL('./fixtures/playoff-type-1.json', import.meta.url), 'utf8'));
-  const rivalry = rivalriesSource(fixture.seedLeagueId);
+  const precision = recordReadabilitySource(fixture.seedLeagueId);
+  const rivalry = rivalriesSource(precision.seedLeagueId);
   native.responses[`league/${native.seedLeagueId}`].previous_league_id = rivalry.seedLeagueId;
   Object.assign(fixture.responses, rivalry.responses);
+  Object.assign(fixture.responses, precision.responses);
   native.responses['players/nfl'] = { ...fixture.responses['players/nfl'], ...native.responses['players/nfl'] };
   Object.assign(fixture.responses, native.responses);
   await refresh({ leagueId: native.seedLeagueId, storePath: process.env.MUSEUM_STORE_PATH, now: new Date('2025-12-31T12:00:00Z'), provider: {
