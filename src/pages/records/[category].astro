@@ -23,9 +23,9 @@ const sortLabels = { rank: 'Rank', name: 'Manager name', newest: 'Newest first',
     {leader && <section class="record-lead" aria-label="Leading result">
       <TeamImage name={leader.name} src={leader.avatar} />
       <div class="record-lead-body">
-        {view.leaders.length > 1 && <p class="shared-lead">Shared lead · {view.leaders.length} managers</p>}
-        <h2>{view.leaders.map((row, index) => <span class="leading-identity">{index > 0 && <span class="leader-separator">, </span>}<a href={row.href}>{row.name}</a>{view.leaders.length > 1 && row.sample && <span class="record-sample">{row.sample}</span>}</span>)}</h2>
-        {leader.detail && <p class="record-detail">{leader.detail}</p>}{leader.secondary && <p class="record-secondary">{leader.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</p>}
+        {view.leaders.length > 1 && <p class="shared-lead">Shared lead · {view.leaders.length} results</p>}
+        <h2>{view.leaders.map((row, index) => <span class="leading-identity">{index > 0 && <span class="leader-separator">, </span>}<a href={row.href}>{row.name}</a>{view.leaders.length > 1 && (row.sample || row.leaderContext) && <span class="record-sample">{row.sample ?? row.leaderContext}</span>}</span>)}</h2>
+        {view.leaders.length === 1 && leader.detail && <p class="record-detail">{leader.detail}</p>}{view.leaders.length === 1 && leader.secondary && <p class="record-secondary">{leader.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</p>}
         <p class="leading-value"><strong>{formatRecordValue(leader.value)}{definition!.unit === '%' ? '%' : ''}</strong>{definition!.unit !== '%' && <span>{recordUnit(definition!.unit, leader.value)}</span>}</p>
         {view.leaders.length === 1 && leader.sample && <p class="lead-sample">{leader.sample}</p>}
         <p class="record-context">{view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{leader.period && <> · {periodLabel(leader.period)}</>}</p>

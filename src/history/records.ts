@@ -1,6 +1,7 @@
 import { loadArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
+import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { gameScopes } from './scope.ts';
 import type { Archive, Scope } from './types.ts';
 
@@ -16,7 +17,7 @@ export function latestPeriod(rows: HistoricalPeriod[]): HistoricalPeriod | null 
 export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
-  detail?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
+  detail?: string; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
@@ -47,15 +48,15 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'wins', name: 'Most wins', group: 'Careers', unit: 'wins', scope: 'games', candidates: careerCandidates('wins') },
   { key: 'win-percentage', name: 'Highest win percentage', group: 'Careers', unit: '%', scope: 'games', candidates: careerCandidates('win-percentage') },
   { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', scope: 'games', candidates: careerCandidates('career-points') },
-  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'games', scope: 'games' },
-  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'games', scope: 'games' },
+  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('winning') },
+  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('losing') },
   { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: '%', scope: 'regular', completedSeasons: true },
   { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'wins below expected', scope: 'regular', completedSeasons: true },
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', scope: 'regular', completedSeasons: true },
-  { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games' },
-  { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending' },
-  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending' },
-  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'points', scope: 'games' },
+  { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games', candidates: scoreCandidates },
+  { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: scoreCandidates },
+  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: marginCandidates },
+  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'points', scope: 'games', candidates: marginCandidates },
   { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games' },
   { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games' },
   { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games' },
