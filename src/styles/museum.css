@@ -45,10 +45,14 @@ h1 { font-size: clamp(42px, 3.65vw, 62px); font-weight: 900; line-height: 1.08; 
 .history-table tbody th, .history-table tbody td { border-top: 1px solid #e8e1f1; }
 .history-table tbody th { font-size: 25px; font-weight: 700; }
 .history-table tbody td { font-size: 25px; font-weight: 700; }
-.standings-table th:first-child { width: 10%; }
-.standings-table th:nth-child(2) { width: 50%; }
-.standings-table th:nth-child(3), .standings-table th:nth-child(4) { width: 20%; }
+.standings-table th:first-child { width: 8%; white-space: nowrap; }
+.standings-table th:nth-child(2) { width: 31%; }
+.standings-table th:nth-child(3), .standings-table th:nth-child(4) { width: 12%; }
+.standings-table th:nth-child(5) { width: 19%; }
+.standings-table th:nth-child(6) { width: 18%; }
+.standings-table th, .standings-table td { padding-inline: clamp(12px, 1.65vw, 24px); }
 .standings-table td:nth-child(n+3), .standings-table thead th:nth-child(n+3) { text-align: right; }
+.standing-comparison a { color: var(--ink); text-decoration-color: #bda8de; }
 .team-identity { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .team-identity > div { min-width: 0; }
 .team-image { display: inline-grid; place-items: center; position: relative; flex: 0 0 44px; width: 44px; height: 44px; padding: 5px; border: 1px solid #e8e1f1; border-radius: 12px; color: #51447f; background: #fff; font-size: 16px; font-weight: 800; }
@@ -151,8 +155,8 @@ h1 { font-size: clamp(42px, 3.65vw, 62px); font-weight: 900; line-height: 1.08; 
   .standings-table th { grid-column: 2; grid-row: 1; }
   .standings-table tbody th:nth-child(2) { width: auto; }
   .standings-table .standing-record { grid-column: 3; grid-row: 1; padding-top: 10px; }
-  .standings-table .standing-points { grid-column: 2 / 4; display: flex; justify-content: space-between; gap: 12px; font-size: 20px; }
-  .standing-points::before { content: attr(data-label); color: var(--muted); font-weight: 400; }
+  .standings-table .standing-points, .standings-table .standing-comparison { grid-column: 1 / 4; display: flex; justify-content: space-between; gap: 12px; font-size: 20px; }
+  .standing-points::before, .standing-comparison::before { content: attr(data-label); color: var(--muted); font-weight: 400; text-align: left; }
   .team-identity { gap: 10px; }
   .seasons-table tr { grid-template-columns: 1fr; }
   .seasons-table tbody th { font-size: 30px; }

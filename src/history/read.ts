@@ -2,11 +2,15 @@ import { loadArchive } from './store.ts';
 import type { Archive, Season, SeasonTeam, Scope } from './types.ts';
 import { careerMetrics } from './metrics.ts';
 import { inScope } from './scope.ts';
+import { seasonComparisons } from './season-comparisons.ts';
 export { completedContests, inScope, gameScopes, competitionLabels } from './scope.ts';
 
-export const standingSorts = ['standing', 'name', 'record', 'points'] as const;
+export const standingSorts = ['standing', 'name', 'record', 'points', 'scoring', 'wins-expected'] as const;
 export type StandingSort = typeof standingSorts[number];
-export interface StandingRow extends SeasonTeam { personName: string; record: string; wins: number; losses: number; ties: number; points: number }
+export interface StandingRow extends SeasonTeam {
+  personName: string; record: string; wins: number; losses: number; ties: number; points: number;
+  scoringVsLeague: number | null; expectedWins: number | null; expectedWinsExactKey: string | null; winsVsExpected: number | null;
+}
 
 function honors(archive: Archive, season: Season) {
   return { champion: archive.people.find(person => person.id === season.championId) ?? null, runnerUp: archive.people.find(person => person.id === season.runnerUpId) ?? null };
@@ -18,10 +22,14 @@ export async function readSeasons(storePath?: string) {
 }
 
 function standings(archive: Archive, season: Season, scope: Scope) {
+  const comparisons = seasonComparisons(archive, season);
   const rows = season.teams.map(team => {
     const metrics = careerMetrics(archive, { franchiseId: team.franchiseId }, { season: season.year, scope });
     const { wins, losses, ties, points, record } = metrics.facts;
-    return { ...team, personName: archive.people.find(person => person.id === team.personId)!.name, wins, losses, ties, points, record, metrics };
+    const comparison = comparisons.find(row => row.teamId === team.id)!;
+    return { ...team, personName: archive.people.find(person => person.id === team.personId)!.name, wins, losses, ties, points, record, metrics, comparison,
+      scoringVsLeague: comparison.dominance?.toNumber() ?? null, expectedWins: comparison.expectedWins?.toNumber() ?? null,
+      expectedWinsExactKey: comparison.expectedWins?.key ?? null, winsVsExpected: comparison.winsVsExpected?.toNumber() ?? null };
   });
   rows.sort((a, b) => b.metrics.actualWins.compare(a.metrics.actualWins) || b.metrics.points.compare(a.metrics.points) || a.rosterId.localeCompare(b.rosterId));
   let standing = 1;
@@ -40,7 +48,14 @@ export async function readSeason(year: string, options: { storePath?: string; so
   const rows = standings(archive, season, options.scope ?? 'regular');
   if (options.sort === 'name') rows.sort((a, b) => a.personName.localeCompare(b.personName));
   if (options.sort === 'points') rows.sort((a, b) => b.metrics.points.compare(a.metrics.points) || a.personName.localeCompare(b.personName));
-  return { ...season, ...honors(archive, season), rows: rows.map(({ metrics, ...row }) => row) };
+  if (options.sort === 'scoring' || options.sort === 'wins-expected') {
+    const key = options.sort === 'scoring' ? 'dominance' : 'winsVsExpected';
+    rows.sort((a, b) => {
+      const left = a.comparison[key], right = b.comparison[key];
+      return (left && right ? right.compare(left) : left ? -1 : right ? 1 : 0) || a.personName.localeCompare(b.personName);
+    });
+  }
+  return { ...season, ...honors(archive, season), rows: rows.map(({ metrics, comparison, ...row }) => row) };
 }
 
 export const bracketScopes = ['playoffs', 'consolation', 'placement'] as const;
