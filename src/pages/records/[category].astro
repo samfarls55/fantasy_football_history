@@ -29,7 +29,7 @@ const valueLabel = definition?.valueLabel ?? (definition?.unit === '%' ? 'Win pe
         {view.leaders.length === 1 && leader.detail && <p class="record-detail">{leader.detail}</p>}{view.leaders.length === 1 && leader.secondary && <p class="record-secondary">{leader.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</p>}
         <p class="leading-value"><strong>{formatRecordValue(leader.value, definition!.displayPrecision)}{definition!.unit === '%' ? '%' : ''}</strong>{definition!.unit !== '%' && <span>{recordUnit(definition!.unit, leader.value)}</span>}</p>
         {view.leaders.length === 1 && leader.sample && <p class="lead-sample">{leader.sample}</p>}
-        <p class="record-context">{view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{leader.period && <> · {periodLabel(leader.period)}</>}</p>
+        <p class="record-context">{view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{view.leaders.length === 1 && leader.period && <> · {periodLabel(leader.period)}</>}</p>
         {view.leaders.length === 1 && <a class="record-open" href={leader.href}>{leader.historyLabel ?? 'Open history'} <span aria-hidden="true">›</span></a>}
       </div>
     </section>}
@@ -53,7 +53,7 @@ const valueLabel = definition?.valueLabel ?? (definition?.unit === '%' ? 'Win pe
         </tr>)}</tbody>
       </table>
       {view.nextHref && <a class="record-more" href={view.nextHref}>Show more</a>}
-    </> : <p class="empty-history">No qualifying results.</p>}
+    </> : <p class="empty-history">{view.blocked ? 'Results unavailable for this selection.' : 'No qualifying results.'}</p>}
     {related.length > 0 && <nav class="related-records" aria-label="Related records"><h2>Related records</h2>{related.map(category => <a href={categoryHref(category.key, { season: view.season, scope: view.scope ?? undefined, sort: view.sort, limit: view.limit })}>{category.name}</a>)}</nav>}
   </> : <p class="empty-history">{definition ? 'League history is unavailable.' : 'This category is not in the record book.'}</p>}
 </MuseumLayout>
