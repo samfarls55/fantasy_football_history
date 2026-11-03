@@ -250,6 +250,27 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
       season.championId = teams.find(team => team.rosterId === title.winnerRosterId)!.personId;
       season.runnerUpId = teams.find(team => team.rosterId === title.loserRosterId)!.personId;
     }
+    // Bracket placement is a final finish, independent of the regular-season standing.
+    // In the supported type-0 toilet bowl, raw winners advance toward LAST place.
+    for (const entry of season.bracket) {
+      if (!entry.placement || !archive.contests.some(contest => contest.id === entry.contestId && contest.complete)) continue;
+      let winnerFinish: number;
+      let loserFinish: number;
+      if (entry.family === 'winners') {
+        winnerFinish = entry.placement;
+        loserFinish = entry.placement + 1;
+      } else if (settings.playoff_type === 0) {
+        winnerFinish = teams.length - entry.placement + 1;
+        loserFinish = winnerFinish - 1;
+        if (loserFinish <= Number(settings.playoff_teams)) continue;
+      } else continue;
+      if (winnerFinish > teams.length || loserFinish > teams.length) continue;
+      for (const [rosterId, finish] of [[entry.winnerRosterId, winnerFinish], [entry.loserRosterId, loserFinish]] as const) {
+        const team = teams.find(team => team.rosterId === rosterId)!;
+        if (team.finish !== null && team.finish !== finish) throw new Error(`${path}: contradictory final placement for roster ${rosterId}`);
+        team.finish = finish;
+      }
+    }
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));

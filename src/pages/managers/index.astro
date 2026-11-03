@@ -1,0 +1,22 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import { readManagers } from '../../history/managers';
+import '../../styles/profiles.css';
+const managers = await readManagers();
+if (!managers) Astro.response.status = 503;
+---
+<MuseumLayout title="Managers" section="Managers">
+  <div class="page-heading"><h1>Managers</h1><a class="directory-franchises" href="/franchises/">Franchise histories</a></div>
+  {managers ? <table class="history-table directory-table">
+    <caption class="visually-hidden">Manager directory · regular season</caption>
+    <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Titles</th></tr></thead>
+    {[true, false].map(current => <tbody aria-label={current ? 'Current managers' : 'Former managers'}>
+      <tr class="directory-group"><th colspan="4" scope="rowgroup">{current ? 'Current managers' : 'Former managers'}</th></tr>
+      {managers.filter(person => person.current === current).map(person => <tr>
+        <th scope="row"><div class="team-identity"><TeamImage name={person.name} src={person.avatar} /><a href={`/managers/${person.id}/`}>{person.name}</a></div></th>
+        <td data-label="Seasons">{person.range}</td><td data-label="Record">{person.facts.record}</td><td data-label="Titles">{person.facts.championships}</td>
+      </tr>)}
+    </tbody>)}
+  </table> : <p class="empty-history">League history is unavailable.</p>}
+</MuseumLayout>
