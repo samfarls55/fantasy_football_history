@@ -8,7 +8,8 @@ const home = await readHome();
 if (!home) Astro.response.status = 503;
 const featureUnit = (key: string) => key === 'best-without-title' ? 'PPG above league average' : 'points in one game';
 const value = (row: { value: number }, category: { key: string; unit: string; displayPrecision?: number }) => `${category.key === 'best-without-title' && row.value > 0 ? '+' : ''}${formatRecordValue(row.value, category.displayPrecision)}${category.unit === '%' ? '%' : ''}`;
-const when = (row: { period: Parameters<typeof periodLabel>[0]; detail?: string }, key: string) => key === 'winning-streak' ? row.detail : periodLabel(row.period);
+const when = (row: { period: Parameters<typeof periodLabel>[0]; detail?: string }, category: { key: string; group: string }) => category.group === 'Seasons' ? `${row.period!.year} season` : category.key === 'winning-streak' ? row.detail : periodLabel(row.period);
+const sample = (row: { sample: string | null }, category: { group: string }) => category.group === 'Seasons' ? row.sample?.replace('week', 'regular-season week') : row.sample;
 ---
 <MuseumLayout title="League record book">
   <div class="home">
@@ -26,14 +27,14 @@ const when = (row: { period: Parameters<typeof periodLabel>[0]; detail?: string 
                 {feature.leaders.map(row => <div>
                   <p class="home-holder">{row.name}</p>
                   {feature.category.group === 'Players' && <p class="home-owner">Benched by {row.owner.name}</p>}
-                  {feature.leaders.length > 1 && <p class="home-date">{periodLabel(row.period)}</p>}
+                  {feature.leaders.length > 1 && <p class="home-date">{when(row, feature.category)}</p>}
                 </div>)}
               </div>
               <div class="home-measure">
                 <p class="home-value">{value(leader, feature.category)}</p>
                 <p class="home-unit">{featureUnit(feature.category.key)}</p>
-                {leader.sample && <p class="home-sample">{leader.sample}</p>}
-                {feature.leaders.length === 1 && <p class="home-date">{periodLabel(leader.period)}</p>}
+                {leader.sample && <p class="home-sample">{sample(leader, feature.category)}</p>}
+                {feature.leaders.length === 1 && <p class="home-date">{when(leader, feature.category)}</p>}
               </div>
               <div class="home-feature-art">{owners.map(owner => <figure>
                 <div class="home-artwork"><TeamImage name={owner.name} src={owner.avatar} /></div>
@@ -52,18 +53,18 @@ const when = (row: { period: Parameters<typeof periodLabel>[0]; detail?: string 
           <tbody>{home.features.slice(2).map(feature => <tr data-category={feature.category.key}>
             <th scope="row"><a class="home-category-link" href={feature.href}>{feature.category.name}<Chevron /></a></th>
             <td class="home-index-holder">{feature.leaders.map(row => <p>{row.owner.name}{feature.category.group === 'Players' && <span> with {row.name}</span>}</p>)}{feature.leaders.length > 1 && <span class="home-shared">Shared lead · {feature.leaders.length} results</span>}</td>
-            <td class="home-index-result">{feature.leaders[0] ? <><strong>{value(feature.leaders[0], feature.category)}</strong> {recordUnit(feature.category.unit, feature.leaders[0].value)}{feature.leaders[0].sample && <span class="home-sample">{feature.leaders[0].sample}</span>}</> : <span>{feature.blocked ? 'Results unavailable' : 'No qualifying results'}</span>}</td>
-            <td class="home-index-date">{feature.leaders.map(row => <p>{feature.leaders.length > 1 && <>{row.owner.name} · </>}{when(row, feature.category.key)}</p>)}</td>
+            <td class="home-index-result">{feature.leaders[0] ? <><strong>{value(feature.leaders[0], feature.category)}</strong> {recordUnit(feature.category.unit, feature.leaders[0].value)}{feature.leaders[0].sample && <span class="home-sample">{sample(feature.leaders[0], feature.category)}</span>}</> : <span>{feature.blocked ? 'Results unavailable' : 'No qualifying results'}</span>}</td>
+            <td class="home-index-date">{feature.leaders.map(row => <p>{feature.leaders.length > 1 && <>{row.owner.name} · </>}{when(row, feature.category)}</p>)}</td>
           </tr>)}</tbody>
         </table>
       </section>
       <section class="home-recent" aria-labelledby="recent-records-heading">
-        <h2 id="recent-records-heading">Recent records</h2>
+        <h2 id="recent-records-heading">Recent top-ten results</h2>
         {home.recent.length ? <ul>{home.recent.map(row => <li><a href={row.categoryHref}>
           <span class="home-recent-identity"><strong>{row.name}<Chevron /></strong>{row.category.group === 'Players' && <span>{row.owner.name}</span>}<span>{row.category.name} · Rank {row.rank}</span></span>
-          <span class="home-recent-result"><strong>{value(row, row.category)}</strong> {row.category.unit === '%' ? row.category.valueLabel ?? '%' : recordUnit(row.category.unit, row.value)}{row.sample && <span class="home-sample">{row.sample}</span>}</span>
-          <span class="home-recent-date">{periodLabel(row.period)}</span>
-        </a></li>)}</ul> : <p class="empty-history">No qualifying recent records.</p>}
+          <span class="home-recent-result"><strong>{value(row, row.category)}</strong> {row.category.unit === '%' ? row.category.valueLabel ?? '%' : recordUnit(row.category.unit, row.value)}{row.sample && <span class="home-sample">{sample(row, row.category)}</span>}</span>
+          <span class="home-recent-date">{when(row, row.category)}</span>
+        </a></li>)}</ul> : <p class="empty-history">No qualifying recent results.</p>}
       </section>
     </> : <p class="empty-history">League history is unavailable.</p>}
   </div>

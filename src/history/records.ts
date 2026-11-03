@@ -144,10 +144,23 @@ export async function readHome(options: { storePath?: string } = {}) {
     const view = categories.find(view => view.category.key === key)!;
     return { category: view.category, leaders: view.leaders.map(identity), blocked: view.blocked, href: categoryHref(key) };
   });
-  const recent = [...new Map(categories.flatMap(view => view.rows.filter(row => row.period).map(row => ({
+  const candidates = [...new Map(categories.flatMap(view => view.rows.filter(row => row.period).map(row => ({
     ...identity(row), category: view.category, categoryHref: categoryHref(view.category.key, { result: row.id }),
   }))).map(row => [`${row.category.key}/${row.id}`, row])).values()]
-    .sort((a, b) => comparePeriods(b.period, a.period) || a.category.key.localeCompare(b.category.key) || a.id.localeCompare(b.id))
-    .slice(0, 6);
+    .sort((a, b) => comparePeriods(b.period, a.period) || a.category.key.localeCompare(b.category.key) || a.id.localeCompare(b.id));
+  // Give each category a place before filling spare places with repeated categories.
+  const selected = new Set<typeof candidates[number]>();
+  const selectedCategories = new Set<string>();
+  for (const row of candidates) {
+    if (selectedCategories.has(row.category.key)) continue;
+    selected.add(row);
+    selectedCategories.add(row.category.key);
+    if (selected.size === 6) break;
+  }
+  for (const row of candidates) {
+    if (selected.size === 6) break;
+    selected.add(row);
+  }
+  const recent = candidates.filter(row => selected.has(row));
   return { features, recent };
 }

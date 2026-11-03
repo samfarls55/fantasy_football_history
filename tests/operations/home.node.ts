@@ -122,9 +122,8 @@ test('Home retains cutoff ties, excludes a newer outside result, and publishes c
     await publish(storePath, source);
     const initial = (await readHome({ storePath }))!;
     assert.equal(initial.recent.length, 6);
-    assert.deepEqual(initial.recent.slice(0, 2).map(row => [row.category.key, row.name, row.rank, row.value, row.period]), [
+    assert.deepEqual(initial.recent.filter(row => row.category.key === 'benched-player').map(row => [row.category.key, row.name, row.rank, row.value, row.period]), [
       ['benched-player', 'Cutoff player A', 10, 90, { year: '2021', week: 2, playedAt: null }],
-      ['benched-player', 'Cutoff player B', 10, 90, { year: '2021', week: 2, playedAt: null }],
     ]);
 
     league.settings.last_scored_leg = 3;
