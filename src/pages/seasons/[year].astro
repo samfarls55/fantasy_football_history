@@ -38,19 +38,19 @@ const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { mi
         <button type="submit">Open season</button>
       </form>
     </div>
-    <p class="season-results">Champion {season.champion ? <a href={`/managers/${season.champion.id}/seasons/${year}/`}>{season.champion.name}</a> : <span>—</span>}<span aria-hidden="true"> · </span>Runner-up {season.runnerUp ? <a href={`/managers/${season.runnerUp.id}/seasons/${year}/`}>{season.runnerUp.name}</a> : <span>—</span>}</p>
+    <p class="season-results">Champion {season.champion ? <a href={`/managers/${season.champion.id}/seasons/${year}/`}>{season.champion.name}</a> : <span>{season.complete ? 'Not recorded' : 'Not yet determined'}</span>}<span aria-hidden="true"> · </span>Runner-up {season.runnerUp ? <a href={`/managers/${season.runnerUp.id}/seasons/${year}/`}>{season.runnerUp.name}</a> : <span>{season.complete ? 'Not recorded' : 'Not yet determined'}</span>}</p>
     <details class="season-format">
       <summary>Season format</summary>
       <dl>
         <div><dt>Teams</dt><dd>{season.teams.length}</dd></div>
         <div><dt>Lineup</dt><dd>{season.rosterPositions.join(', ')}</dd></div>
         <div><dt>Playoffs begin</dt><dd>Week {Number(season.settings.playoff_week_start)}</dd></div>
-        <div><dt>Playoff places</dt><dd>{season.settings.playoff_teams == null ? '—' : Number(season.settings.playoff_teams)}</dd></div>
-        <div><dt>Playoff rounds</dt><dd>{season.settings.playoff_round_type === 2 ? 'Two weeks per round' : season.settings.playoff_round_type === 1 ? 'Two weeks in each bracket’s final round' : 'One week per round'}</dd></div>
+        <div><dt>Playoff places</dt><dd>{season.settings.playoff_teams == null ? 'Not recorded' : Number(season.settings.playoff_teams)}</dd></div>
+        <div><dt>Playoff rounds</dt><dd>{season.settings.playoff_round_type == null ? 'Not recorded' : season.settings.playoff_round_type === 2 ? 'Two weeks per round' : season.settings.playoff_round_type === 1 ? 'Two weeks in each bracket’s final round' : 'One week per round'}</dd></div>
         {Object.entries(season.scoring).map(([key, value]) => <div><dt>{({ rec: 'Reception', pass_td: 'Passing touchdown' } as Record<string, string>)[key] ?? key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}
       </dl>
     </details>
-    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=playoffs&scope=${tab === 'playoffs' ? scope : 'playoffs'}`} aria-current={tab === 'playoffs' ? 'page' : undefined}>Playoffs</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
+    <nav class="local-tabs season-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=playoffs&scope=${tab === 'playoffs' ? scope : 'playoffs'}`} aria-current={tab === 'playoffs' ? 'page' : undefined}>Playoffs</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
     {matchups ? <SeasonMatchups selection={matchups} /> : bracket ? <SeasonBracket selection={bracket} /> : players ? <>
       <form method="get" class="profile-controls season-player-controls"><input type="hidden" name="tab" value="players" /><label for="season-player-scope">Game scope</label><select id="season-player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show players</button></form>
       <Contributors selection={players} />
@@ -90,11 +90,3 @@ const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { mi
     </>}
   </> : <div class="not-found"><h1>Season not found</h1><p>This year is not in the league’s history.</p><a href="/seasons/">Browse seasons</a></div>}
 </MuseumLayout>
-<script>
-  // Reveal the selected local tab without moving page scroll or keyboard focus.
-  document.fonts.ready.then(() => {
-    const tabs = document.querySelector<HTMLElement>('.local-tabs');
-    const selected = tabs?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (tabs && selected && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = selected.offsetLeft - tabs.offsetLeft;
-  });
-</script>

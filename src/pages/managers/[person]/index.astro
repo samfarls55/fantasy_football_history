@@ -30,6 +30,6 @@ const players = tab === 'players' ? await readContributors({ personId: person },
   {profile ? <>
     <ProfileContext profile={profile} />
     <ProfileHistoryControls kind="manager" tab={tab} scope={scope} years={profile.years} season={season} />
-    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : players ? <Contributors selection={players} /> : streak ? <StreakHistory history={streak} /> : <ProfileSeasonHistory rows={profile.seasons} basePath={`/managers/${profile.id}`} scope={scope} />}
+    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : players ? <Contributors selection={players} /> : streak ? <StreakHistory history={streak} /> : <ProfileSeasonHistory rows={profile.seasons} basePath={`/managers/${profile.id}`} scope={scope} managerName={profile.name} />}
   </> : <div class="not-found"><h1>Manager not found</h1><p>This person is not in the league’s history.</p><a href="/managers/">Browse managers</a></div>}
 </MuseumLayout>
