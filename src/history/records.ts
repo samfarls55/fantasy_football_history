@@ -2,6 +2,7 @@ import { loadArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
 import { gameScopes } from './scope.ts';
+import { seasonCandidates } from './season-comparisons.ts';
 import type { Archive, Scope } from './types.ts';
 
 export const recordGroups = ['Careers', 'Seasons', 'Matchups', 'Players'] as const;
@@ -21,6 +22,8 @@ export interface RecordCandidate {
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
   key: string; name: string; group: RecordGroup; unit: string;
+  valueLabel?: string;
+  displayPrecision?: number;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
   candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
@@ -49,9 +52,9 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', scope: 'games', candidates: careerCandidates('career-points') },
   { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'games', scope: 'games' },
   { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'games', scope: 'games' },
-  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: '%', scope: 'regular', completedSeasons: true },
-  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'wins below expected', scope: 'regular', completedSeasons: true },
-  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', scope: 'regular', completedSeasons: true },
+  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title') },
+  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'wins below expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season') },
+  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season') },
   { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games' },
   { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending' },
   { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending' },
@@ -74,7 +77,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
 export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\b(points|titles|wins|games)\b/g, word => word.slice(0, -1)) : unit; }
-export function formatRecordValue(value: number): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value); }
+export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
   const season = seasons.includes(options.season!) ? options.season : undefined;

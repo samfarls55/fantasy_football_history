@@ -20,6 +20,7 @@ if (season && (selected.has('tab') && !['standings', 'matchups', 'playoffs'].inc
 if (matchups && (selected.has('scope') && selected.get('scope') !== scope || selected.has('week') && selected.get('week') !== String(matchups.week))) return Astro.redirect(`/seasons/${year}/?tab=matchups&scope=${scope}&week=${matchups.week}`, 302);
 if (bracket && (selected.has('scope') && selected.get('scope') !== scope || !bracket.availableScopes.includes(scope as BracketScope) && scope !== 'playoffs')) return Astro.redirect(`/seasons/${year}/?tab=playoffs&scope=playoffs`, 302);
 const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value);
 ---
 <MuseumLayout title={season ? `${year} ${tab}` : 'Season not found'} section="Seasons">
   {season ? <>
@@ -54,12 +55,14 @@ const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximu
         <option value="name" selected={sort === 'name'}>Manager name</option>
         <option value="record" selected={sort === 'record'}>Record</option>
         <option value="points" selected={sort === 'points'}>Points</option>
+        <option value="scoring" selected={sort === 'scoring'}>Scoring vs league</option>
+        <option value="wins-expected" selected={sort === 'wins-expected'}>Wins vs expected</option>
       </select>
       <button type="submit">Apply order</button>
     </form></div>
     {season.rows.length ? <table class="history-table standings-table">
       <caption class="visually-hidden">{year} regular-season standings</caption>
-      <thead><tr><th scope="col">Rank</th><th scope="col">Manager / team</th><th scope="col">Record</th><th scope="col">Points</th></tr></thead>
+      <thead><tr><th scope="col">Rank</th><th scope="col">Manager / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Scoring vs league</th><th scope="col">Wins vs expected</th></tr></thead>
       <tbody>{season.rows.map(row => <tr>
         <td class="standing-rank" data-label="Rank">{row.standing}</td>
         <th scope="row"><div class="team-identity"><TeamImage name={row.name} src={row.avatar} /><div>
@@ -68,6 +71,8 @@ const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximu
         </div></div></th>
         <td class="standing-record" data-label="Record">{row.record}</td>
         <td class="standing-points" data-label="Points">{displayNumber(row.points)}</td>
+        <td class="standing-comparison" data-label="Scoring vs league">{row.scoringVsLeague === null ? '—' : <a href={season.complete ? `/records/dominant-season/?season=${year}&result=${row.id}` : `/managers/${row.personId}/seasons/${year}/?scope=regular`}>{displayComparison(row.scoringVsLeague)}%</a>}</td>
+        <td class="standing-comparison" data-label="Wins vs expected">{row.winsVsExpected === null ? '—' : <a href={season.complete ? `/records/unluckiest-season/?season=${year}&result=${row.id}` : `/managers/${row.personId}/seasons/${year}/?scope=regular`}>{displayComparison(row.winsVsExpected)}</a>}</td>
       </tr>)}</tbody>
     </table> : <p class="empty-history">No results for this selection.</p>}
     </>}
