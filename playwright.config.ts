@@ -3,6 +3,7 @@ import { env } from 'node:process';
 import { resolve } from 'node:path';
 
 // Every browser run owns a separate controlled archive, including server reads.
+const port = env.MUSEUM_PORT ?? '4321';
 env.MUSEUM_STORE_PATH = resolve(`.impeccable/review/browser-history-${process.pid}.json`);
 
 export default defineConfig({
@@ -11,7 +12,7 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   use: {
-    baseURL: env.MUSEUM_BASE_URL ?? 'http://127.0.0.1:4321',
+    baseURL: env.MUSEUM_BASE_URL ?? `http://127.0.0.1:${port}`,
     channel: env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? undefined : 'chrome',
     launchOptions: env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
       ? { executablePath: env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
@@ -20,8 +21,8 @@ export default defineConfig({
     reducedMotion: 'reduce',
   },
   webServer: env.MUSEUM_BASE_URL ? undefined : {
-    command: 'npm run dev -- --ignore-lock --port 4321',
-    url: 'http://127.0.0.1:4321',
+    command: `npm run dev -- --ignore-lock --port ${port}`,
+    url: `http://127.0.0.1:${port}`,
     reuseExistingServer: false,
   },
 });

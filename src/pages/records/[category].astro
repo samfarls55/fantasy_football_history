@@ -1,0 +1,58 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import { readCategory, recordCategories, recordSorts, categoryHref, periodLabel, formatRecordValue, recordUnit } from '../../history/records';
+import { gameScopes, competitionLabels } from '../../history/read';
+import type { Scope } from '../../history/types';
+import '../../styles/records.css';
+const key = Astro.params.category ?? '';
+const definition = recordCategories.find(category => category.key === key && category.candidates);
+const params = Astro.url.searchParams;
+const view = await readCategory(key, { season: params.get('season') ?? undefined, scope: params.get('scope') as Scope, sort: params.get('sort') ?? undefined, limit: Number(params.get('limit') ?? 10), result: params.get('result') ?? undefined });
+if (!definition) Astro.response.status = 404;
+else if (!view) Astro.response.status = 503;
+if (view && Astro.url.pathname + Astro.url.search !== view.href) return Astro.redirect(view.href, 302);
+const leader = view?.leaders[0];
+const related = recordCategories.filter(category => category.group === definition?.group && category.key !== key && category.candidates);
+const sortLabels = { rank: 'Rank', name: 'Manager name', newest: 'Newest first', oldest: 'Oldest first', 'value-asc': 'Value, low to high' };
+---
+<MuseumLayout title={definition?.name ?? 'Record not found'} section="Records">
+  <a class="records-back" href="/records/">‹ <span>Back to record book</span></a>
+  <div class="page-heading record-heading"><h1>{definition?.name ?? 'Record not found'}</h1></div>
+  {view ? <>
+    {leader && <section class="record-lead" aria-label="Leading result">
+      <TeamImage name={leader.name} src={leader.avatar} />
+      <div class="record-lead-body">
+        {view.leaders.length > 1 && <p class="shared-lead">Shared lead · {view.leaders.length} managers</p>}
+        <h2>{view.leaders.map((row, index) => <span class="leading-identity">{index > 0 && <span class="leader-separator">, </span>}<a href={row.href}>{row.name}</a>{view.leaders.length > 1 && row.sample && <span class="record-sample">{row.sample}</span>}</span>)}</h2>
+        {leader.detail && <p class="record-detail">{leader.detail}</p>}{leader.secondary && <p class="record-secondary">{leader.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</p>}
+        <p class="leading-value"><strong>{formatRecordValue(leader.value)}{definition!.unit === '%' ? '%' : ''}</strong>{definition!.unit !== '%' && <span>{recordUnit(definition!.unit, leader.value)}</span>}</p>
+        {view.leaders.length === 1 && leader.sample && <p class="lead-sample">{leader.sample}</p>}
+        <p class="record-context">{view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{leader.period && <> · {periodLabel(leader.period)}</>}</p>
+        {view.leaders.length === 1 && <a class="record-open" href={leader.href}>{leader.historyLabel ?? 'Open history'} <span aria-hidden="true">›</span></a>}
+      </div>
+    </section>}
+    <form method="get" class="record-controls">
+      <div><label for="record-season">Season</label><select id="record-season" name="season"><option value="" selected={!view.season}>All seasons</option>{view.seasons.map(year => <option value={year} selected={view.season === year}>{year}</option>)}</select></div>
+      {definition!.scope === 'games' && <div><label for="record-scope">Game scope</label><select id="record-scope" name="scope">{gameScopes.map(scope => <option value={scope} selected={scope === view.scope}>{competitionLabels[scope]}</option>)}</select></div>}
+      <div><label for="record-sort">Sort results</label><select id="record-sort" name="sort">{recordSorts.map(sort => <option value={sort} selected={sort === view.sort}>{sortLabels[sort]}</option>)}</select></div>
+      {view.limit !== 10 && <input type="hidden" name="limit" value={view.limit} />}
+      {view.result && <input type="hidden" name="result" value={view.result} />}
+      <button type="submit">Show rankings</button>
+    </form>
+    {view.rows.length ? <>
+      <table class="history-table record-ranking">
+        <caption class="visually-hidden">{definition!.name} rankings</caption>
+        <thead><tr><th scope="col">Rank</th><th scope="col">Manager</th><th scope="col">{definition!.unit === '%' ? 'Win percentage' : definition!.unit}</th><th scope="col">When</th></tr></thead>
+        <tbody>{view.rows.map(row => <tr id={`result-${row.id}`} data-rank={row.rank} class:list={{ 'selected-record': row.id === view.result }}>
+          <td class="record-rank" data-label="Rank">{row.rank}</td>
+          <th scope="row"><div class="team-identity"><TeamImage name={row.name} src={row.avatar} /><div><a href={row.href}>{row.name}</a>{row.detail && <span class="historical-team">{row.detail}</span>}{row.secondary && <span class="record-secondary">{row.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</span>}</div></div></th>
+          <td class="record-result" data-label={definition!.unit === '%' ? 'Win percentage' : definition!.unit}><strong>{formatRecordValue(row.value)}{definition!.unit === '%' ? '%' : ''}</strong>{row.sample && <span class="record-sample">{row.sample}</span>}</td>
+          <td class="record-when" data-label="When">{periodLabel(row.period)}</td>
+        </tr>)}</tbody>
+      </table>
+      {view.nextHref && <a class="record-more" href={view.nextHref}>Show more</a>}
+    </> : <p class="empty-history">No qualifying results.</p>}
+    {related.length > 0 && <nav class="related-records" aria-label="Related records"><h2>Related records</h2>{related.map(category => <a href={categoryHref(category.key, { season: view.season, scope: view.scope ?? undefined, sort: view.sort, limit: view.limit })}>{category.name}</a>)}</nav>}
+  </> : <p class="empty-history">{definition ? 'League history is unavailable.' : 'This category is not in the record book.'}</p>}
+</MuseumLayout>

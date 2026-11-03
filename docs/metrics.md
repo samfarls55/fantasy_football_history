@@ -145,3 +145,15 @@ Initial implementation must establish linked-season, completed-game, lineup, pla
 A required unavailable input blocks publication of the affected derived claim, and a blocked required v1 claim blocks declaring the full release complete. Report the finding to Sam with the exact affected scope and feasible options. No public freshness panel or calculation warning is authorized.
 
 Tests through the import-to-public application boundary must cover ties, source precision, identity replacements, ongoing seasons, official overrides, incomplete inputs, repeat imports, corrections, player bench/start separation, repeated acquisition spells and the two signs of schedule comparison.
+
+## Shared implementation boundary
+
+`src/history/metrics.ts` supplies career facts to manager/franchise profiles, season standings and career rankings. `src/history/decimal.ts` retains reduced BigInt rationals for sums, differences, products, quotients and comparisons. Category comparisons use `Exact.compare`; reduced `Exact.key` values establish canonical equality. Public numeric facts retain their existing shape; convert only after ranking or for display. Never feed a rounded display value back into a calculation.
+
+`src/history/records.ts` registers the four-group category catalog and category candidate calculators. Later category slices supply a calculator on their existing definition and return exact metrics with stable result IDs, relevant historical links, optional secondary identities and a supported historical period. The same persisted visitor reads, ranks, cutoff expansion, sorting and category page apply to all registered calculators. Unregistered categories have no fabricated holder or ranking.
+
+URL parameters are `season`, eligible `scope`, `sort`, `limit` (a rank boundary, initially 10), and optional `result` (stable selected result identity). Sorting rearranges the included canonical places; it does not change them. Show more increases the rank boundary and retains all equal-value rows. Championship links omit game scope.
+
+Historical periods explicitly retain `year`, `week`, and nullable provider `playedAt`. A null exact timestamp does not erase a supported year/week. Category aggregates use the latest contributing period; title results use the resolved title contest. Public labels use `Week N · Year`. These period objects and canonical result IDs are available to recent top-ten selection without inventing dates from refresh time.
+
+Regression handoff: game-margin categories must preserve equality between `100.12 − 100` and `10.25 − 10.13` at exactly `3/25`. Expected-win categories must retain nine fractions of `1/9` as exactly `1/1`. Implement those assertions through their own published visitor reads when those categories are registered. Career publication tests already cover decimal sums, unequal official decimal values, equivalent `1/3` and `2/6` rates, corrections and all cutoff ties.

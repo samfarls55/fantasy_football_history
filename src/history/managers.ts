@@ -1,13 +1,11 @@
 import { loadArchive } from './store.ts';
-import { completedContests, inScope } from './read.ts';
-import { sumPoints } from './decimal.ts';
+import { inScope } from './scope.ts';
+import { careerFacts } from './metrics.ts';
+export { careerFacts } from './metrics.ts';
+export type { CareerFacts } from './metrics.ts';
 import type { Archive, Person, Scope, Season, SeasonTeam } from './types.ts';
 
 export interface HistorySelection { storePath?: string; scope?: Scope; season?: string }
-export interface CareerFacts {
-  wins: number; losses: number; ties: number; games: number; record: string;
-  winPercentage: number | null; points: number; championships: number; playoffAppearances: number;
-}
 export interface TimelineEvent {
   year: string; kind: 'recorded' | 'takeover' | 'return' | 'name'; label: string;
   predecessor: Person | null;
@@ -16,22 +14,6 @@ export interface Tenure {
   franchiseId: string; start: string; end: string; range: string; events: TimelineEvent[];
 }
 type TeamSeason = { season: Season; team: SeasonTeam };
-
-/** Shared person/franchise facts. Contest results and weekly official points have distinct units. */
-export function careerFacts(archive: Archive, identity: { personId?: string; franchiseId?: string }, options: HistorySelection = {}): CareerFacts {
-  const includes = (row: { personId: string; franchiseId: string }) => identity.personId ? row.personId === identity.personId : row.franchiseId === identity.franchiseId;
-  const seasons = archive.seasons.filter(season => !options.season || season.year === options.season);
-  const seasonIds = new Set(seasons.map(season => season.id));
-  const games = completedContests(archive, { scope: options.scope }).filter(game => seasonIds.has(game.seasonId) && game.sides.some(includes));
-  const wins = games.filter(game => game.sides.some(side => includes(side) && side.personId === game.winnerId)).length;
-  const ties = games.filter(game => game.tie).length;
-  const losses = games.length - wins - ties;
-  const points = sumPoints(archive.performances.filter(row => includes(row) && seasonIds.has(row.seasonId) && inScope(row.competition, options.scope ?? 'regular')).map(row => row.points));
-  const ownerIds = (season: Season) => season.teams.filter(includes).map(team => team.personId);
-  return { wins, losses, ties, games: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, winPercentage: games.length ? 100 * (wins + ties / 2) / games.length : null, points,
-    championships: seasons.filter(season => season.championId && ownerIds(season).includes(season.championId)).length,
-    playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => ownerIds(season).includes(id))).length };
-}
 
 export function recordedRange(start: string, end: string) { return start === end ? start : `${start}–${end}`; }
 
