@@ -21,6 +21,8 @@ Home is an Experience view. Collections, rankings, profiles, seasons and histori
 - [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) contains local tickets with explicit blocking relationships.
 - [.impeccable/platform-design-decisions.md](.impeccable/platform-design-decisions.md) preserves the interview decisions. The latest confirmed user decision wins over older prose or mockup details.
 
+[Spec 21](https://github.com/samfarls55/fantasy_football_history/issues/21) revises the presentation contracts below for discovery, concise definitions and neutral unresolved outcomes. Record calculations, attribution and eligibility remain unchanged.
+
 Astro and TypeScript are confirmed. The existing home uses synthetic data. The importer, remaining routes and automatic refresh have not been implemented. Hosting, persistence, refresh scheduling and the project license remain implementation/setup choices.
 
 ## Visual direction
@@ -33,7 +35,7 @@ Original source artwork wins over a generated likeness. Show all of an image ins
 
 Cut taglines, redundant labels, oversized context blocks, decorative badges and appended summaries. Important context belongs beside the result it qualifies. Home can be expressive; history views stay compact and readable.
 
-Public pages omit calculation panels, source JSON, methodology dumps, operational status, freshness indicators and update dates. A historical date or a season format is content, not an update indicator. Rates retain their sample size, and missing values must not masquerade as zeros. Synthetic previews retain a plain Sample stats disclosure; the finished real-data archive does not use that disclosure as a status pattern.
+Public pages omit calculation panels, source JSON, methodology dumps, operational status, freshness indicators and update dates. Give unfamiliar measures short definitions beside their values. A historical date or a season format is content, not an update indicator. Rates retain their sample size, and missing values must not masquerade as zeros. Synthetic previews retain a plain Sample stats disclosure; the finished real-data archive does not use that disclosure as a status pattern.
 
 ## Selected references
 
@@ -92,11 +94,11 @@ Use real links for navigation and native form controls for filters. Sorting chan
 
 ### Home
 
-Lead with all-time history. The prominent records are Best season without a title and Highest-scoring benched player. Each includes its category, holder, player where applicable, value, unit, relevant year/week and complete team image. View rankings opens that category's ranked page.
+Lead with all-time history. The prominent records are Best season without a title and Highest-scoring benched player. Each includes its category, holder, player where applicable, value, unit, relevant year/week and complete team image. A season award identifies its year and eligible regular-season sample rather than presenting its recognition week as the accomplishment. View rankings opens that category's ranked page.
 
-Follow with four compact entries: Unluckiest season, Most productive pickup, Dropped players who delivered elsewhere, Longest winning streak. Pickup/drop entries identify both the manager and player. No repeated thumbnails are needed in the index.
+Follow with four compact entries: Unluckiest season, Pickups by starting points, Dropped players' starting points elsewhere, Longest winning streak. Pickup/drop entries identify both the manager and player. Their neutral names also fit zero-start results. No repeated thumbnails are needed in the index.
 
-Recent records follow the all-time section. Show a short list of the newest historical events currently holding a top-ten place in a category. Use the event date, never the import date. Recent entries also open the category with the relevant result retained as context. Do not add a feed of every transaction or generic weekly recap.
+Recent top-ten results follow the all-time section. Select up to six historical results currently holding a top-ten place, giving distinct categories a place before filling spare places with repeats. Keep the selected results in historical order, using supported event dates or year/week precision rather than import time. The heading makes no claim that each result newly broke a record. Recent entries open the category with the relevant result retained as context. Do not add a feed of every transaction or generic weekly recap.
 
 On phones, stack the two features using the retained opening pattern, then the four divided compact entries and recent rows. Keep images complete and result units/dates attached. The page must not inherit the existing prototype's public evidence reveal.
 
@@ -106,7 +108,7 @@ The collection uses four named groups, Careers, Seasons, Matchups, Players. Each
 
 The ranked page leads with the plain category name and its leading result. Follow with page-local applicable season/scope controls and a full-width ranking table. Rows carry place, identity, result, sample size for rates, and year/week where needed. A player measure includes both player and manager/franchise attribution.
 
-Show ten places initially and include every entry tied at the cutoff. Show more exposes further results. Game and season categories rank performances, allowing repeated managers. Career categories have one aggregate row per person. Shared leaders remain visibly tied.
+Show ten places initially and include every entry tied at the cutoff. Show more exposes further results. Game and season categories rank performances, allowing repeated managers. Career categories have one aggregate row per person. Shared leaders remain visibly tied. Bound large leader previews, state the full tied-result count and link to the complete ranking so controls remain reachable. Percentage displays start at one decimal and add precision when distinct ranked values would otherwise share a label. Exact comparisons and ranks never use the display rounding.
 
 The row's primary history link opens its matchup, selected manager-season, career or scoped player history, as defined in docs/metrics.md. Linked secondary identities remain available without making the whole row an ambiguous nested link.
 
@@ -116,13 +118,13 @@ On phones, each result becomes a divided stacked entry with rank/category contex
 
 Managers is a compact full-width table grouped into Current managers and Former managers. These are historical membership groups, not operational statuses. Columns are manager, seasons, W-L-T record and titles. Omit the tie segment only when zero. Names open the person's profile. Use one compact avatar/initials frame size. Sort within groups without losing their headings.
 
-A Franchise histories link opens /franchises/. Reuse the directory family with franchise name, current or latest known manager, season range, record and titles. It leads to the full franchise profile. Do not merge people who successively owned a roster.
+A Franchise histories link opens /franchises/. Explain the distinction here: manager history follows a person, while franchise history follows a league roster slot across owners. Reuse the directory family with franchise name, current or latest known manager, season range, record and titles. It leads to the full franchise profile. Do not merge people who successively owned a roster. Suppress repeated team/manager names only when they are identical, preserving distinct identities and their links.
 
 Default to an alphabetical identity order within groups. Column sorting is shareable. On phones use the approved two-line row pattern, keeping identity first and record/titles together. A source gap does not become a Former manager assignment.
 
 ### Manager and franchise profiles
 
-Use selected B. Put identity, compact career facts and the takeover/team-name timeline above Seasons, Rivalries and Players tabs. Seasons opens initially. Show W-L-T, win percentage with games, official points, championships and playoff appearances. Keep these as a compact facts strip rather than a dashboard of cards.
+Use selected B. Put identity, compact career facts and the takeover/team-name timeline above Seasons, Rivalries and Players tabs. Seasons opens initially. Show W-L-T, win percentage with games, official points, championships and playoff appearances. Keep the selected game scope next to these facts, in a compact strip rather than a dashboard of cards.
 
 The manager timeline covers only that person's tenure. Include the acquisition year/date and predecessor when supported, linked franchise history, and confirmed team-name changes. When a manager has more than one tenure, show the actual separate spans. Do not invent names or exact dates from present-day account metadata.
 
@@ -150,17 +152,17 @@ A drop-category entry opens the dropping person's season Players view with Drops
 
 ### Seasons index and overview
 
-The index is also the championship history. List years newest first with champion, runner-up and enough format context to distinguish seasons. Unresolved results use an em dash. A year opens Standings. Champion and runner-up link to their manager-season history. Do not add an ongoing-season badge or update timestamp.
+The index is also the championship history. List years newest first with champion, runner-up and enough format context to distinguish seasons. Unresolved outcomes use Not yet determined for unfinished seasons and Not recorded for missing completed-season outcomes. A year opens Standings. Champion and runner-up link to their manager-season history. Do not add an ongoing-season badge or update timestamp.
 
-The selected season overview has compact year selection, champion/runner-up when resolved, and a closed Season format disclosure. Format contains supported roster/scoring/playoff settings needed to understand that season. Use the source rules, not modern defaults.
+The selected season overview has compact year selection, champion/runner-up when resolved, and a closed Season format disclosure. Format contains supported roster/scoring/playoff settings needed to understand that season. Use the source rules, not modern defaults. Unknown format values use an em dash and never produce an invalid numeric label.
 
-Local tabs are Standings, Matchups, Playoffs, Players. Standings opens first. Its table shows manager/historical team, record, points, scoring relative to the league and wins versus expected. Sort by official standing initially; other column sorts are shareable. Team/manager links open that season's profile. Comparison values link to the relevant category or scoped history without opening calculations.
+Local tabs are Standings, Matchups, Playoffs, Players. Standings opens first. Its table shows manager/historical team, record, points, scoring relative to the league and wins versus expected. Give scoring versus the league and expected wins concise definitions, including the opposite signs of Wins vs expected and Unluckiest season. Sort by official standing initially; other column sorts are shareable. Team/manager links open that season's profile. Comparison values link to the relevant category or scoped history without opening calculations.
 
 Matchups provides a week selector and compact paired results with game type clearly identified. Default to the latest completed week. Link each result to its matchup and each identity to its season profile. Do not present an unplayed scheduled game as a 0-0 final.
 
-Players shows season-scoped contributors, productive pickups and significant drops, with manager attribution. This is specialized contribution analysis, not a generic NFL stat leaderboard or all-moves feed.
+Players shows season-scoped starting contributors, pickups and drops, with manager attribution. Explain that contribution points count actual starts. Provide links to bench records and supporting player, move and contest histories while retaining season and game scope. This is specialized contribution analysis, not a generic NFL stat leaderboard or all-moves feed.
 
-On phones, compact context precedes locally scrollable tabs, then stacked rows. Preserve the revised season foundation. Detailed mobile polish occurs during implementation; do not restore the rejected large middle blocks or bottom statistic strip.
+On phones, compact context precedes wrapping tabs with every full label visible, then stacked rows. Preserve the revised season foundation. Do not restore the rejected large middle blocks or bottom statistic strip.
 
 ### Playoffs
 
@@ -168,13 +170,13 @@ Reuse season context and select Playoffs. One selector chooses Championship play
 
 Show rounds, seeds when available, participant names, official scores and restrained winner emphasis. Connect bracket progression on desktop. Round/week headings link to the matchup. No extra trophy panel or repeated champion summary follows the bracket.
 
-A bye is an advancement, not a played victory. An unresolved future contest has unassigned participants/scores rather than fabricated results. Multiweek contests show their legs and official aggregate in the matchup detail; bracket progression and career wins count the contest once.
+A bye is an advancement, not a played victory. An unresolved future contest identifies unknown participants as Not yet determined and leaves unknown scores as an em dash. Multiweek contests show their legs and official aggregate in the matchup detail; bracket progression and career wins count the contest once.
 
-On phones, use rounds in reading order with compact contest rows and the advancing result clear. If a bracket needs local horizontal scrolling, contain it within its own labeled region; the page itself must not overflow.
+On phones, stack all rounds in reading order with compact contest rows and the advancing result clear. Provide round links, including the final, and advancement links between contests. If a wider bracket needs local horizontal scrolling, contain it within a labeled region and show a scroll hint; the page itself must not overflow.
 
 ### Rivalries
 
-Two manager selectors define the pair. All seasons and Regular season are the defaults. Until two distinct people are selected, show the selectors and an empty history area rather than silently comparing a person with themselves.
+Two manager selectors define the pair. All seasons and Regular season are the defaults. Until two distinct people are selected, offer up to three pairs with the most completed meetings in the selected season and scope, with stable tie ordering. Links open that comparison with its context retained. If no pair qualifies, show an honest empty state. Keep custom selection and pair reversal available.
 
 After selection show a compact summary of W-L-T, meetings, average margin and current streak, followed by the game table. Show the ten newest meetings initially and offer Show all when more exist. Scope/year filters and pair selection live in the URL. The primary date/week link opens the matchup.
 
@@ -184,7 +186,7 @@ If two valid people never met, show zero meetings and no invented margin or stre
 
 Use the cleaned Q38 arrangement. Show season/week or contest rounds, both complete team identities, official score and result. Link back to the league season and to each relevant person-season profile.
 
-On desktop align both teams' Starters and Bench tables side by side. Include historical slot/position, player and available recorded player points. Preserve official team totals even when player sums differ. Unknown points use an em dash.
+On desktop align both teams' Starters and Bench tables side by side. Include historical slot/position, player and available recorded player points. Use recognizable defense names when supported by source identity. Preserve official team totals even when player sums differ. Unknown points use an em dash.
 
 A link from a record can select the relevant player row. Keep a quiet lilac highlight. There is no separate record-description callout beside Bench, badge, explanatory calculation panel or claim that an unused substitution would have won.
 
@@ -210,7 +212,8 @@ These state rules apply to every route rather than adding a new page design for 
 | Known identity with no games | Preserve identity/history, show zero games and undefined rates as an em dash. |
 | Missing field | Use an em dash or omit the unsupported historical fact. Preserve a real numeric zero. |
 | Missing required source data | Do not replace the last successful published result with an incomplete calculation. Report the gap internally. Initial publication remains blocked until required coverage or an explicit scope decision is resolved. |
-| Invalid entity/category/year | Render a real not-found page with shared navigation and a relevant collection link. |
+| Invalid entity/category/year | Return 404 with shared navigation, a relevant collection link and general routes including Home. |
+| No published history | Return 503 with a concise instruction to try again and general routes including Home. Keep this distinct from an empty selection. |
 | Invalid query value | Normalize once to a documented valid default. Never silently substitute a different identity. |
 | Source outage during refresh | Keep the last successful history readable. No public outage, freshness or update panel. |
 | Missing image or long name | Same rounded initials frame; text wraps without changing the row's meaning. |
