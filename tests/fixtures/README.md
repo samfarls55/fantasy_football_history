@@ -57,3 +57,7 @@ At the partial type-1 boundary after week 4, roster 1 retains its 10.1-point fir
 Type 2: first rounds play weeks **2–3**, semifinals/fifth place weeks **4–5**, main final/third place weeks **6–7**. Both legs of a resolved contest share one contest identity. After only week 2, roster 3 has **30** playoff points and its actual start but **0–0** W-L-T. At completion roster 1 is **1–1** and roster 5 is **3–0**. The final retains the same **30.3–35.3** aggregate as type 1.
 
 Boundary tests mutate only provider responses to create partial seasons, null starter placeholders, missing required legs/points, unknown raw enums, absent historical format and repeated refreshes. Expected results are the literal worked examples above, observed through real refresh and public reads.
+
+## Career ranking boundaries
+
+`records-source.ts` constructs controlled provider responses for regular-season career records. It supplies complete roster-week coverage while letting tests specify official scores and explicit unpaired byes. It does not write a normalized archive. Worked cases observed after real refresh and persisted visitor reads include `0.1 + 0.2 = 0.3`, distinct `100.12001` and `100.12` totals, `1/3 = 2/6` win rates, three entries sharing tenth place, and three sharing twentieth place. The latter pages contain 12 and 22 rows respectively; sorting retains those canonical places.

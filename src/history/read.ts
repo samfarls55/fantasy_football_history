@@ -1,6 +1,8 @@
 import { loadArchive } from './store.ts';
-import type { Archive, Season, SeasonTeam, Scope, Competition } from './types.ts';
-import { sumPoints } from './decimal.ts';
+import type { Archive, Season, SeasonTeam, Scope } from './types.ts';
+import { careerMetrics } from './metrics.ts';
+import { inScope } from './scope.ts';
+export { completedContests, inScope, gameScopes, competitionLabels } from './scope.ts';
 
 export const standingSorts = ['standing', 'name', 'record', 'points'] as const;
 export type StandingSort = typeof standingSorts[number];
@@ -15,19 +17,16 @@ export async function readSeasons(storePath?: string) {
   return archive?.seasons.map(season => ({ ...season, ...honors(archive, season) })) ?? [];
 }
 
-function standings(archive: Archive, season: Season, scope: Scope): StandingRow[] {
+function standings(archive: Archive, season: Season, scope: Scope) {
   const rows = season.teams.map(team => {
-    const games = completedContests(archive, { seasonId: season.id, scope }).filter(game => game.sides.some(side => side.rosterId === team.rosterId));
-    const wins = games.filter(game => game.winnerId === team.personId).length;
-    const ties = games.filter(game => game.tie).length;
-    const losses = games.length - wins - ties;
-    const points = sumPoints(archive.performances.filter(performance => performance.seasonId === season.id && inScope(performance.competition, scope) && performance.rosterId === team.rosterId).map(performance => performance.points));
-    return { ...team, personName: archive.people.find(person => person.id === team.personId)!.name, wins, losses, ties, points, record: `${wins}–${losses}${ties ? `–${ties}` : ''}` };
+    const metrics = careerMetrics(archive, { franchiseId: team.franchiseId }, { season: season.year, scope });
+    const { wins, losses, ties, points, record } = metrics.facts;
+    return { ...team, personName: archive.people.find(person => person.id === team.personId)!.name, wins, losses, ties, points, record, metrics };
   });
-  rows.sort((a, b) => (b.wins + b.ties / 2) - (a.wins + a.ties / 2) || b.points - a.points || a.rosterId.localeCompare(b.rosterId));
+  rows.sort((a, b) => b.metrics.actualWins.compare(a.metrics.actualWins) || b.metrics.points.compare(a.metrics.points) || a.rosterId.localeCompare(b.rosterId));
   let standing = 1;
   for (const [index, row] of rows.entries()) {
-    if (index && (row.wins + row.ties / 2 !== rows[index - 1].wins + rows[index - 1].ties / 2 || row.points !== rows[index - 1].points)) standing = index + 1;
+    if (index && (row.metrics.actualWins.compare(rows[index - 1].metrics.actualWins) || row.metrics.points.compare(rows[index - 1].metrics.points))) standing = index + 1;
     row.standing = standing;
   }
   return rows;
@@ -40,8 +39,8 @@ export async function readSeason(year: string, options: { storePath?: string; so
   if (!archive || !season) return null;
   const rows = standings(archive, season, options.scope ?? 'regular');
   if (options.sort === 'name') rows.sort((a, b) => a.personName.localeCompare(b.personName));
-  if (options.sort === 'points') rows.sort((a, b) => b.points - a.points || a.personName.localeCompare(b.personName));
-  return { ...season, ...honors(archive, season), rows };
+  if (options.sort === 'points') rows.sort((a, b) => b.metrics.points.compare(a.metrics.points) || a.personName.localeCompare(b.personName));
+  return { ...season, ...honors(archive, season), rows: rows.map(({ metrics, ...row }) => row) };
 }
 
 export const bracketScopes = ['playoffs', 'consolation', 'placement'] as const;
@@ -74,17 +73,6 @@ export async function readSeasonBracket(year: string, options: { storePath?: str
   const firstRound = Math.min(...season.bracket.filter(entry => entry.competition === 'playoffs').map(entry => entry.round));
   const byes = started && scope === 'playoffs' ? season.teams.filter(team => entries.some(entry => entry.round > firstRound && (entry.rosterA === team.rosterId && !entry.fromA || entry.rosterB === team.rosterId && !entry.fromB))).map(team => ({ ...team, personName: archive.people.find(person => person.id === team.personId)!.name })) : [];
   return { year, scope, availableScopes, rounds, byes };
-}
-
-export const gameScopes: Scope[] = ['regular', 'playoffs', 'combined', 'consolation', 'placement'];
-export const competitionLabels: Record<Scope, string> = { regular: 'Regular season', playoffs: 'Championship playoffs', combined: 'Regular + playoffs', consolation: 'Consolation', placement: 'Placement' };
-export function inScope(competition: Competition, scope: Scope): boolean {
-  return scope === 'combined' ? competition === 'regular' || competition === 'playoffs' : competition === scope;
-}
-
-/** Shared W-L-T boundary. Weekly score/start queries deliberately use performances instead. */
-export function completedContests(archive: Archive, options: { scope?: Scope; seasonId?: string } = {}) {
-  return archive.contests.filter(game => game.complete && (!options.seasonId || game.seasonId === options.seasonId) && inScope(game.competition, options.scope ?? 'regular'));
 }
 
 /** Completed weekly legs remain visitable even while the encompassing contest is unresolved. */
