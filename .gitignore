@@ -1,0 +1,29 @@
+# Dependencies and generated output
+/node_modules/
+/dist/
+/.astro/
+/test-results/
+/playwright-report/
+
+# Generated Impeccable build state and detector cache
+/.impeccable/build/
+/.impeccable/prototypes/collections/.impeccable/build/
+/.impeccable/prototypes/history-details/.impeccable/build/
+/.impeccable/prototypes/manager-profile/.impeccable/build/
+/.impeccable/prototypes/platform-round-two/.impeccable/build/
+/.impeccable/prototypes/record-navigation/.impeccable/build/
+/.impeccable/hook.cache.json
+
+# Development scratch; retain referenced design and review documentation
+/.impeccable/review/*
+!/.impeccable/review/mobile.png
+!/.impeccable/review/finish-review.md
+!/.impeccable/review/finish-verdict.md
+!/.impeccable/review/gate-blocker.md
+!/.impeccable/review/refinement-review.md
+!/.impeccable/review/verification.json
+
+# Local environment secrets; the named example must contain sanitized values
+/.env
+/.env.*
+!/.env.example
