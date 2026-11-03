@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { refresh } from '../../src/history/refresh.ts';
+import { publishControlledHistory as publish } from '../support/history.ts';
 
 async function withHistory(run: (storePath: string) => Promise<void>) {
   const directory = await mkdtemp(join(tmpdir(), 'museum-franchises-'));
@@ -11,14 +11,6 @@ async function withHistory(run: (storePath: string) => Promise<void>) {
 }
 async function fixture() {
   return JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
-}
-function publish(storePath: string, source: any) {
-  return refresh({ storePath, leagueId: source.seedLeagueId, now: new Date('2026-11-03T12:00:00Z'), provider: {
-    async get(path) {
-      if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`);
-      return structuredClone(source.responses[path]);
-    },
-  } });
 }
 
 test('published franchise history retains both replacement owners without assigning their careers to each other', async () => {

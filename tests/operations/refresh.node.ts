@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { refresh } from '../../src/history/refresh.ts';
+import { publishControlledHistory as publish } from '../support/history.ts';
 import { readSeasons, readSeason } from '../../src/history/read.ts';
 import { readManager } from '../../src/history/managers.ts';
 import { readFranchise } from '../../src/history/franchises.ts';
@@ -20,14 +20,6 @@ async function withHistory(run: (storePath: string) => Promise<void>) {
   await mkdir(review, { recursive: true });
   const directory = await mkdtemp(join(review, 'refresh-acceptance-'));
   try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
-function publish(storePath: string, source: any) {
-  return refresh({ storePath, leagueId: source.seedLeagueId, now: new Date('2026-11-03T12:00:00Z'), provider: {
-    async get(path) {
-      if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`);
-      return structuredClone(source.responses[path]);
-    },
-  } });
 }
 
 test('unpublished seasons remain unavailable rather than becoming known empty history', async () => {

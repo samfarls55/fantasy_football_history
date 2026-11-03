@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { refresh } from '../../src/history/refresh.ts';
+import { publishControlledHistory as publish } from '../support/history.ts';
 import { readCategory, readRecordCollection } from '../../src/history/records.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
@@ -12,14 +12,6 @@ async function published(run: (storePath: string) => Promise<void>) {
   const directory = await mkdtemp(join(tmpdir(), 'museum-game-records-'));
   try { await run(join(directory, 'history.json')); }
   finally { await rm(directory, { recursive: true, force: true }); }
-}
-function publish(storePath: string, source: { seedLeagueId: string; responses: Record<string, unknown> }) {
-  return refresh({ storePath, leagueId: source.seedLeagueId, now: new Date('2026-11-03T12:00:00Z'), provider: {
-    async get(path) {
-      if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`);
-      return structuredClone(source.responses[path]);
-    },
-  } });
 }
 
 test('published final margins preserve decimal equality, zero ties, unique contests and both people', async () => {
