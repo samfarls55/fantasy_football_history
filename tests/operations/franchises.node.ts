@@ -33,7 +33,7 @@ test('published franchise history retains both replacement owners without assign
     assert.equal(franchise?.facts.championships, 1);
     assert.deepEqual(franchise?.tenures.map(tenure => [tenure.owner.name, tenure.range]), [['Woody14', '2019'], ['Timh17', '2020–2021']]);
     assert.equal(franchise?.tenures[1].events[0].predecessor?.name, 'Woody14');
-    assert.ok(franchise?.tenures[1].events.some(event => event.label === 'Renamed Buccaneers'));
+    assert.ok(franchise?.tenures[1].events.some(event => event.label === 'Played as Buccaneers'));
     assert.equal((await readManager('person-608473907007143936', { storePath }))?.facts.record, '1–3');
     assert.equal((await readManager('person-472580465006473216', { storePath }))?.facts.record, '1–0');
     assert.equal((await readFranchises({ storePath }))?.length, 6);
@@ -41,7 +41,7 @@ test('published franchise history retains both replacement owners without assign
     assert.equal(returning?.range, '2019, 2021');
     assert.deepEqual(returning?.tenures.map(tenure => tenure.range), ['2019', '2021']);
     assert.equal(returning?.tenures[1].events[0].predecessor, null);
-    assert.equal(returning?.tenures[1].events[0].label, 'Recorded again');
+    assert.equal(returning?.tenures[1].events[0].label, 'Next season in the archive');
     assert.deepEqual((await readFranchise('franchise-10', { storePath }))?.seasons.map(row => row.owner.name), ['sebastian12', 'alecswartout', 'alecswartout']);
     assert.equal(await readFranchise('missing', { storePath }), null);
   });
