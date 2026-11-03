@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { refresh } from '../../src/history/refresh.ts';
+import { publishControlledHistory as publish } from '../support/history.ts';
 import { readSeason } from '../../src/history/read.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
@@ -12,14 +12,6 @@ async function withHistory(run: (storePath: string, source: any) => Promise<void
   const directory = await mkdtemp(join(tmpdir(), 'museum-season-comparisons-'));
   const source = JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
   try { await run(join(directory, 'history.json'), source); } finally { await rm(directory, { recursive: true, force: true }); }
-}
-function publish(storePath: string, source: any) {
-  return refresh({ storePath, leagueId: source.seedLeagueId, now: new Date('2026-11-03T12:00:00Z'), provider: {
-    async get(path) {
-      if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`);
-      return structuredClone(source.responses[path]);
-    },
-  } });
 }
 
 test('published current-season standings compare the same completed official scores and exact weekly expectation', async () => {

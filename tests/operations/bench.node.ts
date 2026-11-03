@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { refresh } from '../../src/history/refresh.ts';
+import { publishControlledHistory as publish } from '../support/history.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readRecordCollection } from '../../src/history/records.ts';
 import { readMatchup } from '../../src/history/read.ts';
@@ -15,14 +15,6 @@ async function withHistory(run: (storePath: string) => Promise<void>) {
   try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
 }
 async function fixture() { return JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8')); }
-function publish(storePath: string, source: any) {
-  return refresh({ storePath, leagueId: source.seedLeagueId, now: new Date('2026-11-03T12:00:00Z'), provider: {
-    async get(path) {
-      if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`);
-      return structuredClone(source.responses[path]);
-    },
-  } });
-}
 
 test('published bench records rank exact player/team/week performances and open the actual bench without adding starts', async () => {
   await withHistory(async storePath => {

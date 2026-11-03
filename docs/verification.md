@@ -24,7 +24,11 @@ A subsequent targeted cleanup addresses the five annotations from PR #20's first
 
 The complete publication suite passed all 74 checks again, and the browser suite passed all 49 checks with `/usr/bin/chromium` and isolated port 4397. Astro again reported 0 errors, 0 warnings and 0 hints across 96 files; the standalone production build and whitespace check passed. A controlled-provider comparison against `d13c57d6a1f24c63c045cd467061b34366ec9acc` produced byte-identical durable archives, retaining all 89 source paths in the same order, the unchanged repeat-refresh result and identical manager/franchise public reads. No new tests or visual captures were added for these refactors; the 112-image evidence below remains scoped to its original code commit.
 
-These are local verification results. The first remote SonarCloud result failed its security, reliability and duplication conditions; the remote result for this cleanup must be read separately after publication. Local token comparison confirms the extracted manager/franchise match is reduced, but does not establish SonarCloud's project-wide duplication percentage.
+The remote SonarCloud check at `f2630d76a40a5dd639165c0efcc3c82088d83743` cleared all five annotations and the security/reliability conditions. Its remaining failed condition was 3.1% duplication on new code against the 3% limit.
+
+A following test-only refactor extracts eleven repeated controlled-provider publication adapters into `tests/support/history.ts`. They still exercise real refresh and durable publication, preserve missing-response failures and cloned responses, and retain the fixed default clock plus Home's explicit clock overrides. Independent comparison confirmed all 51 test bodies and assertions in the affected suites remained byte-identical. The publication suite passed all 74 checks again, and Astro reported 0 errors, 0 warnings and 0 hints across 97 files; the whitespace check also passed.
+
+Application source, assets and scripts are unchanged from `f2630d76a40a5dd639165c0efcc3c82088d83743`, so the preceding 49-browser-test and production-build results retain their original application scope. The remote duplication result for the shared test adapter must be read after publication; local extraction evidence does not establish SonarCloud's project-wide percentage.
 
 ## Independent code-review corrections
 
