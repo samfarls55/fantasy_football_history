@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily completed-week league history refresh
+
+[Timer]
+OnCalendar=*-*-* 10:00:00 UTC
+Persistent=true
+Unit=farls-museum-refresh.service
+
+[Install]
+WantedBy=timers.target
