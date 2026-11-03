@@ -1,0 +1,7 @@
+interface:
+  display_name: "Init"
+  short_description: "Initialize a project workspace and agent wiki"
+  default_prompt: "Use $init to initialize this working directory."
+
+policy:
+  allow_implicit_invocation: false

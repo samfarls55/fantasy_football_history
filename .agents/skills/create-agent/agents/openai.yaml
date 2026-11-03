@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create Agent"
+  short_description: "Design a specialized user-level agent persona"
+  default_prompt: "Use $create-agent to design a specialized agent persona for this domain:"
+
+policy:
+  allow_implicit_invocation: false

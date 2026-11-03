@@ -1,0 +1,11 @@
+{
+  "template_version": "1.0.0",
+  "directories": [
+    "wiki/inbox",
+    "wiki/sources",
+    "wiki/pages/project",
+    "wiki/pages/decisions",
+    "wiki/pages/concepts",
+    "wiki/_system/modules"
+  ]
+}

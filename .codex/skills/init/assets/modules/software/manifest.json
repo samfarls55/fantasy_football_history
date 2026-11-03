@@ -1,0 +1,7 @@
+{
+  "directories": [
+    "wiki/pages/architecture",
+    "wiki/pages/technical-decisions",
+    "wiki/pages/incidents"
+  ]
+}
