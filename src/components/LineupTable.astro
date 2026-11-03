@@ -9,7 +9,7 @@ const format = (value: number | null) => value === null ? '—' : new Intl.Numbe
   {players.length ? <table class="lineup-table">
     <caption class="visually-hidden">{teamName} {section.toLowerCase()}</caption>
     <thead><tr><th scope="col">Slot</th><th scope="col">Player</th><th scope="col">Points</th></tr></thead>
-    <tbody>{players.map(player => <tr id={`player-${rosterId}-${player.playerId}`} class:list={{ 'lineup-selected': selectedPlayer === player.playerId && (!selectedTeam || selectedTeam === rosterId) }}>
+    <tbody>{players.map(player => <tr id={`player-${rosterId}-${player.playerId}`} aria-current={selectedPlayer === player.playerId && (!selectedTeam || selectedTeam === rosterId) ? 'true' : undefined} class:list={{ 'lineup-selected': selectedPlayer === player.playerId && (!selectedTeam || selectedTeam === rosterId) }}>
       <td>{player.slot ?? '—'}</td>
       <th scope="row"><a href={`/managers/${personId}/players/${player.playerId}/?season=${year}&scope=${scope}`}>{player.name}</a></th>
       <td>{format(player.points)}</td>

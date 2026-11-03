@@ -279,6 +279,10 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
+  const benchGaps = archive.coverage.filter(issue => issue.blocks.includes('benched-player'));
+  if (previous && !previous.coverage.some(issue => issue.blocks.includes('benched-player')) && benchGaps.length) {
+    throw new Error(`Bench record coverage is incomplete: ${benchGaps.map(issue => issue.detail).join('; ')}`);
+  }
   const changed = JSON.stringify(previous && { ...previous, importedAt: '' }) !== JSON.stringify({ ...archive, importedAt: '' });
   await publishArchive(archive, storePath);
   return { archive, changed, storePath };
