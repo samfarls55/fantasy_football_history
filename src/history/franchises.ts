@@ -1,5 +1,5 @@
 import { readArchive } from './store.ts';
-import { careerFacts, readManagerSeason, recordedRange, type HistorySelection, type TimelineEvent, type Tenure, type ManagerGameSort } from './managers.ts';
+import { careerFacts, extendTenure, readManagerSeason, recordedRange, type HistorySelection, type TimelineEvent, type Tenure, type ManagerGameSort } from './managers.ts';
 import type { Archive, Franchise, Person, Season, SeasonTeam } from './types.ts';
 
 type TeamSeason = { season: Season; team: SeasonTeam };
@@ -21,9 +21,7 @@ function ownershipTenures(archive: Archive, entries: TeamSeason[]): OwnershipTen
       if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Team name: ${team.name}`, predecessor: null });
       tenures.push({ franchiseId: team.franchiseId, owner, start: season.year, end: season.year, range: season.year, events });
     } else {
-      const tenure = tenures.at(-1)!;
-      tenure.end = season.year; tenure.range = recordedRange(tenure.start, tenure.end);
-      if (team.nameSource === 'historical-roster' && team.name !== previous.team.name) tenure.events.push({ year: season.year, kind: 'name', label: previous.team.nameSource === 'historical-roster' ? `Renamed ${team.name}` : `Team name: ${team.name}`, predecessor: null });
+      extendTenure(tenures.at(-1)!, season.year, team, previous.team);
     }
   }
   return tenures;

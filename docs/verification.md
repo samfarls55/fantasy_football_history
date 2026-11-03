@@ -16,7 +16,15 @@ npm run build
 
 `MUSEUM_PORT` isolates a browser run's local server; omit it to use 4321. The browser suite publishes controlled Sleeper-shaped responses through real refresh into its dedicated store. Synthetic names, long names, ties, empty scopes and failed-image inputs are QA fixtures, not league facts. The application never serves those fixtures as fallback history.
 
-On that code commit, the publication suite passed all 74 checks and the complete browser suite passed all 49 checks using `/usr/bin/chromium` and isolated port 4391. Astro reported 0 errors, 0 warnings and 0 hints across 96 files, the standalone production build succeeded, and `git diff --check` passed. The existing profile and contribution checks also cover the shared-component and game-context refactors. The final handoff changes only this document, so its additional checks are the whitespace check and confirmation of that file-only diff.
+On that code commit, the publication suite passed all 74 checks and the complete browser suite passed all 49 checks using `/usr/bin/chromium` and isolated port 4391. Astro reported 0 errors, 0 warnings and 0 hints across 96 files, the standalone production build succeeded, and `git diff --check` passed. The existing profile and contribution checks also cover the shared-component and game-context refactors. That earlier final handoff changed only this document; its additional checks were the whitespace check and confirmation of that file-only diff.
+
+## Pre-merge static-analysis cleanup
+
+A subsequent targeted cleanup addresses the five annotations from PR #20's first SonarCloud check. Refresh accumulates source responses in a `Map` and constructs the archive's own-key JSON dictionary before publication. Year sorting now uses explicit string comparators, and the existing HTTP assertion strips tags without allowing overlapping opening brackets. The identical manager/franchise tenure continuation logic now shares one helper; each caller retains its own continuity and ownership decisions, including historical-name provenance. No analysis exclusions, gate thresholds or rendered interface files changed.
+
+The complete publication suite passed all 74 checks again, and the browser suite passed all 49 checks with `/usr/bin/chromium` and isolated port 4397. Astro again reported 0 errors, 0 warnings and 0 hints across 96 files; the standalone production build and whitespace check passed. A controlled-provider comparison against `d13c57d6a1f24c63c045cd467061b34366ec9acc` produced byte-identical durable archives, retaining all 89 source paths in the same order, the unchanged repeat-refresh result and identical manager/franchise public reads. No new tests or visual captures were added for these refactors; the 112-image evidence below remains scoped to its original code commit.
+
+These are local verification results. The first remote SonarCloud result failed its security, reliability and duplication conditions; the remote result for this cleanup must be read separately after publication. Local token comparison confirms the extracted manager/franchise match is reduced, but does not establish SonarCloud's project-wide duplication percentage.
 
 ## Independent code-review corrections
 

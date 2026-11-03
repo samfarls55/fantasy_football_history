@@ -131,7 +131,7 @@ test('published dominance ties across scoring eras and season lengths instead of
     await publish(storePath, source);
     const dominant = await readCategory('dominant-season', { storePath });
     assert.deepEqual(dominant!.leaders.map(row => [row.value, row.exactKey, row.rank]), [[60, '60/1', 1], [60, '60/1', 1]]);
-    assert.deepEqual(dominant!.leaders.map(row => row.period!.year).sort(), ['2020', '2021']);
+    assert.deepEqual(dominant!.leaders.map(row => row.period!.year).sort((a, b) => a.localeCompare(b)), ['2020', '2021']);
     assert.equal((await readSeason('2020', { storePath }))!.rows.find(row => row.personName === 'Record manager 02')!.points, 4);
     assert.equal((await readSeason('2021', { storePath }))!.rows.find(row => row.personName === 'Record manager 02')!.points, 80);
     const week = source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[];
