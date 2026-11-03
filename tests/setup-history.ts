@@ -1,5 +1,6 @@
 import { readFile, rm } from 'node:fs/promises';
 import { refresh } from '../src/history/refresh.ts';
+import { rivalriesSource } from './fixtures/rivalries-source.ts';
 
 export default async function setup() {
   const fixture = JSON.parse(await readFile(new URL('./fixtures/provider-history.json', import.meta.url), 'utf8'));
@@ -10,7 +11,9 @@ export default async function setup() {
   fixture.responses['league/900000000000002021/rosters'][2].metadata = { team_name: 'Buccaneers' };
   fixture.responses['league/900000000000002020/matchups/1'][0].players.push('90');
   const native = JSON.parse(await readFile(new URL('./fixtures/playoff-type-1.json', import.meta.url), 'utf8'));
-  native.responses[`league/${native.seedLeagueId}`].previous_league_id = fixture.seedLeagueId;
+  const rivalry = rivalriesSource(fixture.seedLeagueId);
+  native.responses[`league/${native.seedLeagueId}`].previous_league_id = rivalry.seedLeagueId;
+  Object.assign(fixture.responses, rivalry.responses);
   native.responses['players/nfl'] = { ...fixture.responses['players/nfl'], ...native.responses['players/nfl'] };
   Object.assign(fixture.responses, native.responses);
   await refresh({ leagueId: native.seedLeagueId, storePath: process.env.MUSEUM_STORE_PATH, now: new Date('2025-12-31T12:00:00Z'), provider: {
