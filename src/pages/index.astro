@@ -1,0 +1,115 @@
+---
+import { sampleHistory as history } from '../../assets/data/sample-history';
+import Chevron from '../components/Chevron.astro';
+import { dominance, gameScopes, records } from '../lib/records';
+import '../styles/home.css';
+const [season, bench] = history.records;
+const playoff = records[2];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Farls da bag · Record book</title>
+    <meta name="description" content="The Farls da bag fantasy football record book." />
+  </head>
+  <body>
+    <a class="skip-link" href="#record-book">Skip to record book</a>
+    <header class="site-header">
+      <h1><a class="brand" href="/">{history.league.name}</a></h1>
+      <nav aria-label="Main navigation">
+        <a href="#featured-records">Featured records</a>
+        <a href="#record-book" aria-current="location">Record book</a>
+        <a href="#recently-added">Recently added</a>
+      </nav>
+      <p class="sample-notice">Sample stats</p>
+    </header>
+    <p class="gallery-scope">All-time records <span aria-hidden="true">·</span> Regular season</p>
+    <main>
+      <section class="gallery" id="featured-records" aria-label="Featured records" tabindex="-1">
+        <article class="lead-record">
+          <img class="lead-image" src="/assets/plates/achievement-logo.png" alt="The Monkey Buccaneers team logo" width="800" height="800" fetchpriority="high" data-initials="MB" />
+          <h2 class="record-category lead-category">{season.title}</h2>
+          <p class="lead-team" title={history.teams.monkey.name}>{history.teams.monkey.name}</p>
+          <div class="lead-measure">
+            <p class="lead-value"><span class="lead-sign">{dominance[0]}</span><span class="lead-digits">{dominance.slice(1, -1)}</span><span class="lead-percent">%</span></p>
+            <p class="lead-unit"><abbr title="Points per game">PPG</abbr> above league average</p>
+            <p class="lead-date">{season.season}</p>
+          </div>
+          <a class="evidence-button lead-action" href={`?record=${season.id}#evidence`} data-record={season.id}>View evidence <Chevron /></a>
+        </article>
+        <div class="supporting-records">
+          <article class="bench-record">
+            <h2 class="record-category bench-category">{bench.title}</h2>
+            <div class="bench-measure">
+              <p class="bench-player" title={bench.source.playerName}>{bench.source.playerName}</p>
+              <p class="bench-value">{bench.source.playerPoints}</p>
+              <p class="bench-unit">points in one game</p>
+              <p class="bench-date">Week {bench.week} <span aria-hidden="true">·</span> {bench.season}</p>
+            </div>
+            <div class="bench-identity">
+              <img class="bench-image" src="/assets/plates/bench-portrait.png" alt="2025 Champion team image" width="800" height="800" data-initials="25C" />
+              <p class="bench-team" title={history.teams.champion.name}>{history.teams.champion.name}</p>
+            </div>
+            <a class="evidence-button bench-action" href={`?record=${bench.id}#evidence`} data-record={bench.id}>View evidence <Chevron /></a>
+          </article>
+          <section class="recent-records" id="recently-added" tabindex="-1">
+            <img class="recent-image" src="/assets/plates/history-logo.png" alt="The Monkey Buccaneers team logo" width="400" height="400" data-initials="MB" />
+            <h2 class="record-category recent-category">Recently added</h2>
+            <a class="recent-link" href={`?record=${season.id}#evidence`} data-record={season.id}>
+              <strong>{season.title}</strong>
+              <span>{history.teams.monkey.name} <span aria-hidden="true">·</span> {season.season}</span>
+              <Chevron />
+            </a>
+          </section>
+        </div>
+      </section>
+      <section class="record-book" id="record-book" aria-label="Record book" tabindex="-1">
+        <div class="records-heading">
+          <h2>Record book</h2>
+          <label class="scope-control"><span class="visually-hidden">Game scope</span><select id="game-scope">{gameScopes.map(scope => <option value={scope.value} aria-label={scope.description}>{scope.label}</option>)}</select><Chevron /></label>
+        </div>
+        <table role="table" aria-label="Sample record book">
+          <colgroup><col class="record-column" /><col class="team-column" /><col class="metric-column" /><col class="scope-column" /></colgroup>
+          <thead><tr><th scope="col">Record</th><th scope="col">Team</th><th scope="col">Metric</th><th scope="col">When</th></tr></thead>
+          <tbody>
+            <tr data-scope="regular"><th scope="row"><a class="record-title-link" href={`?record=${season.id}#evidence`} data-record={season.id}>{season.title}<Chevron /></a></th><td>{history.teams.monkey.name}</td><td><strong class="table-value">{dominance}</strong><span class="table-unit">PPG above league average</span></td><td>{season.season}</td></tr>
+            <tr data-scope="regular"><th scope="row"><a class="record-title-link" href={`?record=${bench.id}#evidence`} data-record={bench.id}>{bench.title}<Chevron /></a></th><td>{history.teams.champion.name}</td><td><strong class="table-value">{bench.source.playerPoints}</strong><span class="table-unit">points in one game</span></td><td>Week {bench.week} <span aria-hidden="true">·</span> {bench.season}</td></tr>
+            <tr data-scope="playoffs" hidden><th scope="row"><a class="record-title-link" href={`?record=${playoff.id}#evidence`} data-record={playoff.id}>{playoff.title}<Chevron /></a></th><td>{playoff.team.name}</td><td><strong class="table-value">{playoff.value}</strong><span class="table-unit">{playoff.unit}</span></td><td>{playoff.when}</td></tr>
+          </tbody>
+        </table>
+        <p class="empty-records" id="empty-records" hidden>No sample records in this scope.</p>
+        <p class="visually-hidden" id="scope-status" role="status"></p>
+      </section>
+      <section class="evidence" id="evidence" aria-label="Record evidence" hidden>
+        <div class="evidence-toolbar">
+          <a href="#record-book" id="close-evidence">Back to records</a>
+          <div><span class="evidence-sample">Sample stats</span><button type="button" id="copy-record">Copy link</button></div>
+        </div>
+        <input id="record-link" class="record-link" type="url" aria-label="Record link" readonly hidden />
+        <p id="copy-status" class="copy-status" role="status"></p>
+        {records.map(record => (
+          <article class="record-evidence" data-record-id={record.id} hidden>
+            <div class="evidence-identity">
+              <img src={record.team.featureImage} alt={`${record.team.name} team image`} width="800" height="800" data-initials={record.team === history.teams.monkey ? 'MB' : '25C'} />
+              <div><h2 tabindex="-1">{record.title}</h2><p>{record.team.name} <span aria-hidden="true">·</span> {record.when}</p></div>
+              <div class="evidence-metric">{record.kind === 'benched-player-high' && <p class="evidence-player">{record.source.playerName}</p>}<strong>{record.value}</strong><span>{record.unit}</span></div>
+            </div>
+            <div class="evidence-content">
+              <div><h3>How it’s measured</h3><p>{record.method}</p><p class="source-notice">Synthetic results paired with sourced team images. The team name is not evidence of a historical name or championship.</p><a href="/sample-history.json">View sample data</a></div>
+              <dl>{record.facts.map(([label, value]) => <div><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+            </div>
+            <details><summary>Source fixture</summary><pre>{JSON.stringify(record.source, null, 2)}</pre></details>
+          </article>
+        ))}
+        <article id="record-not-found" hidden><h2 tabindex="-1">Record not found</h2><p>This link does not identify a record in the sample archive.</p><a href="#record-book" data-return-to-records>Back to records</a></article>
+      </section>
+      <footer class="archive-footer"><p>Sample archive <span aria-hidden="true">·</span> League history has not been imported.</p><a href="/sample-history.json">Sample data</a></footer>
+      <noscript><p>Record details need JavaScript. <a href="/sample-history.json">View the sample data</a>.</p></noscript>
+    </main>
+    <script>
+      import '../scripts/home';
+    </script>
+  </body>
+</html>
