@@ -1,4 +1,5 @@
 import { contextualPickups, pickupStarts } from './pickups.ts';
+import { contextualDrops, selectedDrop } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
 import { loadArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
@@ -7,7 +8,9 @@ import type { Archive, Performance, Scope } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
 export interface ContributionIdentity { personId?: string; franchiseId?: string }
-export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope; pickup?: string }
+export const contributionViews = ['all', 'pickups', 'drops'] as const;
+export type ContributionView = typeof contributionViews[number];
+export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope; pickup?: string; view?: ContributionView; event?: string }
 export interface RecordedStart { performance: Performance; playerId: string; points: number }
 
 /** Completed paired weekly legs are the shared actual-start boundary, including unresolved multiweek contests. */
@@ -64,7 +67,11 @@ export async function readContributors(identity: ContributionIdentity = {}, sele
   if ((identity.personId || identity.franchiseId) && !selectedContext) return null;
   const years = selectedContext?.years ?? archive.seasons.map(season => season.year);
   const season = years.includes(selection.season!) ? selection.season : undefined;
-  return { pickups: contextualPickups(archive, identity, { ...selection, season }), rows: contributors(archive, identity, { ...selection, season }).map(({ metric, performances, ...row }) => row), years, season, scope: selection.scope ?? 'regular', context: selectedContext };
+  const drop = selection.event ? selectedDrop(archive, identity, { ...selection, season }) : null;
+  if (selection.event && !drop) return null;
+  return { pickups: contextualPickups(archive, identity, { ...selection, season }), drops: contextualDrops(archive, identity, { ...selection, season }), selectedDrop: drop,
+    view: contributionViews.includes(selection.view!) ? selection.view! : 'all',
+    rows: contributors(archive, identity, { ...selection, season }).map(({ metric, performances, ...row }) => row), years, season, scope: selection.scope ?? 'regular', context: selectedContext };
 }
 
 /** Player detail totals cover the whole scope; its season selector applies locally to the game list. */
