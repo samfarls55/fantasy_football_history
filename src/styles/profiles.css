@@ -1,4 +1,5 @@
 .directory-franchises { border-left: 1px solid #e8e7f1; padding-left: 24px; font-size: 24px; font-weight: 700; }
+.directory-controls { justify-content: end; margin-bottom: 16px; }
 .directory-table th:first-child { width: 44%; }
 .directory-table th:nth-child(2) { width: 25%; }
 .directory-table th:nth-child(3) { width: 20%; }
@@ -45,6 +46,12 @@
 .manager-games-table th:nth-child(2) { width: 40%; }
 .manager-games-table th:nth-child(3) { width: 25%; }
 .manager-games-table th:last-child { width: 10%; }
+.franchise-seasons-table th:first-child { width: 26%; }
+.franchise-seasons-table th:nth-child(2) { width: 19%; }
+.franchise-seasons-table th:nth-child(3) { width: 13%; }
+.franchise-seasons-table th:nth-child(4) { width: 16%; }
+.franchise-seasons-table th:nth-child(5) { width: 10%; }
+.franchise-seasons-table th:last-child { width: 16%; }
 @media (max-width: 1000px) {
   .profile-context { grid-template-columns: 1fr; gap: 24px; }
   .profile-identity .team-image { flex-basis: 120px; width: 120px; height: 120px; }
@@ -96,4 +103,5 @@
   .career-seasons-table tbody th > a { font-size: 28px; }
   .career-seasons-table td, .manager-games-table td:nth-child(n+3) { display: flex; flex-direction: column; gap: 4px; }
   .career-seasons-table td::before, .manager-games-table td:nth-child(n+3)::before { content: attr(data-label); font-size: 17px; color: var(--muted); font-weight: 400; }
+  .franchise-seasons-table td:nth-child(2) { grid-column: 1 / -1; }
 }

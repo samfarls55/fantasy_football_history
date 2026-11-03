@@ -89,6 +89,7 @@ export const sleeperProvider: Provider = {
 export async function refresh(options: RefreshOptions = {}): Promise<RefreshResult> {
   const leagueId = string(options.leagueId ?? process.env.SLEEPER_LEAGUE_ID ?? '1385327861673529344', 'league ID');
   const storePath = configuredStorePath(options.storePath);
+  const previous = await loadArchive(storePath);
   const provider = options.provider ?? sleeperProvider;
   const archive: Archive = {
     version: 1, leagueId, importedAt: (options.now ?? new Date()).toISOString(),
@@ -133,7 +134,10 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     const previousLeagueId: string | null = league.previous_league_id == null ? null : string(league.previous_league_id, `${path} previous_league_id`);
     const users = list(await get(`${path}/users`), `${path}/users`).map((value, index) => {
       const user = object(value, `${path}/users ${index}`);
-      return { accountId: string(user.user_id, `${path}/users user_id`), name: string(user.display_name, `${path}/users display_name`), avatar: user.avatar == null ? null : string(user.avatar, `${path}/users avatar`) };
+      const accountId = string(user.user_id, `${path}/users user_id`);
+      const known = archive.people.find(person => person.accountId === accountId) ?? previous?.people.find(person => person.accountId === accountId);
+      const name = typeof user.display_name === 'string' && user.display_name.trim() ? user.display_name : known?.name;
+      return { accountId, name: string(name, `${path}/users display_name`), avatar: user.avatar == null ? null : string(user.avatar, `${path}/users avatar`) };
     });
     if (new Set(users.map(user => user.accountId)).size !== users.length) throw new Error(`${path}/users: duplicate account ID`);
     const rosters = list(await get(`${path}/rosters`), `${path}/rosters`);
@@ -274,7 +278,6 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
-  const previous = await loadArchive(storePath);
   const changed = JSON.stringify(previous && { ...previous, importedAt: '' }) !== JSON.stringify({ ...archive, importedAt: '' });
   await publishArchive(archive, storePath);
   return { archive, changed, storePath };
