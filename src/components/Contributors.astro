@@ -17,3 +17,10 @@ if (selection.season) rankings.set('season', selection.season);
     <td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td><td data-label="Seasons">{row.range}</td>
   </tr>)}</tbody>
 </table> : <p class="empty-history">No recorded starts for this selection.</p>}
+<script>
+  document.fonts.ready.then(() => {
+    const tabs = document.querySelector<HTMLElement>('.local-tabs');
+    const selected = tabs?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (tabs && selected && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = selected.offsetLeft - tabs.offsetLeft;
+  });
+</script>

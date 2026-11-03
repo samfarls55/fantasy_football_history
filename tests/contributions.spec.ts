@@ -69,6 +69,7 @@ test('contribution history and Players rows stay usable on phones, a narrow desk
     for (const [name, path] of targets) {
       await page.goto(path);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name} at ${width}px`).toBe(true);
+      if (name.endsWith('players')) await expect(page.getByRole('link', { name: 'Players', exact: true })).toBeInViewport();
       await page.screenshot({ path: `.impeccable/review/ticket-12-synthetic-${name}-${width}.png`, fullPage: true });
       if (width <= 600 && name.includes('player') && !name.endsWith('players')) {
         const first = page.locator('.contribution-games tbody tr').first();
