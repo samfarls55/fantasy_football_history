@@ -1,0 +1,64 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import { readSeason, readSeasons, standingSorts, type StandingSort } from '../../history/read';
+const { year = '' } = Astro.params;
+const seasons = await readSeasons();
+const selected = Astro.url.searchParams;
+const sort = standingSorts.includes(selected.get('sort') as StandingSort) ? selected.get('sort') as StandingSort : 'standing';
+const season = await readSeason(year, { sort });
+if (!season) Astro.response.status = 404;
+if (season && (selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && selected.get('tab') !== 'standings')) {
+  return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
+}
+const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+---
+<MuseumLayout title={season ? `${year} standings` : 'Season not found'} section="Seasons">
+  {season ? <>
+    <div class="page-heading season-heading">
+      <h1>{year}</h1>
+      <form action="/seasons/" method="get" class="season-switcher">
+        <label for="season-year">Season</label>
+        <select id="season-year" name="season">{seasons.map(item => <option value={item.year} selected={item.year === year}>{item.year}</option>)}</select>
+        <input type="hidden" name="tab" value="standings" /><input type="hidden" name="sort" value={sort} />
+        <button type="submit">Open season</button>
+      </form>
+    </div>
+    <p class="season-results">Champion <span>—</span><span aria-hidden="true"> · </span>Runner-up <span>—</span></p>
+    <details class="season-format">
+      <summary>Season format</summary>
+      <dl>
+        <div><dt>Teams</dt><dd>{season.teams.length}</dd></div>
+        <div><dt>Lineup</dt><dd>{season.rosterPositions.join(', ')}</dd></div>
+        <div><dt>Playoffs begin</dt><dd>Week {Number(season.settings.playoff_week_start)}</dd></div>
+        <div><dt>Playoff places</dt><dd>{Number(season.settings.playoff_teams)}</dd></div>
+        {Object.entries(season.scoring).map(([key, value]) => <div><dt>{({ rec: 'Reception', pass_td: 'Passing touchdown' } as Record<string, string>)[key] ?? key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}
+      </dl>
+    </details>
+    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current="page">Standings</a></nav>
+    <div class="table-toolbar"><p>Regular season</p><form method="get">
+      <input type="hidden" name="tab" value="standings" />
+      <label for="standing-sort">Sort standings</label>
+      <select id="standing-sort" name="sort">
+        <option value="standing" selected={sort === 'standing'}>Official standing</option>
+        <option value="name" selected={sort === 'name'}>Manager name</option>
+        <option value="record" selected={sort === 'record'}>Record</option>
+        <option value="points" selected={sort === 'points'}>Points</option>
+      </select>
+      <button type="submit">Apply order</button>
+    </form></div>
+    {season.rows.length ? <table class="history-table standings-table">
+      <caption class="visually-hidden">{year} regular-season standings</caption>
+      <thead><tr><th scope="col">Rank</th><th scope="col">Manager / team</th><th scope="col">Record</th><th scope="col">Points</th></tr></thead>
+      <tbody>{season.rows.map(row => <tr>
+        <td class="standing-rank" data-label="Rank">{row.standing}</td>
+        <th scope="row"><div class="team-identity"><TeamImage name={row.name} src={row.avatar} /><div>
+          <a href={`/managers/${row.personId}/seasons/${year}/`}>{row.personName}</a>
+          {row.name !== row.personName && <span class="historical-team">{row.name}</span>}
+        </div></div></th>
+        <td class="standing-record" data-label="Record">{row.record}</td>
+        <td class="standing-points" data-label="Points">{displayNumber(row.points)}</td>
+      </tr>)}</tbody>
+    </table> : <p class="empty-history">No results for this selection.</p>}
+  </> : <div class="not-found"><h1>Season not found</h1><p>This year is not in the league’s history.</p><a href="/seasons/">Browse seasons</a></div>}
+</MuseumLayout>

@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "astro dev --host 127.0.0.1",
+    "dev": "node --env-file-if-exists=.env ./node_modules/astro/bin/astro.mjs dev --host 127.0.0.1",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "start": "node --env-file-if-exists=.env ./dist/server/entry.mjs",
@@ -17,7 +17,8 @@
     "test:browser": "playwright test",
     "test:publication": "node --test tests/operations/*.node.ts",
     "history:publish": "node --env-file-if-exists=.env scripts/history-publication.ts publish",
-    "history:inspect": "node --env-file-if-exists=.env scripts/history-publication.ts inspect"
+    "history:inspect": "node --env-file-if-exists=.env scripts/history-publication.ts inspect",
+    "refresh": "node --env-file-if-exists=.env scripts/refresh.ts"
   },
   "dependencies": {
     "@astrojs/node": "11.1.9",

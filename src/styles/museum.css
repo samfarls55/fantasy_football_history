@@ -1,0 +1,99 @@
+@font-face { font-family: 'Roboto Condensed'; src: url('/fonts/roboto-condensed-variable.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+:root { --ink: #0b1028; --muted: #51447f; --violet: #4908dc; --aqua: #e5fbfb; --lilac: #f1edfc; color: var(--ink); background: #fff; font-family: 'Roboto Condensed', sans-serif; font-size: 20px; font-synthesis: none; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body, h1, h2, h3, p { margin: 0; }
+body { min-width: 320px; }
+a { color: var(--violet); text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2px; }
+button, select, input { font: inherit; accent-color: var(--violet); }
+button, select { min-height: 44px; border: 1px solid #cfc3e9; border-radius: 8px; background: #fff; color: var(--muted); padding: 6px 12px; }
+button { cursor: pointer; }
+button:hover { background: var(--lilac); }
+::selection { color: #fff; background: #5d20df; }
+:focus-visible { outline: 3px solid #7637e4; outline-offset: 4px; }
+html { scrollbar-color: #aa91db #f3eefb; }
+.visually-hidden, .museum-skip:not(:focus) { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.museum-skip:focus { position: fixed; z-index: 20; top: 12px; left: 12px; padding: 12px 18px; color: #fff; background: var(--violet); }
+.museum-header { position: relative; height: clamp(72px, 4.99vw, 86px); padding-inline: clamp(20px, 1.58vw, 30px); display: flex; align-items: center; background: #fff; }
+.museum-brand { font-size: clamp(36px, 3.1vw, 52px); font-weight: 900; letter-spacing: -.025em; color: #230b52; text-decoration: none; white-space: nowrap; line-height: 1; }
+.museum-header nav { display: flex; align-items: center; gap: clamp(20px, 2.34vw, 40px); margin-left: clamp(28px, 4.17vw, 70px); height: 100%; font-size: clamp(20px, 1.46vw, 25px); font-weight: 600; }
+.museum-header nav a { display: flex; align-items: center; min-height: 44px; height: 74%; padding: 0 5px; border-bottom: 3px solid transparent; color: #51447f; text-decoration: none; }
+.museum-header nav a[aria-current] { color: #5d0bf5; border-bottom-color: #6919ef; }
+.museum-sample { margin-left: auto; color: #60518b; white-space: nowrap; font-size: clamp(18px, 1.46vw, 24px); }
+.menu-toggle { display: none; }
+.museum-main { padding: 26px clamp(20px, 1.58vw, 30px) 60px; }
+.page-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin: 0 0 20px; }
+h1 { font-size: clamp(42px, 3.65vw, 62px); font-weight: 900; line-height: 1.08; letter-spacing: -.025em; text-wrap: balance; }
+.season-heading { margin-bottom: 16px; }
+.season-switcher, .table-toolbar form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--muted); }
+.season-switcher { padding-left: 24px; border-left: 1px solid #ddd3f1; }
+.season-results { color: var(--muted); font-size: 23px; margin-bottom: 12px; }
+.season-format { margin-bottom: 20px; color: var(--muted); }
+.season-format summary { cursor: pointer; min-height: 44px; display: list-item; width: fit-content; padding-top: 7px; }
+.season-format summary::marker { color: var(--violet); }
+.season-format dl { max-width: 650px; margin: 12px 0 24px; }
+.season-format dl div { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-bottom: 1px solid #edecf4; padding: 8px 0; }
+.season-format dd { color: var(--ink); margin: 0; }
+.local-tabs { display: flex; gap: 30px; overflow-x: auto; scrollbar-width: thin; margin: 0 0 16px; }
+.local-tabs a { display: inline-flex; align-items: center; min-height: 58px; padding: 0 10px 8px; font-size: 28px; font-weight: 800; text-decoration: none; color: var(--muted); border-bottom: 4px solid transparent; }
+.local-tabs a[aria-current] { color: #5d0bf5; border-color: #6919ef; }
+.table-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; color: var(--muted); font-size: 18px; }
+.history-table { width: 100%; border-spacing: 0; border: 1px solid #e2dcef; border-radius: 14px; overflow: hidden; table-layout: fixed; font-variant-numeric: tabular-nums; }
+.history-table thead { background: #f1eef7; color: var(--muted); text-transform: uppercase; font-size: 18px; }
+.history-table th, .history-table td { text-align: left; padding: 14px 24px; overflow-wrap: anywhere; }
+.history-table tbody th, .history-table tbody td { border-top: 1px solid #e8e1f1; }
+.history-table tbody th { font-size: 25px; font-weight: 700; }
+.history-table tbody td { font-size: 25px; font-weight: 700; }
+.standings-table th:first-child { width: 10%; }
+.standings-table th:nth-child(2) { width: 50%; }
+.standings-table th:nth-child(3), .standings-table th:nth-child(4) { width: 20%; }
+.standings-table td:nth-child(n+3), .standings-table thead th:nth-child(n+3) { text-align: right; }
+.team-identity { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.team-identity > div { min-width: 0; }
+.team-image { display: inline-grid; place-items: center; position: relative; flex: 0 0 44px; width: 44px; height: 44px; padding: 5px; border: 1px solid #e8e1f1; border-radius: 12px; color: #51447f; background: #fff; font-size: 16px; font-weight: 800; }
+.team-image img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 5px; border-radius: 12px; object-fit: contain; background: #fff; }
+.historical-team { display: block; color: var(--muted); font-size: 18px; font-weight: 400; margin-top: 4px; }
+.seasons-table th:first-child { width: 15%; }
+.seasons-table th:last-child { width: 35%; }
+.seasons-table td:last-child { font-size: 20px; font-weight: 400; color: var(--muted); }
+.empty-history { color: var(--muted); padding-block: 24px; }
+.not-found p { margin-block: 18px; color: var(--muted); }
+.not-found > a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 760px) {
+  .museum-header { height: 76px; padding-inline: 20px; justify-content: space-between; gap: 12px; }
+  .museum-brand { font-size: clamp(30px, 5.8vw, 40px); }
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 76px; background: var(--lilac); color: #3a1769; }
+  .museum-header nav { display: none; position: absolute; z-index: 10; left: 16px; right: 16px; top: calc(100% - 4px); height: auto; margin: 0; padding: 10px 16px; border: 1px solid #ddd3f1; border-radius: 12px; background: #fff; box-shadow: 0 10px 24px #230b5214; }
+  .menu-toggle[aria-expanded='true'] + nav { display: grid; gap: 4px; }
+  .museum-header nav a { padding: 10px 6px; width: fit-content; }
+  .museum-sample { display: none; }
+  .museum-main { padding: 22px 20px 44px; }
+  .page-heading { gap: 16px; }
+  .season-switcher { border: 0; padding: 0; font-size: 17px; }
+  .season-switcher label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .season-switcher select, .season-switcher button { padding-inline: 8px; }
+  .season-results { font-size: 20px; }
+  .table-toolbar { align-items: flex-start; gap: 10px; }
+  .table-toolbar form { gap: 8px; }
+  .table-toolbar label { width: 100%; }
+  .history-table { display: block; border: 0; border-radius: 0; }
+  .history-table caption, .history-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .history-table tbody { display: block; }
+  .history-table tr { display: grid; border-top: 1px solid #d9cbee; padding: 18px 0; gap: 14px 12px; }
+  .history-table tbody th, .history-table tbody td { padding: 0; border: 0; font-size: 22px; }
+  .standings-table tr { grid-template-columns: 24px minmax(0, 1fr) auto; }
+  .standings-table .standing-rank { grid-column: 1; grid-row: 1; padding-top: 10px; }
+  .standings-table th { grid-column: 2; grid-row: 1; }
+  .standings-table tbody th:nth-child(2) { width: auto; }
+  .standings-table .standing-record { grid-column: 3; grid-row: 1; padding-top: 10px; }
+  .standings-table .standing-points { grid-column: 2 / 4; display: flex; justify-content: space-between; gap: 12px; font-size: 20px; }
+  .standing-points::before { content: attr(data-label); color: var(--muted); font-weight: 400; }
+  .team-identity { gap: 10px; }
+  .seasons-table tr { grid-template-columns: 1fr; }
+  .seasons-table tbody th { font-size: 30px; }
+  .seasons-table td { display: flex; justify-content: space-between; gap: 16px; }
+  .seasons-table td::before { content: attr(data-label); color: var(--muted); font-size: 18px; font-weight: 400; }
+}
+@media (max-width: 360px) { .museum-main { padding-inline: 16px; } .museum-header { padding-inline: 16px; } .history-table tbody th, .history-table tbody td { font-size: 21px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }

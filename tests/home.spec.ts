@@ -6,69 +6,19 @@ test('game scopes separate regular, playoff, consolation, and placement results'
   await expect(rows).toHaveCount(2);
   await expect(page.locator('.lead-value')).toHaveText('+24%');
   await page.getByLabel('Game scope').selectOption('playoffs');
+  await page.getByRole('button', { name: 'Apply scope' }).click();
   await expect(rows).toHaveCount(1);
   await expect(rows).toContainText('Playoff scoring high');
   await expect(rows).toContainText('162.4');
   await page.getByLabel('Game scope').selectOption('combined');
+  await page.getByRole('button', { name: 'Apply scope' }).click();
   await expect(rows).toHaveCount(3);
   for (const scope of ['consolation', 'placement']) {
     await page.getByLabel('Game scope').selectOption(scope);
+    await page.getByRole('button', { name: 'Apply scope' }).click();
     await expect(rows).toHaveCount(0);
     await expect(page.getByText('No sample records in this scope.')).toBeVisible();
   }
-});
-
-test('a keyboard-opened bench record identifies its player and limits the lineup claim', async ({ page }) => {
-  await page.goto('/');
-  await page.locator('.bench-action').focus();
-  await page.keyboard.press('Enter');
-  const panel = page.locator('[data-record-id="bench-2023-week-7"]');
-  await expect(panel).toBeVisible();
-  await expect(panel.getByRole('heading', { name: 'Highest-scoring benched player' })).toBeFocused();
-  await expect(panel).toContainText('Sample receiver');
-  await expect(panel.locator('.evidence-metric')).toContainText('Sample receiver');
-  await expect(panel).toContainText('38.7');
-  await expect(panel).toContainText('does not establish that a legal lineup change');
-  await panel.getByText('Source fixture', { exact: true }).click();
-  await expect(panel.locator('pre')).toContainText('"lineupStatus": "bench"');
-});
-
-test('shared links reproduce evidence and browser history restores the record', async ({ page, request }) => {
-  const fixture = await (await request.get('/sample-history.json')).json();
-  expect(fixture.sample).toBe(true);
-  expect(fixture.league.seedLeagueId).toBe('1385327861673529344');
-  await page.goto('/?scope=combined&record=uncrowned-2024#evidence');
-  const panel = page.locator('[data-record-id="uncrowned-2024"]');
-  await expect(panel).toBeVisible();
-  await expect(panel).toContainText('1,736 points ÷ 14 games = 124 PPG');
-  await expect(panel).toContainText('14,000 points ÷ 140 team-games = 100 PPG');
-  await expect(panel).toContainText('(124 ÷ 100 − 1) × 100 = +24%');
-  await page.getByRole('link', { name: 'Back to records', exact: true }).first().click();
-  await expect(page.locator('#evidence')).toBeHidden();
-  await expect(page.locator('tbody tr:visible')).toHaveCount(3);
-  await page.goBack();
-  await expect(panel).toBeVisible();
-  await page.getByRole('link', { name: 'Playoff scoring high', exact: true }).focus();
-  await page.keyboard.press('Enter');
-  await expect(page.locator('[data-record-id="playoff-2024-week-15"]')).toBeVisible();
-  await page.goto('/?record=missing');
-  await expect(page.getByRole('heading', { name: 'Record not found' })).toBeVisible();
-});
-
-test('copy-link success and failure give accurate feedback', async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => undefined } });
-  });
-  await page.goto('/?record=bench-2023-week-7#evidence');
-  await page.getByRole('button', { name: 'Copy link' }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Link copied.' })).toBeVisible();
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('Permission denied'); } } });
-  });
-  await page.getByRole('button', { name: 'Copy link' }).click();
-  await expect(page.getByLabel('Record link')).toBeFocused();
-  await expect(page.getByLabel('Record link')).toHaveValue(/record=bench-2023-week-7/);
-  await expect(page.locator('#copy-status')).toHaveText('Select and copy this record link.');
 });
 
 test('missing images preserve identity and usable record links', async ({ page }) => {
@@ -77,8 +27,7 @@ test('missing images preserve identity and usable record links', async ({ page }
   await page.goto('/');
   await expect(page.locator('.lead-record .image-fallback')).toHaveText('MB');
   await expect(page.locator('.bench-record .image-fallback')).toHaveText('25C');
-  await page.locator('.lead-action').click();
-  await expect(page.locator('[data-record-id="uncrowned-2024"]')).toBeVisible();
+  await expect(page.locator('.lead-action')).toHaveAttribute('href', '/records/best-without-title/');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -99,4 +48,12 @@ test('the page stays within the viewport at desktop, tablet, and phone widths', 
     }
   }
   expect(errors).toEqual([]);
+});
+
+test('Home uses the shared navigation without public source or calculation panels', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link')).toHaveText(['Records', 'Managers', 'Seasons', 'Rivalries']);
+  await expect(page.locator('.museum-header [aria-current]')).toHaveCount(0);
+  await expect(page.getByText(/How it’s measured|Source fixture|View sample data|View evidence/)).toHaveCount(0);
+  expect((await request.get('/sample-history.json')).status()).toBe(404);
 });
