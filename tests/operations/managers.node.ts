@@ -34,14 +34,14 @@ test('published manager careers retain the two replacements, supported names and
     assert.equal(woody?.seasons.length, 1);
     assert.equal(tim?.tenures[0].events[0].kind, 'takeover');
     assert.equal(tim?.tenures[0].events[0].predecessor?.name, 'Woody14');
-    assert.ok(tim?.tenures[0].events.some(event => event.label === 'Renamed Buccaneers'));
-    assert.equal(woody?.tenures[0].events[0].label, 'First recorded season');
+    assert.ok(tim?.tenures[0].events.some(event => event.label === 'Played as Buccaneers'));
+    assert.equal(woody?.tenures[0].events[0].label, 'First season in the archive');
     const sebastian = await readManager('person-740265931783245824', { storePath });
     assert.equal(sebastian?.tenures[0].events[0].predecessor?.name, 'alecswartout');
     assert.equal(sebastian?.facts.championships, 0);
     const returning = await readManager('person-800000000000000001', { storePath });
     assert.deepEqual(returning?.tenures.map(tenure => tenure.range), ['2019', '2021']);
-    assert.equal(returning?.tenures[1].events[0].label, 'Recorded again');
+    assert.equal(returning?.tenures[1].events[0].label, 'Next season in the archive');
     assert.equal(JSON.stringify(tim).includes('Present-day label'), false);
     assert.equal(await readManager('missing', { storePath }), null);
   });
