@@ -45,3 +45,15 @@ Under `supportedMoveOrdering`, player `50` is added by Tim before his week-1 sta
 Player `60` starts for Sebastian in week 1 (4), moves by completed trade to Tim before week 2 (6), and trades back before week 3 (8). Sebastian has 12 starting points and Tim has 6 from that player; none is a waiver/free-agent pickup. The first trade also retains a future pick and a five-unit waiver-budget transfer: those assets create no player points and do not credit the pick's original owner. Drafted/traded players and noncomplete attempts must not inherit player `50`'s pickup credit.
 
 This fixture establishes cases for later vertical implementation slices. It does not replace the [real-league coverage audit](../../docs/coverage.md), supply historical legal eligibility, or establish actual NFL kickoff dates. Extend the fixture only when a public/operator behavior requires another case; do not snapshot the entire production corpus.
+
+## Native playoff format boundaries
+
+[playoff-type-1.json](playoff-type-1.json) and [playoff-type-2.json](playoff-type-2.json) are synthetic 2025 provider-shaped responses using the independently observed contemporary semantics documented in [Sleeper formats](../../docs/sleeper-formats.md). Main and lower bracket match numbers deliberately overlap and differ from weekly IDs. Numeric score/lineup rows for unpaired byes must never create played performances.
+
+Type 1: six main qualifiers play first round in week 2, semifinals/fifth place in week 3, and final **and third place** in weeks 4–5. Four lower teams play in week 2 and terminal **weeks 3–4**, including lower third place. Roster 1's final is 10.1 + 20.2 = **30.3**, against roster 5's 20.2 + 15.1 = **35.3**. Roster 1 has one semifinal win and one final loss, not three contests. Main third-place scores are **65–60**. Lower raw `w:7` advances a **20–40** aggregate loser; scored victory belongs to roster 8. Lower `p:1` awards no league title.
+
+At the partial type-1 boundary after week 4, roster 1 retains its 10.1-point first-final-leg start and **60.1** playoff points, with record **1–0** from its resolved semifinal. The incomplete final has no W-L-T/title.
+
+Type 2: first rounds play weeks **2–3**, semifinals/fifth place weeks **4–5**, main final/third place weeks **6–7**. Both legs of a resolved contest share one contest identity. After only week 2, roster 3 has **30** playoff points and its actual start but **0–0** W-L-T. At completion roster 1 is **1–1** and roster 5 is **3–0**. The final retains the same **30.3–35.3** aggregate as type 1.
+
+Boundary tests mutate only provider responses to create partial seasons, null starter placeholders, missing required legs/points, unknown raw enums, absent historical format and repeated refreshes. Expected results are the literal worked examples above, observed through real refresh and public reads.

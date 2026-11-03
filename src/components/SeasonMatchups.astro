@@ -1,0 +1,21 @@
+---
+import TeamImage from './TeamImage.astro';
+import { competitionLabels, gameScopes, type readSeasonMatchups } from '../history/read';
+interface Props { selection: NonNullable<Awaited<ReturnType<typeof readSeasonMatchups>>> }
+const { selection } = Astro.props;
+const format = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+---
+<form class="matchup-controls" method="get">
+  <input type="hidden" name="tab" value="matchups" />
+  <div><label for="game-scope">Game scope</label><select id="game-scope" name="scope">{gameScopes.map(scope => <option value={scope} selected={scope === selection.scope}>{competitionLabels[scope]}</option>)}</select></div>
+  <div><label for="matchup-week">Week</label><select id="matchup-week" name="week">{selection.weeks.map(week => <option value={week} selected={week === selection.week}>Week {week}</option>)}</select></div>
+  <button type="submit">Show matchups</button>
+</form>
+{selection.games.length ? <div class="matchup-list">{selection.games.map(game => <article class="matchup-summary" aria-label={`${game.sides[0].teamName} versus ${game.sides[1].teamName}`}>
+  <p class="game-type">{competitionLabels[game.competition]}</p>
+  <div class="paired-result">{game.weeklySides.map(side => <div class="paired-team">
+    <div class="team-identity"><TeamImage name={side.teamName} src={side.avatar} /><a href={`/managers/${side.personId}/seasons/${selection.year}/?scope=${selection.scope}`}>{side.teamName}</a></div>
+    <strong>{format(side.points)}</strong>
+  </div>)}</div>
+  <a class="matchup-open" href={`/seasons/${selection.year}/matchups/${game.id}/?scope=${selection.scope}&week=${selection.week}`}>View matchup<span class="visually-hidden"> · {game.sides.map(side => side.teamName).join(' versus ')}</span></a>
+</article>)}</div> : <p class="empty-history">No results for this selection.</p>}
