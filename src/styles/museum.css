@@ -103,6 +103,27 @@ h1 { font-size: clamp(42px, 3.65vw, 62px); font-weight: 900; line-height: 1.08; 
 .week-links { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 0 20px; }
 .week-links a { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 14px; border-radius: 8px; }
 .week-links a[aria-current] { background: var(--lilac); font-weight: 800; }
+.season-results a { color: var(--ink); font-weight: 700; }
+.bracket-controls { margin-bottom: 22px; }
+.bracket-byes { color: var(--muted); margin-bottom: 24px; font-size: 18px; }
+.bracket-scroll { max-width: 100%; overflow-x: auto; padding: 8px 4px 12px; scrollbar-width: thin; }
+.bracket-canvas { position: relative; display: grid; gap: 64px; margin-inline: auto; }
+.bracket-round { position: relative; min-width: 0; }
+.bracket-connections { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.bracket-connections path { fill: none; stroke: #bda8de; stroke-width: 2; }
+.bracket-contest { position: absolute; width: 100%; border: 1px solid #ded3f2; border-radius: 12px; background: #fff; overflow: hidden; }
+.bracket-contest h3 { padding: 10px 16px; min-height: 46px; color: var(--muted); background: #eee8f7; font-size: 22px; font-weight: 700; }
+.bracket-contest h3 a { display: inline-flex; align-items: center; min-height: 28px; }
+.bracket-sides { list-style: none; margin: 0; padding: 0; }
+.bracket-sides li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 16px; min-height: 56px; font-size: 23px; }
+.bracket-sides li + li { border-top: 1px solid #e8e1f1; }
+.bracket-identity { min-width: 0; overflow-wrap: anywhere; }
+.bracket-identity a { color: var(--ink); text-decoration: none; }
+.bracket-identity a:hover { text-decoration: underline; }
+.bracket-score { font-variant-numeric: tabular-nums; }
+.bracket-advanced > .bracket-identity > a, .bracket-advanced .bracket-score { font-weight: 800; }
+.bracket-outcome { display: block; font-size: 15px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+.bracket-seed { display: inline-block; min-width: 24px; margin-right: 8px; }
 @media (max-width: 760px) {
   .museum-header { height: 76px; padding-inline: 20px; justify-content: space-between; gap: 12px; }
   .museum-brand { font-size: clamp(30px, 5.8vw, 40px); }

@@ -1,0 +1,69 @@
+---
+import { competitionLabels, type readSeasonBracket } from '../history/read';
+interface Props { selection: NonNullable<Awaited<ReturnType<typeof readSeasonBracket>>> }
+const { selection } = Astro.props;
+const format = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+const width = 340;
+const gap = 64;
+const rowStep = 210;
+const games = selection.rounds.flatMap(round => round.games);
+const positions = new Map<string, number>();
+let nextRow = 0;
+for (const round of selection.rounds) {
+ const occupied: number[] = [];
+ for (const game of round.games) {
+  const parents = [game.fromA, game.fromB].flatMap(edge => {
+    const parent = edge && games.find(parent => parent.family === game.family && parent.match === edge.match);
+    return parent && positions.has(parent.id) ? [positions.get(parent.id)!] : [];
+  });
+  let position = parents.length ? parents.reduce((sum, value) => sum + value, 0) / parents.length : nextRow++;
+  while (occupied.some(value => Math.abs(position - value) < 1)) position += 1;
+  positions.set(game.id, position);
+  occupied.push(position);
+ }
+}
+// Disconnected placement rounds keep their own compact reading order.
+if (selection.scope === 'placement') for (const round of selection.rounds) round.games.forEach((game, index) => positions.set(game.id, index));
+const canvasWidth = selection.rounds.length * width + Math.max(0, selection.rounds.length - 1) * gap;
+const canvasHeight = (Math.max(0, ...positions.values()) + 1) * rowStep;
+const connections = games.flatMap(game => [game.fromA, game.fromB].flatMap(edge => {
+  const parent = edge && games.find(parent => parent.family === game.family && parent.match === edge.match);
+  if (!parent) return [];
+  const x1 = selection.rounds.findIndex(round => round.round === parent.round) * (width + gap) + width;
+  const x2 = selection.rounds.findIndex(round => round.round === game.round) * (width + gap);
+  const y1 = positions.get(parent.id)! * rowStep + 82;
+  const y2 = positions.get(game.id)! * rowStep + 82;
+  return [`M ${x1} ${y1} H ${x1 + gap / 2} V ${y2} H ${x2}`];
+}));
+const heading = (game: typeof games[number]) => {
+  const name = game.championship || game.placement === 1 ? 'Final' : game.placement === 3 ? 'Third place' : game.placement === 5 ? 'Fifth place' : `Round ${game.round}`;
+  const weeks = game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`;
+  return `${name} · ${weeks}`;
+};
+---
+<form class="matchup-controls bracket-controls" method="get">
+  <input type="hidden" name="tab" value="playoffs" />
+  <div><label for="bracket-scope">Competition</label><select id="bracket-scope" name="scope">{selection.availableScopes.map(scope => <option value={scope} selected={scope === selection.scope}>{competitionLabels[scope]}</option>)}</select></div>
+  <button type="submit">Show bracket</button>
+</form>
+{selection.rounds.length ? <>
+  {selection.byes.length > 0 && <p class="bracket-byes">Round 1 byes: {selection.byes.map((team, index) => <>{index > 0 && ', '}<a href={`/managers/${team.personId}/seasons/${selection.year}/?scope=playoffs`}>{team.personName}</a></>)}</p>}
+  <div class="bracket-scroll" role="region" aria-label={`${competitionLabels[selection.scope]} bracket`} tabindex="0">
+    <div class="bracket-canvas" style={`width:${canvasWidth}px;height:${canvasHeight}px;grid-template-columns:repeat(${selection.rounds.length},${width}px)`}>
+      <svg class="bracket-connections" width={canvasWidth} height={canvasHeight} aria-hidden="true">{connections.map(path => <path d={path} />)}</svg>
+      {selection.rounds.map(round => <section class="bracket-round" aria-label={`Round ${round.round}`}>
+        {round.games.map(game => <article class="bracket-contest" style={`top:${positions.get(game.id)! * rowStep}px`}>
+          <h3>{game.href ? <a href={game.href}>{heading(game)}</a> : heading(game)}</h3>
+          <ol class="bracket-sides">{game.sides.map(side => <li class:list={{ 'bracket-advanced': side && game.advancingRosterId === side.rosterId }}>
+            <span class="bracket-identity">{side ? <>
+              {side.playoffSeed !== null && <span class="bracket-seed">{side.playoffSeed}<span class="visually-hidden"> seed</span></span>}
+              <a href={`/managers/${side.personId}/seasons/${selection.year}/?scope=${selection.scope}`}>{side.personName}</a>
+              {game.advancingRosterId === side.rosterId && <span class="bracket-outcome">{game.championship ? 'Champion' : 'Advanced'}</span>}
+            </> : <span aria-label="Participant unassigned">—</span>}</span>
+            <span class="bracket-score">{side?.points == null ? '—' : format(side.points)}</span>
+          </li>)}</ol>
+        </article>)}
+      </section>)}
+    </div>
+  </div>
+</> : <p class="empty-history">No results for this selection.</p>}

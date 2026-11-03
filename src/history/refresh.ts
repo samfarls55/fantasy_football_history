@@ -229,6 +229,27 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
       contest.winnerId = !contest.complete || contest.tie ? null : contest.sides[contest.sides[0].points > contest.sides[1].points ? 0 : 1].personId;
     }
     if (settings.playoff_round_type == null && season.bracket.some(entry => !archive.contests.some(contest => contest.id === entry.id && contest.complete))) throw new Error(`${path}: missing playoff_round_type lacks complete actual pairing evidence`);
+    // Direct entrants include qualifying byes. Before the regular season ends,
+    // provider brackets can still be provisional standings rather than qualifiers.
+    if (completedWeeks.includes(playoffStart - 1)) {
+      const qualifiers = season.bracket.filter(entry => entry.competition === 'playoffs').flatMap(entry => [
+        entry.fromA ? null : entry.rosterA,
+        entry.fromB ? null : entry.rosterB,
+      ]).filter((rosterId): rosterId is string => rosterId !== null);
+      season.playoffPersonIds = [...new Set(qualifiers.map(rosterId => {
+        const team = teams.find(team => team.rosterId === rosterId);
+        if (!team) throw new Error(`${path}: unknown qualifying roster ${rosterId}`);
+        return team.personId;
+      }))];
+    }
+    const title = season.bracket.find(entry => entry.championship);
+    const titleContest = title && archive.contests.find(contest => contest.id === title.contestId && contest.complete);
+    if (title && titleContest) {
+      const scoredWinner = titleContest.sides.find(side => side.personId === titleContest.winnerId);
+      if (!titleContest.tie && scoredWinner?.rosterId !== title.winnerRosterId) throw new Error(`${path}: title advancement contradicts official score`);
+      season.championId = teams.find(team => team.rosterId === title.winnerRosterId)!.personId;
+      season.runnerUpId = teams.find(team => team.rosterId === title.loserRosterId)!.personId;
+    }
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
