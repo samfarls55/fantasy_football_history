@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
 import { recordedStarts, playerContributionHref, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipSpell } from './ownership.ts';
@@ -26,7 +26,7 @@ export function contextualPickups(archive: Archive, identity: ContributionIdenti
   return ranked.filter((row, index) => index < 10 || cutoff && row.metric.compare(cutoff) === 0).map(row => ({ id: row.spell.id, player: row.player, person: row.person, year: row.spell.year, week: row.spell.addWeek, points: row.metric.toNumber(), starts: row.starts.length, href: row.href }));
 }
 export async function readPickups(identity: ContributionIdentity = {}, selection: ContributionSelection = {}) {
-  const archive = await loadArchive(selection.storePath);
+  const archive = await readArchive(selection.storePath);
   return archive ? { rows: contextualPickups(archive, identity, selection), scope: selection.scope ?? 'regular', season: selection.season } : null;
 }
 export function pickupCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {

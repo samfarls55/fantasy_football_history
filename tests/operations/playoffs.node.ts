@@ -31,6 +31,7 @@ test('season history awards only the resolved main title and counts qualifying p
     provisional[1].t1 = 7; provisional[1].t2 = 10;
     await publish(storePath, source);
     const seasons = await readSeasons(storePath);
+    assert.ok(seasons);
     const old = seasons.find(season => season.year === '2019')!;
     assert.equal(old.championId, 'person-473910025325113344');
     assert.equal(old.runnerUpId, 'person-800000000000000001');
@@ -93,7 +94,7 @@ test('bracket history retains multiweek aggregates, alternate paths and unresolv
     const title = source.responses[`league/${source.seedLeagueId}/winners_bracket`].find((row: any) => row.p === 1);
     title.w = 1; title.l = 5;
     await publish(storePath, source);
-    assert.equal((await readSeasons(storePath))[0].championId, 'person-950000000000000001');
+    assert.equal((await readSeasons(storePath))?.[0].championId, 'person-950000000000000001');
     assert.equal((await readSeason('2025', { storePath, scope: 'playoffs' }))?.rows.find(row => row.rosterId === '1')?.record, '2–0');
   });
 });
@@ -120,6 +121,6 @@ test('completed regular season qualification includes a bye before its first gam
     const completed = await readSeasonBracket('2025', { storePath });
     assert.deepEqual(completed?.rounds.at(-1)?.games[0].weeks, [6, 7]);
     assert.deepEqual(completed?.rounds.at(-1)?.games[0].sides.map(side => side?.points), [30.3, 35.3]);
-    assert.equal((await readSeasons(storePath))[0].championId, 'person-950000000000000005');
+    assert.equal((await readSeasons(storePath))?.[0].championId, 'person-950000000000000005');
   });
 });

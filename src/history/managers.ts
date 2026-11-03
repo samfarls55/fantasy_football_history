@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { inScope } from './scope.ts';
 import { careerFacts } from './metrics.ts';
 export { careerFacts } from './metrics.ts';
@@ -53,13 +53,13 @@ function profile(archive: Archive, person: Person, options: HistorySelection) {
 }
 
 export async function readManagers(options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return archive.people.map(person => profile(archive, person, options)).sort((a, b) => Number(b.current) - Number(a.current) || a.name.localeCompare(b.name));
 }
 
 export async function readManager(personId: string, options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const person = archive?.people.find(person => person.id === personId);
   return archive && person ? profile(archive, person, options) : null;
 }
@@ -68,7 +68,7 @@ export const managerGameSorts = ['newest', 'oldest', 'points'] as const;
 export type ManagerGameSort = typeof managerGameSorts[number];
 
 export async function readManagerSeason(personId: string, year: string, options: HistorySelection & { sort?: ManagerGameSort } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const person = archive?.people.find(person => person.id === personId);
   const season = archive?.seasons.find(season => season.year === year);
   const team = season?.teams.find(team => team.personId === personId);

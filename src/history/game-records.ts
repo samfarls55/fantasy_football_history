@@ -1,6 +1,6 @@
 import { Exact } from './decimal.ts';
 import { completedContests, inScope } from './scope.ts';
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import type { Archive, Contest } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 
@@ -82,7 +82,7 @@ export function streakCandidates(kind: StreakKind): NonNullable<CategoryDefiniti
 /** A shared history URL keeps its interval even if a later game extends the career best. */
 export async function readStreakHistory(personId: string, selection: RecordSelection & { streak?: string | null; from?: string | null; through?: string | null } = {}) {
   if (selection.streak !== 'winning' && selection.streak !== 'losing') return null;
-  const archive = await loadArchive(selection.storePath);
+  const archive = await readArchive(selection.storePath);
   if (!archive) return null;
   const eligible = streakGames(archive, personId, selection);
   const start = eligible.findIndex(game => game.id === selection.from);

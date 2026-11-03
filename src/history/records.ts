@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
 import { pickupCandidates } from './pickups.ts';
@@ -118,11 +118,11 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
 export async function readCategory(key: string, options: RecordSelection = {}) {
   const category = recordCategories.find(category => category.key === key && category.candidates);
   if (!category) return null;
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => ({ ...category, leaders: category.candidates ? rankCategory(archive, category, {}).leaders : [], href: category.candidates ? categoryHref(category.key) : null })) }));
 }
@@ -130,7 +130,7 @@ export async function readRecordCollection(options: { storePath?: string } = {})
 const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-season', 'productive-pickup', 'productive-drop', 'winning-streak'];
 /** One publication supplies the entire Home, including every category's recent places. */
 export async function readHome(options: { storePath?: string } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   if (!archive) return null;
   const categories = recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}));
   const identity = (row: ReturnType<typeof rankCategory>['rows'][number]) => {

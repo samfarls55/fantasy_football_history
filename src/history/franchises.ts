@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { careerFacts, readManagerSeason, recordedRange, type HistorySelection, type TimelineEvent, type Tenure, type ManagerGameSort } from './managers.ts';
 import type { Archive, Franchise, Person, Season, SeasonTeam } from './types.ts';
 
@@ -48,20 +48,20 @@ export const franchiseSorts = ['name', 'owner', 'seasons', 'record', 'titles'] a
 export type FranchiseSort = typeof franchiseSorts[number];
 
 export async function readFranchises(options: HistorySelection & { sort?: FranchiseSort } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   if (!archive) return null;
   const rows = archive.franchises.map(franchise => profile(archive, franchise, options));
   return rows.sort((a, b) => (options.sort === 'owner' ? a.owner.name.localeCompare(b.owner.name) : options.sort === 'seasons' ? b.years.length - a.years.length : options.sort === 'record' ? b.facts.wins - a.facts.wins : options.sort === 'titles' ? b.facts.championships - a.facts.championships : 0) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
 }
 
 export async function readFranchise(franchiseId: string, options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const franchise = archive?.franchises.find(franchise => franchise.id === franchiseId);
   return archive && franchise ? profile(archive, franchise, options) : null;
 }
 
 export async function readFranchiseSeason(franchiseId: string, year: string, options: HistorySelection & { sort?: ManagerGameSort } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const franchise = archive?.franchises.find(franchise => franchise.id === franchiseId);
   const team = archive?.seasons.find(season => season.year === year)?.teams.find(team => team.franchiseId === franchiseId);
   if (!archive || !franchise || !team) return null;

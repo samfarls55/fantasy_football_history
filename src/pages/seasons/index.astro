@@ -2,6 +2,7 @@
 import MuseumLayout from '../../layouts/MuseumLayout.astro';
 import { readSeasons } from '../../history/read';
 const seasons = await readSeasons();
+if (!seasons) Astro.response.status = 503;
 const requested = Astro.url.searchParams.get('season');
 if (requested) {
   const query = new URLSearchParams({ tab: Astro.url.searchParams.get('tab') ?? 'standings', sort: Astro.url.searchParams.get('sort') ?? 'standing' });
@@ -14,7 +15,7 @@ if (requested) {
 ---
 <MuseumLayout title="Seasons" section="Seasons">
   <div class="page-heading"><h1>Seasons</h1></div>
-  {seasons.length ? <table class="history-table seasons-table">
+  {seasons === null ? <p class="empty-history">League history is unavailable.</p> : seasons.length ? <table class="history-table seasons-table">
     <caption class="visually-hidden">Season history</caption>
     <thead><tr><th scope="col">Year</th><th scope="col">Champion</th><th scope="col">Runner-up</th><th scope="col">Season format</th></tr></thead>
     <tbody>{seasons.map(season => <tr>

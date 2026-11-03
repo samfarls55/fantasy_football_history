@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import type { Archive, Season, SeasonTeam, Scope } from './types.ts';
 import { careerMetrics } from './metrics.ts';
 import { inScope } from './scope.ts';
@@ -17,8 +17,8 @@ function honors(archive: Archive, season: Season) {
 }
 
 export async function readSeasons(storePath?: string) {
-  const archive = await loadArchive(storePath);
-  return archive?.seasons.map(season => ({ ...season, ...honors(archive, season) })) ?? [];
+  const archive = await readArchive(storePath);
+  return archive?.seasons.map(season => ({ ...season, ...honors(archive, season) })) ?? null;
 }
 
 function standings(archive: Archive, season: Season, scope: Scope) {
@@ -42,7 +42,7 @@ function standings(archive: Archive, season: Season, scope: Scope) {
 
 /** Visitor-facing read model; all routes consume the same imported history. */
 export async function readSeason(year: string, options: { storePath?: string; sort?: StandingSort; scope?: Scope } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const season = archive?.seasons.find(season => season.year === year);
   if (!archive || !season) return null;
   const rows = standings(archive, season, options.scope ?? 'regular');
@@ -63,7 +63,7 @@ export type BracketScope = typeof bracketScopes[number];
 
 /** Historical bracket results share contest completion and source advancement. */
 export async function readSeasonBracket(year: string, options: { storePath?: string; scope?: BracketScope } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const season = archive?.seasons.find(season => season.year === year);
   if (!archive || !season) return null;
   const scope = options.scope ?? 'playoffs';
@@ -92,7 +92,7 @@ export async function readSeasonBracket(year: string, options: { storePath?: str
 
 /** Completed weekly legs remain visitable even while the encompassing contest is unresolved. */
 export async function readSeasonMatchups(year: string, options: { storePath?: string; scope?: Scope; week?: number } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const season = archive?.seasons.find(season => season.year === year);
   if (!archive || !season) return null;
   const scope = options.scope ?? 'regular';
@@ -104,7 +104,7 @@ export async function readSeasonMatchups(year: string, options: { storePath?: st
 }
 
 export async function readMatchup(year: string, contestId: string, options: { storePath?: string; week?: number } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const season = archive?.seasons.find(season => season.year === year);
   const contest = archive?.contests.find(game => game.id === contestId && game.seasonId === season?.id);
   if (!archive || !season || !contest) return null;
