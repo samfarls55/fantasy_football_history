@@ -126,3 +126,25 @@ export async function readRecordCollection(options: { storePath?: string } = {})
   if (!archive) return null;
   return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => ({ ...category, leaders: category.candidates ? rankCategory(archive, category, {}).leaders : [], href: category.candidates ? categoryHref(category.key) : null })) }));
 }
+
+const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-season', 'productive-pickup', 'productive-drop', 'winning-streak'];
+/** One publication supplies the entire Home, including every category's recent places. */
+export async function readHome(options: { storePath?: string } = {}) {
+  const archive = await loadArchive(options.storePath);
+  if (!archive) return null;
+  const categories = recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}));
+  const identity = (row: ReturnType<typeof rankCategory>['rows'][number]) => {
+    const owner = archive.people.find(person => person.id === row.personId)!;
+    return { ...row, owner: { id: owner.id, name: owner.name, avatar: owner.avatar } };
+  };
+  const features = homeCategories.map(key => {
+    const view = categories.find(view => view.category.key === key)!;
+    return { category: view.category, leaders: view.leaders.map(identity), blocked: view.blocked, href: categoryHref(key) };
+  });
+  const recent = [...new Map(categories.flatMap(view => view.rows.filter(row => row.period).map(row => ({
+    ...identity(row), category: view.category, categoryHref: categoryHref(view.category.key, { result: row.id }),
+  }))).map(row => [`${row.category.key}/${row.id}`, row])).values()]
+    .sort((a, b) => comparePeriods(b.period, a.period) || a.category.key.localeCompare(b.category.key) || a.id.localeCompare(b.id))
+    .slice(0, 6);
+  return { features, recent };
+}

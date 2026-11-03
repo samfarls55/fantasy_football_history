@@ -22,7 +22,8 @@ export default defineConfig({
   },
   webServer: env.MUSEUM_BASE_URL ? undefined : {
     command: `npm run dev -- --ignore-lock --port ${port}`,
-    url: `http://127.0.0.1:${port}`,
+    // Readiness precedes globalSetup's first publication; Home correctly returns 503 then.
+    url: `http://127.0.0.1:${port}/fonts/roboto-condensed-variable.woff2`,
     reuseExistingServer: false,
   },
 });

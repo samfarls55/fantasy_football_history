@@ -1,87 +1,70 @@
 ---
-import { sampleHistory as history } from '../../assets/data/sample-history';
+import MuseumLayout from '../layouts/MuseumLayout.astro';
+import TeamImage from '../components/TeamImage.astro';
 import Chevron from '../components/Chevron.astro';
-import SiteHeader from '../components/SiteHeader.astro';
-import '../styles/museum.css';
-import { dominance, gameScopes, records } from '../lib/records';
+import { readHome, formatRecordValue, periodLabel, recordUnit } from '../history/records';
 import '../styles/home.css';
-const [season, bench] = history.records;
-const playoff = records[2];
-const scope = gameScopes.find(scope => scope.value === Astro.url.searchParams.get('scope')) ?? gameScopes[0];
-const includes = (value: string) => scope.value === value || scope.value === 'combined' && ['regular', 'playoffs'].includes(value);
+const home = await readHome();
+if (!home) Astro.response.status = 503;
+const featureUnit = (key: string) => key === 'best-without-title' ? 'PPG above league average' : 'points in one game';
+const value = (row: { value: number }, category: { key: string; unit: string; displayPrecision?: number }) => `${category.key === 'best-without-title' && row.value > 0 ? '+' : ''}${formatRecordValue(row.value, category.displayPrecision)}${category.unit === '%' ? '%' : ''}`;
+const when = (row: { period: Parameters<typeof periodLabel>[0]; detail?: string }, key: string) => key === 'winning-streak' ? row.detail : periodLabel(row.period);
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Farls da bag · Record book</title>
-    <meta name="description" content="The Farls da bag fantasy football record book." />
-  </head>
-  <body>
-    <a class="skip-link" href="#record-book">Skip to record book</a>
-    <SiteHeader sample />
-    <p class="gallery-scope">All-time records <span aria-hidden="true">·</span> Regular season</p>
-    <main>
-      <h1 class="visually-hidden">League record book</h1>
-      <section class="gallery" id="featured-records" aria-label="Featured records" tabindex="-1">
-        <article class="lead-record">
-          <img class="lead-image" src="/assets/plates/achievement-logo.png" alt="The Monkey Buccaneers team logo" width="800" height="800" fetchpriority="high" data-initials="MB" />
-          <h2 class="record-category lead-category">{season.title}</h2>
-          <p class="lead-team" title={history.teams.monkey.name}>{history.teams.monkey.name}</p>
-          <div class="lead-measure">
-            <p class="lead-value"><span class="lead-sign">{dominance[0]}</span><span class="lead-digits">{dominance.slice(1, -1)}</span><span class="lead-percent">%</span></p>
-            <p class="lead-unit"><abbr title="Points per game">PPG</abbr> above league average</p>
-            <p class="lead-date">{season.season}</p>
-          </div>
-          <a class="evidence-button lead-action" href="/records/best-without-title/">View rankings <Chevron /></a>
-        </article>
-        <div class="supporting-records">
-          <article class="bench-record">
-            <h2 class="record-category bench-category">{bench.title}</h2>
-            <div class="bench-measure">
-              <p class="bench-player" title={bench.source.playerName}>{bench.source.playerName}</p>
-              <p class="bench-value">{bench.source.playerPoints}</p>
-              <p class="bench-unit">points in one game</p>
-              <p class="bench-date">Week {bench.week} <span aria-hidden="true">·</span> {bench.season}</p>
-            </div>
-            <div class="bench-identity">
-              <img class="bench-image" src="/assets/plates/bench-portrait.png" alt="2025 Champion team image" width="800" height="800" data-initials="25C" />
-              <p class="bench-team" title={history.teams.champion.name}>{history.teams.champion.name}</p>
-            </div>
-            <a class="evidence-button bench-action" href="/records/benched-player-high/">View rankings <Chevron /></a>
-          </article>
-          <section class="recent-records" id="recently-added" tabindex="-1">
-            <img class="recent-image" src="/assets/plates/history-logo.png" alt="The Monkey Buccaneers team logo" width="400" height="400" data-initials="MB" />
-            <h2 class="record-category recent-category">Recently added</h2>
-            <a class="recent-link" href="/records/best-without-title/">
-              <strong>{season.title}</strong>
-              <span>{history.teams.monkey.name} <span aria-hidden="true">·</span> {season.season}</span>
-              <Chevron />
-            </a>
-          </section>
-        </div>
+<MuseumLayout title="League record book">
+  <div class="home">
+    <h1 class="home-title">All-time records</h1>
+    {home ? <>
+      <section class="home-features" aria-label="Featured records">
+        {home.features.slice(0, 2).map(feature => {
+          const leader = feature.leaders[0];
+          const owners = [...new Map(feature.leaders.map(row => [row.owner.id, row.owner])).values()];
+          return <article class:list={['home-feature', `home-${feature.category.key}`]} data-category={feature.category.key}>
+            <h2>{feature.category.name}</h2>
+            {leader ? <>
+              <div class="home-holders">
+                {feature.leaders.length > 1 && <p class="home-shared">Shared lead · {feature.leaders.length} results</p>}
+                {feature.leaders.map(row => <div>
+                  <p class="home-holder">{row.name}</p>
+                  {feature.category.group === 'Players' && <p class="home-owner">Benched by {row.owner.name}</p>}
+                  {feature.leaders.length > 1 && <p class="home-date">{periodLabel(row.period)}</p>}
+                </div>)}
+              </div>
+              <div class="home-measure">
+                <p class="home-value">{value(leader, feature.category)}</p>
+                <p class="home-unit">{featureUnit(feature.category.key)}</p>
+                {leader.sample && <p class="home-sample">{leader.sample}</p>}
+                {feature.leaders.length === 1 && <p class="home-date">{periodLabel(leader.period)}</p>}
+              </div>
+              <div class="home-feature-art">{owners.map(owner => <figure>
+                <div class="home-artwork"><TeamImage name={owner.name} src={owner.avatar} /></div>
+                <figcaption>{owner.name} · team artwork</figcaption>
+              </figure>)}</div>
+            </> : <p class="home-feature-empty">{feature.blocked ? 'Results unavailable for this selection.' : 'No qualifying results.'}</p>}
+            <a class="home-category-link home-action" href={feature.href}>View rankings <Chevron /></a>
+          </article>;
+        })}
       </section>
-      <section class="record-book" id="record-book" aria-label="Record book" tabindex="-1">
-        <div class="records-heading">
-          <h2>Record book</h2>
-          <form class="home-scope-form" method="get"><label class="scope-control"><span class="visually-hidden">Game scope</span><select id="game-scope" name="scope">{gameScopes.map(item => <option value={item.value} selected={item.value === scope.value} aria-label={item.description}>{item.label}</option>)}</select><Chevron /></label><button type="submit">Apply scope</button></form>
-        </div>
-        <table role="table" aria-label="Sample record book">
-          <colgroup><col class="record-column" /><col class="team-column" /><col class="metric-column" /><col class="scope-column" /></colgroup>
-          <thead><tr><th scope="col">Record</th><th scope="col">Team</th><th scope="col">Metric</th><th scope="col">When</th></tr></thead>
-          <tbody>
-            <tr data-scope="regular" hidden={!includes('regular')}><th scope="row"><a class="record-title-link" href="/records/best-without-title/">{season.title}<Chevron /></a></th><td>{history.teams.monkey.name}</td><td><strong class="table-value">{dominance}</strong><span class="table-unit">PPG above league average</span></td><td>{season.season}</td></tr>
-            <tr data-scope="regular" hidden={!includes('regular')}><th scope="row"><a class="record-title-link" href="/records/benched-player-high/">{bench.title}<Chevron /></a></th><td>{history.teams.champion.name}</td><td><strong class="table-value">{bench.source.playerPoints}</strong><span class="table-unit">points in one game</span></td><td>Week {bench.week} <span aria-hidden="true">·</span> {bench.season}</td></tr>
-            <tr data-scope="playoffs" hidden={!includes('playoffs')}><th scope="row"><a class="record-title-link" href="/records/team-score-high/?scope=playoffs">{playoff.title}<Chevron /></a></th><td>{playoff.team.name}</td><td><strong class="table-value">{playoff.value}</strong><span class="table-unit">{playoff.unit}</span></td><td>{playoff.when}</td></tr>
-          </tbody>
+      <section class="home-record-book" aria-labelledby="record-book-heading">
+        <div class="home-section-heading"><h2 id="record-book-heading">Record book</h2><a href="/records/">All records <Chevron /></a></div>
+        <table class="home-index">
+          <caption class="visually-hidden">More all-time records</caption>
+          <thead><tr><th scope="col">Record</th><th scope="col">Holder</th><th scope="col">Result</th><th scope="col">When</th></tr></thead>
+          <tbody>{home.features.slice(2).map(feature => <tr data-category={feature.category.key}>
+            <th scope="row"><a class="home-category-link" href={feature.href}>{feature.category.name}<Chevron /></a></th>
+            <td class="home-index-holder">{feature.leaders.map(row => <p>{row.owner.name}{feature.category.group === 'Players' && <span> with {row.name}</span>}</p>)}{feature.leaders.length > 1 && <span class="home-shared">Shared lead · {feature.leaders.length} results</span>}</td>
+            <td class="home-index-result">{feature.leaders[0] ? <><strong>{value(feature.leaders[0], feature.category)}</strong> {recordUnit(feature.category.unit, feature.leaders[0].value)}{feature.leaders[0].sample && <span class="home-sample">{feature.leaders[0].sample}</span>}</> : <span>{feature.blocked ? 'Results unavailable' : 'No qualifying results'}</span>}</td>
+            <td class="home-index-date">{feature.leaders.map(row => <p>{feature.leaders.length > 1 && <>{row.owner.name} · </>}{when(row, feature.category.key)}</p>)}</td>
+          </tr>)}</tbody>
         </table>
-        <p class="empty-records" id="empty-records" hidden={includes('regular') || includes('playoffs')}>No sample records in this scope.</p>
-        <p class="visually-hidden" id="scope-status" role="status"></p>
       </section>
-    </main>
-    <script>
-      import '../scripts/home';
-    </script>
-  </body>
-</html>
+      <section class="home-recent" aria-labelledby="recent-records-heading">
+        <h2 id="recent-records-heading">Recent records</h2>
+        {home.recent.length ? <ul>{home.recent.map(row => <li><a href={row.categoryHref}>
+          <span class="home-recent-identity"><strong>{row.name}<Chevron /></strong>{row.category.group === 'Players' && <span>{row.owner.name}</span>}<span>{row.category.name} · Rank {row.rank}</span></span>
+          <span class="home-recent-result"><strong>{value(row, row.category)}</strong> {row.category.unit === '%' ? row.category.valueLabel ?? '%' : recordUnit(row.category.unit, row.value)}{row.sample && <span class="home-sample">{row.sample}</span>}</span>
+          <span class="home-recent-date">{periodLabel(row.period)}</span>
+        </a></li>)}</ul> : <p class="empty-history">No qualifying recent records.</p>}
+      </section>
+    </> : <p class="empty-history">League history is unavailable.</p>}
+  </div>
+</MuseumLayout>

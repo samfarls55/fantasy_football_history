@@ -2,6 +2,7 @@ import { loadArchive, publishArchive, configuredStorePath } from './store.ts';
 import type { Archive, Provider, RefreshOptions, RefreshResult, Season, SeasonTeam, ContestSide, BracketEntry } from './types.ts';
 import { sumPoints } from './decimal.ts';
 import { importOwnershipInputs } from './ownership-import.ts';
+import { ownerArtwork } from './artwork.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {
@@ -139,7 +140,9 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
       const accountId = string(user.user_id, `${path}/users user_id`);
       const known = archive.people.find(person => person.accountId === accountId) ?? previous?.people.find(person => person.accountId === accountId);
       const name = typeof user.display_name === 'string' && user.display_name.trim() ? user.display_name : known?.name;
-      return { accountId, name: string(name, `${path}/users display_name`), avatar: user.avatar == null ? null : string(user.avatar, `${path}/users avatar`) };
+      const metadata = user.metadata && typeof user.metadata === 'object' && !Array.isArray(user.metadata) ? user.metadata as ObjectValue : null;
+      const accountAvatar = user.avatar == null ? null : string(user.avatar, `${path}/users avatar`);
+      return { accountId, name: string(name, `${path}/users display_name`), avatar: ownerArtwork(metadata?.avatar, accountAvatar) };
     });
     if (new Set(users.map(user => user.accountId)).size !== users.length) throw new Error(`${path}/users: duplicate account ID`);
     const rosters = list(await get(`${path}/rosters`), `${path}/rosters`);
@@ -152,7 +155,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
       if (!user) throw new Error(`${path}/rosters: no identity for account ${accountId}`);
       const personId = `person-${accountId}`;
       const franchiseId = `franchise-${rosterId}`;
-      const avatar = user.avatar ? `https://sleepercdn.com/avatars/${encodeURIComponent(user.avatar)}` : null;
+      const avatar = user.avatar;
       if (!archive.people.some(person => person.id === personId)) archive.people.push({ id: personId, ...user, avatar, current: archive.seasons.length === 0 });
       const metadata = roster.metadata == null ? null : object(roster.metadata, `${path}/rosters metadata`);
       const historicalName = typeof metadata?.team_name === 'string' && metadata.team_name.trim() ? metadata.team_name : null;

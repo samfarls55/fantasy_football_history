@@ -1,6 +1,6 @@
 # Farls da bag
 
-A responsive league-history home page built with Astro and TypeScript. The gallery leads into a record index and shareable evidence views.
+A public league-history museum built with Astro and TypeScript. Home features six all-time records, a compact category index and recent top-ten history. Rankings lead to the people, seasons, games and player contributions behind each result.
 
 ## Run locally
 
@@ -8,6 +8,8 @@ Use Node.js 24, the version used to check this build.
 
 ```sh
 npm ci
+cp .env.example .env
+npm run refresh
 npm run dev
 ```
 
@@ -23,17 +25,17 @@ The selected production arrangement is the standalone Node server (`npm start` a
 
 ## Browser checks
 
-The Playwright configuration uses an installed Google Chrome browser. Run `npm test` to check scope filters, evidence links, browser history, keyboard focus, copying links, missing images, and responsive layouts. The tests start a development server when needed.
+The Playwright configuration uses an installed Google Chrome browser. Run `npm test` to check imported history, category and game links, scope filters, browser history, keyboard focus, missing images and responsive layouts. The tests start a development server and publish controlled provider responses to a dedicated test archive.
 
 Set `MUSEUM_BASE_URL` to test an already running preview instead. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use an installed Chromium binary in place of Google Chrome. `npm test` also runs publication/recovery checks through the real operator commands.
 
 ## Current data
 
-Statistics are synthetic examples in `assets/data/sample-history.ts`. The page labels them as sample stats, and the evidence views include calculations, eligibility, and the source fixture. The Sleeper importer is not connected.
+Public pages read the durable archive created by `npm run refresh`. Complete the first refresh before serving visitors; without a publication, Home returns 503 with the shared navigation and an unavailable-history message. Controlled synthetic responses live only in test fixtures, never as public fallback statistics.
 
 Current team names and images came from the configured league's Sleeper users endpoint. They do not establish historical names, player identity, or championships. Image origins are embedded in the PNG assets. Fonts are self-hosted, with their licenses in `public/fonts`.
 
-The running prototype's inline evidence behavior is historical. The approved full-platform direction removes public calculation/source panels and update-status UI, and uses category rankings followed by actual historical destinations. Application code has not been changed during the design walkthrough.
+Home and category rankings open actual historical destinations. Public pages omit calculation/source panels and update-status UI; internal metric and coverage contracts remain documented and tested.
 
 ## Full-platform handoff
 
@@ -44,6 +46,6 @@ The running prototype's inline evidence behavior is historical. The approved ful
 - [docs/requirements.md](docs/requirements.md) accounts for all original stories and walkthrough additions.
 - [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) supplies local tickets and blocking relationships for implement-spec.
 
-Sam confirmed the complete written design handoff at Q44 on November 3, 2026. The public repository and GitHub Issues are configured at [samfarls55/fantasy_football_history](https://github.com/samfarls55/fantasy_football_history), with shared agent configuration in AGENTS.md and docs/agents/. Spec #1 and its child tickets are published. Delivery choices are recorded in ADR 0001; the provider importer and public history routes are subsequent implementation slices.
+Sam confirmed the complete written design handoff at Q44 on November 3, 2026. The public repository and GitHub Issues are configured at [samfarls55/fantasy_football_history](https://github.com/samfarls55/fantasy_football_history), with shared agent configuration in AGENTS.md and docs/agents/. Spec #1 and its child tickets track implementation and release verification. Delivery choices are recorded in ADR 0001.
 
 Project-authored code and documentation use the [MIT license](LICENSE). Artwork, source data, fonts and dependencies retain the rights and notices described in [third-party notices](THIRD_PARTY_NOTICES.md).
