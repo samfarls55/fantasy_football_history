@@ -1,6 +1,7 @@
 import { loadArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
+import { pickupCandidates } from './pickups.ts';
 import { contributionCandidates } from './contributions.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
@@ -63,7 +64,7 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: marginCandidates },
   { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'points', scope: 'games', candidates: marginCandidates },
   { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games', candidates: benchCandidates },
-  { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games' },
+  { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
   { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games' },
   { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games', candidates: contributionCandidates },
 ];

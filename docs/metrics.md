@@ -124,17 +124,21 @@ Current position metadata is not proof of historical lineup eligibility. A curre
 
 ## Acquisition and drop attribution
 
-Use only source-confirmed completed events. A free-agent/waiver add starts an ownership spell; a drop, outgoing trade or end of season ends that spell. A reacquisition is a separate spell. Draft and trade inputs help resolve ownership, but they are not automatically productive-pickup candidates.
+Use only source-confirmed completed events. A completed arrival starts an ownership spell; a drop, outgoing trade, commissioner ownership change or end of season ends that spell. Only waiver/free-agent arrivals become pickup candidates. A reacquisition is a separate spell. Draft and trade inputs help resolve ownership, but they are not automatically productive-pickup candidates.
 
-Productive pickup = actual starting points for the acquiring person after the add, while that spell continues, within the selected game scope. A franchise query is separately scoped. Do not credit starts before acquisition, after departure, or to the previous owner of a traded draft pick.
+**Approved policy revision, November 3, 2026:** Sam instructed both move measures to count only starts in later weeks, excluding the move week. This supersedes the original exact same-week attribution requirement; it does not establish missing kickoff or lineup-lock timestamps.
 
-Productive drop = later actual starting points for other league people after that drop in the same season, within the selected game scope. Exclude points for the dropping person, including their later reacquisition. The row represents one drop event and retains its dropping-person attribution. Another drop/reacquisition is its own candidate; do not merge distinct events into one ownership spell.
+Productive pickup = actual starting points for the acquiring person in the same season and selected game scope, with `acquisitionWeek < startWeek < departureWeek`. Without a departure, credit later completed weeks through season end. Both acquisition and departure move weeks are excluded. A reacquisition is a new candidate, even for the same player/person/year. Draft/trade/commissioner arrivals resolve ownership but are not waiver/free-agent pickup candidates; outgoing trade and commissioner changes end an existing spell.
+
+Productive drop = actual starting points for other league people in weeks strictly after the drop week, in the same season and selected game scope. Exclude points for the dropping person, including their later reacquisition. Completed nontrade source drops are candidates; trades remain ownership departures without becoming drop candidates. Another drop/reacquisition retains its own event identity.
 
 A drop detail retains the dropping person/year at the top and lists actual receiving-person contributions with game links. It can link to each receiving person's scoped player history. Do not put those later points into the dropping person's career contribution total.
 
-Rank observed contributions, with no invented significance cutoff. Contextual Players lists can show the top results and let visitors open the ranked category. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
+Rank observed contributions, with no invented significance cutoff. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
 
-Exact same-week attribution must be supported by event/lineup ordering. A timestamp-shaped field or weekly leg alone is not proof that the move preceded a player's start. Verify usable semantics and coverage before crediting that week. If this cannot be established, report the concrete gap as a blocker for the agreed claim; do not silently change the start window or fabricate precision.
+Order completed ownership events by source week and recorded `status_updated` chronology within that week. Validate missing or tied same-player/week recorded timestamps at import rather than inventing a tie-break. This order resolves recorded ownership changes only. Weekly snapshots establish initial observed ownership; they never create a synthetic pickup. Draft picks identify the receiving roster using `roster_id`, independently of `picked_by` or original draft-pick ownership. Completed events of unfamiliar types preserve their ownership assets. Failed, pending and unknown-status events never change a spell.
+
+The original exact-timing audit remains historical evidence in [coverage.md](coverage.md). Timestamp-shaped transaction fields do not prove event-before-NFL-start order. The revised full-week policy does not need that unsupported precision and credits no excluded move week.
 
 Keeper flags remain nullable where unknown. Preserve source picks and transaction assets internally so ownership can be reproduced. Unsuccessful or unknown-status events never become completed moves.
 
@@ -148,7 +152,7 @@ Use dates at supported precision and stable ordering for equal dates. Do not inv
 
 ## Coverage and publication
 
-The existing research in [.impeccable/player-impact-feasibility.md](../.impeccable/player-impact-feasibility.md) found player-point fields in one sampled response, not complete historical coverage. Its old Decisions still needed paragraph is superseded by the approved pickup/drop policies above. The audit itself remains unperformed.
+The existing research in [.impeccable/player-impact-feasibility.md](../.impeccable/player-impact-feasibility.md) found player-point fields in one sampled response, not complete historical coverage. Its old Decisions still needed paragraph is superseded by the approved pickup/drop policies above. The complete bounded source audit and its historical exact-timing limitation are recorded in [coverage.md](coverage.md); validate required fields on every refresh.
 
 Initial implementation must establish linked-season, completed-game, lineup, player-point and completed-event coverage for the claims it publishes. Keep missing, empty, zero and incomplete distinct. Preserve the last complete successful snapshot on later failures. Do not mix a new partial import into previously correct public totals.
 
@@ -174,3 +178,5 @@ Regression handoff: game-margin categories must preserve equality between `100.1
 Rivalry visitor reads in `src/history/rivalries.ts` use `completedContests` and the same `Exact` decimal arithmetic for official contest differences and their mean. An unfinished multiweek contest creates no meeting even when completed legs contribute elsewhere. Scored W-L-T uses the official scored outcome, independently of lower-bracket advancement. A final tie ends either winning streak; it displays as Last meeting tied. Nemeses are person-level positive losses-minus-wins maxima, including every shared maximum. Franchise rows group actual owning person and year and link to that pair/year rather than comparing fictional aggregate owners.
 
 Rivalry URL state uses `a`, `b` (distinct person IDs), optional `season` (all seasons by default), `scope` (regular by default), and `limit=all` after Show all. The initial game list is the ten newest finalized contests. Profile Rivalries uses `tab=rivalries` with `season` and `scope`; each franchise opponent link always retains its actual owner and year. Missing publication returns unavailable history, separately from a known pair with zero meetings.
+
+`src/history/ownership-import.ts` validates draft/pick and transaction inputs at refresh, retaining raw assets internally. `src/history/ownership.ts` exposes typed completed events, distinct ownership spells and departures for pickup/drop calculations. `src/history/pickups.ts` reuses `recordedStarts` and exact sums for the category, contextual lists and selected spell detail. Event IDs include season, transaction, player and roster. Spells never extend across seasons or replacement people. No transaction or draft payload is exposed by a public route.

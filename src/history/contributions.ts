@@ -1,3 +1,5 @@
+import { contextualPickups, pickupStarts } from './pickups.ts';
+import { resolveOwnership } from './ownership.ts';
 import { loadArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
 import { inScope } from './scope.ts';
@@ -5,7 +7,7 @@ import type { Archive, Performance, Scope } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
 export interface ContributionIdentity { personId?: string; franchiseId?: string }
-export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope }
+export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope; pickup?: string }
 export interface RecordedStart { performance: Performance; playerId: string; points: number }
 
 /** Completed paired weekly legs are the shared actual-start boundary, including unresolved multiweek contests. */
@@ -62,7 +64,7 @@ export async function readContributors(identity: ContributionIdentity = {}, sele
   if ((identity.personId || identity.franchiseId) && !selectedContext) return null;
   const years = selectedContext?.years ?? archive.seasons.map(season => season.year);
   const season = years.includes(selection.season!) ? selection.season : undefined;
-  return { rows: contributors(archive, identity, { ...selection, season }).map(({ metric, performances, ...row }) => row), years, season, scope: selection.scope ?? 'regular', context: selectedContext };
+  return { pickups: contextualPickups(archive, identity, { ...selection, season }), rows: contributors(archive, identity, { ...selection, season }).map(({ metric, performances, ...row }) => row), years, season, scope: selection.scope ?? 'regular', context: selectedContext };
 }
 
 /** Player detail totals cover the whole scope; its season selector applies locally to the game list. */
@@ -73,7 +75,9 @@ export async function readPlayerContributions(identity: ContributionIdentity, pl
   const player = archive.players.find(player => player.id === playerId);
   if (!selectedContext || !player) return null;
   const scope = selection.scope ?? 'regular';
-  const starts = recordedStarts(archive, identity, { scope }).filter(row => row.playerId === playerId);
+  const spell = selection.pickup ? resolveOwnership(archive).spells.find(spell => spell.id === selection.pickup && spell.pickupCandidate && spell.playerId === playerId && spell.personId === identity.personId) : null;
+  if (selection.pickup && !spell) return null;
+  const starts = spell ? pickupStarts(archive, spell, { scope }) : recordedStarts(archive, identity, { scope }).filter(row => row.playerId === playerId);
   const { metric, ...totals } = summarize(archive, starts);
   const seasons = selectedContext.entries.flatMap(({ year, team }) => {
     const rows = starts.filter(row => row.performance.year === year);
@@ -81,7 +85,7 @@ export async function readPlayerContributions(identity: ContributionIdentity, pl
     const { metric, ...summary } = summarize(archive, rows);
     return [{ year, ...summary, owner: archive.people.find(person => person.id === team.personId)!, href: `${selectedContext.path}seasons/${year}/?tab=players&scope=${scope}` }];
   });
-  const season = selectedContext.years.includes(selection.season!) ? selection.season! : seasons[0]?.year ?? selectedContext.years[0];
+  const season = spell?.year ?? (selectedContext.years.includes(selection.season!) ? selection.season! : seasons[0]?.year ?? selectedContext.years[0]);
   const selectedTeam = selectedContext.entries.find(entry => entry.year === season)!.team;
   const games = starts.filter(row => row.performance.year === season).sort((a, b) => b.performance.week - a.performance.week).map(row => {
     const performance = row.performance;
@@ -94,9 +98,11 @@ export async function readPlayerContributions(identity: ContributionIdentity, pl
       href: `/seasons/${performance.year}/matchups/${contest.id}/?scope=${scope}&week=${performance.week}&player=${playerId}&team=${performance.rosterId}#player-${performance.rosterId}-${playerId}`,
       opponentHref: `/managers/${opponent.id}/seasons/${performance.year}/?scope=${scope}`, ownerHref: `/managers/${owner.id}/players/${playerId}/?${query(scope, season)}` };
   });
-  return { player, context: selectedContext, ...totals, seasons, season, years: selectedContext.years, games, scope,
-    contextHref: `${selectedContext.path}?tab=players&${query(scope, selection.season)}`,
-    franchiseHref: identity.personId ? playerContributionHref({ franchiseId: selectedTeam.franchiseId }, playerId, { scope, season }) : null };
+  return { player, context: selectedContext, ...totals, seasons, season, years: spell ? [spell.year] : selectedContext.years, games, scope,
+    pickup: spell ? { id: spell.id, year: spell.year, week: spell.addWeek, departureWeek: spell.departureWeek } : null,
+    wholeHistoryHref: spell ? playerContributionHref(identity, playerId, { scope, season: spell.year }) : null,
+    contextHref: spell ? `${selectedContext.path}seasons/${spell.year}/?tab=players&scope=${scope}` : `${selectedContext.path}?tab=players&${query(scope, selection.season)}`,
+    franchiseHref: identity.personId && !spell ? playerContributionHref({ franchiseId: selectedTeam.franchiseId }, playerId, { scope, season }) : null };
 }
 
 /** Player/person pairs use the same exact totals as the contextual contributor lists. */

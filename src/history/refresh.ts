@@ -1,6 +1,7 @@
 import { loadArchive, publishArchive, configuredStorePath } from './store.ts';
 import type { Archive, Provider, RefreshOptions, RefreshResult, Season, SeasonTeam, ContestSide, BracketEntry } from './types.ts';
 import { sumPoints } from './decimal.ts';
+import { importOwnershipInputs } from './ownership-import.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {
@@ -276,6 +277,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
         team.finish = finish;
       }
     }
+    await importOwnershipInputs(archive, season, get, playerSource);
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
