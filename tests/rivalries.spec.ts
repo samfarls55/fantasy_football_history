@@ -3,11 +3,72 @@ import { test, expect } from '@playwright/test';
 const tim = 'person-608473907007143936';
 const seb = 'person-740265931783245824';
 const alec = 'person-473910025325113344';
+const longName = 'Rivalry Manager With A Very Long Display Name That Wraps Across Lines';
+
+test('landing suggestions open a completed rivalry in the selected season and game scope', async ({ page }) => {
+  await page.route('https://sleepercdn.com/avatars/**', route => route.fulfill({ status: 404, body: '' }));
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto('/rivalries/?season=2024&scope=regular');
+    const suggestions = page.getByRole('region', { name: 'Most meetings', exact: true });
+    await expect(page.getByText('Choose two different managers to compare.', { exact: true })).toHaveCount(0);
+    const first = suggestions.getByRole('link').first();
+    await expect(first).toContainText(`${longName} vs Rivalry manager 02`);
+    await expect(first).toContainText('13 meetings');
+    await first.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL('/rivalries/?a=person-960000000000000001&b=person-960000000000000002&season=2024&scope=regular');
+    await expect(page.getByRole('heading', { name: `${longName} vs Rivalry manager 02`, exact: true })).toBeVisible();
+    await expect(page.getByLabel('Head-to-head summary')).toContainText('13 meetings');
+    await expect(page.getByRole('table', { name: 'Head-to-head games' }).locator('tbody tr')).toHaveCount(10);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.impeccable/review/spec-21/ticket27-suggested-pair-${width}.png`, fullPage: true });
+    await page.goBack();
+    await expect(suggestions.getByRole('link').first()).toContainText('13 meetings');
+    await page.screenshot({ path: `.impeccable/review/spec-21/ticket27-landing-${width}.png`, fullPage: true });
+  }
+});
+
+test('phone comparisons identify the pair and perspective through custom selection, reversal and zero meetings', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 1000 });
+  await page.goto('/rivalries/?season=2024&scope=placement');
+  const suggestions = page.getByRole('region', { name: 'Most meetings', exact: true });
+  await expect(suggestions).toContainText('No completed meetings in this selection.');
+  await expect(suggestions.getByRole('link')).toHaveCount(0);
+  await page.goto('/rivalries/');
+  await page.getByLabel('First manager').selectOption(tim);
+  await page.getByLabel('Second manager').selectOption(seb);
+  await page.getByLabel('Season', { exact: true }).selectOption('2021');
+  await page.getByLabel('Game scope').selectOption('regular');
+  await page.getByRole('button', { name: 'Compare managers' }).click();
+  await expect(page.getByRole('heading', { name: 'Rivalries', exact: true })).toBeVisible();
+  expect((await page.getByRole('heading', { name: 'Rivalries', exact: true }).boundingBox())!.height).toBeGreaterThan(30);
+  await expect(page.getByRole('heading', { name: 'Timh17 vs sebastian12', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('Record for Timh17');
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('0–3');
+  await page.getByRole('link', { name: 'Reverse pair', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(`/rivalries/?a=${seb}&b=${tim}&season=2021&scope=regular`);
+  await expect(page.getByRole('heading', { name: 'sebastian12 vs Timh17', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('Record for sebastian12');
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('3–0');
+  await page.getByRole('link', { name: 'Week 3 · 2021', exact: true }).click();
+  await expect(page).toHaveURL('/seasons/2021/matchups/900000000000002021-w3-m2/?scope=regular&week=3');
+  await page.goBack();
+  await page.getByLabel('Game scope').selectOption('placement');
+  await page.getByRole('button', { name: 'Compare managers' }).click();
+  await expect(page.getByRole('heading', { name: 'sebastian12 vs Timh17', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('0 meetings');
+  await expect(page.getByLabel('Head-to-head summary')).toContainText('Average margin—');
+  await expect(page.getByText('No meetings in this selection.', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: '.impeccable/review/spec-21/ticket27-zero-meetings-phone.png', fullPage: true });
+});
 
 test('Rivalries selects distinct people and keeps pair, scope, season and history links through Back and sharing', async ({ page }) => {
   await page.goto('/rivalries/');
   await expect(page.getByRole('heading', { name: 'Rivalries', exact: true })).toBeVisible();
-  await expect(page.getByText('Choose two different managers to compare.')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Most meetings', exact: true })).toBeVisible();
   await page.getByLabel('First manager').selectOption(tim);
   await page.getByLabel('Second manager').selectOption(seb);
   await page.getByLabel('Season', { exact: true }).selectOption('2021');
