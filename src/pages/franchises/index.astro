@@ -1,0 +1,26 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import { readFranchises, franchiseSorts, type FranchiseSort } from '../../history/franchises';
+import '../../styles/profiles.css';
+const selectedSort = Astro.url.searchParams.get('sort');
+const sort = franchiseSorts.includes(selectedSort as FranchiseSort) ? selectedSort as FranchiseSort : 'name';
+if (selectedSort && selectedSort !== sort) return Astro.redirect('/franchises/?sort=name', 302);
+const franchises = await readFranchises({ sort });
+if (!franchises) Astro.response.status = 503;
+---
+<MuseumLayout title="Franchise histories" section="Managers">
+  <div class="page-heading"><h1>Franchise histories</h1><a class="directory-franchises" href="/managers/">Managers</a></div>
+  <form method="get" class="profile-controls directory-controls">
+    <label for="directory-sort">Sort franchises</label><select id="directory-sort" name="sort"><option value="name" selected={sort === 'name'}>Franchise name</option><option value="owner" selected={sort === 'owner'}>Latest owner</option><option value="seasons" selected={sort === 'seasons'}>Most seasons</option><option value="record" selected={sort === 'record'}>Most wins</option><option value="titles" selected={sort === 'titles'}>Most titles</option></select>
+    <button type="submit">Sort histories</button>
+  </form>
+  {franchises ? <table class="history-table directory-table franchise-directory-table">
+    <caption class="visually-hidden">Franchise directory · regular season</caption>
+    <thead><tr><th scope="col" aria-sort={sort === 'name' ? 'ascending' : undefined}><a href="?sort=name">Franchise</a> / latest owner</th><th scope="col" aria-sort={sort === 'seasons' ? 'descending' : undefined}><a href="?sort=seasons">Seasons</a></th><th scope="col" aria-sort={sort === 'record' ? 'descending' : undefined}><a href="?sort=record">Record</a></th><th scope="col" aria-sort={sort === 'titles' ? 'descending' : undefined}><a href="?sort=titles">Titles</a></th></tr></thead>
+    <tbody>{franchises.map(franchise => <tr>
+      <th scope="row"><div class="team-identity"><TeamImage name={franchise.name} src={franchise.avatar} /><div><a href={`/franchises/${franchise.id}/`}>{franchise.name}</a><span class="historical-team"><a href={`/managers/${franchise.owner.id}/`}>{franchise.owner.name}</a></span></div></div></th>
+      <td data-label="Seasons">{franchise.range}</td><td data-label="Record">{franchise.facts.record}</td><td data-label="Titles">{franchise.facts.championships}</td>
+    </tr>)}</tbody>
+  </table> : <p class="empty-history">League history is unavailable.</p>}
+</MuseumLayout>

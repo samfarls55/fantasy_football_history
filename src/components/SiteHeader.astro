@@ -1,0 +1,28 @@
+---
+interface Props { section?: 'Records' | 'Managers' | 'Seasons' | 'Rivalries'; sample?: boolean }
+const { section, sample = false } = Astro.props;
+const destinations = ['Records', 'Managers', 'Seasons', 'Rivalries'] as const;
+---
+<header class="museum-header">
+  <a class="museum-brand" href="/">Farls da bag</a>
+  <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="museum-navigation">Menu</button>
+  <nav id="museum-navigation" aria-label="Main navigation">
+    {destinations.map(destination => <a href={`/${destination.toLowerCase()}/`} aria-current={section === destination ? 'page' : undefined}>{destination}</a>)}
+  </nav>
+  {sample && <p class="museum-sample">Sample stats</p>}
+</header>
+<script>
+  const menu = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const navigation = document.querySelector<HTMLElement>('#museum-navigation');
+  menu?.addEventListener('click', () => {
+    menu.setAttribute('aria-expanded', String(menu.getAttribute('aria-expanded') !== 'true'));
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && menu?.getAttribute('aria-expanded') === 'true') {
+      menu.setAttribute('aria-expanded', 'false'); menu.focus();
+    }
+  });
+  navigation?.addEventListener('click', event => {
+    if ((event.target as HTMLElement).closest('a')) menu?.setAttribute('aria-expanded', 'false');
+  });
+</script>

@@ -1,0 +1,37 @@
+---
+import { gameScopes, competitionLabels } from '../history/read';
+import type { Scope } from '../history/types';
+import type { ManagerGameSort } from '../history/managers';
+import type { ContributionView } from '../history/contributions';
+interface Props {
+  kind: 'manager' | 'franchise';
+  tab: string;
+  scope: Scope;
+  years: string[];
+  season?: string;
+  sort?: ManagerGameSort;
+  view?: ContributionView;
+  event?: string;
+}
+const { kind, tab, scope, years, season, sort, view = 'all', event } = Astro.props;
+const seasonView = sort !== undefined;
+const context = kind === 'manager' ? 'Manager' : 'Franchise';
+const tabs = seasonView ? ['matchups', 'players'] : ['seasons', 'rivalries', 'players'];
+const tabHref = (value: string) => seasonView
+  ? `?tab=${value}&scope=${scope}${value === 'matchups' ? `&sort=${sort}` : ''}`
+  : `?tab=${value}&scope=${scope}${season ? `&season=${season}` : ''}`;
+const seasonId = seasonView ? `${kind}-season` : 'profile-season';
+const scopeId = seasonView ? 'season-scope' : 'profile-scope';
+---
+<div class="profile-local-heading">
+  <nav class="local-tabs" aria-label={`${context}${seasonView ? ' season' : ''} views`}>{tabs.map(value => <a href={tabHref(value)} aria-current={tab === value ? 'page' : undefined}>{value[0].toUpperCase() + value.slice(1)}</a>)}</nav>
+  <form method="get" class="profile-controls">
+    {(!seasonView || tab === 'players') && <input type="hidden" name="tab" value={tab} />}
+    {seasonView && tab === 'players' && view !== 'all' && <input type="hidden" name="view" value={view} />}
+    {seasonView && event && <input type="hidden" name="event" value={event} />}
+    <label for={seasonId}>Season</label><select id={seasonId} name="season">{!seasonView && <option value="" selected={!season}>All seasons</option>}{years.map(year => <option value={year} selected={season === year}>{year}</option>)}</select>
+    <label for={scopeId}>Game scope</label><select id={scopeId} name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
+    {seasonView && tab === 'matchups' && <><label for={`${kind}-sort`}>Sort games</label><select id={`${kind}-sort`} name="sort"><option value="newest" selected={sort === 'newest'}>Newest first</option><option value="oldest" selected={sort === 'oldest'}>Oldest first</option><option value="points" selected={sort === 'points'}>Most points</option></select></>}
+    <button type="submit">{seasonView ? tab === 'players' ? 'Show players' : 'Show matchups' : 'Show history'}</button>
+  </form>
+</div>

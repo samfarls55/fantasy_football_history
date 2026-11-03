@@ -1,0 +1,20 @@
+---
+import SiteHeader from '../components/SiteHeader.astro';
+import '../styles/museum.css';
+interface Props { title: string; section?: 'Records' | 'Managers' | 'Seasons' | 'Rivalries' }
+const { title, section } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} · Farls da bag</title>
+    <meta name="description" content="Explore the Farls da bag fantasy football league's history." />
+  </head>
+  <body>
+    <a class="museum-skip" href="#main-content">Skip to content</a>
+    <SiteHeader section={section} />
+    <main class="museum-main" id="main-content" tabindex="-1"><slot /></main>
+  </body>
+</html>

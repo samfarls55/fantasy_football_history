@@ -1,6 +1,6 @@
 # Full-platform implementation plan
 
-Status: APPROVED AND PUBLISHED. Sam approved the 18-ticket breakdown. All child issues are published under [spec #1](https://github.com/samfarls55/fantasy_football_history/issues/1), labeled ready-for-agent, with GitHub's native parent-child and blocking relationships. Implementation has not been invoked.
+Status: APPROVED AND PUBLISHED. Sam approved the 18-ticket breakdown. All child issues are published under [spec #1](https://github.com/samfarls55/fantasy_football_history/issues/1), labeled ready-for-agent, with GitHub's native parent-child and blocking relationships. Implementation is in final verification. Feature issues #2–#18 are closed; #19 and parent #1 remain open pending independent reviews and the ready-for-review PR. See [docs/verification.md](docs/verification.md).
 
 ## Start here
 
@@ -37,9 +37,9 @@ Numbers in the left column are the approved proposal numbers. Linked issue numbe
 | 17 | [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) Refresh and correct the complete archive automatically | [#16](https://github.com/samfarls55/fantasy_football_history/issues/16), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17) |
 | 18 | [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) Verify the complete platform and implementation handoff | [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
 
-## Ready frontier
+## Original ready frontier
 
-The initial unblocked tickets are [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), historical source coverage, and [#3](https://github.com/samfarls55/fantasy_football_history/issues/3), durable storage and automatic refresh execution. They can proceed independently. Coverage findings must identify unsupported claims without silently changing the approved ranking windows.
+At publication, the initial unblocked tickets were [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), historical source coverage, and [#3](https://github.com/samfarls55/fantasy_football_history/issues/3), durable storage and automatic refresh execution. They could proceed independently. Coverage findings must identify unsupported claims without silently changing the approved ranking windows.
 
 Once both are complete, [#4](https://github.com/samfarls55/fantasy_football_history/issues/4) delivers the first import-to-public standings slice. After manager profiles, franchise history and career rankings branch independently. Scoring records, season comparisons, player contributions and rivalries then provide further parallel work.
 

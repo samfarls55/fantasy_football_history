@@ -1,0 +1,14 @@
+[Unit]
+Description=Refresh the configured Farls da bag history
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=farls-museum
+Group=farls-museum
+WorkingDirectory=/opt/farls-museum
+EnvironmentFile=/etc/farls-museum.env
+Environment=NODE_ENV=production
+StateDirectory=farls-museum
+ExecStart=/usr/bin/flock --nonblock --conflict-exit-code 75 /var/lib/farls-museum/refresh.lock /usr/bin/npm run refresh

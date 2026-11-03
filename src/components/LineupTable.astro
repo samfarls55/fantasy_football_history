@@ -1,0 +1,18 @@
+---
+import type { LineupPlayer, Scope } from '../history/types';
+interface Props { players: Array<LineupPlayer & { name: string }>; section: 'Starters' | 'Bench'; teamName: string; personId: string; rosterId: string; year: string; scope: Scope; selectedPlayer?: string | null; selectedTeam?: string | null }
+const { players, section, teamName, personId, rosterId, year, scope, selectedPlayer, selectedTeam } = Astro.props;
+const format = (value: number | null) => value === null ? '—' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+---
+<section class="lineup-section">
+  <h3>{section}</h3>
+  {players.length ? <table class="lineup-table">
+    <caption class="visually-hidden">{teamName} {section.toLowerCase()}</caption>
+    <thead><tr><th scope="col">Slot</th><th scope="col">Player</th><th scope="col">Points</th></tr></thead>
+    <tbody>{players.map(player => <tr id={`player-${rosterId}-${player.playerId}`} aria-current={selectedPlayer === player.playerId && (!selectedTeam || selectedTeam === rosterId) ? 'true' : undefined} class:list={{ 'lineup-selected': selectedPlayer === player.playerId && (!selectedTeam || selectedTeam === rosterId) }}>
+      <td>{player.slot ?? '—'}</td>
+      <th scope="row"><a href={`/managers/${personId}/players/${player.playerId}/?season=${year}&scope=${scope}`}>{player.name}</a></th>
+      <td>{format(player.points)}</td>
+    </tr>)}</tbody>
+  </table> : <p class="empty-lineup">No {section.toLowerCase()}.</p>}
+</section>

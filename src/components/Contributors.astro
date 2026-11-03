@@ -1,0 +1,57 @@
+---
+import type { readContributors } from '../history/contributions';
+import { formatRecordValue } from '../history/records';
+import DropHistory from './DropHistory.astro';
+import '../styles/contributions.css';
+interface Props { selection: NonNullable<Awaited<ReturnType<typeof readContributors>>>; views?: boolean }
+const { selection, views = false } = Astro.props;
+const attribution = selection.context?.kind !== 'person';
+const rankings = new URLSearchParams({ scope: selection.scope });
+if (selection.season) rankings.set('season', selection.season);
+function viewHref(view: string) {
+  const params = new URLSearchParams(Astro.url.searchParams);
+  params.delete('event'); params.delete('view');
+  if (view !== 'all') params.set('view', view);
+  return `?${params}`;
+}
+---
+{views && <nav class="local-tabs player-views" aria-label="Player history views">{[['all', 'All players'], ['pickups', 'Pickups'], ['drops', 'Drops']].map(([key, label]) => <a href={viewHref(key)} aria-current={selection.view === key ? 'page' : undefined}>{label}</a>)}</nav>}
+{selection.view === 'all' && <>
+<div class="contributor-heading"><h2>Starting contributors</h2><a href={`/records/player-contributions/?${rankings}`}>View rankings</a></div>
+{selection.rows.length ? <table class="history-table contributors-table">
+  <caption class="visually-hidden">Starting player contributions</caption>
+  <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Starting points</th><th scope="col">Starts</th><th scope="col">Seasons</th></tr></thead>
+  <tbody>{selection.rows.map(row => <tr>
+    <th scope="row"><a href={row.href}>{row.name}</a>{attribution && <span class="contributor-owners">{row.owners.map((owner, index) => <>{index > 0 && <span aria-hidden="true"> · </span>}<a href={`/managers/${owner.id}/?tab=players&scope=${selection.scope}${selection.season ? `&season=${selection.season}` : ''}`}>{owner.name}</a></>)}</span>}</th>
+    <td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td><td data-label="Seasons">{row.range}</td>
+  </tr>)}</tbody>
+</table> : <p class="empty-history">No recorded starts for this selection.</p>}
+</>}
+{selection.view !== 'drops' && <>
+<section class="contextual-pickups" aria-labelledby="pickup-heading">
+  <div class="contributor-heading"><h2 id="pickup-heading">Productive pickups</h2><a href={`/records/productive-pickup/?${rankings}`}>View pickup rankings</a></div>
+  {selection.pickups.length ? <table class="history-table pickups-table">
+    <caption class="visually-hidden">Productive pickup spells</caption>
+    <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Pickup</th><th scope="col">Starting points</th><th scope="col">Starts</th></tr></thead>
+    <tbody>{selection.pickups.map(row => <tr><th scope="row"><a href={row.href}>{row.player.name}</a>{attribution && <span class="contributor-owners"><a href={`/managers/${row.person.id}/seasons/${row.year}/?tab=players&scope=${selection.scope}`}>{row.person.name}</a></span>}</th><td data-label="Pickup">{row.year} · Week {row.week}</td><td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
+  </table> : <p class="empty-history">No pickups for this selection.</p>}
+</section>
+</>}
+{selection.view !== 'pickups' && <>
+{selection.selectedDrop && <DropHistory history={selection.selectedDrop} />}
+<section class="contextual-drops" aria-labelledby="drops-heading">
+  <div class="contributor-heading"><h2 id="drops-heading">Drops</h2><a href={`/records/productive-drop/?${rankings}`}>View drop rankings</a></div>
+  {selection.drops.length ? <table class="history-table drops-table">
+    <caption class="visually-hidden">Dropped players' later contributions elsewhere</caption>
+    <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Drop</th><th scope="col">Starting points elsewhere</th><th scope="col">Starts</th></tr></thead>
+    <tbody>{selection.drops.map(row => <tr class:list={{ 'selected-drop': row.id === selection.selectedDrop?.id }}><th scope="row"><a href={row.href} aria-current={row.id === selection.selectedDrop?.id ? 'true' : undefined}>{row.player.name}</a>{attribution && <span class="contributor-owners"><a href={`/managers/${row.person.id}/seasons/${row.year}/?tab=players&scope=${selection.scope}`}>{row.person.name}</a></span>}</th><td data-label="Drop">{row.year} · Week {row.week}</td><td data-label="Starting points elsewhere">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
+  </table> : <p class="empty-history">No drops for this selection.</p>}
+</section>
+</>}
+<script>
+  document.fonts.ready.then(() => {
+    const tabs = document.querySelector<HTMLElement>('.local-tabs');
+    const selected = tabs?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (tabs && selected && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = selected.offsetLeft - tabs.offsetLeft;
+  });
+</script>

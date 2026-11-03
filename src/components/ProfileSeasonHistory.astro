@@ -1,0 +1,18 @@
+---
+import { formatRecordValue } from '../history/records';
+import type { readManager } from '../history/managers';
+import type { Person, Scope } from '../history/types';
+type SeasonRow = NonNullable<Awaited<ReturnType<typeof readManager>>>['seasons'][number] & { owner?: Person };
+interface Props { rows: SeasonRow[]; basePath: string; scope: Scope; franchise?: boolean }
+const { rows, basePath, scope, franchise = false } = Astro.props;
+---
+<table class:list={['history-table', 'career-seasons-table', { 'franchise-seasons-table': franchise }]}>
+  <caption class="visually-hidden">{franchise ? 'Franchise season history' : 'Season history'}</caption>
+  <thead><tr><th scope="col">Year / team</th>{franchise && <th scope="col">Owner</th>}<th scope="col">Record</th><th scope="col">Points</th><th scope="col">Finish</th><th scope="col">Playoffs</th></tr></thead>
+  <tbody>{rows.map(row => <tr>
+    <th scope="row"><a href={`${basePath}/seasons/${row.year}/?scope=${scope}`}>{row.year}</a><span class="historical-team">{row.name}</span></th>
+    {franchise && <td data-label="Owner">{row.owner && <a href={`/managers/${row.owner.id}/seasons/${row.year}/?scope=${scope}`}>{row.owner.name}</a>}</td>}
+    <td data-label="Record">{row.facts.record}</td><td data-label="Points">{formatRecordValue(row.facts.points)}</td><td data-label="Finish">{row.finish ?? '—'}</td>
+    <td data-label="Playoffs">{row.championship ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Champion</a> : row.runnerUp ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Runner-up</a> : row.playoffAppearance ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Qualified</a> : '—'}</td>
+  </tr>)}</tbody>
+</table>

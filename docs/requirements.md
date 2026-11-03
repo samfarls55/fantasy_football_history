@@ -17,13 +17,15 @@ Tests start with controlled provider responses, use the real import/refresh entr
 | A05 Official results | Preserve overrides, true final zeros, decimal margins, W-L-T and tied ranks. Unplayed/missing scores never become low-score records. |
 | A06 Season comparisons | Hand-calculated fixtures produce the expected dominance, expected wins and opposite comparison signs. Full-season awards exclude unfinished seasons. |
 | A07 Starting contributions | Person and franchise totals match actual starts and linked games. Bench points and team overrides are not assigned to starting totals. |
-| A08 Move attribution | Completed pickup/drop candidates use the right person, ownership spell, source-supported timing and same-season window. Reacquisition/trade/failed-event fixtures do not double-credit a spell. |
+| A08 Move attribution | Per Sam’s November 3, 2026 revision, both measures exclude the move week. Pickups credit full weeks strictly after acquisition and before departure (or through season end); drops credit other people’s starts strictly after the drop week, in the same season and scope. Recorded chronology resolves distinct spells; no exact kickoff timing is inferred. Reacquisition, commissioner/trade ownership and failed/unknown events retain correct attribution. |
 | A09 Ranked discovery | Every approved category has correct eligibility/order/history links; initial results include ten places plus all cutoff ties; Show more preserves selection. Home has six agreed categories and recent top-ten events ordered by historical date. |
 | A10 Rivalries | Pair/season/scope selections produce consistent records, margins, streaks and game links. Nemesis ties and the no-nemesis case are correct. Zero meetings stays distinct from missing history. |
 | A11 Refresh and gaps | Corrections update all affected views. Missing inputs and request failures retain the last successful snapshot and yield useful operator diagnostics. Public pages have no update-status, timestamp or calculation/source panel. |
 | A12 Responsive access | At 320px through desktop and 200% zoom, meaningful flows remain usable with keyboard, long names and image failures. Header roles match, complete images have rounded frames, and reduced motion works. |
 | A13 Setup | A documented configured league ID drives the same calculations without editing domain logic. Import, repeat refresh, tests and production build have reproducible commands. License/setup choices are recorded before public release. |
 | A14 Whole journey | Open Home, a category, a ranked performance, its actual matchup or season, and scoped player history. Share each relevant view, reload and navigate Back without losing identity or filter context. |
+
+The implementation checks and remaining review/delivery boundaries are recorded in [verification.md](verification.md). This scope ledger does not itself certify release completion.
 
 A scenario can be covered by more than one focused fixture. Do not write a mirror of every private function. A small fixture should make each expected result understandable.
 
@@ -90,8 +92,8 @@ A scenario can be covered by more than one focused fixture. Do not write a mirro
 
 | ID | Added requirement | Destination | Acceptance | GitHub tickets |
 | --- | --- | --- | --- | --- |
-| 55 | Productive waiver/free-agent pickup by actual spell contributions | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14) |
-| 56 | Drop followed by later starting production for other people in that season | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15) |
+| 55 | Productive waiver/free-agent pickup by actual later-full-week spell contributions | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14) |
+| 56 | Drop followed by starting production in later weeks for other people in that season | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15) |
 | 57 | Takeover, predecessor and team-name timeline | Person tenure and separate full franchise | A03 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
 | 58 | Category-first flow, ten places plus ties and Show more | Records category pages | A01, A09, A14 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
 | 59 | Consistent header, rounded complete artwork and responsive row patterns | Shared components and every family | A12 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#16](https://github.com/samfarls55/fantasy_football_history/issues/16), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |

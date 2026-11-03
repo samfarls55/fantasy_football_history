@@ -1,0 +1,1241 @@
+{
+  "seedLeagueId": "950000000000002501",
+  "responses": {
+    "state/nfl": {
+      "season": "2025",
+      "week": 8
+    },
+    "players/nfl": {
+      "201": {
+        "full_name": "Format Player 1",
+        "position": "QB"
+      },
+      "202": {
+        "full_name": "Format Player 2",
+        "position": "QB"
+      },
+      "203": {
+        "full_name": "Format Player 3",
+        "position": "QB"
+      },
+      "204": {
+        "full_name": "Format Player 4",
+        "position": "QB"
+      },
+      "205": {
+        "full_name": "Format Player 5",
+        "position": "QB"
+      },
+      "206": {
+        "full_name": "Format Player 6",
+        "position": "QB"
+      },
+      "207": {
+        "full_name": "Format Player 7",
+        "position": "QB"
+      },
+      "208": {
+        "full_name": "Format Player 8",
+        "position": "QB"
+      },
+      "209": {
+        "full_name": "Format Player 9",
+        "position": "QB"
+      },
+      "210": {
+        "full_name": "Format Player 10",
+        "position": "QB"
+      }
+    },
+    "league/950000000000002501": {
+      "league_id": "950000000000002501",
+      "previous_league_id": null,
+      "season": "2025",
+      "status": "complete",
+      "name": "Controlled native format 1",
+      "total_rosters": 10,
+      "settings": {
+        "start_week": 1,
+        "playoff_week_start": 2,
+        "playoff_teams": 6,
+        "playoff_round_type": 1,
+        "playoff_type": 0,
+        "last_scored_leg": 5
+      },
+      "scoring_settings": {
+        "rec": 1
+      },
+      "roster_positions": [
+        "QB",
+        "BN"
+      ]
+    },
+    "league/950000000000002501/users": [
+      {
+        "user_id": "950000000000000001",
+        "display_name": "Format Manager 1",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000002",
+        "display_name": "Format Manager 2",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000003",
+        "display_name": "Format Manager 3",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000004",
+        "display_name": "Format Manager 4",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000005",
+        "display_name": "Format Manager 5",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000006",
+        "display_name": "Format Manager 6",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000007",
+        "display_name": "Format Manager 7",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000008",
+        "display_name": "Format Manager 8",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000009",
+        "display_name": "Format Manager 9",
+        "avatar": null
+      },
+      {
+        "user_id": "950000000000000010",
+        "display_name": "Format Manager 10",
+        "avatar": null
+      }
+    ],
+    "league/950000000000002501/rosters": [
+      {
+        "roster_id": 1,
+        "owner_id": "950000000000000001",
+        "metadata": null
+      },
+      {
+        "roster_id": 2,
+        "owner_id": "950000000000000002",
+        "metadata": null
+      },
+      {
+        "roster_id": 3,
+        "owner_id": "950000000000000003",
+        "metadata": null
+      },
+      {
+        "roster_id": 4,
+        "owner_id": "950000000000000004",
+        "metadata": null
+      },
+      {
+        "roster_id": 5,
+        "owner_id": "950000000000000005",
+        "metadata": null
+      },
+      {
+        "roster_id": 6,
+        "owner_id": "950000000000000006",
+        "metadata": null
+      },
+      {
+        "roster_id": 7,
+        "owner_id": "950000000000000007",
+        "metadata": null
+      },
+      {
+        "roster_id": 8,
+        "owner_id": "950000000000000008",
+        "metadata": null
+      },
+      {
+        "roster_id": 9,
+        "owner_id": "950000000000000009",
+        "metadata": null
+      },
+      {
+        "roster_id": 10,
+        "owner_id": "950000000000000010",
+        "metadata": null
+      }
+    ],
+    "league/950000000000002501/winners_bracket": [
+      {
+        "m": 11,
+        "r": 1,
+        "t1": 3,
+        "t2": 6,
+        "w": 3,
+        "l": 6
+      },
+      {
+        "m": 12,
+        "r": 1,
+        "t1": 4,
+        "t2": 5,
+        "w": 5,
+        "l": 4
+      },
+      {
+        "m": 13,
+        "r": 2,
+        "t1": 1,
+        "t2": 3,
+        "w": 1,
+        "l": 3,
+        "t2_from": {
+          "w": 11
+        }
+      },
+      {
+        "m": 14,
+        "r": 2,
+        "t1": 2,
+        "t2": 5,
+        "w": 5,
+        "l": 2,
+        "t2_from": {
+          "w": 12
+        }
+      },
+      {
+        "m": 15,
+        "r": 2,
+        "t1": 6,
+        "t2": 4,
+        "w": 4,
+        "l": 6,
+        "p": 5,
+        "t1_from": {
+          "l": 11
+        },
+        "t2_from": {
+          "l": 12
+        }
+      },
+      {
+        "m": 16,
+        "r": 3,
+        "t1": 1,
+        "t2": 5,
+        "w": 5,
+        "l": 1,
+        "p": 1,
+        "t1_from": {
+          "w": 13
+        },
+        "t2_from": {
+          "w": 14
+        }
+      },
+      {
+        "m": 17,
+        "r": 3,
+        "t1": 3,
+        "t2": 2,
+        "w": 3,
+        "l": 2,
+        "p": 3,
+        "t1_from": {
+          "l": 13
+        },
+        "t2_from": {
+          "l": 14
+        }
+      }
+    ],
+    "league/950000000000002501/losers_bracket": [
+      {
+        "m": 11,
+        "r": 1,
+        "t1": 7,
+        "t2": 10,
+        "w": 7,
+        "l": 10
+      },
+      {
+        "m": 12,
+        "r": 1,
+        "t1": 8,
+        "t2": 9,
+        "w": 8,
+        "l": 9
+      },
+      {
+        "m": 13,
+        "r": 2,
+        "t1": 7,
+        "t2": 8,
+        "w": 7,
+        "l": 8,
+        "p": 1,
+        "t1_from": {
+          "w": 11
+        },
+        "t2_from": {
+          "w": 12
+        }
+      },
+      {
+        "m": 14,
+        "r": 2,
+        "t1": 10,
+        "t2": 9,
+        "w": 9,
+        "l": 10,
+        "p": 3,
+        "t1_from": {
+          "l": 11
+        },
+        "t2_from": {
+          "l": 12
+        }
+      }
+    ],
+    "league/950000000000002501/matchups/1": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 16,
+        "custom_points": null,
+        "starters": [
+          "201"
+        ],
+        "players": [
+          "201"
+        ],
+        "starters_points": [
+          16
+        ],
+        "players_points": {
+          "201": 16
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 1,
+        "points": 15,
+        "custom_points": null,
+        "starters": [
+          "202"
+        ],
+        "players": [
+          "202"
+        ],
+        "starters_points": [
+          15
+        ],
+        "players_points": {
+          "202": 15
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 2,
+        "points": 14,
+        "custom_points": null,
+        "starters": [
+          "203"
+        ],
+        "players": [
+          "203"
+        ],
+        "starters_points": [
+          14
+        ],
+        "players_points": {
+          "203": 14
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 2,
+        "points": 13,
+        "custom_points": null,
+        "starters": [
+          "204"
+        ],
+        "players": [
+          "204"
+        ],
+        "starters_points": [
+          13
+        ],
+        "players_points": {
+          "204": 13
+        }
+      },
+      {
+        "roster_id": 5,
+        "matchup_id": 3,
+        "points": 12,
+        "custom_points": null,
+        "starters": [
+          "205"
+        ],
+        "players": [
+          "205"
+        ],
+        "starters_points": [
+          12
+        ],
+        "players_points": {
+          "205": 12
+        }
+      },
+      {
+        "roster_id": 6,
+        "matchup_id": 3,
+        "points": 11,
+        "custom_points": null,
+        "starters": [
+          "206"
+        ],
+        "players": [
+          "206"
+        ],
+        "starters_points": [
+          11
+        ],
+        "players_points": {
+          "206": 11
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 4,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "207"
+        ],
+        "players": [
+          "207"
+        ],
+        "starters_points": [
+          10
+        ],
+        "players_points": {
+          "207": 10
+        }
+      },
+      {
+        "roster_id": 8,
+        "matchup_id": 4,
+        "points": 9,
+        "custom_points": null,
+        "starters": [
+          "208"
+        ],
+        "players": [
+          "208"
+        ],
+        "starters_points": [
+          9
+        ],
+        "players_points": {
+          "208": 9
+        }
+      },
+      {
+        "roster_id": 9,
+        "matchup_id": 5,
+        "points": 8,
+        "custom_points": null,
+        "starters": [
+          "209"
+        ],
+        "players": [
+          "209"
+        ],
+        "starters_points": [
+          8
+        ],
+        "players_points": {
+          "209": 8
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 5,
+        "points": 7,
+        "custom_points": null,
+        "starters": [
+          "210"
+        ],
+        "players": [
+          "210"
+        ],
+        "starters_points": [
+          7
+        ],
+        "players_points": {
+          "210": 7
+        }
+      }
+    ],
+    "league/950000000000002501/matchups/2": [
+      {
+        "roster_id": 3,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "203"
+        ],
+        "players": [
+          "203"
+        ],
+        "starters_points": [
+          30
+        ],
+        "players_points": {
+          "203": 30
+        }
+      },
+      {
+        "roster_id": 6,
+        "matchup_id": 1,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "206"
+        ],
+        "players": [
+          "206"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "206": 20
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 2,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "204"
+        ],
+        "players": [
+          "204"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "204": 20
+        }
+      },
+      {
+        "roster_id": 5,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "205"
+        ],
+        "players": [
+          "205"
+        ],
+        "starters_points": [
+          40
+        ],
+        "players_points": {
+          "205": 40
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 3,
+        "points": 12,
+        "custom_points": null,
+        "starters": [
+          "207"
+        ],
+        "players": [
+          "207"
+        ],
+        "starters_points": [
+          12
+        ],
+        "players_points": {
+          "207": 12
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 3,
+        "points": 22,
+        "custom_points": null,
+        "starters": [
+          "210"
+        ],
+        "players": [
+          "210"
+        ],
+        "starters_points": [
+          22
+        ],
+        "players_points": {
+          "210": 22
+        }
+      },
+      {
+        "roster_id": 8,
+        "matchup_id": 4,
+        "points": 18,
+        "custom_points": null,
+        "starters": [
+          "208"
+        ],
+        "players": [
+          "208"
+        ],
+        "starters_points": [
+          18
+        ],
+        "players_points": {
+          "208": 18
+        }
+      },
+      {
+        "roster_id": 9,
+        "matchup_id": 4,
+        "points": 28,
+        "custom_points": null,
+        "starters": [
+          "209"
+        ],
+        "players": [
+          "209"
+        ],
+        "starters_points": [
+          28
+        ],
+        "players_points": {
+          "209": 28
+        }
+      },
+      {
+        "roster_id": 1,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "201"
+        ],
+        "players": [
+          "201"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "201": 99
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "202"
+        ],
+        "players": [
+          "202"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "202": 99
+        }
+      }
+    ],
+    "league/950000000000002501/matchups/3": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 50,
+        "custom_points": null,
+        "starters": [
+          "201"
+        ],
+        "players": [
+          "201"
+        ],
+        "starters_points": [
+          50
+        ],
+        "players_points": {
+          "201": 50
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 1,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "203"
+        ],
+        "players": [
+          "203"
+        ],
+        "starters_points": [
+          30
+        ],
+        "players_points": {
+          "203": 30
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 2,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "202"
+        ],
+        "players": [
+          "202"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "202": 20
+        }
+      },
+      {
+        "roster_id": 5,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "205"
+        ],
+        "players": [
+          "205"
+        ],
+        "starters_points": [
+          40
+        ],
+        "players_points": {
+          "205": 40
+        }
+      },
+      {
+        "roster_id": 6,
+        "matchup_id": 3,
+        "points": 15,
+        "custom_points": null,
+        "starters": [
+          "206"
+        ],
+        "players": [
+          "206"
+        ],
+        "starters_points": [
+          15
+        ],
+        "players_points": {
+          "206": 15
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": 3,
+        "points": 25,
+        "custom_points": null,
+        "starters": [
+          "204"
+        ],
+        "players": [
+          "204"
+        ],
+        "starters_points": [
+          25
+        ],
+        "players_points": {
+          "204": 25
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 4,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "207"
+        ],
+        "players": [
+          "207"
+        ],
+        "starters_points": [
+          10
+        ],
+        "players_points": {
+          "207": 10
+        }
+      },
+      {
+        "roster_id": 8,
+        "matchup_id": 4,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "208"
+        ],
+        "players": [
+          "208"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "208": 20
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 5,
+        "points": 32,
+        "custom_points": null,
+        "starters": [
+          "210"
+        ],
+        "players": [
+          "210"
+        ],
+        "starters_points": [
+          32
+        ],
+        "players_points": {
+          "210": 32
+        }
+      },
+      {
+        "roster_id": 9,
+        "matchup_id": 5,
+        "points": 23,
+        "custom_points": null,
+        "starters": [
+          "209"
+        ],
+        "players": [
+          "209"
+        ],
+        "starters_points": [
+          23
+        ],
+        "players_points": {
+          "209": 23
+        }
+      }
+    ],
+    "league/950000000000002501/matchups/4": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 10.1,
+        "custom_points": null,
+        "starters": [
+          "201"
+        ],
+        "players": [
+          "201"
+        ],
+        "starters_points": [
+          10.1
+        ],
+        "players_points": {
+          "201": 10.1
+        }
+      },
+      {
+        "roster_id": 5,
+        "matchup_id": 1,
+        "points": 20.2,
+        "custom_points": null,
+        "starters": [
+          "205"
+        ],
+        "players": [
+          "205"
+        ],
+        "starters_points": [
+          20.2
+        ],
+        "players_points": {
+          "205": 20.2
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 2,
+        "points": 40,
+        "custom_points": null,
+        "starters": [
+          "203"
+        ],
+        "players": [
+          "203"
+        ],
+        "starters_points": [
+          40
+        ],
+        "players_points": {
+          "203": 40
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 2,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "202"
+        ],
+        "players": [
+          "202"
+        ],
+        "starters_points": [
+          30
+        ],
+        "players_points": {
+          "202": 30
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": 3,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "207"
+        ],
+        "players": [
+          "207"
+        ],
+        "starters_points": [
+          10
+        ],
+        "players_points": {
+          "207": 10
+        }
+      },
+      {
+        "roster_id": 8,
+        "matchup_id": 3,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "208"
+        ],
+        "players": [
+          "208"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "208": 20
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": 4,
+        "points": 20,
+        "custom_points": null,
+        "starters": [
+          "210"
+        ],
+        "players": [
+          "210"
+        ],
+        "starters_points": [
+          20
+        ],
+        "players_points": {
+          "210": 20
+        }
+      },
+      {
+        "roster_id": 9,
+        "matchup_id": 4,
+        "points": 10,
+        "custom_points": null,
+        "starters": [
+          "209"
+        ],
+        "players": [
+          "209"
+        ],
+        "starters_points": [
+          10
+        ],
+        "players_points": {
+          "209": 10
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "204"
+        ],
+        "players": [
+          "204"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "204": 99
+        }
+      },
+      {
+        "roster_id": 6,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "206"
+        ],
+        "players": [
+          "206"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "206": 99
+        }
+      }
+    ],
+    "league/950000000000002501/matchups/5": [
+      {
+        "roster_id": 1,
+        "matchup_id": 1,
+        "points": 20.2,
+        "custom_points": null,
+        "starters": [
+          "201"
+        ],
+        "players": [
+          "201"
+        ],
+        "starters_points": [
+          20.2
+        ],
+        "players_points": {
+          "201": 20.2
+        }
+      },
+      {
+        "roster_id": 5,
+        "matchup_id": 1,
+        "points": 15.1,
+        "custom_points": null,
+        "starters": [
+          "205"
+        ],
+        "players": [
+          "205"
+        ],
+        "starters_points": [
+          15.1
+        ],
+        "players_points": {
+          "205": 15.1
+        }
+      },
+      {
+        "roster_id": 3,
+        "matchup_id": 2,
+        "points": 25,
+        "custom_points": null,
+        "starters": [
+          "203"
+        ],
+        "players": [
+          "203"
+        ],
+        "starters_points": [
+          25
+        ],
+        "players_points": {
+          "203": 25
+        }
+      },
+      {
+        "roster_id": 2,
+        "matchup_id": 2,
+        "points": 30,
+        "custom_points": null,
+        "starters": [
+          "202"
+        ],
+        "players": [
+          "202"
+        ],
+        "starters_points": [
+          30
+        ],
+        "players_points": {
+          "202": 30
+        }
+      },
+      {
+        "roster_id": 4,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "204"
+        ],
+        "players": [
+          "204"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "204": 99
+        }
+      },
+      {
+        "roster_id": 6,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "206"
+        ],
+        "players": [
+          "206"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "206": 99
+        }
+      },
+      {
+        "roster_id": 7,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "207"
+        ],
+        "players": [
+          "207"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "207": 99
+        }
+      },
+      {
+        "roster_id": 8,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "208"
+        ],
+        "players": [
+          "208"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "208": 99
+        }
+      },
+      {
+        "roster_id": 9,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "209"
+        ],
+        "players": [
+          "209"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "209": 99
+        }
+      },
+      {
+        "roster_id": 10,
+        "matchup_id": null,
+        "points": 99,
+        "custom_points": null,
+        "starters": [
+          "210"
+        ],
+        "players": [
+          "210"
+        ],
+        "starters_points": [
+          99
+        ],
+        "players_points": {
+          "210": 99
+        }
+      }
+    ],
+    "league/950000000000002501/drafts": [],
+    "league/950000000000002501/transactions/0": [],
+    "league/950000000000002501/transactions/1": [],
+    "league/950000000000002501/transactions/2": [],
+    "league/950000000000002501/transactions/3": [],
+    "league/950000000000002501/transactions/4": [],
+    "league/950000000000002501/transactions/5": [],
+    "league/950000000000002501/transactions/6": [],
+    "league/950000000000002501/transactions/7": [],
+    "league/950000000000002501/transactions/8": [],
+    "league/950000000000002501/transactions/9": [],
+    "league/950000000000002501/transactions/10": [],
+    "league/950000000000002501/transactions/11": [],
+    "league/950000000000002501/transactions/12": [],
+    "league/950000000000002501/transactions/13": [],
+    "league/950000000000002501/transactions/14": [],
+    "league/950000000000002501/transactions/15": [],
+    "league/950000000000002501/transactions/16": [],
+    "league/950000000000002501/transactions/17": [],
+    "league/950000000000002501/transactions/18": []
+  }
+}

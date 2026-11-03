@@ -1,0 +1,96 @@
+---
+import MuseumLayout from '../../layouts/MuseumLayout.astro';
+import TeamImage from '../../components/TeamImage.astro';
+import SeasonMatchups from '../../components/SeasonMatchups.astro';
+import SeasonBracket from '../../components/SeasonBracket.astro';
+import Contributors from '../../components/Contributors.astro';
+import { readContributors } from '../../history/contributions';
+import { readSeasonMatchups, readSeasonBracket, gameScopes, competitionLabels, bracketScopes, type BracketScope } from '../../history/read';
+import '../../styles/profiles.css';
+import type { Scope } from '../../history/types';
+import { readSeason, readSeasons, standingSorts, type StandingSort } from '../../history/read';
+const { year = '' } = Astro.params;
+const seasons = await readSeasons();
+const selected = Astro.url.searchParams;
+const sort = standingSorts.includes(selected.get('sort') as StandingSort) ? selected.get('sort') as StandingSort : 'standing';
+const tab = ['matchups', 'playoffs', 'players'].includes(selected.get('tab')!) ? selected.get('tab')! : 'standings';
+const scope = tab === 'playoffs' ? bracketScopes.includes(selected.get('scope') as BracketScope) ? selected.get('scope') as BracketScope : 'playoffs' : gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const matchups = tab === 'matchups' ? await readSeasonMatchups(year, { scope, week: Number(selected.get('week')) }) : null;
+const bracket = tab === 'playoffs' ? await readSeasonBracket(year, { scope: scope as BracketScope }) : null;
+const season = await readSeason(year, { sort });
+const players = tab === 'players' && season ? await readContributors({}, { scope, season: year }) : null;
+if (!season) Astro.response.status = 404;
+if (season && (selected.has('tab') && !['standings', 'matchups', 'playoffs', 'players'].includes(selected.get('tab')!) || tab === 'standings' && selected.has('sort') && selected.get('sort') !== sort)) return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
+if (players && selected.has('scope') && selected.get('scope') !== scope) return Astro.redirect(`/seasons/${year}/?tab=players&scope=${scope}`, 302);
+if (matchups && (selected.has('scope') && selected.get('scope') !== scope || selected.has('week') && selected.get('week') !== String(matchups.week))) return Astro.redirect(`/seasons/${year}/?tab=matchups&scope=${scope}&week=${matchups.week}`, 302);
+if (bracket && (selected.has('scope') && selected.get('scope') !== scope || !bracket.availableScopes.includes(scope as BracketScope) && scope !== 'playoffs')) return Astro.redirect(`/seasons/${year}/?tab=playoffs&scope=playoffs`, 302);
+const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: 'exceptZero' }).format(value);
+---
+<MuseumLayout title={season ? `${year} ${tab}` : 'Season not found'} section="Seasons">
+  {season ? <>
+    <div class="page-heading season-heading">
+      <h1>{year}</h1>
+      <form action="/seasons/" method="get" class="season-switcher">
+        <label for="season-year">Season</label>
+        <select id="season-year" name="season">{seasons?.map(item => <option value={item.year} selected={item.year === year}>{item.year}</option>)}</select>
+        <input type="hidden" name="tab" value={tab} />{tab === 'standings' ? <input type="hidden" name="sort" value={sort} /> : <input type="hidden" name="scope" value={scope} />}
+        <button type="submit">Open season</button>
+      </form>
+    </div>
+    <p class="season-results">Champion {season.champion ? <a href={`/managers/${season.champion.id}/seasons/${year}/`}>{season.champion.name}</a> : <span>—</span>}<span aria-hidden="true"> · </span>Runner-up {season.runnerUp ? <a href={`/managers/${season.runnerUp.id}/seasons/${year}/`}>{season.runnerUp.name}</a> : <span>—</span>}</p>
+    <details class="season-format">
+      <summary>Season format</summary>
+      <dl>
+        <div><dt>Teams</dt><dd>{season.teams.length}</dd></div>
+        <div><dt>Lineup</dt><dd>{season.rosterPositions.join(', ')}</dd></div>
+        <div><dt>Playoffs begin</dt><dd>Week {Number(season.settings.playoff_week_start)}</dd></div>
+        <div><dt>Playoff places</dt><dd>{season.settings.playoff_teams == null ? '—' : Number(season.settings.playoff_teams)}</dd></div>
+        <div><dt>Playoff rounds</dt><dd>{season.settings.playoff_round_type === 2 ? 'Two weeks per round' : season.settings.playoff_round_type === 1 ? 'Two weeks in each bracket’s final round' : 'One week per round'}</dd></div>
+        {Object.entries(season.scoring).map(([key, value]) => <div><dt>{({ rec: 'Reception', pass_td: 'Passing touchdown' } as Record<string, string>)[key] ?? key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}
+      </dl>
+    </details>
+    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=playoffs&scope=${tab === 'playoffs' ? scope : 'playoffs'}`} aria-current={tab === 'playoffs' ? 'page' : undefined}>Playoffs</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
+    {matchups ? <SeasonMatchups selection={matchups} /> : bracket ? <SeasonBracket selection={bracket} /> : players ? <>
+      <form method="get" class="profile-controls season-player-controls"><input type="hidden" name="tab" value="players" /><label for="season-player-scope">Game scope</label><select id="season-player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show players</button></form>
+      <Contributors selection={players} />
+    </> : <>
+    <div class="table-toolbar"><p>Regular season</p><form method="get">
+      <input type="hidden" name="tab" value="standings" />
+      <label for="standing-sort">Sort standings</label>
+      <select id="standing-sort" name="sort">
+        <option value="standing" selected={sort === 'standing'}>Official standing</option>
+        <option value="name" selected={sort === 'name'}>Manager name</option>
+        <option value="record" selected={sort === 'record'}>Record</option>
+        <option value="points" selected={sort === 'points'}>Points</option>
+        <option value="scoring" selected={sort === 'scoring'}>Scoring vs league</option>
+        <option value="wins-expected" selected={sort === 'wins-expected'}>Wins vs expected</option>
+      </select>
+      <button type="submit">Apply order</button>
+    </form></div>
+    {season.rows.length ? <table class="history-table standings-table">
+      <caption class="visually-hidden">{year} regular-season standings</caption>
+      <thead><tr><th scope="col">Rank</th><th scope="col">Manager / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Scoring vs league</th><th scope="col">Wins vs expected</th></tr></thead>
+      <tbody>{season.rows.map(row => <tr>
+        <td class="standing-rank" data-label="Rank">{row.standing}</td>
+        <th scope="row"><div class="team-identity"><TeamImage name={row.name} src={row.avatar} /><div>
+          <a href={`/managers/${row.personId}/seasons/${year}/`}>{row.personName}</a>
+          {row.name !== row.personName && <span class="historical-team">{row.name}</span>}
+        </div></div></th>
+        <td class="standing-record" data-label="Record">{row.record}</td>
+        <td class="standing-points" data-label="Points">{displayNumber(row.points)}</td>
+        <td class="standing-comparison" data-label="Scoring vs league">{row.scoringVsLeague === null ? '—' : <a href={season.complete ? `/records/dominant-season/?season=${year}&result=${row.id}` : `/managers/${row.personId}/seasons/${year}/?scope=regular`}>{displayComparison(row.scoringVsLeague)}%</a>}</td>
+        <td class="standing-comparison" data-label="Wins vs expected">{row.winsVsExpected === null ? '—' : <a href={season.complete ? `/records/unluckiest-season/?season=${year}&result=${row.id}` : `/managers/${row.personId}/seasons/${year}/?scope=regular`}>{displayComparison(row.winsVsExpected)}</a>}</td>
+      </tr>)}</tbody>
+    </table> : <p class="empty-history">No results for this selection.</p>}
+    </>}
+  </> : <div class="not-found"><h1>Season not found</h1><p>This year is not in the league’s history.</p><a href="/seasons/">Browse seasons</a></div>}
+</MuseumLayout>
+<script>
+  // Reveal the selected local tab without moving page scroll or keyboard focus.
+  document.fonts.ready.then(() => {
+    const tabs = document.querySelector<HTMLElement>('.local-tabs');
+    const selected = tabs?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (tabs && selected && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = selected.offsetLeft - tabs.offsetLeft;
+  });
+</script>

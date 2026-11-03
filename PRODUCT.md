@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Astro with TypeScript is confirmed. The existing application is a synthetic Home prototype. The importer, durable history, remaining routes and automatic refresh still need implementation. Hosting, persistence, refresh scheduling and the project license remain implementation/setup choices.
+Astro and TypeScript serve the implemented museum from a durable atomic JSON publication on Node.js 24. Linked-season imports, all public route families and daily systemd refresh tooling are implemented. Project-authored code uses MIT. No public host, domain or scheduled service has been provisioned; see [docs/operations.md](docs/operations.md).
 
 ## Users
 
@@ -67,7 +67,7 @@ Do not add public calculation panels, source JSON, methodology dumps, operationa
 
 ESPN imports, provider-history merging, hosted multi-league management, visitor accounts, billing, league-management actions, live scoring, a commissioner CMS, manual recaps, photo collections and unsupported subjective awards are outside v1. Betting, projections, lineup recommendations, other fantasy sports, a native app and runtime language-model calls are also outside scope.
 
-The repository and tracker are configured on GitHub. Hosting, persistence, refresh scheduling and license remain unresolved setup choices. Actual historical point/event coverage still needs an audit before the agreed derived claims can be declared complete. These are implementation dependencies, not unselected visual directions.
+The repository and task graph are on GitHub. [ADR 0001](docs/adr/0001-local-node-delivery.md) records standalone Node delivery, durable JSON, daily locked systemd refresh and MIT. [docs/coverage.md](docs/coverage.md) records the bounded eight-season source audit and approved later-full-week move policy. Host provisioning and deployment-specific timer checks remain conditional on an available target. Final independent implementation/visual review and release disposition remain in progress.
 
 ## Brand Commitments
 
@@ -84,10 +84,10 @@ The existing prototype's inline public evidence reveal is superseded for the ful
 - [SPEC.md](SPEC.md) is reconciled with the walkthrough. [DESIGN-BRIEF.md](DESIGN-BRIEF.md) gives route/state/responsive contracts and the selected image index. [DESIGN.md](DESIGN.md) records existing visual tokens, with current applicability stated above its historical prototype documentation.
 - [docs/requirements.md](docs/requirements.md) tracks all original 54 stories and six additions. [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) gives local tickets and explicit dependencies.
 - Discovery on October 27, 2026 found eight linked seasons, 2019 through 2026, with ten rosters each; seven seasons were complete and 2026 ongoing at that inspection. This is dated research, not proof of complete coverage or the league's founding year.
-- Historical endpoint samples, including observed player-point fields in one 2019 week, support further audit rather than a completeness claim.
-- The actual application contains only Home and a synthetic JSON route, with six authored Playwright tests. No live history import is connected. No preview server was running at the November 3 handoff inspection.
+- The cached eight-season source replay passes through the real refresh into a durable archive. Controlled provider tests establish corrections, completed-week updates, exact ranks, attribution and failure retention; [docs/verification.md](docs/verification.md) records the final acceptance checks.
+- Public routes read the persisted publication, including six-category Home discovery, all record categories, people/franchises, seasons/brackets/matchups, rivalries and scoped player histories. No synthetic public fallback route remains.
 - Current team artwork comes from supplied/source assets. Mockup statistics, identities, timelines and dates remain fictional examples.
-- The public repository and GitHub Issues are configured at samfarls55/fantasy_football_history, with shared agent docs and five triage labels. The spec and tickets have not been published; no PR, deployment or full-platform implementation has started.
+- The public repository and GitHub Issues are configured at samfarls55/fantasy_football_history. Spec #1 and children #2–#19 are published with native relationships. Feature children #2–#18 are closed; #19 and the parent await final independent review and release handling. No deployment has been performed.
 
 ## Product Principles
 

@@ -1,0 +1,18 @@
+---
+import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
+import PlayerContributions from '../../../../components/PlayerContributions.astro';
+import { readPlayerContributions, playerContributionHref } from '../../../../history/contributions';
+import { gameScopes } from '../../../../history/read';
+import type { Scope } from '../../../../history/types';
+import '../../../../styles/profiles.css';
+const { person = '', player = '' } = Astro.params;
+const selected = Astro.url.searchParams;
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const identity = { personId: person };
+const history = await readPlayerContributions(identity, player, { scope, season: selected.get('season') ?? undefined, pickup: selected.get('pickup') ?? undefined });
+if (!history) Astro.response.status = 404;
+if (history && (selected.has('scope') && selected.get('scope') !== scope || selected.has('season') && selected.get('season') !== history.season)) return Astro.redirect(`${playerContributionHref(identity, player, { scope, season: history.season })}${history.pickup ? `&pickup=${encodeURIComponent(history.pickup.id)}` : ''}`, 302);
+---
+<MuseumLayout title={history ? `${history.player.name} · ${history.context.name}` : 'Player history not found'} section="Managers">
+  {history ? <PlayerContributions history={history} /> : <div class="not-found"><h1>Player history not found</h1><p>This player or team is not in the recorded history.</p><a href="/managers/">Browse managers</a></div>}
+</MuseumLayout>

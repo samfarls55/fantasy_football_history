@@ -1,0 +1,38 @@
+---
+import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
+import ProfileContext from '../../../../components/ProfileContext.astro';
+import ProfileHistoryControls from '../../../../components/ProfileHistoryControls.astro';
+import ProfileMatchupHistory from '../../../../components/ProfileMatchupHistory.astro';
+import Contributors from '../../../../components/Contributors.astro';
+import { readContributors, contributionViews, type ContributionView } from '../../../../history/contributions';
+import { readManagerSeason, managerGameSorts, type ManagerGameSort } from '../../../../history/managers';
+import { gameScopes } from '../../../../history/read';
+import type { Scope } from '../../../../history/types';
+import '../../../../styles/profiles.css';
+const { person = '', year = '' } = Astro.params;
+const selected = Astro.url.searchParams;
+const tab = selected.get('tab') === 'players' ? 'players' : 'matchups';
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const sort = managerGameSorts.includes(selected.get('sort') as ManagerGameSort) ? selected.get('sort') as ManagerGameSort : 'newest';
+const view = contributionViews.includes(selected.get('view') as ContributionView) ? selected.get('view') as ContributionView : 'all';
+const event = tab === 'players' && view === 'drops' ? selected.get('event') ?? undefined : undefined;
+const profile = await readManagerSeason(person, year, { scope, sort });
+const requestedYear = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : year;
+if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && !['matchups', 'players'].includes(selected.get('tab')!) || selected.has('view') && selected.get('view') !== view || selected.has('season'))) {
+  const params = new URLSearchParams({ ...(tab === 'players' ? { tab } : {}), scope, sort });
+  if (tab === 'players' && view !== 'all') params.set('view', view);
+  if (event && requestedYear === year) params.set('event', event);
+  return Astro.redirect(`/managers/${person}/seasons/${requestedYear}/?${params}`, 302);
+}
+if (!profile) Astro.response.status = 404;
+const players = tab === 'players' ? await readContributors({ personId: person }, { scope, season: year, view, event }) : null;
+const missingDrop = profile && tab === 'players' && event && !players;
+if (missingDrop) Astro.response.status = 404;
+---
+<MuseumLayout title={profile ? `${profile.name} · ${year}` : 'Manager season not found'} section="Managers">
+  {missingDrop ? <div class="not-found"><h1>Drop history not found</h1><p>This drop is not recorded for this person and season.</p><a href={`/managers/${person}/seasons/${year}/?tab=players&scope=${scope}&view=drops`}>View drops</a></div> : profile ? <>
+    <ProfileContext profile={profile} year={year} />
+    <ProfileHistoryControls kind="manager" tab={tab} scope={scope} years={profile.years} season={year} sort={sort} view={view} event={event} />
+    {players ? <Contributors selection={players} views /> : <ProfileMatchupHistory games={profile.games} year={year} scope={scope} />}
+  </> : <div class="not-found"><h1>Manager season not found</h1><p>This person has no recorded team in this year.</p><a href={`/managers/${person}/`}>View career</a></div>}
+</MuseumLayout>

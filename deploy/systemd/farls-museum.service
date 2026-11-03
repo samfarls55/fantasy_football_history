@@ -1,0 +1,18 @@
+[Unit]
+Description=Farls da bag public league history
+After=network.target
+
+[Service]
+Type=simple
+User=farls-museum
+Group=farls-museum
+WorkingDirectory=/opt/farls-museum
+EnvironmentFile=/etc/farls-museum.env
+Environment=NODE_ENV=production
+StateDirectory=farls-museum
+ExecStart=/usr/bin/node /opt/farls-museum/dist/server/entry.mjs
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

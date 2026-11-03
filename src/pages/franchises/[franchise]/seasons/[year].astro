@@ -1,0 +1,30 @@
+---
+import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
+import ProfileContext from '../../../../components/ProfileContext.astro';
+import ProfileHistoryControls from '../../../../components/ProfileHistoryControls.astro';
+import ProfileMatchupHistory from '../../../../components/ProfileMatchupHistory.astro';
+import Contributors from '../../../../components/Contributors.astro';
+import { readContributors } from '../../../../history/contributions';
+import { readFranchiseSeason } from '../../../../history/franchises';
+import { managerGameSorts, type ManagerGameSort } from '../../../../history/managers';
+import { gameScopes } from '../../../../history/read';
+import type { Scope } from '../../../../history/types';
+import '../../../../styles/profiles.css';
+const { franchise = '', year = '' } = Astro.params;
+const selected = Astro.url.searchParams;
+const tab = selected.get('tab') === 'players' ? 'players' : 'matchups';
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const sort = managerGameSorts.includes(selected.get('sort') as ManagerGameSort) ? selected.get('sort') as ManagerGameSort : 'newest';
+const profile = await readFranchiseSeason(franchise, year, { scope, sort });
+const requestedYear = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : year;
+if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && !['matchups', 'players'].includes(selected.get('tab')!) || selected.has('season'))) return Astro.redirect(`/franchises/${franchise}/seasons/${requestedYear}/?${tab === 'players' ? 'tab=players&' : ''}scope=${scope}&sort=${sort}`, 302);
+if (!profile) Astro.response.status = 404;
+const players = tab === 'players' ? await readContributors({ franchiseId: franchise }, { scope, season: year }) : null;
+---
+<MuseumLayout title={profile ? `${profile.team.name} · ${year}` : 'Franchise season not found'} section="Managers">
+  {profile ? <>
+    <ProfileContext profile={{ ...profile, name: profile.team.name }} year={year} />
+    <ProfileHistoryControls kind="franchise" tab={tab} scope={scope} years={profile.years} season={year} sort={sort} />
+    {players ? <Contributors selection={players} /> : <ProfileMatchupHistory games={profile.games} year={year} scope={scope} franchise />}
+  </> : <div class="not-found"><h1>Franchise season not found</h1><p>This franchise has no recorded team in this year.</p><a href={`/franchises/${franchise}/`}>View franchise history</a></div>}
+</MuseumLayout>

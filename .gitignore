@@ -4,6 +4,7 @@
 /.astro/
 /test-results/
 /playwright-report/
+/data/
 
 # Generated Impeccable build state and detector cache
 /.impeccable/build/

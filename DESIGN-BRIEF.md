@@ -198,7 +198,7 @@ Rows contain week, opponent, player points and official team result. Week links 
 
 A Franchise contributions link changes to the corresponding full-franchise scope explicitly. Phone uses stacked season/game rows. If the player had no starts in that scope, show genuine zero starts/points and an empty contributing-games table; missing point inputs remain unknown rather than zero.
 
-A pickup-category link can retain its selected acquisition spell. The visible acquisition context, totals and game list then use that spell, with a link back to the player's whole selected-manager history. Do not show full-career totals as if they were earned after one pickup.
+A pickup-category link retains its selected acquisition spell and year. Under Sam’s November 3, 2026 policy revision, the measure includes only full weeks after acquisition and before departure, or through season end; drop measures likewise exclude the drop week. The visible acquisition context, totals and game list then use that spell, with a link back to the player's whole selected-manager history. Do not show full-career totals as if they were earned after one pickup.
 
 ## Shared states and accessibility
 
@@ -223,10 +223,10 @@ Meet WCAG 2.2 AA contrast for ordinary text and controls. Preserve usable text a
 
 ## Delivery boundary and remaining choices
 
-The design is confirmed and ready to guide implementation. No full-platform application code has been written during this walkthrough. T00's repository/workflow setup is complete; its delivery choices remain open. The remaining local tickets are unstarted.
+The approved design now guides the implemented full platform. Standalone Node delivery, durable atomic JSON history, daily locked systemd refresh and MIT are recorded in [ADR 0001](docs/adr/0001-local-node-delivery.md). Feature issues #2–#18 are closed; final verification, independent reviews and release handling remain open under #19 and parent #1. [docs/verification.md](docs/verification.md) records the actual checks.
 
-The repository and issue destination are configured at [samfarls55/fantasy_football_history](https://github.com/samfarls55/fantasy_football_history). Hosting, durable storage, refresh schedule and open-source license remain open. Resolve those choices before the dependent build or deployment work. Publish the local spec/tickets with native parent-child and blocking relationships when that publication is invoked. No issue publication or PR action is authorized by this document.
+The repository and task graph are configured at [samfarls55/fantasy_football_history](https://github.com/samfarls55/fantasy_football_history). No external host, domain, scheduled service or timer has been provisioned. Deployment-specific service checks require an available chosen host; local publication and production-server checks do not establish deployment.
 
-Complete source coverage for player points and acquisition/drop attribution still needs verification. Existing samples demonstrate possible fields, not complete history. The implementation plan gives that work an explicit blocking ticket. If coverage cannot support the agreed claim, return the concrete gap to Sam instead of silently changing the ranking window.
+Source coverage is documented in docs/coverage.md and validated at refresh. Sam explicitly revised both move measures on November 3, 2026 to later weeks only, excluding move weeks; exact kickoff timing remains unsupported and is not needed for that window. Missing required inputs retain the last complete publication and produce operator diagnostics.
 
 The inherited root Impeccable receipt problem remains documented in [.impeccable/review/gate-blocker.md](.impeccable/review/gate-blocker.md). Design approval does not repair or close those old prototype phases. Use supported checks and record an accurate disposition during the actual implementation.

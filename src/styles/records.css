@@ -1,0 +1,89 @@
+.record-collection { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 32px; }
+.record-collection section { min-width: 0; }
+.record-collection h2 { color: #3a1769; font-size: 36px; line-height: 1.1; margin: 16px 0; }
+.collection-table { width: 100%; border-spacing: 0; table-layout: fixed; }
+.collection-table thead { background: #eee8f7; color: #51447f; text-transform: uppercase; font-size: 18px; }
+.collection-table thead th:first-child { border-top-left-radius: 12px; width: 40%; }
+.collection-table thead th:last-child { border-top-right-radius: 12px; width: 29%; }
+.collection-table th, .collection-table td { text-align: left; padding: 12px 14px; overflow-wrap: anywhere; vertical-align: middle; }
+.collection-table tbody th, .collection-table tbody td { border-bottom: 1px solid #ddd3f1; font-size: 22px; }
+.collection-table tbody th { font-weight: 700; }
+.collection-table tbody a { display: inline-flex; align-items: center; min-height: 44px; }
+.collection-table td { font-weight: 500; }
+.record-sample { display: block; font-size: 18px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.collection-holder { display: block; }
+.collection-holder + .collection-holder { margin-top: 8px; }
+.collection-table .collection-ranking { font-size: 18px; font-weight: 500; }
+.records-back { display: inline-flex; align-items: center; min-height: 44px; gap: 14px; text-decoration: none; color: var(--muted); margin-bottom: 22px; }
+.records-back > :first-child { font-size: 22px; }
+.record-heading { margin-bottom: 30px; }
+.record-lead { display: flex; align-items: center; gap: 42px; background: var(--lilac); border-radius: 16px; padding: 32px; margin-bottom: 26px; }
+.record-lead > .team-image { width: 220px; height: 220px; flex-basis: 220px; font-size: 54px; border-radius: 20px; border: 0; }
+.record-lead > .team-image img { border-radius: 20px; padding: 8px; }
+.record-lead-body { min-width: 0; }
+.record-lead h2 { font-size: clamp(28px, 2.7vw, 42px); line-height: 1.15; font-weight: 800; overflow-wrap: anywhere; }
+.record-lead h2 a { color: var(--ink); text-decoration-thickness: 1px; }
+.shared-lead, .record-detail { font-size: 22px; color: var(--muted); margin-bottom: 8px; }
+.leading-value { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; color: var(--violet); font-size: 30px; font-weight: 800; }
+.leading-value strong { font-size: clamp(52px, 6.7vw, 104px); line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.record-context, .lead-sample { font-size: 22px; color: var(--muted); margin-top: 10px; }
+.record-open { display: inline-flex; align-items: center; justify-content: space-between; gap: 40px; min-height: 48px; margin-top: 18px; padding: 8px 24px; border-radius: 10px; background: var(--violet); color: #fff; text-decoration: none; font-size: 23px; }
+.record-controls { display: flex; align-items: end; gap: 16px; flex-wrap: wrap; margin: 26px 0 24px; color: var(--muted); }
+.record-controls > div { display: grid; gap: 6px; min-width: 0; }
+.record-controls label { font-size: 18px; }
+.record-controls select { max-width: 100%; }
+.record-ranking { margin-bottom: 20px; }
+.record-ranking thead th:first-child { width: 8%; }
+.record-ranking thead th:nth-child(2) { width: 42%; }
+.record-ranking thead th:nth-child(3) { width: 25%; }
+.record-ranking thead th:last-child { width: 25%; }
+.record-ranking .record-result { font-variant-numeric: tabular-nums; }
+.record-ranking .record-when { color: var(--muted); font-size: 20px; font-weight: 400; }
+.record-ranking .selected-record, .record-ranking tr:target { background: var(--aqua); }
+.record-ranking tr { scroll-margin-top: 24px; }
+.record-more { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 22px; border: 1px solid #d1c3e9; border-radius: 8px; text-decoration: none; }
+.related-records { display: flex; gap: 10px 28px; flex-wrap: wrap; align-items: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid #e5ddf1; }
+.related-records h2 { flex-basis: 100%; font-size: 28px; }
+.related-records a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 1000px) {
+  .record-collection { gap: 32px 24px; }
+  .collection-table th, .collection-table td { padding: 10px 8px; }
+  .collection-table tbody th, .collection-table tbody td { font-size: 20px; }
+  .record-lead > .team-image { width: 160px; height: 160px; flex-basis: 160px; }
+  .record-ranking th, .record-ranking td { padding-inline: 16px; }
+}
+@media (max-width: 760px) {
+  .record-collection { grid-template-columns: 1fr; gap: 28px; }
+  .record-collection h2 { font-size: 32px; }
+  .collection-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .collection-table, .collection-table tbody { display: block; }
+  .collection-table tr { display: grid; grid-template-columns: 1fr; border-top: 1px solid #ddd3f1; padding: 12px 0 16px; gap: 4px; }
+  .collection-table tbody th, .collection-table tbody td { display: block; padding: 0; border: 0; font-size: 22px; }
+  .collection-table tbody td:last-child { font-size: 23px; }
+  .records-back { margin-bottom: 18px; }
+  .record-heading { margin-bottom: 24px; }
+  .record-lead { gap: 16px; padding: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .record-lead > .team-image { flex: 0 0 84px; width: 84px; height: 84px; font-size: 26px; border-radius: 16px; }
+  .record-lead > .team-image img { border-radius: 16px; }
+  .record-lead-body { flex: 1 1 190px; }
+  .record-lead h2 { font-size: 28px; }
+  .shared-lead, .record-detail { font-size: 19px; }
+  .leading-value { gap: 8px; font-size: 25px; }
+  .leading-value strong { font-size: 58px; }
+  .record-context, .lead-sample { font-size: 19px; }
+  .record-open { width: 100%; gap: 12px; font-size: 21px; }
+  .record-controls { gap: 14px 10px; }
+  .record-controls > div { flex: 1 1 140px; }
+  .record-controls > div:nth-child(2) { flex-basis: 100%; }
+  .record-ranking tr { grid-template-columns: 28px minmax(0, 1fr); gap: 12px; }
+  .record-ranking .record-rank { grid-column: 1; grid-row: 1; padding-top: 10px; }
+  .record-ranking tbody th { grid-column: 2; grid-row: 1; width: auto; }
+  .record-ranking .record-result { grid-column: 2; grid-row: 2; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+  .record-result::before { content: attr(data-label); font-size: 17px; color: var(--muted); font-weight: 400; text-transform: capitalize; }
+  .record-ranking .record-sample { flex-basis: 100%; margin: 0; }
+  .record-ranking .record-when { grid-column: 2; grid-row: 3; font-size: 18px; }
+}
+.leading-identity { display: inline; }
+.leading-identity:has(.record-sample) { display: inline-block; margin-right: 18px; margin-bottom: 8px; }
+.leading-identity:has(.record-sample) .leader-separator { display: none; }
+.record-secondary { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 20px; margin-top: 6px; font-weight: 400; }

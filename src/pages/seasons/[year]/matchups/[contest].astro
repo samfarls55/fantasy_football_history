@@ -1,0 +1,44 @@
+---
+import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
+import TeamImage from '../../../../components/TeamImage.astro';
+import LineupTable from '../../../../components/LineupTable.astro';
+import { readMatchup, gameScopes, competitionLabels } from '../../../../history/read';
+import type { Scope } from '../../../../history/types';
+const { year = '', contest = '' } = Astro.params;
+const query = Astro.url.searchParams;
+const game = await readMatchup(year, contest, { week: Number(query.get('week')) });
+if (!game) Astro.response.status = 404;
+const scope = gameScopes.includes(query.get('scope') as Scope) ? query.get('scope') as Scope : game?.competition ?? 'regular';
+if (game && (query.has('week') && query.get('week') !== String(game.week) || query.has('scope') && query.get('scope') !== scope)) {
+  const normalized = new URLSearchParams(query);
+  normalized.set('scope', scope); normalized.set('week', String(game.week));
+  return Astro.redirect(`${Astro.url.pathname}?${normalized}`, 302);
+}
+const heading = game ? `${game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.week}`} · ${year}` : 'Matchup not found';
+const format = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+const winner = game?.sides.find(side => side.personId === game.winnerId);
+---
+<MuseumLayout title={heading} section="Seasons">
+  {game ? <>
+    <div class="matchup-heading"><a href={`/seasons/${year}/?tab=matchups&scope=${scope}&week=${game.week}`}>‹ Back to {year} season</a><h1>{heading}</h1></div>
+    <p class="matchup-context">{competitionLabels[game.competition]}{game.complete && <span> · {game.tie ? 'Tie' : `${winner?.teamName} won`}</span>}</p>
+    <div class="scoreboard" aria-label="Official matchup scores">{game.sides.map(side => {
+      const lineup = game.lineups.find(lineup => lineup.rosterId === side.rosterId)!;
+      return <div class="score-team" data-selected={query.get('team') === side.rosterId ? 'true' : undefined}><TeamImage name={side.teamName} src={lineup.avatar} /><div>
+        <h2><a href={`/managers/${side.personId}/seasons/${year}/?scope=${scope}`}>{side.teamName}</a></h2>
+        {lineup.personName !== side.teamName && <p class="historical-team">{lineup.personName}</p>}
+        <strong aria-label={`Official score for ${side.teamName}`}>{format(game.complete ? side.points : lineup.points)}</strong>
+        {game.complete && game.weeks.length > 1 && <p class="historical-team" aria-label={`Official week ${game.week} score for ${side.teamName}`}>Week {game.week} · {format(lineup.points)} points</p>}
+      </div></div>;
+    })}</div>
+    {game.weeks.length > 1 && <nav class="week-links" aria-label="Weekly lineups">{game.completedWeeks.map(week => <a href={`?scope=${scope}&week=${week}${query.has('player') ? `&player=${encodeURIComponent(query.get('player')!)}` : ''}${query.has('team') ? `&team=${encodeURIComponent(query.get('team')!)}` : ''}`} aria-current={week === game.week ? 'page' : undefined}>Week {week}</a>)}</nav>}
+    <div class="lineup-grid">{game.lineups.map(lineup => <section class="team-lineups" aria-label={`${lineup.teamName} lineup`}>
+      <h2 class="lineup-team-heading">{lineup.teamName} lineup</h2>
+      <LineupTable players={lineup.starters} section="Starters" teamName={lineup.teamName} personId={lineup.personId} rosterId={lineup.rosterId} year={year} scope={scope} selectedPlayer={query.get('player')} selectedTeam={query.get('team')} />
+      <LineupTable players={lineup.bench} section="Bench" teamName={lineup.teamName} personId={lineup.personId} rosterId={lineup.rosterId} year={year} scope={scope} selectedPlayer={query.get('player')} selectedTeam={query.get('team')} />
+    </section>)}</div>
+  </> : <div class="not-found"><h1>Matchup not found</h1><p>This game is not in the league’s history.</p><a href={`/seasons/${year}/?tab=matchups`}>Browse season matchups</a></div>}
+</MuseumLayout>
+<style>
+  .score-team[data-selected="true"] :global(.team-image) { outline: 3px solid var(--violet); outline-offset: 3px; }
+</style>
