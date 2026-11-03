@@ -15,7 +15,7 @@ if (!groups) Astro.response.status = 503;
       <tbody>{group.categories.map(category => <tr>
         <th scope="row">{category.href ? <a href={category.href}>{category.name}</a> : category.name}</th>
         <td data-label="Holder">{category.leaders.length ? category.leaders.map((leader, index) => <span>{index > 0 && ', '}{leader.name}{category.leaders.length > 1 && leader.sample && <span class="record-sample">{leader.sample}</span>}</span>) : '—'}</td>
-        <td data-label="Value">{category.leaders.length ? <><strong>{formatRecordValue(category.leaders[0].value)}{category.unit === '%' ? '%' : ` ${recordUnit(category.unit, category.leaders[0].value)}`}</strong>{category.leaders.length === 1 && category.leaders[0].sample && <span class="record-sample">{category.leaders[0].sample}</span>}</> : '—'}</td>
+        <td data-label="Value">{category.leaders.length ? <><strong>{formatRecordValue(category.leaders[0].value, category.displayPrecision)}{category.unit === '%' ? '%' : ` ${recordUnit(category.unit, category.leaders[0].value)}`}</strong>{category.leaders.length === 1 && category.leaders[0].sample && <span class="record-sample">{category.leaders[0].sample}</span>}</> : '—'}</td>
       </tr>)}</tbody>
     </table>
   </section>)}</div> : <p class="empty-history">League history is unavailable.</p>}

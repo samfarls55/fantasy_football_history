@@ -126,6 +126,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     const playoffStart = integer(settings.playoff_week_start, `${path} playoff_week_start`);
     const lastScored = integer(settings.last_scored_leg, `${path} last_scored_leg`);
     if (start < 1 || playoffStart <= start || lastScored > 22) throw new Error(`${path}: unsupported week coverage`);
+    if (complete && lastScored < playoffStart - 1) throw new Error(`${path}: completed season has incomplete regular-season week coverage`);
     // A numeric score/leg alone is not completion evidence. Current weeks require
     // both league scoring progress and an NFL week that has already ended.
     if (!complete && year > stateSeason) throw new Error(`${path}: season lies after available NFL state`);
