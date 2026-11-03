@@ -68,7 +68,7 @@ export async function readFranchiseRivalries(franchiseId: string, options: Histo
   return { franchise, rows };
 }
 
-export async function readRivalriesPage(options: HistorySelection & { a?: string; b?: string; limit?: string } = {}) {
+export async function readRivalriesPage(options: HistorySelection & { a?: string; b?: string; limit?: 'all' } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   const people = archive.people.map(person => {
@@ -79,7 +79,19 @@ export async function readRivalriesPage(options: HistorySelection & { a?: string
   const b = people.find(person => person.id === options.b);
   const comparison = a && b && a.id !== b.id ? rivalry(archive, a, b, options) : null;
   const games = options.limit === 'all' ? comparison?.games ?? [] : comparison?.games.slice(0, 10) ?? [];
-  return { people, years: archive.seasons.map(season => season.year).sort((a, b) => b.localeCompare(a)), a: a?.id ?? '', b: b?.id ?? '', comparison, games,
+  const pairs = new Map<string, { a: Person; b: Person; meetings: number }>();
+  if (!comparison) for (const game of completedContests(archive, options)) {
+    if (options.season && game.year !== options.season) continue;
+    const [first, second] = game.sides.map(side => side.personId).sort();
+    const key = `${first}/${second}`;
+    const pair = pairs.get(key);
+    if (pair) pair.meetings++;
+    else pairs.set(key, { a: people.find(person => person.id === first)!, b: people.find(person => person.id === second)!, meetings: 1 });
+  }
+  const suggestions = [...pairs.values()]
+    .sort((left, right) => right.meetings - left.meetings || left.a.name.localeCompare(right.a.name) || left.b.name.localeCompare(right.b.name) || left.a.id.localeCompare(right.a.id) || left.b.id.localeCompare(right.b.id))
+    .slice(0, 3).map(pair => ({ ...pair, href: rivalryHref(pair.a.id, pair.b.id, options) }));
+  return { people, years: archive.seasons.map(season => season.year).sort((a, b) => b.localeCompare(a)), a: a?.id ?? '', b: b?.id ?? '', comparison, games, suggestions,
     nextHref: comparison && comparison.meetings > games.length ? rivalryHref(comparison.a.id, comparison.b.id, { ...options, limit: 'all' }) : null };
 }
 

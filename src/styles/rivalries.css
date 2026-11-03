@@ -1,3 +1,10 @@
+.rivalry-suggestions { margin-bottom: 28px; }
+.rivalry-suggestions h2 { font-size: 28px; margin-bottom: 8px; }
+.rivalry-suggestions ul { margin: 0; padding: 0; list-style: none; }
+.rivalry-suggestions li { border-bottom: 1px solid #e8e1f1; }
+.rivalry-suggestions a { display: flex; justify-content: space-between; align-items: baseline; gap: 12px 24px; min-height: 44px; padding: 12px 0; font-size: 23px; font-weight: 700; }
+.rivalry-suggestions a span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.rivalry-suggestions a span:last-child { flex-shrink: 0; color: var(--muted); font-size: 20px; font-weight: 400; }
 .rivalry-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto minmax(160px, auto); gap: 18px 24px; align-items: center; margin-bottom: 12px; }
 .rivalry-controls label { display: block; margin-bottom: 6px; font-size: 18px; color: var(--muted); }
 .rivalry-controls select { width: 100%; min-width: 0; }
@@ -8,12 +15,13 @@
 .rivalry-person select { color: var(--ink); font-weight: 800; font-size: 25px; }
 .rivalry-filter { min-width: 0; }
 .rivalry-controls button { grid-column: 4; justify-self: end; }
-.rivalry-actions { display: flex; justify-content: end; margin-bottom: 8px; font-size: 18px; }
-.rivalry-actions a { display: inline-flex; align-items: center; min-height: 44px; }
+.rivalry-comparison-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 24px; margin-top: 24px; }
+.rivalry-comparison-heading h2 { flex: 1; min-width: 0; font-size: 32px; overflow-wrap: anywhere; }
+.rivalry-comparison-heading a { display: inline-flex; align-items: center; min-height: 44px; font-size: 18px; }
 .rivalry-summary { display: flex; flex-wrap: wrap; gap: 16px 28px; margin: 10px 0 28px; font-size: 25px; }
 .rivalry-summary > div { display: flex; flex-wrap: wrap; gap: 6px 10px; padding-right: 28px; border-right: 1px solid #ddd3f1; }
 .rivalry-summary > div:last-child { border: 0; padding: 0; }
-.rivalry-summary dt { color: var(--muted); }
+.rivalry-summary dt { color: var(--muted); overflow-wrap: anywhere; }
 .rivalry-summary dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .rivalry-games th:first-child { width: 24%; }
 .rivalry-games th:nth-child(n+2) { width: 25.33%; }
@@ -35,6 +43,8 @@
   .rivalry-summary { font-size: 23px; }
 }
 @media (max-width: 760px) {
+  .rivalry-suggestions a { flex-direction: column; gap: 4px; }
+  .rivalry-comparison-heading h2 { flex-basis: 100%; font-size: 28px; }
   .rivalry-controls { grid-template-columns: 1fr; gap: 16px; }
   .rivalry-controls button { grid-column: 1; justify-self: stretch; }
   .rivalry-person .team-image { flex-basis: 64px; width: 64px; height: 64px; font-size: 22px; }

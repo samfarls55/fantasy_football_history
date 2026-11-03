@@ -8,6 +8,9 @@ export default async function setup() {
   // A positive later-week pickup without changing any established lineup or team-score facts.
   fixture.responses['league/900000000000002021/transactions/0'].push({ transaction_id: '930000000000000001', type: 'waiver', status: 'complete', leg: 0, status_updated: 1629999999000, adds: { '107': 7 }, drops: null, draft_picks: [], waiver_budget: [] });
   // Browser-only source edge cases, kept separate from the worked metric history.
+  fixture.responses['players/nfl']['60'] = { player_id: '60', full_name: null, first_name: 'Buffalo', last_name: 'Bills', position: 'DEF', team: 'BUF' };
+  fixture.responses['players/nfl']['102'] = { player_id: '102', full_name: null, position: 'DEF', team: 'BAL' };
+  fixture.responses['players/nfl']['101'] = { player_id: '101', full_name: null, position: 'DEF', team: null };
   fixture.responses['league/900000000000002021/users'][0].avatar = 'controlled-source-image';
   fixture.responses['league/900000000000002019/users'].find((user: any) => user.user_id === '472580465006473216').avatar = 'controlled-home-owner-image';
   fixture.responses['league/900000000000002021/rosters'][1].metadata = { team_name: 'The Museum Team With A Very Long Historical Name That Wraps Across Lines' };

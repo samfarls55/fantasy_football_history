@@ -65,8 +65,8 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', order: 'ascending', candidates: marginCandidates },
   { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', candidates: marginCandidates },
   { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games', candidates: benchCandidates },
-  { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
-  { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games', candidates: dropCandidates },
+  { key: 'productive-pickup', name: 'Pickups by starting points', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
+  { key: 'productive-drop', name: "Dropped players' starting points elsewhere", group: 'Players', unit: 'starting points elsewhere', scope: 'games', candidates: dropCandidates },
   { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games', candidates: contributionCandidates },
 ];
 export const recordSorts = ['rank', 'name', 'newest', 'oldest', 'value-asc'] as const;
