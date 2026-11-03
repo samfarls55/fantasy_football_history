@@ -105,7 +105,7 @@ export function contributionCandidates(archive: Archive, selection: RecordSelect
     const latest = [...row.performances].sort((a, b) => b.performance.year.localeCompare(a.performance.year) || b.performance.week - a.performance.week)[0].performance;
     const team = archive.seasons.find(season => season.id === latest.seasonId)!.teams.find(team => team.personId === row.owner.id)!;
     return { id: row.id, personId: row.owner.id, name: row.name, avatar: team.avatar, metric: row.metric,
-      sample: `${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
+      sample: `${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, leaderContext: `${row.owner.name} · ${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
       secondary: [{ name: row.owner.name, href: `/managers/${row.owner.id}/?tab=players&${query(selection.scope ?? 'regular', selection.season)}` }] };
   });
 }

@@ -7,6 +7,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('Players opens scoped starting history and retains year and game scope through actual games and franchise history', async ({ page }) => {
+  await page.goto('/records/player-contributions/?season=2020&scope=combined');
+  await expect(page.getByRole('columnheader', { name: 'Player / manager', exact: true })).toBeVisible();
+  await page.locator('.record-ranking tbody tr').filter({ hasText: 'Timh17' }).getByRole('link', { name: 'Synthetic Player 107', exact: true }).click();
+  await expect(page).toHaveURL(`/managers/${tim}/players/107/?scope=combined&season=2020`);
   await page.goto(`/managers/${tim}/?tab=players&scope=combined&season=2020`);
   await expect(page.getByRole('link', { name: 'Players', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.contributors-table')).toContainText('50.5');
