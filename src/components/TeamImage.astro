@@ -1,0 +1,16 @@
+---
+interface Props { name: string; src?: string | null }
+const { name, src } = Astro.props;
+const initials = name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+---
+<span class="team-image" aria-hidden="true">
+  <span>{initials}</span>
+  {src && <img src={src} alt="" width="44" height="44" loading="lazy" />}
+</span>
+<script>
+  document.querySelectorAll<HTMLImageElement>('.team-image img').forEach(image => {
+    const fallback = () => { image.hidden = true; };
+    image.addEventListener('error', fallback);
+    if (image.complete && !image.naturalWidth) fallback();
+  });
+</script>

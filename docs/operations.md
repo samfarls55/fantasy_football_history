@@ -39,7 +39,19 @@ npm run test:publication
 
 `publish` checks the archive envelope and atomically replaces the persisted publication. `inspect` reports the persisted league, season names and counts for operators. Tests exercise these actual commands in separate processes against a temporary durable directory, demonstrate a later correction, and prove incomplete or malformed candidate failure retains the previous successful history. They do not inspect private files to assert success.
 
-This proves storage/publication behavior. It does not claim a provider import, completed-week calculation or full public page exists yet. The real `npm run refresh` import command is supplied by issue #4, and issue #18 completes the archive-wide correction/failure behavior. Provider fixtures and public acceptance journeys exercise that same publication boundary as those slices land. A refresh must finish the complete candidate before publishing; a missing required input or request failure must not publish a partial replacement.
+The real configured provider import is now available:
+
+```sh
+npm run refresh
+```
+
+It uses `SLEEPER_LEAGUE_ID`, follows every linked previous season, validates source responses at import, retains their string IDs and source settings, and publishes one coherent archive through the same atomic boundary. Repeating an import replaces results rather than appending them. Current-season completion requires both league scoring progress and a passed NFL-state week; numeric current-week scores alone cannot enter standings. Request failures and missing required team scores fail the run with an endpoint diagnostic and retain the last successful history.
+
+The delivered public slice is `/seasons/` and `/seasons/[year]/`, with regular-season records and official points. `tab=standings` and `sort=standing|name|record|points` are shareable native GET selections. Unknown years return HTTP 404; invalid tab/order values redirect once to the valid default. Opening a year through the season selector retains the local selection. Source settings appear only as supported season-format content inside a closed disclosure. There is no public source endpoint or operational panel.
+
+At this stage, completed postseason matchup responses are preserved internally without inferred bracket membership. Contest/lineup browsing, postseason outcomes and comparison metrics are supplied by the dependent slices; the standings slice does not invent unresolved champions or comparison values. Issue #18 completes the archive-wide correction/failure behavior as those collections are added.
+
+`npm run test:publication` includes controlled-provider import-to-public-read tests as well as the independent publication command tests. Browser checks run a real controlled import into a dedicated per-run `MUSEUM_STORE_PATH`, then exercise the SSR pages. They never replace the default archive. The browser-only fixture adds a long historical roster name and a controlled avatar response to check wrapping and image failure. All recurring checks run without live provider requests.
 
 ## Production installation arrangement
 
