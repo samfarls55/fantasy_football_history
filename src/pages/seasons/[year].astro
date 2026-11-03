@@ -1,26 +1,31 @@
 ---
 import MuseumLayout from '../../layouts/MuseumLayout.astro';
 import TeamImage from '../../components/TeamImage.astro';
+import SeasonMatchups from '../../components/SeasonMatchups.astro';
+import { readSeasonMatchups, gameScopes } from '../../history/read';
+import type { Scope } from '../../history/types';
 import { readSeason, readSeasons, standingSorts, type StandingSort } from '../../history/read';
 const { year = '' } = Astro.params;
 const seasons = await readSeasons();
 const selected = Astro.url.searchParams;
 const sort = standingSorts.includes(selected.get('sort') as StandingSort) ? selected.get('sort') as StandingSort : 'standing';
+const tab = selected.get('tab') === 'matchups' ? 'matchups' : 'standings';
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+const matchups = tab === 'matchups' ? await readSeasonMatchups(year, { scope, week: Number(selected.get('week')) }) : null;
 const season = await readSeason(year, { sort });
 if (!season) Astro.response.status = 404;
-if (season && (selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && selected.get('tab') !== 'standings')) {
-  return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
-}
+if (season && (selected.has('tab') && !['standings', 'matchups'].includes(selected.get('tab')!) || tab === 'standings' && selected.has('sort') && selected.get('sort') !== sort)) return Astro.redirect(`/seasons/${year}/?tab=standings&sort=${sort}`, 302);
+if (matchups && (selected.has('scope') && selected.get('scope') !== scope || selected.has('week') && selected.get('week') !== String(matchups.week))) return Astro.redirect(`/seasons/${year}/?tab=matchups&scope=${scope}&week=${matchups.week}`, 302);
 const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
-<MuseumLayout title={season ? `${year} standings` : 'Season not found'} section="Seasons">
+<MuseumLayout title={season ? `${year} ${tab}` : 'Season not found'} section="Seasons">
   {season ? <>
     <div class="page-heading season-heading">
       <h1>{year}</h1>
       <form action="/seasons/" method="get" class="season-switcher">
         <label for="season-year">Season</label>
         <select id="season-year" name="season">{seasons.map(item => <option value={item.year} selected={item.year === year}>{item.year}</option>)}</select>
-        <input type="hidden" name="tab" value="standings" /><input type="hidden" name="sort" value={sort} />
+        <input type="hidden" name="tab" value={tab} />{tab === 'standings' ? <input type="hidden" name="sort" value={sort} /> : <input type="hidden" name="scope" value={scope} />}
         <button type="submit">Open season</button>
       </form>
     </div>
@@ -35,7 +40,8 @@ const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximu
         {Object.entries(season.scoring).map(([key, value]) => <div><dt>{({ rec: 'Reception', pass_td: 'Passing touchdown' } as Record<string, string>)[key] ?? key.replaceAll('_', ' ')}</dt><dd>{value}</dd></div>)}
       </dl>
     </details>
-    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current="page">Standings</a></nav>
+    <nav class="local-tabs" aria-label="Season views"><a href={`?tab=standings&sort=${sort}`} aria-current={tab === 'standings' ? 'page' : undefined}>Standings</a><a href={`?tab=matchups&scope=${scope}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a></nav>
+    {matchups ? <SeasonMatchups selection={matchups} /> : <>
     <div class="table-toolbar"><p>Regular season</p><form method="get">
       <input type="hidden" name="tab" value="standings" />
       <label for="standing-sort">Sort standings</label>
@@ -60,5 +66,6 @@ const displayNumber = (value: number) => new Intl.NumberFormat('en-US', { maximu
         <td class="standing-points" data-label="Points">{displayNumber(row.points)}</td>
       </tr>)}</tbody>
     </table> : <p class="empty-history">No results for this selection.</p>}
+    </>}
   </> : <div class="not-found"><h1>Season not found</h1><p>This year is not in the league’s history.</p><a href="/seasons/">Browse seasons</a></div>}
 </MuseumLayout>

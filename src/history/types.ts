@@ -22,6 +22,7 @@ export interface Performance {
   personId: string; franchiseId: string; rosterId: string; teamName: string;
   competition: Competition; points: number; sourcePoints: number; overridePoints: number | null;
   starters: LineupPlayer[]; bench: LineupPlayer[];
+  weeklyMatchupId: string;
   /** Only provider-supported historical precision. Year/week labels are not fabricated dates. */
   playedAt: string | null;
 }
@@ -30,6 +31,8 @@ export interface Contest {
   id: string; seasonId: string; year: string; competition: Competition;
   weeks: number[]; sides: [ContestSide, ContestSide]; performanceIds: string[];
   winnerId: string | null; tie: boolean; championship: boolean; round: number | null;
+  /** Only finalized contests enter W-L-T; completed legs may exist before this is true. */
+  complete: boolean; bracketId: string | null;
   playedAt: string | null;
 }
 export interface BracketEntry {
@@ -37,6 +40,9 @@ export interface BracketEntry {
   rosterA: string | null; rosterB: string | null; winnerRosterId: string | null;
   loserRosterId: string | null; placement: number | null; contestId: string | null;
   weeks: number[]; bye: boolean;
+  family: 'winners' | 'losers'; championship: boolean;
+  fromA: { outcome: 'w' | 'l'; match: number } | null;
+  fromB: { outcome: 'w' | 'l'; match: number } | null;
 }
 export interface Transaction {
   id: string; seasonId: string; year: string; week: number;

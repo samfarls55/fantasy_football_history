@@ -1,5 +1,6 @@
 import { loadArchive, publishArchive, configuredStorePath } from './store.ts';
-import type { Archive, Provider, RefreshOptions, RefreshResult, Season, SeasonTeam, ContestSide } from './types.ts';
+import type { Archive, Provider, RefreshOptions, RefreshResult, Season, SeasonTeam, ContestSide, BracketEntry } from './types.ts';
+import { sumPoints } from './decimal.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {
@@ -24,6 +25,57 @@ function integer(value: unknown, path: string): number {
   return result;
 }
 function sourceId(value: unknown, path: string): string { return String(integer(value, path)); }
+
+function bracketEntries(value: unknown, path: string, season: Season, family: BracketEntry['family']): BracketEntry[] {
+  const playoffStart = Number(season.settings.playoff_week_start);
+  const from = (value: unknown): BracketEntry['fromA'] => {
+    if (value == null) return null;
+    const edge = object(value, `${path} progression`);
+    const outcome = edge.w != null ? 'w' : 'l';
+    return { outcome, match: integer(edge[outcome], `${path} progression ${outcome}`) };
+  };
+  const entries = list(value, path).map((value): BracketEntry => {
+    const row = object(value, path);
+    const match = integer(row.m, `${path} m`);
+    const round = integer(row.r, `${path} r`);
+    const roster = (value: unknown) => value == null ? null : sourceId(value, `${path} roster`);
+    return { id: `${season.id}-${family}-m${match}`, family, competition: family === 'losers' ? 'consolation' : 'placement', championship: false, round, match, rosterA: roster(row.t1), rosterB: roster(row.t2), winnerRosterId: roster(row.w), loserRosterId: roster(row.l), placement: row.p == null ? null : integer(row.p, `${path} p`), contestId: null, weeks: [playoffStart + round - 1], bye: false, fromA: from(row.t1_from), fromB: from(row.t2_from) };
+  });
+  const roundType = season.settings.playoff_round_type;
+  if (entries.length && roundType != null && ![0, 1, 2].includes(roundType as number)) throw new Error(`${path}: unsupported playoff_round_type ${String(roundType)}`);
+  if (entries.length && [1, 2].includes(roundType as number) && Number(season.year) < 2021) throw new Error(`${path}: unverified historical playoff_round_type ${String(roundType)} in ${season.year}`);
+  if (entries.length && roundType == null && !season.complete) throw new Error(`${path}: missing playoff_round_type requires completed pairing evidence`);
+  if (season.settings.playoff_round_type === 1 && Number(season.year) >= 2021) {
+    const terminalRound = Math.max(...entries.map(entry => entry.round));
+    for (const entry of entries) if (entry.round === terminalRound) entry.weeks.push(entry.weeks[0] + 1);
+  }
+  if (season.settings.playoff_round_type === 2 && Number(season.year) >= 2021) {
+    for (const entry of entries) {
+      const first = playoffStart + 2 * (entry.round - 1);
+      entry.weeks = [first, first + 1];
+    }
+  }
+  if (new Set(entries.map(entry => entry.match)).size !== entries.length) throw new Error(`${path}: duplicate bracket match`);
+  if (family === 'winners' && entries.length) {
+    const finals = entries.filter(entry => entry.placement === 1);
+    if (finals.length !== 1) throw new Error(`${path}: championship path needs one title contest`);
+    const visit = (entry: BracketEntry, ancestors: Set<number>) => {
+      if (ancestors.has(entry.match)) throw new Error(`${path}: cyclic bracket progression`);
+      entry.competition = 'playoffs';
+      for (const edge of [entry.fromA, entry.fromB]) {
+        if (!edge) continue;
+        if (edge.outcome !== 'w') throw new Error(`${path}: title path contains a loser edge`);
+        const parent = entries.find(item => item.match === edge.match);
+        if (!parent || parent.round >= entry.round) throw new Error(`${path}: invalid bracket progression`);
+        visit(parent, new Set([...ancestors, entry.match]));
+      }
+    };
+    finals[0].championship = true;
+    visit(finals[0], new Set());
+    for (const entry of entries) if (entry.competition !== 'playoffs' && entry.placement === null && ![entry.fromA, entry.fromB].some(edge => edge?.outcome === 'l')) throw new Error(`${path}: unclassified main-bracket contest ${entry.match}; missing championship ancestry`);
+  }
+  return entries;
+}
 
 export const sleeperProvider: Provider = {
   async get(path) {
@@ -53,6 +105,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
   const state = object(await get('state/nfl'), 'state/nfl');
   const stateSeason = string(state.season, 'state/nfl season');
   const stateWeek = integer(state.week, 'state/nfl week');
+  const playerSource = object(await get('players/nfl'), 'players/nfl');
   let next: string | null = leagueId;
   const seen = new Set<string>();
   while (next) {
@@ -103,6 +156,10 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     if (new Set(teams.map(team => team.rosterId)).size !== teams.length) throw new Error(`${path}/rosters: duplicate roster ID`);
     const season: Season = { id, year, name: string(league.name, `${path} name`), previousLeagueId, complete, completedWeeks, regularWeeks: completedWeeks.filter(week => week < playoffStart), teams, scoring, settings, rosterPositions, championId: null, runnerUpId: null, playoffPersonIds: [], bracket: [] };
     archive.seasons.push(season);
+    season.bracket = [
+      ...bracketEntries(await get(`${path}/winners_bracket`), `${path}/winners_bracket`, season, 'winners'),
+      ...bracketEntries(await get(`${path}/losers_bracket`), `${path}/losers_bracket`, season, 'losers'),
+    ];
     for (const week of completedWeeks) {
       const weekPath = `${path}/matchups/${week}`;
       const rows = list(await get(weekPath), weekPath).map((value, index) => {
@@ -113,12 +170,27 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
         const sourcePoints = number(row.points, `${weekPath} points`);
         const overridePoints = row.custom_points == null ? null : number(row.custom_points, `${weekPath} custom_points`);
         const matchupId = row.matchup_id == null ? null : sourceId(row.matchup_id, `${weekPath} matchup_id`);
-        return { team, sourcePoints, overridePoints, points: overridePoints ?? sourcePoints, matchupId };
+        const starters = list(row.starters, `${weekPath} starters`).map((value, index) => value == null ? '0' : string(value, `${weekPath} starter ${index}`));
+        const players = list(row.players, `${weekPath} players`).map(value => string(value, `${weekPath} player`));
+        const playerPoints = object(row.players_points, `${weekPath} players_points`);
+        const starterPoints = list(row.starters_points, `${weekPath} starters_points`);
+        const slots = rosterPositions.filter(slot => !['BN', 'IR', 'TAXI'].includes(slot));
+        const lineup = starters.flatMap((playerId, index) => {
+          if (playerId === '0') return [];
+          const recorded = playerPoints[playerId] ?? starterPoints[index];
+          if (matchupId !== null && recorded == null) throw new Error(`${weekPath}: missing starter points for roster ${rosterId}, player ${playerId}; player contribution coverage is incomplete`);
+          return [{ playerId, slot: slots[index] ?? null, points: recorded == null ? null : number(recorded, `${weekPath} starter points`) }];
+        });
+        const bench = players.filter(playerId => !starters.includes(playerId) && playerId !== '0').map(playerId => ({ playerId, slot: null, points: playerPoints[playerId] == null ? null : number(playerPoints[playerId], `${weekPath} bench points`) }));
+        for (const player of bench) if (matchupId !== null && player.points === null) archive.coverage.push({ seasonId: id, area: 'player-points', detail: `${weekPath}: missing bench points for roster ${rosterId}, player ${player.playerId}`, blocks: ['benched-player'] });
+        for (const playerId of [...starters, ...players]) {
+          if (playerId === '0' || archive.players.some(player => player.id === playerId)) continue;
+          const source = playerSource[playerId] == null ? null : object(playerSource[playerId], `players/nfl ${playerId}`);
+          archive.players.push({ id: playerId, name: typeof source?.full_name === 'string' && source.full_name.trim() ? source.full_name : `Player ${playerId}`, position: typeof source?.position === 'string' ? source.position : null });
+        }
+        return { team, sourcePoints, overridePoints, points: overridePoints ?? sourcePoints, matchupId, starters: lineup, bench };
       });
       if (rows.length !== teams.length || new Set(rows.map(row => row.team.rosterId)).size !== teams.length) throw new Error(`${weekPath}: incomplete weekly roster coverage`);
-      // Postseason pairing/format normalization is owned by the contest slice.
-      // Preserve its complete source input without inferring bracket membership.
-      if (week >= playoffStart) continue;
       const pairs = new Map<string, typeof rows>();
       for (const row of rows) {
         if (row.matchupId === null) continue;
@@ -127,14 +199,36 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
       }
       for (const [matchupId, pair] of pairs) {
         if (pair.length !== 2) throw new Error(`${weekPath}: matchup ${matchupId} does not have two sides`);
-        const contestId = `${id}-w${week}-m${matchupId}`;
+        const bracket = week < playoffStart ? null : season.bracket.filter(entry => entry.weeks.includes(week) && [entry.rosterA, entry.rosterB].every(rosterId => pair.some(row => row.team.rosterId === rosterId)));
+        if (bracket && bracket.length !== 1) throw new Error(`${weekPath}: cannot unambiguously match roster pair to supported bracket contest`);
+        const entry = bracket?.[0];
+        const competition = entry?.competition ?? 'regular';
+        const contestId = entry?.id ?? `${id}-w${week}-m${matchupId}`;
         const sides = pair.map(({ team, points }): ContestSide => ({ personId: team.personId, franchiseId: team.franchiseId, rosterId: team.rosterId, teamName: team.name, points })) as [ContestSide, ContestSide];
         const tie = sides[0].points === sides[1].points;
         const winnerId = tie ? null : sides[sides[0].points > sides[1].points ? 0 : 1].personId;
-        archive.contests.push({ id: contestId, seasonId: id, year, competition: 'regular', weeks: [week], sides, performanceIds: pair.map(row => `${id}-w${week}-r${row.team.rosterId}`), winnerId, tie, championship: false, round: null, playedAt: null });
-        for (const row of pair) archive.performances.push({ id: `${id}-w${week}-r${row.team.rosterId}`, contestId, seasonId: id, year, week, personId: row.team.personId, franchiseId: row.team.franchiseId, rosterId: row.team.rosterId, teamName: row.team.name, competition: 'regular', points: row.points, sourcePoints: row.sourcePoints, overridePoints: row.overridePoints, starters: [], bench: [], playedAt: null });
+        const performanceIds = pair.map(row => `${id}-w${week}-r${row.team.rosterId}`);
+        const existing = archive.contests.find(game => game.id === contestId);
+        if (existing) {
+          existing.performanceIds.push(...performanceIds);
+          for (const side of existing.sides) side.points = sumPoints([...archive.performances.filter(performance => performance.contestId === contestId && performance.rosterId === side.rosterId).map(performance => performance.points), sides.find(item => item.rosterId === side.rosterId)!.points]);
+        } else archive.contests.push({ id: contestId, seasonId: id, year, competition, weeks: entry?.weeks ?? [week], sides, performanceIds, winnerId, tie, championship: entry?.championship ?? false, round: entry?.round ?? null, complete: !entry, bracketId: entry?.id ?? null, playedAt: null });
+        if (entry) entry.contestId = contestId;
+        for (const row of pair) archive.performances.push({ id: `${id}-w${week}-r${row.team.rosterId}`, contestId, seasonId: id, year, week, personId: row.team.personId, franchiseId: row.team.franchiseId, rosterId: row.team.rosterId, teamName: row.team.name, competition, points: row.points, sourcePoints: row.sourcePoints, overridePoints: row.overridePoints, weeklyMatchupId: matchupId, starters: row.starters, bench: row.bench, playedAt: null });
       }
     }
+    for (const entry of season.bracket) {
+      if (entry.rosterA === null || entry.rosterB === null) continue;
+      const contest = archive.contests.find(game => game.id === entry.id);
+      for (const week of entry.weeks.filter(week => completedWeeks.includes(week))) {
+        if (archive.performances.filter(performance => performance.contestId === entry.id && performance.week === week).length !== 2) throw new Error(`${path}: missing paired bracket leg for ${entry.family} match ${entry.match}, week ${week}`);
+      }
+      if (!contest) continue;
+      contest.complete = entry.weeks.every(week => completedWeeks.includes(week)) && entry.winnerRosterId !== null && entry.loserRosterId !== null && [entry.rosterA, entry.rosterB].includes(entry.winnerRosterId) && [entry.rosterA, entry.rosterB].includes(entry.loserRosterId) && entry.winnerRosterId !== entry.loserRosterId;
+      contest.tie = contest.complete && contest.sides[0].points === contest.sides[1].points;
+      contest.winnerId = !contest.complete || contest.tie ? null : contest.sides[contest.sides[0].points > contest.sides[1].points ? 0 : 1].personId;
+    }
+    if (settings.playoff_round_type == null && season.bracket.some(entry => !archive.contests.some(contest => contest.id === entry.id && contest.complete))) throw new Error(`${path}: missing playoff_round_type lacks complete actual pairing evidence`);
     next = previousLeagueId;
   }
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));

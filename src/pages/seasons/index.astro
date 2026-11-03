@@ -5,6 +5,10 @@ const seasons = await readSeasons();
 const requested = Astro.url.searchParams.get('season');
 if (requested) {
   const query = new URLSearchParams({ tab: Astro.url.searchParams.get('tab') ?? 'standings', sort: Astro.url.searchParams.get('sort') ?? 'standing' });
+  if (query.get('tab') === 'matchups') {
+    query.delete('sort');
+    query.set('scope', Astro.url.searchParams.get('scope') ?? 'regular');
+  }
   return Astro.redirect(`/seasons/${encodeURIComponent(requested)}/?${query}`, 302);
 }
 ---

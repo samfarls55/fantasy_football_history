@@ -26,6 +26,8 @@ Only completed results enter finalized records. A missing response, a scheduled 
 
 Do not infer championship-path membership from a week number alone. Preserve the season's actual bracket and format. A bye has no win or player start. Count each resolved multiweek playoff contest once for W-L-T; only the championship contest can award a title. A playoff appearance counts the qualifying season once, including a qualifying bye. Weekly legs remain available for player starts and individual weekly team-score records; label the week when linking such a performance.
 
+[Sleeper format evidence](sleeper-formats.md) records supported round-type semantics, bracket/weekly identity pairing, raw lower-bracket advancement and coverage gates. Shared `completedContests` filters explicit completion for W-L-T; weekly points and starts use completed `performances`, including the available legs of an unfinished multiweek contest.
+
 Career points sum eligible official scored team performances. Win percentage uses decided contests, with half credit for tied contests. These units differ for a multiweek contest, so do not derive game count from the count of player-point rows.
 
 Completed current-season games count in career/game/player totals. Completed-season awards wait for the season to finish. Champion and runner-up remain unknown until the title contest resolves. The visitor sees historical content, without an ongoing/update-status badge.
