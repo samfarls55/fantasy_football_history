@@ -1,6 +1,8 @@
 ---
 import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../../components/ProfileContext.astro';
+import Contributors from '../../../../components/Contributors.astro';
+import { readContributors } from '../../../../history/contributions';
 import TeamImage from '../../../../components/TeamImage.astro';
 import { readManagerSeason, managerGameSorts, type ManagerGameSort } from '../../../../history/managers';
 import { gameScopes, competitionLabels } from '../../../../history/read';
@@ -8,27 +10,30 @@ import type { Scope } from '../../../../history/types';
 import '../../../../styles/profiles.css';
 const { person = '', year = '' } = Astro.params;
 const selected = Astro.url.searchParams;
+const tab = selected.get('tab') === 'players' ? 'players' : 'matchups';
 const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
 const sort = managerGameSorts.includes(selected.get('sort') as ManagerGameSort) ? selected.get('sort') as ManagerGameSort : 'newest';
 const profile = await readManagerSeason(person, year, { scope, sort });
 const requestedYear = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : year;
-if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && selected.get('tab') !== 'matchups' || selected.has('season'))) return Astro.redirect(`/managers/${person}/seasons/${requestedYear}/?scope=${scope}&sort=${sort}`, 302);
+if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && !['matchups', 'players'].includes(selected.get('tab')!) || selected.has('season'))) return Astro.redirect(`/managers/${person}/seasons/${requestedYear}/?${tab === 'players' ? 'tab=players&' : ''}scope=${scope}&sort=${sort}`, 302);
 if (!profile) Astro.response.status = 404;
+const players = tab === 'players' ? await readContributors({ personId: person }, { scope, season: year }) : null;
 const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
 <MuseumLayout title={profile ? `${profile.name} · ${year}` : 'Manager season not found'} section="Managers">
   {profile ? <>
     <ProfileContext profile={profile} year={year} />
     <div class="profile-local-heading">
-      <nav class="local-tabs" aria-label="Manager season views"><a href={`?tab=matchups&scope=${scope}&sort=${sort}`} aria-current="page">Matchups</a></nav>
+      <nav class="local-tabs" aria-label="Manager season views"><a href={`?tab=matchups&scope=${scope}&sort=${sort}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
       <form method="get" class="profile-controls">
+        {tab === 'players' && <input type="hidden" name="tab" value="players" />}
         <label for="manager-season">Season</label><select id="manager-season" name="season">{profile.years.map(value => <option value={value} selected={year === value}>{value}</option>)}</select>
         <label for="season-scope">Game scope</label><select id="season-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
-        <label for="manager-sort">Sort games</label><select id="manager-sort" name="sort"><option value="newest" selected={sort === 'newest'}>Newest first</option><option value="oldest" selected={sort === 'oldest'}>Oldest first</option><option value="points" selected={sort === 'points'}>Most points</option></select>
-        <button type="submit">Show matchups</button>
+        {tab === 'matchups' && <><label for="manager-sort">Sort games</label><select id="manager-sort" name="sort"><option value="newest" selected={sort === 'newest'}>Newest first</option><option value="oldest" selected={sort === 'oldest'}>Oldest first</option><option value="points" selected={sort === 'points'}>Most points</option></select></>}
+        <button type="submit">{tab === 'players' ? 'Show players' : 'Show matchups'}</button>
       </form>
     </div>
-    {profile.games.length ? <table class="history-table manager-games-table">
+    {players ? <Contributors selection={players} /> : profile.games.length ? <table class="history-table manager-games-table">
       <caption class="visually-hidden">{year} matchup history</caption>
       <thead><tr><th scope="col">Week</th><th scope="col">Opponent / team</th><th scope="col">Score</th><th scope="col">Result</th></tr></thead>
       <tbody>{profile.games.map(game => <tr>

@@ -1,6 +1,7 @@
 import { loadArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
+import { contributionCandidates } from './contributions.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
@@ -63,7 +64,7 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games' },
   { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games' },
   { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games' },
-  { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games' },
+  { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games', candidates: contributionCandidates },
 ];
 export const recordSorts = ['rank', 'name', 'newest', 'oldest', 'value-asc'] as const;
 export type RecordSort = typeof recordSorts[number];
