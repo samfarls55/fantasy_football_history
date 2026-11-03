@@ -7,6 +7,7 @@ const { history } = Astro.props;
 ---
 <section class="drop-context" aria-labelledby="selected-drop-heading">
   <div class="contributor-heading"><div><h2 id="selected-drop-heading">{history.player.name}</h2><p class="drop-period">{history.year} · Week {history.week} drop</p></div></div>
+  <p class="contribution-definition">Actual starts for other managers after Week {history.week} in {history.year}. The drop week is excluded.</p>
   <dl class="contribution-facts"><div><dt>starting points elsewhere</dt><dd>{formatRecordValue(history.points)}</dd></div><div><dt>{history.starts === 1 ? 'start' : 'starts'}</dt><dd>{history.starts}</dd></div></dl>
   <h3>Receiving managers</h3>
   {history.receivers.length ? <table class="history-table drop-receivers">
