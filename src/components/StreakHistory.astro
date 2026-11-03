@@ -1,0 +1,19 @@
+---
+import type { readStreakHistory } from '../history/game-records';
+interface Props { history: NonNullable<Awaited<ReturnType<typeof readStreakHistory>>> }
+const { history } = Astro.props;
+const label = history.kind === 'winning' ? 'Winning' : 'Losing';
+const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+---
+<p class="streak-interval">{label} streak · {history.count} {history.count === 1 ? 'game' : 'games'} · {history.interval}</p>
+<table class="history-table manager-games-table streak-history">
+  <caption class="visually-hidden">{label} streak history</caption>
+  <thead><tr><th scope="col">When</th><th scope="col">Opponent</th><th scope="col">Score</th><th scope="col">Result</th></tr></thead>
+  <tbody>{history.games.map(game => <tr>
+    <th scope="row"><a href={game.href}>{game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`} · {game.year}</a></th>
+    <td>{game.opponentName}</td><td data-label="Score">{number(game.points)} – {number(game.opponentPoints)}</td><td data-label="Result">{game.result}</td>
+  </tr>)}</tbody>
+</table>
+<style>
+  .streak-interval { margin: 20px 0 16px; color: var(--muted); font-size: 22px; }
+</style>

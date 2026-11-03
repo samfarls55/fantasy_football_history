@@ -24,10 +24,11 @@ const winner = game?.sides.find(side => side.personId === game.winnerId);
     <p class="matchup-context">{competitionLabels[game.competition]}{game.complete && <span> · {game.tie ? 'Tie' : `${winner?.teamName} won`}</span>}</p>
     <div class="scoreboard" aria-label="Official matchup scores">{game.sides.map(side => {
       const lineup = game.lineups.find(lineup => lineup.rosterId === side.rosterId)!;
-      return <div class="score-team"><TeamImage name={side.teamName} src={lineup.avatar} /><div>
+      return <div class="score-team" data-selected={query.get('team') === side.rosterId ? 'true' : undefined}><TeamImage name={side.teamName} src={lineup.avatar} /><div>
         <h2><a href={`/managers/${side.personId}/seasons/${year}/?scope=${scope}`}>{side.teamName}</a></h2>
         {lineup.personName !== side.teamName && <p class="historical-team">{lineup.personName}</p>}
         <strong aria-label={`Official score for ${side.teamName}`}>{format(game.complete ? side.points : lineup.points)}</strong>
+        {game.complete && game.weeks.length > 1 && <p class="historical-team" aria-label={`Official week ${game.week} score for ${side.teamName}`}>Week {game.week} · {format(lineup.points)} points</p>}
       </div></div>;
     })}</div>
     {game.weeks.length > 1 && <nav class="week-links" aria-label="Weekly lineups">{game.completedWeeks.map(week => <a href={`?scope=${scope}&week=${week}${query.has('player') ? `&player=${encodeURIComponent(query.get('player')!)}` : ''}${query.has('team') ? `&team=${encodeURIComponent(query.get('team')!)}` : ''}`} aria-current={week === game.week ? 'page' : undefined}>Week {week}</a>)}</nav>}
@@ -38,3 +39,6 @@ const winner = game?.sides.find(side => side.personId === game.winnerId);
     </section>)}</div>
   </> : <div class="not-found"><h1>Matchup not found</h1><p>This game is not in the league’s history.</p><a href={`/seasons/${year}/?tab=matchups`}>Browse season matchups</a></div>}
 </MuseumLayout>
+<style>
+  .score-team[data-selected="true"] :global(.team-image) { outline: 3px solid var(--violet); outline-offset: 3px; }
+</style>

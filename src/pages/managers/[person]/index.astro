@@ -1,9 +1,11 @@
 ---
 import MuseumLayout from '../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../components/ProfileContext.astro';
+import StreakHistory from '../../../components/StreakHistory.astro';
 import ProfileRivalries from '../../../components/ProfileRivalries.astro';
 import { readManagerRivalries } from '../../../history/rivalries';
 import { readManager } from '../../../history/managers';
+import { readStreakHistory } from '../../../history/game-records';
 import { gameScopes, competitionLabels } from '../../../history/read';
 import type { Scope } from '../../../history/types';
 import '../../../styles/profiles.css';
@@ -15,6 +17,7 @@ let profile = await readManager(person, { scope });
 const season = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : undefined;
 if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('season') && selected.get('season') !== season || selected.has('tab') && selected.get('tab') !== tab)) return Astro.redirect(`/managers/${person}/?tab=${tab}&scope=${scope}${season ? `&season=${season}` : ''}`, 302);
 if (season) profile = await readManager(person, { scope, season });
+const streak = tab === 'seasons' ? await readStreakHistory(person, { scope, season, streak: selected.get('streak'), from: selected.get('from'), through: selected.get('through') }) : null;
 if (!profile) Astro.response.status = 404;
 const rivalries = profile && tab === 'rivalries' ? await readManagerRivalries(profile.id, { scope, season }) : null;
 const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
@@ -31,7 +34,7 @@ const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFracti
         <button type="submit">Show history</button>
       </form>
     </div>
-    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : <table class="history-table career-seasons-table">
+    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : streak ? <StreakHistory history={streak} /> : <table class="history-table career-seasons-table">
       <caption class="visually-hidden">Season history</caption>
       <thead><tr><th scope="col">Year / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Finish</th><th scope="col">Playoffs</th></tr></thead>
       <tbody>{profile.seasons.map(row => <tr>
