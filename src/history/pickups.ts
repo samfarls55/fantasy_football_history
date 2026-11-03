@@ -30,7 +30,7 @@ export async function readPickups(identity: ContributionIdentity = {}, selection
   return archive ? { rows: contextualPickups(archive, identity, selection), scope: selection.scope ?? 'regular', season: selection.season } : null;
 }
 export function pickupCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
-  return pickups(archive, {}, selection).map(row => ({ id: row.spell.id, personId: row.person.id, name: row.player.name, avatar: row.team.avatar, metric: row.metric,
+  return pickups(archive, {}, selection).map(row => ({ id: row.spell.id, personId: row.person.id, name: row.player.name, avatar: null, metric: row.metric,
     sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · ${row.spell.year} · Week ${row.spell.addWeek} pickup`,
     period: { year: row.spell.year, week: Math.max(row.spell.addWeek, ...row.starts.map(start => start.performance.week)), playedAt: null }, href: row.href, historyLabel: 'Open pickup history',
     secondary: [{ name: `${row.person.name} · ${row.spell.year} · Week ${row.spell.addWeek} pickup`, href: `/managers/${row.person.id}/seasons/${row.spell.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));

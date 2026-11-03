@@ -120,7 +120,7 @@ A bench performance is a player present on the weekly roster and absent from its
 
 Missing bench points remain `null` with an internal `player-points` coverage issue blocking `benched-player`. Category reads honor that block for all seasons or the affected selected season, suppressing both rankings and leading holders; a genuine empty selection remains distinct. The block conservatively applies to every game scope within that season. An initial archive can retain unknown lineup rows while the affected record claim stays unavailable. Once a complete bench publication exists, a later missing score rejects the candidate before publication with endpoint/roster/player diagnostics and retains the previous complete history. Numeric zero remains eligible, and empty slots and byes create no bench record.
 
-Current position metadata is not proof of historical lineup eligibility. A current team avatar is not an NFL player's photo.
+Current position metadata is not proof of historical lineup eligibility. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
 
 ## Acquisition and drop attribution
 
