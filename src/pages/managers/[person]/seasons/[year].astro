@@ -1,11 +1,12 @@
 ---
 import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../../components/ProfileContext.astro';
+import ProfileHistoryControls from '../../../../components/ProfileHistoryControls.astro';
+import ProfileMatchupHistory from '../../../../components/ProfileMatchupHistory.astro';
 import Contributors from '../../../../components/Contributors.astro';
 import { readContributors, contributionViews, type ContributionView } from '../../../../history/contributions';
-import TeamImage from '../../../../components/TeamImage.astro';
 import { readManagerSeason, managerGameSorts, type ManagerGameSort } from '../../../../history/managers';
-import { gameScopes, competitionLabels } from '../../../../history/read';
+import { gameScopes } from '../../../../history/read';
 import type { Scope } from '../../../../history/types';
 import '../../../../styles/profiles.css';
 const { person = '', year = '' } = Astro.params;
@@ -27,31 +28,11 @@ if (!profile) Astro.response.status = 404;
 const players = tab === 'players' ? await readContributors({ personId: person }, { scope, season: year, view, event }) : null;
 const missingDrop = profile && tab === 'players' && event && !players;
 if (missingDrop) Astro.response.status = 404;
-const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
 <MuseumLayout title={profile ? `${profile.name} · ${year}` : 'Manager season not found'} section="Managers">
   {missingDrop ? <div class="not-found"><h1>Drop history not found</h1><p>This drop is not recorded for this person and season.</p><a href={`/managers/${person}/seasons/${year}/?tab=players&scope=${scope}&view=drops`}>View drops</a></div> : profile ? <>
     <ProfileContext profile={profile} year={year} />
-    <div class="profile-local-heading">
-      <nav class="local-tabs" aria-label="Manager season views"><a href={`?tab=matchups&scope=${scope}&sort=${sort}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
-      <form method="get" class="profile-controls">
-        {tab === 'players' && <input type="hidden" name="tab" value="players" />}
-        {tab === 'players' && view !== 'all' && <input type="hidden" name="view" value={view} />}
-        {event && <input type="hidden" name="event" value={event} />}
-        <label for="manager-season">Season</label><select id="manager-season" name="season">{profile.years.map(value => <option value={value} selected={year === value}>{value}</option>)}</select>
-        <label for="season-scope">Game scope</label><select id="season-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
-        {tab === 'matchups' && <><label for="manager-sort">Sort games</label><select id="manager-sort" name="sort"><option value="newest" selected={sort === 'newest'}>Newest first</option><option value="oldest" selected={sort === 'oldest'}>Oldest first</option><option value="points" selected={sort === 'points'}>Most points</option></select></>}
-        <button type="submit">{tab === 'players' ? 'Show players' : 'Show matchups'}</button>
-      </form>
-    </div>
-    {players ? <Contributors selection={players} views /> : profile.games.length ? <table class="history-table manager-games-table">
-      <caption class="visually-hidden">{year} matchup history</caption>
-      <thead><tr><th scope="col">Week</th><th scope="col">Opponent / team</th><th scope="col">Score</th><th scope="col">Result</th></tr></thead>
-      <tbody>{profile.games.map(game => <tr>
-        <th scope="row"><a href={game.href}>{game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`}</a><span class="historical-team">{competitionLabels[game.competition]}</span></th>
-        <td><div class="team-identity"><TeamImage name={game.opponent.teamName} src={game.opponent.avatar} /><div><a href={`/managers/${game.opponent.personId}/seasons/${year}/?scope=${scope}`}>{game.opponent.name}</a>{game.opponent.teamName !== game.opponent.name && <span class="historical-team">{game.opponent.teamName}</span>}</div></div></td>
-        <td data-label="Score">{game.complete ? `${number(game.side.points)} – ${number(game.opponent.points)}` : '—'}</td><td data-label="Result">{game.result}</td>
-      </tr>)}</tbody>
-    </table> : <p class="empty-history">No results for this selection.</p>}
+    <ProfileHistoryControls kind="manager" tab={tab} scope={scope} years={profile.years} season={year} sort={sort} view={view} event={event} />
+    {players ? <Contributors selection={players} views /> : <ProfileMatchupHistory games={profile.games} year={year} scope={scope} />}
   </> : <div class="not-found"><h1>Manager season not found</h1><p>This person has no recorded team in this year.</p><a href={`/managers/${person}/`}>View career</a></div>}
 </MuseumLayout>

@@ -1,12 +1,13 @@
 ---
 import MuseumLayout from '../../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../../components/ProfileContext.astro';
+import ProfileHistoryControls from '../../../../components/ProfileHistoryControls.astro';
+import ProfileMatchupHistory from '../../../../components/ProfileMatchupHistory.astro';
 import Contributors from '../../../../components/Contributors.astro';
 import { readContributors } from '../../../../history/contributions';
-import TeamImage from '../../../../components/TeamImage.astro';
 import { readFranchiseSeason } from '../../../../history/franchises';
 import { managerGameSorts, type ManagerGameSort } from '../../../../history/managers';
-import { gameScopes, competitionLabels } from '../../../../history/read';
+import { gameScopes } from '../../../../history/read';
 import type { Scope } from '../../../../history/types';
 import '../../../../styles/profiles.css';
 const { franchise = '', year = '' } = Astro.params;
@@ -19,29 +20,11 @@ const requestedYear = profile?.years.includes(selected.get('season')!) ? selecte
 if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('sort') && selected.get('sort') !== sort || selected.has('tab') && !['matchups', 'players'].includes(selected.get('tab')!) || selected.has('season'))) return Astro.redirect(`/franchises/${franchise}/seasons/${requestedYear}/?${tab === 'players' ? 'tab=players&' : ''}scope=${scope}&sort=${sort}`, 302);
 if (!profile) Astro.response.status = 404;
 const players = tab === 'players' ? await readContributors({ franchiseId: franchise }, { scope, season: year }) : null;
-const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
 <MuseumLayout title={profile ? `${profile.team.name} · ${year}` : 'Franchise season not found'} section="Managers">
   {profile ? <>
     <ProfileContext profile={{ ...profile, name: profile.team.name }} year={year} />
-    <div class="profile-local-heading">
-      <nav class="local-tabs" aria-label="Franchise season views"><a href={`?tab=matchups&scope=${scope}&sort=${sort}`} aria-current={tab === 'matchups' ? 'page' : undefined}>Matchups</a><a href={`?tab=players&scope=${scope}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
-      <form method="get" class="profile-controls">
-        {tab === 'players' && <input type="hidden" name="tab" value="players" />}
-        <label for="franchise-season">Season</label><select id="franchise-season" name="season">{profile.years.map(value => <option value={value} selected={year === value}>{value}</option>)}</select>
-        <label for="season-scope">Game scope</label><select id="season-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
-        {tab === 'matchups' && <><label for="franchise-sort">Sort games</label><select id="franchise-sort" name="sort"><option value="newest" selected={sort === 'newest'}>Newest first</option><option value="oldest" selected={sort === 'oldest'}>Oldest first</option><option value="points" selected={sort === 'points'}>Most points</option></select></>}
-        <button type="submit">{tab === 'players' ? 'Show players' : 'Show matchups'}</button>
-      </form>
-    </div>
-    {players ? <Contributors selection={players} /> : profile.games.length ? <table class="history-table manager-games-table">
-      <caption class="visually-hidden">{year} franchise matchup history</caption>
-      <thead><tr><th scope="col">Week</th><th scope="col">Opponent / team</th><th scope="col">Score</th><th scope="col">Result</th></tr></thead>
-      <tbody>{profile.games.map(game => <tr>
-        <th scope="row"><a href={game.href}>{game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`}</a><span class="historical-team">{competitionLabels[game.competition]}</span></th>
-        <td><div class="team-identity"><TeamImage name={game.opponent.teamName} src={game.opponent.avatar} /><div><a href={`/managers/${game.opponent.personId}/seasons/${year}/?scope=${scope}`}>{game.opponent.name}</a>{game.opponent.teamName !== game.opponent.name && <span class="historical-team">{game.opponent.teamName}</span>}</div></div></td>
-        <td data-label="Score">{game.complete ? `${number(game.side.points)} – ${number(game.opponent.points)}` : '—'}</td><td data-label="Result">{game.result}</td>
-      </tr>)}</tbody>
-    </table> : <p class="empty-history">No results for this selection.</p>}
+    <ProfileHistoryControls kind="franchise" tab={tab} scope={scope} years={profile.years} season={year} sort={sort} />
+    {players ? <Contributors selection={players} /> : <ProfileMatchupHistory games={profile.games} year={year} scope={scope} franchise />}
   </> : <div class="not-found"><h1>Franchise season not found</h1><p>This franchise has no recorded team in this year.</p><a href={`/franchises/${franchise}/`}>View franchise history</a></div>}
 </MuseumLayout>

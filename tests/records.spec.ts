@@ -59,6 +59,18 @@ test('expanded URL and context survive sorting while rates show sample sizes and
   expect(bad?.status()).toBe(404);
 });
 
+test('the Records collection previews a shared lead and opens its complete tied ranking', async ({ page }) => {
+  await page.goto('/records/');
+  const lowest = page.getByRole('row').filter({ has: page.getByRole('link', { name: 'Lowest team score', exact: true }) });
+  // Twelve weeks contain three zero scores, week 13 contains one, and 2019 adds one: 38 tied results.
+  await expect(lowest).toContainText('Shared lead · 38 results');
+  expect((await lowest.innerText()).length).toBeLessThan(250);
+  await lowest.getByRole('link', { name: 'View full ranking', exact: true }).click();
+  await expect(page).toHaveURL('/records/lowest-score/?scope=regular');
+  await expect(page.locator('.shared-lead')).toHaveText('Shared lead · 38 results');
+  await expect(page.locator('.record-ranking tbody tr[data-rank="1"]')).toHaveCount(38);
+});
+
 test('Records collection and category stack cleanly on phones and support keyboard controls', async ({ page }) => {
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });

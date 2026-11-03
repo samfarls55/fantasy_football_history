@@ -1,6 +1,7 @@
 ---
 import TeamImage from './TeamImage.astro';
 import Chevron from './Chevron.astro';
+import { formatRecordValue as number } from '../history/records';
 import type { readManager, Tenure } from '../history/managers';
 import type { Person } from '../history/types';
 type ManagerProfile = NonNullable<Awaited<ReturnType<typeof readManager>>>;
@@ -14,7 +15,6 @@ const { profile, year } = Astro.props;
 const franchise = Boolean(profile.owner);
 const team = year ? profile.seasons.find(season => season.year === year) : null;
 const owner = franchise ? team?.owner ?? profile.owner : null;
-const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 const tenures = year ? profile.tenures.filter(tenure => tenure.start <= year && tenure.end >= year).map(tenure => ({ ...tenure, events: tenure.events.filter(event => event.year === year || event === tenure.events[0]) })) : profile.tenures;
 ---
 <section class="profile-context" aria-label={year ? `${year} season summary` : 'Career summary'}>

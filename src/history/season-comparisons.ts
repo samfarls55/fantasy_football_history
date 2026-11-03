@@ -7,6 +7,8 @@ export function seasonComparisons(archive: Archive, season: Season) {
   const weeks = season.regularWeeks.map(week => ({ week, scores: archive.performances.filter(row => row.seasonId === season.id && row.competition === 'regular' && row.week === week) }));
   const requiredCoverage = !archive.coverage.some(issue => issue.seasonId === season.id && issue.blocks.some(key => ['season-comparisons', 'dominant-season', 'unluckiest-season', 'best-without-title'].includes(key)));
   const fullSeasonCoverage = requiredCoverage && season.complete && weeks.length === Number(season.settings.playoff_week_start) - Number(season.settings.start_week) && weeks.every(row => row.scores.length >= 2);
+  const leaguePoints = exactSum(weeks.flatMap(week => week.scores.map(score => score.points)));
+  const leagueWeeks = weeks.reduce((count, week) => count + week.scores.length, 0);
   return season.teams.map(team => {
     const played = weeks.flatMap(week => {
       const own = week.scores.find(score => score.rosterId === team.rosterId);
@@ -14,8 +16,6 @@ export function seasonComparisons(archive: Archive, season: Season) {
     });
     const covered = requiredCoverage && played.length > 0 && played.every(week => week.scores.length >= 2);
     const points = exactSum(played.map(week => week.own.points));
-    const leaguePoints = exactSum(played.flatMap(week => week.scores.map(score => score.points)));
-    const leagueWeeks = played.reduce((count, week) => count + week.scores.length, 0);
     const dominance = covered && leaguePoints.compare(0) !== 0 ? points.divide(played.length).divide(leaguePoints.divide(leagueWeeks)).subtract(1).multiply(100) : null;
     const expectedWins = covered ? exactSum(played.map(week => {
       const opponents = week.scores.filter(score => score.rosterId !== team.rosterId);

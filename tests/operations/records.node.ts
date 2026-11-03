@@ -86,6 +86,28 @@ test('published category pages include every cutoff tie and sorting preserves ca
   });
 });
 
+test('a published standings result expands its category through the selected rank and survives sharing', async () => {
+  await withHistory(async storePath => {
+    const { recordsSource } = await import('../fixtures/records-source.ts');
+    const { readCategory } = await import('../../src/history/records.ts');
+    const { readSeason } = await import('../../src/history/read.ts');
+    const source = recordsSource([[120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10]]);
+    (source.responses[`league/${source.seedLeagueId}`] as any).status = 'complete';
+    await publish(storePath, source);
+    const selected = (await readSeason('2021', { storePath }))!.rows.find(row => row.personName === 'Record manager 12')!;
+    const category = (await readCategory('dominant-season', { storePath, season: '2021', sort: 'name', result: selected.id }))!;
+    assert.equal(category.rows.find(row => row.id === selected.id)?.rank, 12);
+    assert.equal(category.limit, 12);
+    assert.equal(category.rows.length, 12);
+    const shared = new URL(category.href, 'http://museum.test');
+    assert.equal(shared.searchParams.get('result'), selected.id);
+    assert.equal(shared.searchParams.get('season'), '2021');
+    assert.equal(shared.searchParams.get('sort'), 'name');
+    const reloaded = await readCategory('dominant-season', { storePath, season: shared.searchParams.get('season')!, sort: shared.searchParams.get('sort')!, result: shared.searchParams.get('result')!, limit: Number(shared.searchParams.get('limit')) });
+    assert.deepEqual(reloaded?.rows.map(row => [row.id, row.rank]), category.rows.map(row => [row.id, row.rank]));
+  });
+});
+
 test('equal published career rates share a canonical rational rank despite different game counts', async () => {
   await withHistory(async storePath => {
     const { recordsSource } = await import('../fixtures/records-source.ts');

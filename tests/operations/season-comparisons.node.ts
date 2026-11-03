@@ -40,6 +40,26 @@ test('published current-season standings compare the same completed official sco
   });
 });
 
+test('published dominance uses one season league baseline when teams have different played weeks', async () => {
+  await withHistory(async storePath => {
+    const source = recordsSource([[10, 0, 0, 0], [0, 100, 100, 0]]);
+    (source.responses[`league/${source.seedLeagueId}`] as any).status = 'complete';
+    const first = source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[];
+    const second = source.responses[`league/${source.seedLeagueId}/matchups/2`] as any[];
+    first[2].matchup_id = first[3].matchup_id = null;
+    second[0].matchup_id = second[3].matchup_id = null;
+    second[1].matchup_id = second[2].matchup_id = 1;
+    await publish(storePath, source);
+    // Four played team-weeks total 210 points: league PPG is 52.5 in both weeks.
+    // Manager 01's 10 PPG is 100 × (10 / 52.5 - 1) = -1700/21 percent.
+    const season = (await readSeason('2021', { storePath }))!;
+    assert.equal(season.rows.find(row => row.personName === 'Record manager 01')!.scoringVsLeague, -80.95238095238095);
+    const awards = (await readCategory('dominant-season', { storePath }))!;
+    assert.equal(awards.rows.find(row => row.name === 'Record manager 01')!.exactKey, '-1700/21');
+    assert.equal(season.rows.find(row => row.personName === 'Record manager 04')!.scoringVsLeague, null);
+  });
+});
+
 test('published season awards share exact dominance ties, opposite schedule signs and only resolved completed eligibility', async () => {
   await withHistory(async (storePath, source) => {
     await publish(storePath, source);

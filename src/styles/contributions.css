@@ -23,7 +23,7 @@
 .contribution-games th:nth-child(2) { width: 32%; }
 .contribution-games th:nth-child(3) { width: 22%; }
 .contribution-games th:last-child { width: 28%; }
-@media (max-width: 600px) {
+@media (max-width: 760px) {
   .contributor-heading h2, .contribution-games-heading h2 { font-size: 30px; }
   :is(.pickups-table, .drops-table), :is(.pickups-table, .drops-table) tbody, .contributors-table, .contributors-table tbody, .contribution-seasons, .contribution-seasons tbody, .contribution-games, .contribution-games tbody { display: block; }
   :is(.pickups-table, .drops-table) thead, .contributors-table thead, .contribution-seasons thead, .contribution-games thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -53,7 +53,7 @@
 .drops-table .selected-drop { background: var(--lilac); }
 .pickup-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1.5rem; margin: -.5rem 0 1.5rem; font-weight: 650; }
 .pickup-context a { font-weight: 500; }
-@media (max-width: 600px) {
+@media (max-width: 760px) {
   .drop-receivers, .drop-receivers tbody { display: block; }
   .drop-receivers thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .drop-receivers tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 18px 14px; border-top: 1px solid #e8e1f1; }
