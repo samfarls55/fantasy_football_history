@@ -2,15 +2,25 @@
   "name": "farls-league-museum",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
+    "start": "node --env-file-if-exists=.env ./dist/server/entry.mjs",
     "check": "astro check",
-    "test": "playwright test"
+    "test": "npm run test:publication && npm run test:browser",
+    "test:browser": "playwright test",
+    "test:publication": "node --test tests/operations/*.node.ts",
+    "history:publish": "node --env-file-if-exists=.env scripts/history-publication.ts publish",
+    "history:inspect": "node --env-file-if-exists=.env scripts/history-publication.ts inspect"
   },
   "dependencies": {
+    "@astrojs/node": "11.1.9",
     "astro": "7.4.2"
   },
   "devDependencies": {
