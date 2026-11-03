@@ -69,3 +69,41 @@ test('phone Menu restores focus and standings retain readable labels without ove
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
   await expect(menu).toBeFocused();
 });
+
+test('season comparisons retain their signed values, closed format and shared sort URL', async ({ page }) => {
+  await page.goto('/seasons/2021/');
+  const tim = page.getByRole('row').filter({ hasText: 'Timh17' });
+  await expect(tim.locator('[data-label="Scoring vs league"]')).toHaveText('-20.0%');
+  await expect(tim.locator('[data-label="Wins vs expected"]')).toHaveText('-1.0');
+  await expect(page.locator('.season-format')).not.toHaveAttribute('open', '');
+  await page.getByLabel('Sort standings').selectOption('scoring');
+  await page.getByRole('button', { name: 'Apply order' }).click();
+  await expect(page).toHaveURL('/seasons/2021/?tab=standings&sort=scoring');
+  await expect(page.locator('tbody tr').first()).toContainText('sebastian12');
+  await page.reload();
+  await expect(page.getByLabel('Sort standings')).toHaveValue('scoring');
+  await page.getByLabel('Sort standings').selectOption('wins-expected');
+  await page.getByRole('button', { name: 'Apply order' }).click();
+  await expect(page).toHaveURL('/seasons/2021/?tab=standings&sort=wins-expected');
+  for (const width of [1440, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => document.fonts.ready);
+    await expect(tim.locator('[data-label="Scoring vs league"]')).toBeVisible();
+    await expect(tim.locator('[data-label="Wins vs expected"]')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.impeccable/review/ticket-11-season-${width}.png`, fullPage: true });
+  }
+  await page.goto('/records/dominant-season/?season=2019');
+  await expect(page.getByRole('heading', { name: 'Most dominant season', exact: true })).toBeVisible();
+  await expect(page.locator('.leading-value')).toHaveText('73.8%');
+  await expect(page.locator('.record-ranking .record-when').first()).toHaveText('Week 4 · 2019');
+  await expect(page.getByRole('columnheader', { name: 'Scoring vs league' })).toBeAttached();
+  for (const width of [1440, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(() => document.fonts.ready);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.impeccable/review/ticket-11-category-${width}.png`, fullPage: true });
+  }
+  await page.getByRole('link', { name: 'Open season', exact: true }).click();
+  await expect(page).toHaveURL(/\/managers\/person-.*\/seasons\/2019\/\?scope=regular/);
+});

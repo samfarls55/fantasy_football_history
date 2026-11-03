@@ -61,3 +61,9 @@ Boundary tests mutate only provider responses to create partial seasons, null st
 ## Career ranking boundaries
 
 `records-source.ts` constructs controlled provider responses for regular-season career records. It supplies complete roster-week coverage while letting tests specify official scores and explicit unpaired byes. It does not write a normalized archive. Worked cases observed after real refresh and persisted visitor reads include `0.1 + 0.2 = 0.3`, distinct `100.12001` and `100.12` totals, `1/3 = 2/6` win rates, three entries sharing tenth place, and three sharing twentieth place. The latter pages contain 12 and 22 rows respectively; sorting retains those canonical places.
+
+## Season comparison boundaries
+
+`season-comparisons.node.ts` refreshes controlled source responses into unique durable stores before reading season standings and category pages. Its nine-week fixture repeats official scores `[2, 10, 1, 3, 4, 5, 6, 7, 8, 9]`: Manager 1 loses to 10 and out-scores only 1 each week, so nine exact 1/9 fractions total **1** expected win. Actual wins are zero; Wins vs expected is **−1** and Unluckiest season is **+1**. The persisted visitor read retains `1/1` as the exact comparison key. A completed season without a resolved title has no Best season without a title candidates.
+
+The scoring-era fixture compares one week of `[2, 4, 1, 3]` with two weeks of `[20, 40, 10, 30]`, using changed passing-touchdown rules. Both leading seasons share **60%** dominance despite totals of **4** and **80**. Four true final zeros produce unknown dominance but **0.5** expected wins and **0** schedule difference per team. Explicit unpaired rows produce no expected-win result. Missing completed regular weeks, a missing official score and failed source responses preserve the previous readable publication. The base 2019 tied scores independently yield **0.7** expected wins and shared dominance ranks.
