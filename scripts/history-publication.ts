@@ -17,7 +17,7 @@ try {
   console.log(JSON.stringify({
     operation, published: archive !== null, storePath: configuredStorePath(),
     ...(archive ? {
-      leagueId: archive.leagueId,
+      leagueId: archive.leagueId, importedAt: archive.importedAt, coverage: archive.coverage,
       seasons: archive.seasons.map(({ id, year, name }) => ({ id, year, name })),
       people: archive.people.length, contests: archive.contests.length,
     } : {}),

@@ -33,7 +33,7 @@ const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { mi
       <h1>{year}</h1>
       <form action="/seasons/" method="get" class="season-switcher">
         <label for="season-year">Season</label>
-        <select id="season-year" name="season">{seasons.map(item => <option value={item.year} selected={item.year === year}>{item.year}</option>)}</select>
+        <select id="season-year" name="season">{seasons?.map(item => <option value={item.year} selected={item.year === year}>{item.year}</option>)}</select>
         <input type="hidden" name="tab" value={tab} />{tab === 'standings' ? <input type="hidden" name="sort" value={sort} /> : <input type="hidden" name="scope" value={scope} />}
         <button type="submit">Open season</button>
       </form>

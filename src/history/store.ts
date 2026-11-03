@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import { mkdir, open, readFile, rename, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -41,6 +42,21 @@ export async function loadArchive(storePath?: string): Promise<Archive | null> {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
     throw error;
   }
+}
+
+/** Each visitor request reads one publication, even if a refresh finishes mid-request. */
+const snapshots = new AsyncLocalStorage<{ storePath: string; archive: Archive | null }>();
+
+export async function withHistorySnapshot<T>(read: () => Promise<T>, storePath?: string): Promise<T> {
+  const path = configuredStorePath(storePath);
+  const archive = await loadArchive(path);
+  return snapshots.run({ storePath: path, archive }, read);
+}
+
+/** Visitor reads share their request snapshot; refreshes always read the durable file. */
+export async function readArchive(storePath?: string): Promise<Archive | null> {
+  const snapshot = snapshots.getStore();
+  return snapshot?.storePath === configuredStorePath(storePath) ? snapshot.archive : loadArchive(storePath);
 }
 
 /** Publish one complete snapshot. Readers see either the old file or the new file. */

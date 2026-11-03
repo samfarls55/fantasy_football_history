@@ -1,4 +1,4 @@
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { Exact, exactSum } from './decimal.ts';
 import { completedContests } from './scope.ts';
 import { comparePeriods } from './records.ts';
@@ -36,7 +36,7 @@ function rivalry(archive: Archive, a: Person, b: Person, options: HistorySelecti
 
 /** Every public comparison reads the last durable publication. An absent history is not zero meetings. */
 export async function readRivalry(a: string, b: string, options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const first = archive?.people.find(person => person.id === a);
   const second = archive?.people.find(person => person.id === b);
   return archive && first && second && first.id !== second.id ? rivalry(archive, first, second, options) : null;
@@ -47,7 +47,7 @@ function opponents(archive: Archive, person: Person, options: HistorySelection) 
 }
 
 export async function readManagerRivalries(personId: string, options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const person = archive?.people.find(person => person.id === personId);
   if (!archive || !person) return null;
   const rows = opponents(archive, person, options);
@@ -56,7 +56,7 @@ export async function readManagerRivalries(personId: string, options: HistorySel
 }
 
 export async function readFranchiseRivalries(franchiseId: string, options: HistorySelection = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   const franchise = archive?.franchises.find(franchise => franchise.id === franchiseId);
   if (!archive || !franchise) return null;
   const rows = archive.seasons.filter(season => !options.season || season.year === options.season).flatMap(season => {
@@ -69,7 +69,7 @@ export async function readFranchiseRivalries(franchiseId: string, options: Histo
 }
 
 export async function readRivalriesPage(options: HistorySelection & { a?: string; b?: string; limit?: string } = {}) {
-  const archive = await loadArchive(options.storePath);
+  const archive = await readArchive(options.storePath);
   if (!archive) return null;
   const people = archive.people.map(person => {
     const latest = archive.seasons.toSorted((a, b) => b.year.localeCompare(a.year)).flatMap(season => season.teams.filter(team => team.personId === person.id))[0];

@@ -1,7 +1,7 @@
 import { contextualPickups, pickupStarts } from './pickups.ts';
 import { contextualDrops, selectedDrop } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
-import { loadArchive } from './store.ts';
+import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
 import { inScope } from './scope.ts';
 import type { Archive, Performance, Scope } from './types.ts';
@@ -61,7 +61,7 @@ function contributors(archive: Archive, identity: ContributionIdentity, selectio
 
 /** Lists actual starting contributors in the selected person, franchise or whole-season context. */
 export async function readContributors(identity: ContributionIdentity = {}, selection: ContributionSelection = {}) {
-  const archive = await loadArchive(selection.storePath);
+  const archive = await readArchive(selection.storePath);
   if (!archive) return null;
   const selectedContext = identity.personId || identity.franchiseId ? context(archive, identity) : null;
   if ((identity.personId || identity.franchiseId) && !selectedContext) return null;
@@ -76,7 +76,7 @@ export async function readContributors(identity: ContributionIdentity = {}, sele
 
 /** Player detail totals cover the whole scope; its season selector applies locally to the game list. */
 export async function readPlayerContributions(identity: ContributionIdentity, playerId: string, selection: ContributionSelection = {}) {
-  const archive = await loadArchive(selection.storePath);
+  const archive = await readArchive(selection.storePath);
   if (!archive) return null;
   const selectedContext = context(archive, identity);
   const player = archive.players.find(player => player.id === playerId);

@@ -4,11 +4,15 @@ The selected delivery is Astro/TypeScript SSR on Node.js 24 or newer, a durable 
 
 ## Local commands and configuration
 
+Set the configured league and durable archive path in `.env` before the first refresh. Complete a successful refresh and inspect its publication before serving visitors.
+
 ```sh
 npm ci
 cp .env.example .env
 npm run check
 npm test
+npm run refresh
+npm run history:inspect
 npm run build
 npm start
 ```
@@ -29,7 +33,7 @@ The publication store reads its path from the runtime environment on every opera
 
 ## Locally demonstrated publication boundary
 
-The first delivery slice accepts a prepared canonical `Archive` JSON candidate. Its operator commands run independently of Astro:
+Operator commands run independently of Astro. The publication command also accepts a prepared canonical `Archive` JSON candidate:
 
 ```sh
 npm run history:publish -- /absolute/path/to/candidate.json
@@ -37,7 +41,7 @@ npm run history:inspect
 npm run test:publication
 ```
 
-`publish` checks the archive envelope and atomically replaces the persisted publication. `inspect` reports the persisted league, season names and counts for operators. Tests exercise these actual commands in separate processes against a temporary durable directory, demonstrate a later correction, and prove incomplete or malformed candidate failure retains the previous successful history. They do not inspect private files to assert success.
+`publish` checks the archive envelope and atomically replaces the persisted publication. `inspect` reports whether a publication exists and, when present, its league, `importedAt`, season names, counts and coverage issues. Coverage includes the affected season, area, endpoint/roster/player detail and blocked record categories. These are operator-only diagnostics. Tests exercise these actual commands in separate processes against a temporary durable directory, demonstrate a later correction, and prove incomplete or malformed candidate failure retains the previous successful history. They do not inspect private files to assert success.
 
 The real configured provider import is now available:
 
@@ -47,9 +51,9 @@ npm run refresh
 
 It uses `SLEEPER_LEAGUE_ID`, follows every linked previous season, validates source responses at import, retains their string IDs and source settings, and publishes one coherent archive through the same atomic boundary. Repeating an import replaces results rather than appending them. Current-season completion requires both league scoring progress and a passed NFL-state week; numeric current-week scores alone cannot enter standings. Request failures and missing required team scores fail the run with an endpoint diagnostic and retain the last successful history.
 
-The delivered public slice is `/seasons/` and `/seasons/[year]/`, with regular-season records and official points. `tab=standings` and `sort=standing|name|record|points` are shareable native GET selections. Unknown years return HTTP 404; invalid tab/order values redirect once to the valid default. Opening a year through the season selector retains the local selection. Source settings appear only as supported season-format content inside a closed disclosure. There is no public source endpoint or operational panel.
+Successful refreshes emit one JSON result with `changed`, `importedAt`, imported seasons/completed weeks, counts and coverage. `importedAt` is the collection-start timestamp stored with the published snapshot. A successful repeat with unchanged source history reports `changed: false` and advances that timestamp without duplicating results. Use `history:inspect` to inspect the durable publication after a process exits.
 
-At this stage, completed postseason matchup responses are preserved internally without inferred bracket membership. Contest/lineup browsing, postseason outcomes and comparison metrics are supplied by the dependent slices; the standings slice does not invent unresolved champions or comparison values. Issue #18 completes the archive-wide correction/failure behavior as those collections are added.
+Each public request captures one persisted snapshot for all of its reads; the next request sees a newly published archive. Public routes use that history for standings, person/franchise profiles, records, season comparisons, rivalries, player contributions, move rankings and Home. Corrections require no frontend rebuild or server restart. Completed weekly legs can contribute player points while a multiweek contest remains unfinished; finalized wins and season awards still require their completion evidence. There is no public source endpoint or operational panel.
 
 `npm run test:publication` includes controlled-provider import-to-public-read tests as well as the independent publication command tests. Browser checks run a real controlled import into a dedicated per-run `MUSEUM_STORE_PATH`, then exercise the SSR pages. They never replace the default archive. The browser-only fixture adds a long historical roster name and a controlled avatar response to check wrapping and image failure. All recurring checks run without live provider requests.
 
@@ -57,7 +61,7 @@ At this stage, completed postseason matchup responses are preserved internally w
 
 Use a Linux host with Node.js and npm available at the unit paths, `flock`, and a persistent local filesystem. Build the application with `npm ci && npm run build`, install the checkout at `/opt/farls-museum`, and create a dedicated `farls-museum` service user. Set `/etc/farls-museum.env` to the configuration above with an absolute production archive path. Both processes must run as the same user so they can read the mode-0600 archive. systemd's `StateDirectory=farls-museum` creates `/var/lib/farls-museum` for that user.
 
-The units in `deploy/systemd/` are installation examples with fixed paths. Adapt them to the chosen host, install them in `/etc/systemd/system/`, and reload systemd. After the real refresh command is available, initialize history through `systemctl start farls-museum-refresh.service`, verify it with `history:inspect` under the same environment, and enable/start `farls-museum.service` and `farls-museum-refresh.timer`. Confirm the timer using `systemctl list-timers farls-museum-refresh.timer` and inspect failures using `journalctl -u farls-museum-refresh.service`.
+The units in `deploy/systemd/` are installation examples with fixed paths. Adapt them to the chosen host, install them in `/etc/systemd/system/`, and reload systemd. Initialize history through `systemctl start farls-museum-refresh.service`; require a successful exit and verify `published: true` with `history:inspect` under the same environment before enabling/starting `farls-museum.service` and `farls-museum-refresh.timer`. If the initial refresh fails, resolve the diagnostic and retry before serving visitors. Confirm the timer using `systemctl list-timers farls-museum-refresh.timer` and inspect failures using `journalctl -u farls-museum-refresh.service`. No deployment-specific timer activation has been verified without an available chosen host.
 
 The timer requests a refresh daily at 10:00 UTC and catches up a missed run after boot. Live scoring is outside the requirement. Deployments preserve `/var/lib/farls-museum`; rebuilding or replacing `/opt/farls-museum` must not remove history. A reverse proxy/domain/TLS arrangement and its costs remain operator choices.
 
@@ -71,7 +75,9 @@ Run that command as the service user from the configured working directory, with
 
 ## Failures, backups and recovery
 
-Collection, validation or temporary-file write failure exits nonzero and leaves the successful archive untouched. Same-filesystem rename is the publication commit: readers see a whole old or new snapshot. File and directory sync support durable publication on the selected Linux filesystem. A disk or filesystem failure after that commit can require recovery from backup. Missing initial history is distinct from an empty successful history; public route behavior is supplied by the dependent route slice. Never expose refresh timestamps, source JSON, coverage diagnostics or operator run state to visitors.
+Collection, validation or temporary-file write failure exits nonzero and leaves the successful archive untouched. The refresh command emits a JSON diagnostic on stderr with the original error and configured store path. It rereads the durable publication to report `published`, whether the previous snapshot was `retained`, its `lastSuccessfulAt` timestamp and persisted coverage. A first-run failure reports `published: false`, `retained: false` and `lastSuccessfulAt: null`; it does not claim to have retained missing history. If inspection itself fails, those publication facts are `null` and `inspectionError` describes the read failure.
+
+Same-filesystem rename is the publication commit: readers see a whole old or new snapshot. File and directory sync support durable publication on the selected Linux filesystem. A disk or filesystem failure after that commit can leave a newly readable publication despite a nonzero command exit, or require recovery from backup; the diagnostic describes what can actually be read and does not guarantee retention of the previous snapshot. Missing initial history is distinct from an empty successful history: public routes use the shared unavailable-history shell until the first publication. Never expose refresh timestamps, source JSON, coverage diagnostics or operator run state to visitors.
 
 Keep an independent backup of the last successful archive outside the deployment directory. To back it up, copy the published file; atomic replacement keeps a concurrently opened source file coherent. To recover from a corrupt or lost disk, stop scheduled/manual writers, preserve the failed file for diagnosis, restore a known-good archive to a sibling temporary path and rename it to the configured publication path, then inspect it before restarting writers. Restore as `farls-museum`, or set the sibling file's owner/group to `farls-museum:farls-museum` and mode to `0600` before the rename so both services can read it. Ordinary provider failures need only a safe retry; do not delete the published archive. Orphan `.tmp-*` siblings from a killed process are ignored by readers and may be removed while no writer is running.
 

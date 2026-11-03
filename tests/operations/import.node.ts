@@ -25,7 +25,7 @@ test('a linked import exposes every year and official regular-season standings w
     const { readSeasons, readSeason } = await import('../../src/history/read.ts');
     const storePath = join(directory, 'history.json');
     await refresh({ storePath, leagueId: fixture.seedLeagueId, now: new Date(fixture.now), provider: controlledProvider() });
-    assert.deepEqual((await readSeasons(storePath)).map(season => season.year), ['2021', '2020', '2019']);
+    assert.deepEqual((await readSeasons(storePath))?.map(season => season.year), ['2021', '2020', '2019']);
     const current = await readSeason('2021', { storePath });
     assert.deepEqual(current?.rows.find(row => row.name === 'Timh17')?.record, '0–3');
     assert.equal(current?.rows.find(row => row.name === 'Timh17')?.points, 60);
