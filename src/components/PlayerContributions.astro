@@ -8,17 +8,18 @@ const { history } = Astro.props;
 const franchise = history.context.kind === 'franchise';
 ---
 <div class="page-heading contribution-heading"><h1>{history.player.name}</h1><p>With <a href={history.contextHref}>{history.context.name}</a>{franchise && <span> · Franchise contributions</span>}</p></div>
+{history.pickup && <p class="pickup-context">{history.pickup.year} · Week {history.pickup.week} pickup <a href={history.wholeHistoryHref!}>Whole manager history</a></p>}
 <div class="contribution-summary">
-  <dl class="contribution-facts"><div><dt>starting-lineup points</dt><dd>{formatRecordValue(history.points)}</dd></div><div><dt>{history.starts === 1 ? 'start' : 'starts'}</dt><dd>{history.starts}</dd></div></dl>
+  <dl class="contribution-facts"><div><dt>{history.pickup ? 'pickup starting points' : 'starting-lineup points'}</dt><dd>{formatRecordValue(history.points)}</dd></div><div><dt>{history.starts === 1 ? 'start' : 'starts'}</dt><dd>{history.starts}</dd></div></dl>
   {history.franchiseHref && <a class="franchise-contributions-link" href={history.franchiseHref}>Franchise contributions</a>}
 </div>
-<form class="profile-controls contribution-scope" method="get"><input type="hidden" name="season" value={history.season} /><label for="player-scope">Game scope</label><select id="player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={history.scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show contributions</button></form>
+<form class="profile-controls contribution-scope" method="get">{history.pickup && <input type="hidden" name="pickup" value={history.pickup.id} />}<input type="hidden" name="season" value={history.season} /><label for="player-scope">Game scope</label><select id="player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={history.scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show contributions</button></form>
 {history.seasons.length ? <table class="history-table contribution-seasons">
   <caption class="visually-hidden">Season contribution totals</caption>
   <thead><tr><th scope="col">Season{franchise ? ' / manager' : ''}</th><th scope="col">Starting points</th><th scope="col">Starts</th></tr></thead>
   <tbody>{history.seasons.map(row => <tr><th scope="row"><a href={row.href}>{row.year}</a>{franchise && <span class="contributor-owners"><a href={`/managers/${row.owner.id}/players/${history.player.id}/?scope=${history.scope}&season=${row.year}`}>{row.owner.name}</a></span>}</th><td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
 </table> : <p class="empty-history">No recorded starts in this history.</p>}
-<div class="contribution-games-heading"><h2>Games</h2><form method="get" class="profile-controls"><input type="hidden" name="scope" value={history.scope} /><label for="games-season">Games season</label><select id="games-season" name="season">{history.years.map(year => <option value={year} selected={history.season === year}>{year}</option>)}</select><button type="submit">Show games</button></form></div>
+<div class="contribution-games-heading"><h2>Games</h2><form method="get" class="profile-controls">{history.pickup && <input type="hidden" name="pickup" value={history.pickup.id} />}<input type="hidden" name="scope" value={history.scope} /><label for="games-season">Games season</label><select id="games-season" name="season">{history.years.map(year => <option value={year} selected={history.season === year}>{year}</option>)}</select><button type="submit">Show games</button></form></div>
 {history.games.length ? <table class="history-table contribution-games">
   <caption class="visually-hidden">Contributing games in {history.season}</caption>
   <thead><tr><th scope="col">Week{franchise ? ' / manager' : ''}</th><th scope="col">Opponent</th><th scope="col">Player points</th><th scope="col">Team result</th></tr></thead>

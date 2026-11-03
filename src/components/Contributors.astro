@@ -17,6 +17,14 @@ if (selection.season) rankings.set('season', selection.season);
     <td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td><td data-label="Seasons">{row.range}</td>
   </tr>)}</tbody>
 </table> : <p class="empty-history">No recorded starts for this selection.</p>}
+<section class="contextual-pickups" aria-labelledby="pickup-heading">
+  <div class="contributor-heading"><h2 id="pickup-heading">Productive pickups</h2><a href={`/records/productive-pickup/?${rankings}`}>View pickup rankings</a></div>
+  {selection.pickups.length ? <table class="history-table pickups-table">
+    <caption class="visually-hidden">Productive pickup spells</caption>
+    <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Pickup</th><th scope="col">Starting points</th><th scope="col">Starts</th></tr></thead>
+    <tbody>{selection.pickups.map(row => <tr><th scope="row"><a href={row.href}>{row.player.name}</a>{attribution && <span class="contributor-owners"><a href={`/managers/${row.person.id}/seasons/${row.year}/?tab=players&scope=${selection.scope}`}>{row.person.name}</a></span>}</th><td data-label="Pickup">{row.year} · Week {row.week}</td><td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
+  </table> : <p class="empty-history">No pickups for this selection.</p>}
+</section>
 <script>
   document.fonts.ready.then(() => {
     const tabs = document.querySelector<HTMLElement>('.local-tabs');
