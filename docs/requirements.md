@@ -1,6 +1,6 @@
 # Requirements reconciliation
 
-Status: Confirmed written handoff, approved by Sam at Q44 on November 3, 2026. All original 54 story IDs remain traceable. Six additions capture requirements settled during the walkthrough. This is a scope ledger, not an implementation-completion report.
+Status: Confirmed written handoff, approved by Sam at Q44 on November 3, 2026. All original 54 story IDs remain traceable. Six additions capture requirements settled during the walkthrough. This is a scope ledger, not an implementation-completion report. The final column now links the published children of spec #1.
 
 The original text is preserved in [.impeccable/spec-before-platform-design.md](../.impeccable/spec-before-platform-design.md). [SPEC.md](../SPEC.md) is the reconciled requirement source, [DESIGN-BRIEF.md](../DESIGN-BRIEF.md) contains route contracts, and [metrics.md](metrics.md) defines internal calculation rules.
 
@@ -29,72 +29,72 @@ A scenario can be covered by more than one focused fixture. Do not write a mirro
 
 ## Original stories
 
-| ID | Original intent | Current requirement and destination | Acceptance | Local tickets |
+| ID | Original intent | Current requirement and destination | Acceptance | GitHub tickets |
 | --- | --- | --- | --- | --- |
-| 1 | Public access | Retained, every public route needs no account. | A01 | T02, T12 |
-| 2 | Phone access | Retained, shared mobile patterns plus per-page responsive contracts. | A12 | T02, T12 |
-| 3 | Home discovery | Retained and specified as six all-time categories, then recent results. | A09, A14 | T10 |
-| 4 | Share history | Retained, stable routes and shareable filters/sorting. | A01, A14 | T03, T04, T05, T09, T12 |
-| 5 | Linked seasons | Retained, importer follows the provider chain. | A02 | T01, T02 |
-| 6 | Current completed weeks | Retained, automatic refresh includes eligible completed results. | A02, A11 | T02, T11 |
-| 7 | Partial seasons | Revised, completion governs awards and unresolved outcomes; no status badge. | A04, A06, A11 | T04, T06, T11 |
-| 8 | Person career | Retained, profile follows the person across accounts/names. | A03 | T03 |
-| 9 | Former manager | Retained, replacement gets a separate career. | A03 | T03 |
-| 10 | Franchise continuity | Retained, franchise directory/profile is separate from people. | A03 | T03 |
-| 11 | Ownership changes | Retained, full franchise timeline attributes each result. | A03 | T03 |
-| 12 | Historical names | Retained with supported facts/fallbacks; provenance stays internal. | A03, A11 | T01, T03 |
-| 13 | Career totals | Retained, W-L-T, rate, games, points and titles on profiles. | A04, A05 | T03, T05 |
-| 14 | Sortable rankings | Retained, category and archive sorts are URL state. | A01, A09 | T05 |
-| 15 | Rate sample size | Retained, one eligible game minimum and visible games/W-L-T. | A05, A09 | T05 |
-| 16 | Regular default | Retained across game-based views. | A04 | T04, T05 |
-| 17 | Playoff/combined | Retained, championship path only in combined. | A04 | T04 |
-| 18 | Consolation/placement | Retained, explicit separate selections. | A04 | T04 |
-| 19 | Score/streak/margin records | Retained in the plain category catalog. | A05, A09 | T05 |
-| 20 | Shared records | Retained, competition ranks and all cutoff ties. | A05, A09 | T05 |
-| 21 | Result history links | Revised from evidence to actual career/season/game/player destinations. | A09, A14 | T05, T07, T08 |
-| 22 | Champions/runners-up | Retained on Seasons index and season context. | A04 | T04 |
-| 23 | Playoff career history | Retained, appearances and resolved runs on profiles/seasons. | A04 | T03, T04 |
-| 24 | Historical brackets | Retained, championship/consolation/placement variants and contest links. | A04 | T04 |
-| 25 | Standings/format | Retained, season Standings and closed format disclosure. | A02, A04, A06 | T02, T04, T06 |
-| 26 | Week browsing | Retained, season Matchups and person/franchise-season views. | A01, A04 | T04 |
-| 27 | Lineups/player points | Retained where supported, official totals stay authoritative. | A05, A07 | T04, T07 |
-| 28 | Head-to-head | Retained, preselected pair links and Rivalries page. | A10 | T09 |
-| 29 | Rivalry facts/games | Retained, compact summary plus linked game table. | A10 | T09 |
-| 30 | Nemesis | Revised to plain contextual result in profile Rivalries; agreed rule/ties. | A10 | T09 |
-| 31 | Official historical scores | Retained, preserve settings and commissioner adjustments. | A05 | T02, T04, T05 |
-| 32 | Cross-era dominance | Retained, regular-season PPG versus league PPG. | A06 | T06 |
-| 33 | Schedule comparison | Retained, actual versus weekly all-play expectation. | A06 | T06 |
-| 34 | Schedule Victims | Renamed Unluckiest season, expected minus actual wins. | A06 | T06 |
-| 35 | Uncrowned Kings | Renamed Best season without a title, completed nonchampion dominance. | A06, A09 | T06 |
-| 36 | Franchise Legends | Revised to scoped starting contributors and ranked player/person pairs. | A07 | T07 |
-| 37 | Bench Crimes | Renamed Highest-scoring benched player; actual bench points, no counterfactual. | A07, A09 | T07 |
-| 38 | Clear exhibit meaning | Revised to plain category names, values and history links. | A09, A14 | T05, T10 |
-| 39 | Public method/eligibility | Removed from public UI. Internal rules/tests remain required. | A05, A06, A11 | T05, T06, T12 |
-| 40 | Public draft board | Removed from public UI. Source picks/nullable keeper inputs retained internally. | A08, A11 | T01, T08, T12 |
-| 41 | Draft-to-contribution history | Revised, supported acquisition inputs connect through Players without a draft-board route. | A07, A08 | T07, T08 |
-| 42 | Completed transactions | Revised to internal inputs and significant outcomes; no exhaustive public feed. | A08, A11 | T08, T12 |
-| 43 | Failed attempts excluded | Retained at the completed-event boundary. | A08 | T08 |
-| 44 | Player season/game links | Retained, manager/franchise-scoped player detail. | A07, A14 | T07 |
-| 45 | Corrections | Retained, refresh replaces affected results consistently. | A11 | T11 |
-| 46 | Incomplete results excluded | Retained, no false finalized record or zero. | A04, A05, A11 | T02, T04, T11 |
-| 47 | Missing versus zero | Retained in data and value states; gaps internal, unknown public fields use a dash. | A05, A11 | T01, T02, T11 |
-| 48 | Visible update time | Removed from public UI. Operator run history remains internal. | A11 | T11, T12 |
-| 49 | Read through outage | Retained, last successful snapshot remains available. | A11 | T02, T11 |
-| 50 | Automatic operation | Retained, configured import/refresh command and automatic scheduling. | A11, A13 | T02, T11 |
-| 51 | Repeatable imports | Retained, stable identities and no duplicate observable results. | A02, A11 | T02, T11 |
-| 52 | Operator diagnostics | Retained internally; no visitor status dashboard. | A11 | T01, T11 |
-| 53 | Configurable open-source setup | Retained, one league per deployment with documented commands. | A13 | T00, T02, T11, T12 |
-| 54 | Domain docs/application tests | Retained, these contracts and deterministic import-to-public checks. | A02–A14 | T01–T12 |
+| 1 | Public access | Retained, every public route needs no account. | A01 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 2 | Phone access | Retained, shared mobile patterns plus per-page responsive contracts. | A12 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 3 | Home discovery | Retained and specified as six all-time categories, then recent results. | A09, A14 | [#17](https://github.com/samfarls55/fantasy_football_history/issues/17) |
+| 4 | Share history | Retained, stable routes and shareable filters/sorting. | A01, A14 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#16](https://github.com/samfarls55/fantasy_football_history/issues/16), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 5 | Linked seasons | Retained, importer follows the provider chain. | A02 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4) |
+| 6 | Current completed weeks | Retained, automatic refresh includes eligible completed results. | A02, A11 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 7 | Partial seasons | Revised, completion governs awards and unresolved outcomes; no status badge. | A04, A06, A11 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 8 | Person career | Retained, profile follows the person across accounts/names. | A03 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7) |
+| 9 | Former manager | Retained, replacement gets a separate career. | A03 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7) |
+| 10 | Franchise continuity | Retained, franchise directory/profile is separate from people. | A03 | [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
+| 11 | Ownership changes | Retained, full franchise timeline attributes each result. | A03 | [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
+| 12 | Historical names | Retained with supported facts/fallbacks; provenance stays internal. | A03, A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
+| 13 | Career totals | Retained, W-L-T, rate, games, points and titles on profiles. | A04, A05 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 14 | Sortable rankings | Retained, category and archive sorts are URL state. | A01, A09 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 15 | Rate sample size | Retained, one eligible game minimum and visible games/W-L-T. | A05, A09 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 16 | Regular default | Retained across game-based views. | A04 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 17 | Playoff/combined | Retained, championship path only in combined. | A04 | [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 18 | Consolation/placement | Retained, explicit separate selections. | A04 | [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 19 | Score/streak/margin records | Retained in the plain category catalog. | A05, A09 | [#10](https://github.com/samfarls55/fantasy_football_history/issues/10) |
+| 20 | Shared records | Retained, competition ranks and all cutoff ties. | A05, A09 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#10](https://github.com/samfarls55/fantasy_football_history/issues/10), [#13](https://github.com/samfarls55/fantasy_football_history/issues/13) |
+| 21 | Result history links | Revised from evidence to actual career/season/game/player destinations. | A09, A14 | [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#10](https://github.com/samfarls55/fantasy_football_history/issues/10), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#13](https://github.com/samfarls55/fantasy_football_history/issues/13) |
+| 22 | Champions/runners-up | Retained on Seasons index and season context. | A04 | [#6](https://github.com/samfarls55/fantasy_football_history/issues/6) |
+| 23 | Playoff career history | Retained, appearances and resolved runs on profiles/seasons. | A04 | [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
+| 24 | Historical brackets | Retained, championship/consolation/placement variants and contest links. | A04 | [#6](https://github.com/samfarls55/fantasy_football_history/issues/6) |
+| 25 | Standings/format | Retained, season Standings and closed format disclosure. | A02, A04, A06 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 26 | Week browsing | Retained, season Matchups and person/franchise-season views. | A01, A04 | [#5](https://github.com/samfarls55/fantasy_football_history/issues/5) |
+| 27 | Lineups/player points | Retained where supported, official totals stay authoritative. | A05, A07 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#13](https://github.com/samfarls55/fantasy_football_history/issues/13) |
+| 28 | Head-to-head | Retained, preselected pair links and Rivalries page. | A10 | [#16](https://github.com/samfarls55/fantasy_football_history/issues/16) |
+| 29 | Rivalry facts/games | Retained, compact summary plus linked game table. | A10 | [#16](https://github.com/samfarls55/fantasy_football_history/issues/16) |
+| 30 | Nemesis | Revised to plain contextual result in profile Rivalries; agreed rule/ties. | A10 | [#16](https://github.com/samfarls55/fantasy_football_history/issues/16) |
+| 31 | Official historical scores | Retained, preserve settings and commissioner adjustments. | A05 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#10](https://github.com/samfarls55/fantasy_football_history/issues/10) |
+| 32 | Cross-era dominance | Retained, regular-season PPG versus league PPG. | A06 | [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 33 | Schedule comparison | Retained, actual versus weekly all-play expectation. | A06 | [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 34 | Schedule Victims | Renamed Unluckiest season, expected minus actual wins. | A06 | [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 35 | Uncrowned Kings | Renamed Best season without a title, completed nonchampion dominance. | A06, A09 | [#11](https://github.com/samfarls55/fantasy_football_history/issues/11) |
+| 36 | Franchise Legends | Revised to scoped starting contributors and ranked player/person pairs. | A07 | [#12](https://github.com/samfarls55/fantasy_football_history/issues/12) |
+| 37 | Bench Crimes | Renamed Highest-scoring benched player; actual bench points, no counterfactual. | A07, A09 | [#13](https://github.com/samfarls55/fantasy_football_history/issues/13) |
+| 38 | Clear exhibit meaning | Revised to plain category names, values and history links. | A09, A14 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17) |
+| 39 | Public method/eligibility | Removed from public UI. Internal rules/tests remain required. | A05, A06, A11 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#11](https://github.com/samfarls55/fantasy_football_history/issues/11), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 40 | Public draft board | Removed from public UI. Source picks/nullable keeper inputs retained internally. | A08, A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 41 | Draft-to-contribution history | Revised, supported acquisition inputs connect through Players without a draft-board route. | A07, A08 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14) |
+| 42 | Completed transactions | Revised to internal inputs and significant outcomes; no exhaustive public feed. | A08, A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 43 | Failed attempts excluded | Retained at the completed-event boundary. | A08 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15) |
+| 44 | Player season/game links | Retained, manager/franchise-scoped player detail. | A07, A14 | [#12](https://github.com/samfarls55/fantasy_football_history/issues/12) |
+| 45 | Corrections | Retained, refresh replaces affected results consistently. | A11 | [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 46 | Incomplete results excluded | Retained, no false finalized record or zero. | A04, A05, A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 47 | Missing versus zero | Retained in data and value states; gaps internal, unknown public fields use a dash. | A05, A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 48 | Visible update time | Removed from public UI. Operator run history remains internal. | A11 | [#18](https://github.com/samfarls55/fantasy_football_history/issues/18), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 49 | Read through outage | Retained, last successful snapshot remains available. | A11 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 50 | Automatic operation | Retained, configured import/refresh command and automatic scheduling. | A11, A13 | [#3](https://github.com/samfarls55/fantasy_football_history/issues/3), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 51 | Repeatable imports | Retained, stable identities and no duplicate observable results. | A02, A11 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 52 | Operator diagnostics | Retained internally; no visitor status dashboard. | A11 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18) |
+| 53 | Configurable open-source setup | Retained, one league per deployment with documented commands. | A13 | [#3](https://github.com/samfarls55/fantasy_football_history/issues/3), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 54 | Domain docs/application tests | Retained, these contracts and deterministic import-to-public checks. | A02–A14 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#3](https://github.com/samfarls55/fantasy_football_history/issues/3), [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#6](https://github.com/samfarls55/fantasy_football_history/issues/6), [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8), [#9](https://github.com/samfarls55/fantasy_football_history/issues/9), [#10](https://github.com/samfarls55/fantasy_football_history/issues/10), [#11](https://github.com/samfarls55/fantasy_football_history/issues/11), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#13](https://github.com/samfarls55/fantasy_football_history/issues/13), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15), [#16](https://github.com/samfarls55/fantasy_football_history/issues/16), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17), [#18](https://github.com/samfarls55/fantasy_football_history/issues/18), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
 
 ## Walkthrough additions
 
-| ID | Added requirement | Destination | Acceptance | Local tickets |
+| ID | Added requirement | Destination | Acceptance | GitHub tickets |
 | --- | --- | --- | --- | --- |
-| 55 | Productive waiver/free-agent pickup by actual spell contributions | Records and contextual Players | A08, A09 | T08 |
-| 56 | Drop followed by later starting production for other people in that season | Records and contextual Players | A08, A09 | T08 |
-| 57 | Takeover, predecessor and team-name timeline | Person tenure and separate full franchise | A03 | T03 |
-| 58 | Category-first flow, ten places plus ties and Show more | Records category pages | A01, A09, A14 | T05 |
-| 59 | Consistent header, rounded complete artwork and responsive row patterns | Shared components and every family | A12 | T02, T12 |
-| 60 | Six all-time Home categories then recent top-ten events | Home | A09, A14 | T10 |
+| 55 | Productive waiver/free-agent pickup by actual spell contributions | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#14](https://github.com/samfarls55/fantasy_football_history/issues/14) |
+| 56 | Drop followed by later starting production for other people in that season | Records and contextual Players | A08, A09 | [#2](https://github.com/samfarls55/fantasy_football_history/issues/2), [#15](https://github.com/samfarls55/fantasy_football_history/issues/15) |
+| 57 | Takeover, predecessor and team-name timeline | Person tenure and separate full franchise | A03 | [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8) |
+| 58 | Category-first flow, ten places plus ties and Show more | Records category pages | A01, A09, A14 | [#9](https://github.com/samfarls55/fantasy_football_history/issues/9) |
+| 59 | Consistent header, rounded complete artwork and responsive row patterns | Shared components and every family | A12 | [#4](https://github.com/samfarls55/fantasy_football_history/issues/4), [#5](https://github.com/samfarls55/fantasy_football_history/issues/5), [#7](https://github.com/samfarls55/fantasy_football_history/issues/7), [#8](https://github.com/samfarls55/fantasy_football_history/issues/8), [#12](https://github.com/samfarls55/fantasy_football_history/issues/12), [#16](https://github.com/samfarls55/fantasy_football_history/issues/16), [#17](https://github.com/samfarls55/fantasy_football_history/issues/17), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
+| 60 | Six all-time Home categories then recent top-ten events | Home | A09, A14 | [#17](https://github.com/samfarls55/fantasy_football_history/issues/17), [#19](https://github.com/samfarls55/fantasy_football_history/issues/19) |
 
 No original requirement is silently dropped. Original stories 39, 40 and 48 are retired as public UI requirements. Stories 41 and 42 are intentionally narrowed; their source data remains internal. This ledger does not authorize a later builder to restore those public screens.
