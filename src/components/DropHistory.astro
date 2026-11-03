@@ -1,0 +1,23 @@
+---
+import type { readContributors } from '../history/contributions';
+import { formatRecordValue } from '../history/records';
+type Drop = NonNullable<NonNullable<Awaited<ReturnType<typeof readContributors>>>['selectedDrop']>;
+interface Props { history: Drop }
+const { history } = Astro.props;
+---
+<section class="drop-context" aria-labelledby="selected-drop-heading">
+  <div class="contributor-heading"><div><h2 id="selected-drop-heading">{history.player.name}</h2><p class="drop-period">{history.year} · Week {history.week} drop</p></div></div>
+  <dl class="contribution-facts"><div><dt>starting points elsewhere</dt><dd>{formatRecordValue(history.points)}</dd></div><div><dt>{history.starts === 1 ? 'start' : 'starts'}</dt><dd>{history.starts}</dd></div></dl>
+  <h3>Receiving managers</h3>
+  {history.receivers.length ? <table class="history-table drop-receivers">
+    <caption class="visually-hidden">Receiving managers' contributions after this drop</caption>
+    <thead><tr><th scope="col">Manager</th><th scope="col">Starting points</th><th scope="col">Starts</th></tr></thead>
+    <tbody>{history.receivers.map(row => <tr><th scope="row"><a href={row.href}>{row.person.name}</a></th><td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
+  </table> : <p class="empty-history">No later starts elsewhere for this selection.</p>}
+  <h3>Games</h3>
+  {history.games.length ? <table class="history-table drop-games contribution-games">
+    <caption class="visually-hidden">Actual contributing games after this drop</caption>
+    <thead><tr><th scope="col">Week / manager</th><th scope="col">Opponent</th><th scope="col">Player points</th><th scope="col">Team result</th></tr></thead>
+    <tbody>{history.games.map(row => <tr><th scope="row"><a href={row.href}>Week {row.week}</a><span class="contributor-owners"><a href={row.ownerHref}>{row.owner.name}</a></span></th><td><a href={row.opponentHref}>{row.opponent.name}</a></td><td data-label="Player points">{formatRecordValue(row.points)}</td><td data-label="Team result">{row.result} {formatRecordValue(row.teamPoints)}–{formatRecordValue(row.opponentPoints)}</td></tr>)}</tbody>
+  </table> : <p class="empty-history">No contributing games for this selection.</p>}
+</section>
