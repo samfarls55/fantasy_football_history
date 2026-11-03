@@ -1,0 +1,40 @@
+---
+import MuseumLayout from '../../../layouts/MuseumLayout.astro';
+import ProfileContext from '../../../components/ProfileContext.astro';
+import { readFranchise } from '../../../history/franchises';
+import { gameScopes, competitionLabels } from '../../../history/read';
+import type { Scope } from '../../../history/types';
+import '../../../styles/profiles.css';
+const { franchise = '' } = Astro.params;
+const selected = Astro.url.searchParams;
+const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
+let profile = await readFranchise(franchise, { scope });
+const season = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : undefined;
+if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('season') && selected.get('season') !== season || selected.has('tab') && selected.get('tab') !== 'seasons')) return Astro.redirect(`/franchises/${franchise}/?tab=seasons&scope=${scope}${season ? `&season=${season}` : ''}`, 302);
+if (season) profile = await readFranchise(franchise, { scope, season });
+if (!profile) Astro.response.status = 404;
+const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+---
+<MuseumLayout title={profile?.name ?? 'Franchise not found'} section="Managers">
+  {profile ? <>
+    <ProfileContext profile={profile} />
+    <div class="profile-local-heading">
+      <nav class="local-tabs" aria-label="Franchise views"><a href={`?tab=seasons&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current="page">Seasons</a></nav>
+      <form method="get" class="profile-controls">
+        <label for="profile-season">Season</label><select id="profile-season" name="season"><option value="" selected={!season}>All seasons</option>{profile.years.map(year => <option value={year} selected={season === year}>{year}</option>)}</select>
+        <label for="profile-scope">Game scope</label><select id="profile-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
+        <button type="submit">Show history</button>
+      </form>
+    </div>
+    <table class="history-table career-seasons-table franchise-seasons-table">
+      <caption class="visually-hidden">Franchise season history</caption>
+      <thead><tr><th scope="col">Year / team</th><th scope="col">Owner</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Finish</th><th scope="col">Playoffs</th></tr></thead>
+      <tbody>{profile.seasons.map(row => <tr>
+        <th scope="row"><a href={`/franchises/${profile.id}/seasons/${row.year}/?scope=${scope}`}>{row.year}</a><span class="historical-team">{row.name}</span></th>
+        <td data-label="Owner"><a href={`/managers/${row.owner.id}/seasons/${row.year}/?scope=${scope}`}>{row.owner.name}</a></td>
+        <td data-label="Record">{row.facts.record}</td><td data-label="Points">{number(row.facts.points)}</td><td data-label="Finish">{row.finish ?? '—'}</td>
+        <td data-label="Playoffs">{row.championship ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Champion</a> : row.runnerUp ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Runner-up</a> : row.playoffAppearance ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Qualified</a> : '—'}</td>
+      </tr>)}</tbody>
+    </table>
+  </> : <div class="not-found"><h1>Franchise not found</h1><p>This franchise is not in the league’s history.</p><a href="/franchises/">Browse franchises</a></div>}
+</MuseumLayout>
