@@ -22,7 +22,7 @@ export function latestPeriod(rows: HistoricalPeriod[]): HistoricalPeriod | null 
 export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
-  detail?: string; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
+  detail?: string; matchupLabel?: string; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
@@ -62,8 +62,8 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season') },
   { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games', candidates: scoreCandidates },
   { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: scoreCandidates },
-  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: marginCandidates },
-  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'points', scope: 'games', candidates: marginCandidates },
+  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', order: 'ascending', candidates: marginCandidates },
+  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', candidates: marginCandidates },
   { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games', candidates: benchCandidates },
   { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
   { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games', candidates: dropCandidates },
@@ -93,6 +93,13 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
   const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  let displayPrecision = category.displayPrecision;
+  if (category.unit === '%') {
+    const values = [...new Map(candidates.map(row => [row.metric.key, row.metric.toNumber()])).values()];
+    displayPrecision ??= 1;
+    // Add decimals only when distinct ranked values would otherwise share a label.
+    while (displayPrecision < 20 && values.some((value, index) => index > 0 && formatRecordValue(value, displayPrecision) === formatRecordValue(values[index - 1], displayPrecision))) displayPrecision++;
+  }
   let rank = 1;
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
@@ -114,7 +121,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const result = selectedResult?.id;
   const nextRank = ranked.find(row => row.rank > limit)?.rank;
   const nextLimit = nextRank ? Math.max(limit + 10, nextRank) : null;
-  return { category, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
+  return { category: { ...category, displayPrecision }, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
     href: categoryHref(category.key, { ...selection, result }), nextHref: nextLimit ? categoryHref(category.key, { ...selection, result, limit: nextLimit }) : null };
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
@@ -127,7 +134,10 @@ export async function readCategory(key: string, options: RecordSelection = {}) {
 export async function readRecordCollection(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => ({ ...category, leaders: category.candidates ? rankCategory(archive, category, {}).leaders : [], href: category.candidates ? categoryHref(category.key) : null })) }));
+  return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => {
+    const view = category.candidates ? rankCategory(archive, category, {}) : null;
+    return { ...category, displayPrecision: view?.category.displayPrecision, leaders: view?.leaders ?? [], href: view ? categoryHref(category.key) : null };
+  }) }));
 }
 
 const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-season', 'productive-pickup', 'productive-drop', 'winning-streak'];
