@@ -1,5 +1,5 @@
 import { exactSum } from './decimal.ts';
-import { recordedStarts, playerContributionHref, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
+import { recordedStarts, playerContributionHref, startGame, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipDeparture } from './ownership.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
@@ -35,22 +35,12 @@ export function selectedDrop(archive: Archive, identity: ContributionIdentity, s
     return { person: archive.people.find(person => person.id === personId)!, points: metric.toNumber(), starts: starts.length, metric,
       href: playerContributionHref({ personId }, row.player.id, { scope, season: row.event.year }) };
   }).sort((a, b) => b.metric.compare(a.metric) || a.person.name.localeCompare(b.person.name)).map(({ metric, ...receiver }) => receiver);
-  const games = [...row.starts].sort((a, b) => b.performance.week - a.performance.week || a.performance.personId.localeCompare(b.performance.personId)).map(start => {
-    const performance = start.performance;
-    const contest = archive.contests.find(contest => contest.id === performance.contestId)!;
-    const opponentPerformance = archive.performances.find(other => other.contestId === contest.id && other.week === performance.week && other.rosterId !== performance.rosterId)!;
-    const owner = archive.people.find(person => person.id === performance.personId)!;
-    const opponent = archive.people.find(person => person.id === opponentPerformance.personId)!;
-    return { week: performance.week, owner, opponent, points: start.points, teamPoints: performance.points, opponentPoints: opponentPerformance.points,
-      result: contest.complete ? contest.tie ? 'T' : contest.winnerId === owner.id ? 'W' : 'L' : '—',
-      ownerHref: playerContributionHref({ personId: owner.id }, row.player.id, { scope, season: row.event.year }), opponentHref: `/managers/${opponent.id}/seasons/${row.event.year}/?scope=${scope}`,
-      href: `/seasons/${row.event.year}/matchups/${contest.id}/?scope=${scope}&week=${performance.week}&player=${row.player.id}&team=${performance.rosterId}#player-${performance.rosterId}-${row.player.id}` };
-  });
+  const games = [...row.starts].sort((a, b) => b.performance.week - a.performance.week || a.performance.personId.localeCompare(b.performance.personId)).map(start => startGame(archive, start, scope));
   return { id: row.event.id, player: row.player, person: row.person, year: row.event.year, week: row.event.week, points: row.metric.toNumber(), starts: row.starts.length, receivers, games };
 }
 export function dropCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   return drops(archive, {}, selection).map(row => ({ id: row.event.id, personId: row.person.id, name: row.player.name, avatar: null, metric: row.metric,
     sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · ${row.event.year} · Week ${row.event.week} drop`,
-    period: { year: row.event.year, week: Math.max(row.event.week, ...row.starts.map(start => start.performance.week)), playedAt: null }, href: row.href, historyLabel: 'Open drop history',
+    period: row.starts.length ? { year: row.event.year, week: Math.max(...row.starts.map(start => start.performance.week)), playedAt: null } : null, href: row.href, historyLabel: 'Open drop history',
     secondary: [{ name: `${row.person.name} · ${row.event.year} · Week ${row.event.week} drop`, href: `/managers/${row.person.id}/seasons/${row.event.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));
 }

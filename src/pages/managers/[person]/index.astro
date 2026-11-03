@@ -1,6 +1,8 @@
 ---
 import MuseumLayout from '../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../components/ProfileContext.astro';
+import ProfileHistoryControls from '../../../components/ProfileHistoryControls.astro';
+import ProfileSeasonHistory from '../../../components/ProfileSeasonHistory.astro';
 import StreakHistory from '../../../components/StreakHistory.astro';
 import ProfileRivalries from '../../../components/ProfileRivalries.astro';
 import { readManagerRivalries } from '../../../history/rivalries';
@@ -8,7 +10,7 @@ import Contributors from '../../../components/Contributors.astro';
 import { readContributors } from '../../../history/contributions';
 import { readManager } from '../../../history/managers';
 import { readStreakHistory } from '../../../history/game-records';
-import { gameScopes, competitionLabels } from '../../../history/read';
+import { gameScopes } from '../../../history/read';
 import type { Scope } from '../../../history/types';
 import '../../../styles/profiles.css';
 const { person = '' } = Astro.params;
@@ -23,28 +25,11 @@ const streak = tab === 'seasons' ? await readStreakHistory(person, { scope, seas
 if (!profile) Astro.response.status = 404;
 const rivalries = profile && tab === 'rivalries' ? await readManagerRivalries(profile.id, { scope, season }) : null;
 const players = tab === 'players' ? await readContributors({ personId: person }, { scope, season }) : null;
-const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
 <MuseumLayout title={profile?.name ?? 'Manager not found'} section="Managers">
   {profile ? <>
     <ProfileContext profile={profile} />
-    <div class="profile-local-heading">
-      <nav class="local-tabs" aria-label="Manager views"><a href={`?tab=seasons&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'seasons' ? 'page' : undefined}>Seasons</a><a href={`?tab=rivalries&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'rivalries' ? 'page' : undefined}>Rivalries</a><a href={`?tab=players&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
-      <form method="get" class="profile-controls">
-        <input type="hidden" name="tab" value={tab} />
-        <label for="profile-season">Season</label><select id="profile-season" name="season"><option value="" selected={!season}>All seasons</option>{profile.years.map(year => <option value={year} selected={season === year}>{year}</option>)}</select>
-        <label for="profile-scope">Game scope</label><select id="profile-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select>
-        <button type="submit">Show history</button>
-      </form>
-    </div>
-    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : players ? <Contributors selection={players} /> : streak ? <StreakHistory history={streak} /> : <table class="history-table career-seasons-table">
-      <caption class="visually-hidden">Season history</caption>
-      <thead><tr><th scope="col">Year / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Finish</th><th scope="col">Playoffs</th></tr></thead>
-      <tbody>{profile.seasons.map(row => <tr>
-        <th scope="row"><a href={`/managers/${profile.id}/seasons/${row.year}/?scope=${scope}`}>{row.year}</a><span class="historical-team">{row.name}</span></th>
-        <td data-label="Record">{row.facts.record}</td><td data-label="Points">{number(row.facts.points)}</td><td data-label="Finish">{row.finish ?? '—'}</td>
-        <td data-label="Playoffs">{row.championship ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Champion</a> : row.runnerUp ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Runner-up</a> : row.playoffAppearance ? <a href={`/seasons/${row.year}/?tab=playoffs`}>Qualified</a> : '—'}</td>
-      </tr>)}</tbody>
-    </table>}
+    <ProfileHistoryControls kind="manager" tab={tab} scope={scope} years={profile.years} season={season} />
+    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : players ? <Contributors selection={players} /> : streak ? <StreakHistory history={streak} /> : <ProfileSeasonHistory rows={profile.seasons} basePath={`/managers/${profile.id}`} scope={scope} />}
   </> : <div class="not-found"><h1>Manager not found</h1><p>This person is not in the league’s history.</p><a href="/managers/">Browse managers</a></div>}
 </MuseumLayout>

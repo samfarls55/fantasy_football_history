@@ -37,6 +37,19 @@ function query(scope: Scope, season?: string) { const params = new URLSearchPara
 export function playerContributionHref(identity: ContributionIdentity, playerId: string, selection: ContributionSelection = {}): string {
   return `/${identity.personId ? `managers/${identity.personId}` : `franchises/${identity.franchiseId}`}/players/${playerId}/?${query(selection.scope ?? 'regular', selection.season)}`;
 }
+/** One historical game context for every actual-start contribution view. */
+export function startGame(archive: Archive, start: RecordedStart, scope: Scope) {
+  const performance = start.performance;
+  const contest = archive.contests.find(contest => contest.id === performance.contestId)!;
+  const opponentPerformance = archive.performances.find(other => other.contestId === contest.id && other.week === performance.week && other.rosterId !== performance.rosterId)!;
+  const owner = archive.people.find(person => person.id === performance.personId)!;
+  const opponent = archive.people.find(person => person.id === opponentPerformance.personId)!;
+  return { year: performance.year, week: performance.week, points: start.points, owner, opponent, teamPoints: performance.points, opponentPoints: opponentPerformance.points,
+    result: contest.complete ? contest.tie ? 'T' : contest.winnerId === owner.id ? 'W' : 'L' : '—',
+    href: `/seasons/${performance.year}/matchups/${contest.id}/?scope=${scope}&week=${performance.week}&player=${start.playerId}&team=${performance.rosterId}#player-${performance.rosterId}-${start.playerId}`,
+    opponentHref: `/managers/${opponent.id}/seasons/${performance.year}/?scope=${scope}`,
+    ownerHref: playerContributionHref({ personId: owner.id }, start.playerId, { scope, season: performance.year }) };
+}
 function summarize(archive: Archive, starts: RecordedStart[]) {
   const metric = exactSum(starts.map(row => row.points));
   const years = [...new Set(starts.map(row => row.performance.year))].sort();
@@ -94,17 +107,7 @@ export async function readPlayerContributions(identity: ContributionIdentity, pl
   });
   const season = spell?.year ?? (selectedContext.years.includes(selection.season!) ? selection.season! : seasons[0]?.year ?? selectedContext.years[0]);
   const selectedTeam = selectedContext.entries.find(entry => entry.year === season)!.team;
-  const games = starts.filter(row => row.performance.year === season).sort((a, b) => b.performance.week - a.performance.week).map(row => {
-    const performance = row.performance;
-    const contest = archive.contests.find(contest => contest.id === performance.contestId)!;
-    const opponentPerformance = archive.performances.find(other => other.contestId === contest.id && other.week === performance.week && other.rosterId !== performance.rosterId)!;
-    const owner = archive.people.find(person => person.id === performance.personId)!;
-    const opponent = archive.people.find(person => person.id === opponentPerformance.personId)!;
-    const result = contest.complete ? contest.tie ? 'T' : contest.winnerId === performance.personId ? 'W' : 'L' : '—';
-    return { year: performance.year, week: performance.week, points: row.points, owner, opponent, teamPoints: performance.points, opponentPoints: opponentPerformance.points, result,
-      href: `/seasons/${performance.year}/matchups/${contest.id}/?scope=${scope}&week=${performance.week}&player=${playerId}&team=${performance.rosterId}#player-${performance.rosterId}-${playerId}`,
-      opponentHref: `/managers/${opponent.id}/seasons/${performance.year}/?scope=${scope}`, ownerHref: `/managers/${owner.id}/players/${playerId}/?${query(scope, season)}` };
-  });
+  const games = starts.filter(row => row.performance.year === season).sort((a, b) => b.performance.week - a.performance.week).map(start => startGame(archive, start, scope));
   return { player, context: selectedContext, ...totals, seasons, season, years: spell ? [spell.year] : selectedContext.years, games, scope,
     pickup: spell ? { id: spell.id, year: spell.year, week: spell.addWeek, departureWeek: spell.departureWeek } : null,
     wholeHistoryHref: spell ? playerContributionHref(identity, playerId, { scope, season: spell.year }) : null,

@@ -1,0 +1,18 @@
+---
+import TeamImage from './TeamImage.astro';
+import { competitionLabels } from '../history/read';
+import { formatRecordValue } from '../history/records';
+import type { readManagerSeason } from '../history/managers';
+import type { Scope } from '../history/types';
+interface Props { games: NonNullable<Awaited<ReturnType<typeof readManagerSeason>>>['games']; year: string; scope: Scope; franchise?: boolean }
+const { games, year, scope, franchise = false } = Astro.props;
+---
+{games.length ? <table class="history-table manager-games-table">
+  <caption class="visually-hidden">{year}{franchise ? ' franchise' : ''} matchup history</caption>
+  <thead><tr><th scope="col">Week</th><th scope="col">Opponent / team</th><th scope="col">Score</th><th scope="col">Result</th></tr></thead>
+  <tbody>{games.map(game => <tr>
+    <th scope="row"><a href={game.href}>{game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`}</a><span class="historical-team">{competitionLabels[game.competition]}</span></th>
+    <td><div class="team-identity"><TeamImage name={game.opponent.teamName} src={game.opponent.avatar} /><div><a href={`/managers/${game.opponent.personId}/seasons/${year}/?scope=${scope}`}>{game.opponent.name}</a>{game.opponent.teamName !== game.opponent.name && <span class="historical-team">{game.opponent.teamName}</span>}</div></div></td>
+    <td data-label="Score">{game.complete ? `${formatRecordValue(game.side.points)} – ${formatRecordValue(game.opponent.points)}` : '—'}</td><td data-label="Result">{game.result}</td>
+  </tr>)}</tbody>
+</table> : <p class="empty-history">No results for this selection.</p>}

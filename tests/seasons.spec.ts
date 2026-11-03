@@ -51,6 +51,12 @@ test('unknown years use a real shared not-found page and invalid query state nor
   await expect(page).toHaveURL('/seasons/2021/?tab=standings&sort=standing');
 });
 
+test('an omitted historical playoff-place setting displays an unknown fact', async ({ page }) => {
+  await page.goto('/seasons/2021/');
+  await page.getByText('Season format', { exact: true }).click();
+  await expect(page.locator('.season-format dl > div').filter({ has: page.locator('dt', { hasText: 'Playoff places' }) }).locator('dd')).toHaveText('—');
+});
+
 test('phone Menu restores focus and standings retain readable labels without overflow', async ({ page }) => {
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });

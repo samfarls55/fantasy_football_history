@@ -88,7 +88,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const season = seasons.includes(options.season!) ? options.season : undefined;
   const scope = category.scope === 'none' ? undefined : category.scope === 'regular' ? 'regular' : gameScopes.includes(options.scope!) ? options.scope! : 'regular';
   const sort: RecordSort = recordSorts.includes(options.sort as RecordSort) ? options.sort as RecordSort : 'rank';
-  const limit = Number.isSafeInteger(options.limit) && options.limit! >= 10 ? options.limit! : 10;
+  let limit = Number.isSafeInteger(options.limit) && options.limit! >= 10 ? options.limit! : 10;
   const selection = { season, scope, sort, limit };
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
@@ -99,6 +99,9 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
     const { metric, ...rest } = row;
     return { ...rest, rank, value: metric.toNumber(), exactKey: metric.key };
   });
+  const selectedResult = ranked.find(row => row.id === options.result);
+  limit = Math.max(limit, selectedResult?.rank ?? 10);
+  selection.limit = limit;
   const leaders = ranked.filter(row => row.rank === 1);
   let rows = ranked.filter(row => row.rank <= limit);
   if (sort === 'name') rows.sort((a, b) => a.name.localeCompare(b.name) || a.rank - b.rank || a.id.localeCompare(b.id));
@@ -108,7 +111,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
     const right = candidates.find(row => row.id === b.id)!.metric;
     return left.compare(right) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
   });
-  const result = ranked.some(row => row.id === options.result) ? options.result : undefined;
+  const result = selectedResult?.id;
   const nextRank = ranked.find(row => row.rank > limit)?.rank;
   const nextLimit = nextRank ? Math.max(limit + 10, nextRank) : null;
   return { category, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,

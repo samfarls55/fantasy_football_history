@@ -78,6 +78,34 @@ test('Home uses source-backed current owner artwork without assigning a team por
   });
 });
 
+test('a zero-start pickup stays ranked without fabricating a Recent contribution date', async () => {
+  await withHistory(async storePath => {
+    const source = recordsSource([[10, 20]]);
+    source.responses['players/nfl'] = { '50': { full_name: 'Unused pickup' } };
+    source.responses[`league/${source.seedLeagueId}/transactions/2`] = [{ transaction_id: '980000000000000001', leg: 2, type: 'waiver', status: 'complete', status_updated: 1000, adds: { '50': 1 }, drops: null }];
+    await publish(storePath, source);
+    const category = (await readCategory('productive-pickup', { storePath }))!;
+    assert.deepEqual(category.rows.map(row => [row.name, row.value, row.sample, row.period]), [['Unused pickup', 0, '0 starts', null]]);
+    const home = (await readHome({ storePath }))!;
+    assert.equal(home.features.find(row => row.category.key === 'productive-pickup')!.leaders[0].value, 0);
+    assert.equal(home.recent.some(row => row.category.key === 'productive-pickup'), false);
+  });
+});
+
+test('a zero-start drop stays ranked without fabricating a Recent contribution date', async () => {
+  await withHistory(async storePath => {
+    const source = recordsSource([[10, 20]]);
+    source.responses['players/nfl'] = { '50': { full_name: 'Unused drop' } };
+    source.responses[`league/${source.seedLeagueId}/transactions/2`] = [{ transaction_id: '980000000000000002', leg: 2, type: 'free_agent', status: 'complete', status_updated: 1000, adds: null, drops: { '50': 1 } }];
+    await publish(storePath, source);
+    const category = (await readCategory('productive-drop', { storePath }))!;
+    assert.deepEqual(category.rows.map(row => [row.name, row.value, row.sample, row.period]), [['Unused drop', 0, '0 starts', null]]);
+    const home = (await readHome({ storePath }))!;
+    assert.equal(home.features.find(row => row.category.key === 'productive-drop')!.leaders[0].value, 0);
+    assert.equal(home.recent.some(row => row.category.key === 'productive-drop'), false);
+  });
+});
+
 test('Home retains cutoff ties, excludes a newer outside result, and publishes corrections through provider outages', async () => {
   await withHistory(async storePath => {
     const source = recordsSource([[50, 40], [60, 45], [55, 50]]);

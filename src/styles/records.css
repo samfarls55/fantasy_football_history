@@ -11,6 +11,9 @@
 .collection-table tbody a { display: inline-flex; align-items: center; min-height: 44px; }
 .collection-table td { font-weight: 500; }
 .record-sample { display: block; font-size: 18px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.collection-holder { display: block; }
+.collection-holder + .collection-holder { margin-top: 8px; }
+.collection-table .collection-ranking { font-size: 18px; font-weight: 500; }
 .records-back { display: inline-flex; align-items: center; min-height: 44px; gap: 14px; text-decoration: none; color: var(--muted); margin-bottom: 22px; }
 .records-back > :first-child { font-size: 22px; }
 .record-heading { margin-bottom: 30px; }
