@@ -1,6 +1,8 @@
 ---
 import MuseumLayout from '../../../layouts/MuseumLayout.astro';
 import ProfileContext from '../../../components/ProfileContext.astro';
+import ProfileRivalries from '../../../components/ProfileRivalries.astro';
+import { readManagerRivalries } from '../../../history/rivalries';
 import Contributors from '../../../components/Contributors.astro';
 import { readContributors } from '../../../history/contributions';
 import { readManager } from '../../../history/managers';
@@ -9,13 +11,14 @@ import type { Scope } from '../../../history/types';
 import '../../../styles/profiles.css';
 const { person = '' } = Astro.params;
 const selected = Astro.url.searchParams;
-const tab = selected.get('tab') === 'players' ? 'players' : 'seasons';
+const tab = ['rivalries', 'players'].includes(selected.get('tab')!) ? selected.get('tab')! : 'seasons';
 const scope = gameScopes.includes(selected.get('scope') as Scope) ? selected.get('scope') as Scope : 'regular';
 let profile = await readManager(person, { scope });
 const season = profile?.years.includes(selected.get('season')!) ? selected.get('season')! : undefined;
-if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('season') && selected.get('season') !== season || selected.has('tab') && !['seasons', 'players'].includes(selected.get('tab')!))) return Astro.redirect(`/managers/${person}/?tab=${tab}&scope=${scope}${season ? `&season=${season}` : ''}`, 302);
+if (profile && (selected.has('scope') && selected.get('scope') !== scope || selected.has('season') && selected.get('season') !== season || selected.has('tab') && !['seasons', 'rivalries', 'players'].includes(selected.get('tab')!))) return Astro.redirect(`/managers/${person}/?tab=${tab}&scope=${scope}${season ? `&season=${season}` : ''}`, 302);
 if (season) profile = await readManager(person, { scope, season });
 if (!profile) Astro.response.status = 404;
+const rivalries = profile && tab === 'rivalries' ? await readManagerRivalries(profile.id, { scope, season }) : null;
 const players = tab === 'players' ? await readContributors({ personId: person }, { scope, season }) : null;
 const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
 ---
@@ -23,7 +26,7 @@ const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFracti
   {profile ? <>
     <ProfileContext profile={profile} />
     <div class="profile-local-heading">
-      <nav class="local-tabs" aria-label="Manager views"><a href={`?tab=seasons&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'seasons' ? 'page' : undefined}>Seasons</a><a href={`?tab=players&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
+      <nav class="local-tabs" aria-label="Manager views"><a href={`?tab=seasons&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'seasons' ? 'page' : undefined}>Seasons</a><a href={`?tab=rivalries&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'rivalries' ? 'page' : undefined}>Rivalries</a><a href={`?tab=players&scope=${scope}${season ? `&season=${season}` : ''}`} aria-current={tab === 'players' ? 'page' : undefined}>Players</a></nav>
       <form method="get" class="profile-controls">
         <input type="hidden" name="tab" value={tab} />
         <label for="profile-season">Season</label><select id="profile-season" name="season"><option value="" selected={!season}>All seasons</option>{profile.years.map(year => <option value={year} selected={season === year}>{year}</option>)}</select>
@@ -31,7 +34,7 @@ const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFracti
         <button type="submit">Show history</button>
       </form>
     </div>
-    {players ? <Contributors selection={players} /> : <table class="history-table career-seasons-table">
+    {tab === 'rivalries' ? <ProfileRivalries rows={rivalries?.rows ?? []} nemeses={rivalries?.nemeses ?? []} /> : players ? <Contributors selection={players} /> : <table class="history-table career-seasons-table">
       <caption class="visually-hidden">Season history</caption>
       <thead><tr><th scope="col">Year / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Finish</th><th scope="col">Playoffs</th></tr></thead>
       <tbody>{profile.seasons.map(row => <tr>
