@@ -196,7 +196,13 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
         for (const playerId of [...starters, ...players]) {
           if (playerId === '0' || archive.players.some(player => player.id === playerId)) continue;
           const source = playerSource[playerId] == null ? null : object(playerSource[playerId], `players/nfl ${playerId}`);
-          archive.players.push({ id: playerId, name: typeof source?.full_name === 'string' && source.full_name.trim() ? source.full_name : `Player ${playerId}`, position: typeof source?.position === 'string' ? source.position : null });
+          const position = typeof source?.position === 'string' ? source.position : null;
+          const [fullName, firstName, lastName, team] = ['full_name', 'first_name', 'last_name', 'team'].map(field => {
+            const value = source?.[field];
+            return typeof value === 'string' ? value.trim() : '';
+          });
+          const defenseName = position === 'DEF' ? [firstName, lastName].filter(Boolean).join(' ') || team : '';
+          archive.players.push({ id: playerId, name: fullName || (defenseName ? `${defenseName} D/ST` : `Player ${playerId}`), position });
         }
         return { team, sourcePoints, overridePoints, points: overridePoints ?? sourcePoints, matchupId, starters: lineup, bench };
       });
