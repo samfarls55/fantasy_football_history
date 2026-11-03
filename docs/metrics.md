@@ -116,6 +116,10 @@ A person scope stops when that person's ownership stops. A franchise scope inclu
 
 A bench performance is a player present on the weekly roster and absent from its actual starters, with a usable recorded score. The bench record does not assert that a replacement was legal, avoidable, or would have won the game. The full platform makes no counterfactual substitution claim.
 
+`src/history/bench.ts` ranks individual completed weekly player/team performances with the shared `Exact` comparison and category registry. Repeated people and players remain separate results; ties retain all cutoff places. Links select the actual contest, weekly leg, roster and bench player. Scoped player history still includes actual starts only. No supported historical player portrait is supplied, so these player identities use the shared initials frame rather than a manager avatar.
+
+Missing bench points remain `null` with an internal `player-points` coverage issue blocking `benched-player`. Category reads honor that block for all seasons or the affected selected season, suppressing both rankings and leading holders; a genuine empty selection remains distinct. The block conservatively applies to every game scope within that season. An initial archive can retain unknown lineup rows while the affected record claim stays unavailable. Once a complete bench publication exists, a later missing score rejects the candidate before publication with endpoint/roster/player diagnostics and retains the previous complete history. Numeric zero remains eligible, and empty slots and byes create no bench record.
+
 Current position metadata is not proof of historical lineup eligibility. A current team avatar is not an NFL player's photo.
 
 ## Acquisition and drop attribution

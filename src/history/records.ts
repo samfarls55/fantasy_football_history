@@ -3,6 +3,7 @@ import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
 import { pickupCandidates } from './pickups.ts';
 import { contributionCandidates } from './contributions.ts';
+import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
@@ -62,7 +63,7 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: scoreCandidates },
   { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: marginCandidates },
   { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'points', scope: 'games', candidates: marginCandidates },
-  { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games' },
+  { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games', candidates: benchCandidates },
   { key: 'productive-pickup', name: 'Most productive pickup', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
   { key: 'productive-drop', name: 'Dropped players who delivered elsewhere', group: 'Players', unit: 'starting points elsewhere', scope: 'games' },
   { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games', candidates: contributionCandidates },
@@ -88,7 +89,9 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const sort: RecordSort = recordSorts.includes(options.sort as RecordSort) ? options.sort as RecordSort : 'rank';
   const limit = Number.isSafeInteger(options.limit) && options.limit! >= 10 ? options.limit! : 10;
   const selection = { season, scope, sort, limit };
-  const candidates = category.candidates!(archive, selection).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  const seasonId = archive.seasons.find(row => row.year === season)?.id;
+  const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
+  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
   let rank = 1;
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
@@ -107,7 +110,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const result = ranked.some(row => row.id === options.result) ? options.result : undefined;
   const nextRank = ranked.find(row => row.rank > limit)?.rank;
   const nextLimit = nextRank ? Math.max(limit + 10, nextRank) : null;
-  return { category, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, total: ranked.length, nextLimit,
+  return { category, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
     href: categoryHref(category.key, { ...selection, result }), nextHref: nextLimit ? categoryHref(category.key, { ...selection, result, limit: nextLimit }) : null };
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
