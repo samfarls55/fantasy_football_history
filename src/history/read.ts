@@ -6,8 +6,13 @@ export const standingSorts = ['standing', 'name', 'record', 'points'] as const;
 export type StandingSort = typeof standingSorts[number];
 export interface StandingRow extends SeasonTeam { personName: string; record: string; wins: number; losses: number; ties: number; points: number }
 
-export async function readSeasons(storePath?: string): Promise<Season[]> {
-  return (await loadArchive(storePath))?.seasons ?? [];
+function honors(archive: Archive, season: Season) {
+  return { champion: archive.people.find(person => person.id === season.championId) ?? null, runnerUp: archive.people.find(person => person.id === season.runnerUpId) ?? null };
+}
+
+export async function readSeasons(storePath?: string) {
+  const archive = await loadArchive(storePath);
+  return archive?.seasons.map(season => ({ ...season, ...honors(archive, season) })) ?? [];
 }
 
 function standings(archive: Archive, season: Season, scope: Scope): StandingRow[] {
@@ -36,7 +41,39 @@ export async function readSeason(year: string, options: { storePath?: string; so
   const rows = standings(archive, season, options.scope ?? 'regular');
   if (options.sort === 'name') rows.sort((a, b) => a.personName.localeCompare(b.personName));
   if (options.sort === 'points') rows.sort((a, b) => b.points - a.points || a.personName.localeCompare(b.personName));
-  return { ...season, rows };
+  return { ...season, ...honors(archive, season), rows };
+}
+
+export const bracketScopes = ['playoffs', 'consolation', 'placement'] as const;
+export type BracketScope = typeof bracketScopes[number];
+
+/** Historical bracket results share contest completion and source advancement. */
+export async function readSeasonBracket(year: string, options: { storePath?: string; scope?: BracketScope } = {}) {
+  const archive = await loadArchive(options.storePath);
+  const season = archive?.seasons.find(season => season.year === year);
+  if (!archive || !season) return null;
+  const scope = options.scope ?? 'playoffs';
+  const started = season.completedWeeks.includes(Number(season.settings.playoff_week_start) - 1);
+  const availableScopes = bracketScopes.filter(scope => season.bracket.some(entry => inScope(entry.competition, scope)));
+  const entries = season.bracket.filter(entry => inScope(entry.competition, scope));
+  const games = entries.map(entry => {
+    const contest = archive.contests.find(contest => contest.id === entry.contestId);
+    const complete = contest?.complete ?? false;
+    const sides = ([['rosterA', 'fromA'], ['rosterB', 'fromB']] as const).map(([roster, from]) => {
+      const team = season.teams.find(team => team.rosterId === entry[roster]);
+      const edge = entry[from];
+      const parent = edge && season.bracket.find(parent => parent.family === entry.family && parent.match === edge.match);
+      const parentResolved = parent && archive.contests.some(contest => contest.id === parent.contestId && contest.complete);
+      if (!started || !team || edge && !parentResolved) return null;
+      return { ...team, personName: archive.people.find(person => person.id === team.personId)!.name, points: complete ? contest!.sides.find(side => side.rosterId === team.rosterId)!.points : null };
+    });
+    const lastLeg = archive.performances.filter(performance => performance.contestId === contest?.id).map(performance => performance.week).sort((a, b) => a - b).at(-1);
+    return { ...entry, sides, complete, winnerId: contest?.winnerId ?? null, tie: contest?.tie ?? false, advancingRosterId: complete ? entry.winnerRosterId : null, href: lastLeg ? `/seasons/${year}/matchups/${contest!.id}/?scope=${scope}&week=${lastLeg}` : null };
+  });
+  const rounds = [...new Set(entries.map(entry => entry.round))].sort((a, b) => a - b).map(round => ({ round, games: games.filter(game => game.round === round) }));
+  const firstRound = Math.min(...season.bracket.filter(entry => entry.competition === 'playoffs').map(entry => entry.round));
+  const byes = started && scope === 'playoffs' ? season.teams.filter(team => entries.some(entry => entry.round > firstRound && (entry.rosterA === team.rosterId && !entry.fromA || entry.rosterB === team.rosterId && !entry.fromB))).map(team => ({ ...team, personName: archive.people.find(person => person.id === team.personId)!.name })) : [];
+  return { year, scope, availableScopes, rounds, byes };
 }
 
 export const gameScopes: Scope[] = ['regular', 'playoffs', 'combined', 'consolation', 'placement'];
