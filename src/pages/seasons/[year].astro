@@ -55,7 +55,7 @@ const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { mi
       <form method="get" class="profile-controls season-player-controls"><input type="hidden" name="tab" value="players" /><label for="season-player-scope">Game scope</label><select id="season-player-scope" name="scope">{gameScopes.map(value => <option value={value} selected={scope === value}>{competitionLabels[value]}</option>)}</select><button type="submit">Show players</button></form>
       <Contributors selection={players} />
     </> : <>
-    <div class="table-toolbar"><p>Regular season</p><form method="get">
+    <div class="table-toolbar"><p>Regular season · {season.regularWeeks.length} completed {season.regularWeeks.length === 1 ? 'week' : 'weeks'}</p><form method="get">
       <input type="hidden" name="tab" value="standings" />
       <label for="standing-sort">Sort standings</label>
       <select id="standing-sort" name="sort">
@@ -68,6 +68,10 @@ const displayComparison = (value: number) => new Intl.NumberFormat('en-US', { mi
       </select>
       <button type="submit">Apply order</button>
     </form></div>
+    <dl class="comparison-definitions">
+      <div><dt>Scoring vs league</dt><dd>Points per played week versus the season's league average. +10% means 10% above average.</dd></div>
+      <div><dt>Wins vs expected</dt><dd><p>Actual minus expected wins. Positive means more wins than expected.</p><p>Expected wins sum each week's share of other teams outscored. Ties count as half.</p></dd></div>
+    </dl>
     {season.rows.length ? <table class="history-table standings-table">
       <caption class="visually-hidden">{year} regular-season standings</caption>
       <thead><tr><th scope="col">Rank</th><th scope="col">Manager / team</th><th scope="col">Record</th><th scope="col">Points</th><th scope="col">Scoring vs league</th><th scope="col">Wins vs expected</th></tr></thead>

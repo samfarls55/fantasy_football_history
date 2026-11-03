@@ -102,7 +102,7 @@ test('season comparisons retain their signed values, closed format and shared so
   await page.goto('/records/dominant-season/?season=2019');
   await expect(page.getByRole('heading', { name: 'Most dominant season', exact: true })).toBeVisible();
   await expect(page.locator('.leading-value')).toHaveText('73.8%');
-  await expect(page.locator('.record-ranking .record-when').first()).toHaveText('Week 4 · 2019');
+  await expect(page.locator('.record-ranking .record-when').first()).toHaveText('2019 season');
   await expect(page.getByRole('columnheader', { name: 'Scoring vs league' })).toBeAttached();
   for (const width of [1440, 320]) {
     await page.setViewportSize({ width, height: 900 });

@@ -16,6 +16,7 @@ const leader = view?.leaders[0];
 const related = recordCategories.filter(category => category.group === definition?.group && category.key !== key && category.candidates);
 const sortLabels = { rank: 'Rank', name: definition?.group === 'Players' ? 'Player name' : 'Manager name', newest: 'Newest first', oldest: 'Oldest first', 'value-asc': 'Value, low to high' };
 const valueLabel = definition?.valueLabel ?? (definition?.unit === '%' ? 'Win percentage' : definition?.unit);
+const seasonRecord = definition?.group === 'Seasons';
 ---
 <MuseumLayout title={definition?.name ?? 'Record not found'} section="Records">
   <a class="records-back" href="/records/">‹ <span>Back to record book</span></a>
@@ -29,10 +30,19 @@ const valueLabel = definition?.valueLabel ?? (definition?.unit === '%' ? 'Win pe
         {view.leaders.length === 1 && leader.detail && <p class="record-detail">{leader.detail}</p>}{view.leaders.length === 1 && leader.secondary && <p class="record-secondary">{leader.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</p>}
         <p class="leading-value"><strong>{formatRecordValue(leader.value, definition!.displayPrecision)}{definition!.unit === '%' ? '%' : ''}</strong>{definition!.unit !== '%' && <span>{recordUnit(definition!.unit, leader.value)}</span>}</p>
         {view.leaders.length === 1 && leader.sample && <p class="lead-sample">{leader.sample}</p>}
-        <p class="record-context">{view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{view.leaders.length === 1 && leader.period && <> · {periodLabel(leader.period)}</>}</p>
+        <p class="record-context">{seasonRecord && view.leaders.length === 1 ? `${leader.period!.year} season` : view.season ?? 'All seasons'}{view.scope && <> · {competitionLabels[view.scope]}</>}{!seasonRecord && view.leaders.length === 1 && leader.period && <> · {periodLabel(leader.period)}</>}</p>
         {view.leaders.length === 1 && <a class="record-open" href={leader.href}>{leader.historyLabel ?? 'Open history'} <span aria-hidden="true">›</span></a>}
       </div>
     </section>}
+    {seasonRecord && <div class="record-definition">
+      {key === 'unluckiest-season' ? <>
+        <p>Expected minus actual wins, the opposite of standings' Wins vs expected. Positive means fewer wins than expected.</p>
+        <p>Expected wins sum each week's share of other teams outscored. Ties count as half.</p>
+      </> : <>
+        <p>Points per played regular-season week versus that season's league average. +10% means 10% above average.</p>
+        {key === 'best-without-title' && <p>Completed seasons without a title.</p>}
+      </>}
+    </div>}
     <form method="get" class="record-controls">
       <div><label for="record-season">Season</label><select id="record-season" name="season"><option value="" selected={!view.season}>All seasons</option>{view.seasons.map(year => <option value={year} selected={view.season === year}>{year}</option>)}</select></div>
       {definition!.scope === 'games' && <div><label for="record-scope">Game scope</label><select id="record-scope" name="scope">{gameScopes.map(scope => <option value={scope} selected={scope === view.scope}>{competitionLabels[scope]}</option>)}</select></div>}
@@ -44,12 +54,12 @@ const valueLabel = definition?.valueLabel ?? (definition?.unit === '%' ? 'Win pe
     {view.rows.length ? <>
       <table class="history-table record-ranking">
         <caption class="visually-hidden">{definition!.name} rankings</caption>
-        <thead><tr><th scope="col">Rank</th><th scope="col">{definition!.group === 'Players' ? 'Player / manager' : 'Manager'}</th><th scope="col">{valueLabel}</th><th scope="col">When</th></tr></thead>
+        <thead><tr><th scope="col">Rank</th><th scope="col">{definition!.group === 'Players' ? 'Player / manager' : 'Manager'}</th><th scope="col">{valueLabel}</th><th scope="col">{seasonRecord ? 'Season' : 'When'}</th></tr></thead>
         <tbody>{view.rows.map(row => <tr id={`result-${row.id}`} data-rank={row.rank} class:list={{ 'selected-record': row.id === view.result }}>
           <td class="record-rank" data-label="Rank">{row.rank}</td>
           <th scope="row"><div class="team-identity"><TeamImage name={row.name} src={row.avatar} /><div><a href={row.href}>{row.name}</a>{row.detail && <span class="historical-team">{row.detail}</span>}{row.secondary && <span class="record-secondary">{row.secondary.map(identity => <a href={identity.href}>{identity.name}</a>)}</span>}</div></div></th>
           <td class="record-result" data-label={valueLabel}><strong>{formatRecordValue(row.value, definition!.displayPrecision)}{definition!.unit === '%' ? '%' : ''}</strong>{row.sample && <span class="record-sample">{row.sample}</span>}</td>
-          <td class="record-when" data-label="When">{periodLabel(row.period)}</td>
+          <td class="record-when" data-label={seasonRecord ? 'Season' : 'When'}>{seasonRecord ? `${row.period!.year} season` : periodLabel(row.period)}</td>
         </tr>)}</tbody>
       </table>
       {view.nextHref && <a class="record-more" href={view.nextHref}>Show more</a>}
