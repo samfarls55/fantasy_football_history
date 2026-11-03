@@ -1,0 +1,20 @@
+{
+  "id": "profile-header",
+  "name": "Selected profile B with shared text roles",
+  "purpose": "Apply Sam's requested shared-header and title-color consistency to the already approved B composition.",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-header.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-0560a757-68ff-4531-b251-43f92963bdfe.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-0560a757-68ff-4531-b251-43f92963bdfe.png",
+  "prompt": "Edit reference image 1, the approved desktop manager-profile B. Keep the entire timeline arrangement, identity, career summary, local tabs, season table, every number and historical sample event unchanged. Reference image 2 supplies the established home-page header's font character, color and scale, but its three old navigation labels must become the agreed four section labels. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. Managers is selected. Change the large linked team name The Monkey Buccaneers from violet to dark ink while retaining its link underline. Keep the manager heading dark and dates muted. These same color roles apply throughout the title area. Do not restyle the timeline, move elements, add content, resize the gallery, or redraw the source crest. This is a consistency correction of the selected composition, not a new layout proposal.",
+  "initialPrompt": "Edit reference image 1, the approved desktop manager-profile B. Keep the entire timeline arrangement, identity, career summary, local tabs, season table, every number and historical sample event unchanged. Reference image 2 supplies the established home-page header's font character, color and scale, but its three old navigation labels must become the agreed four section labels. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. Managers is selected. Change the large linked team name The Monkey Buccaneers from violet to dark ink while retaining its link underline. Keep the manager heading dark and dates muted. These same color roles apply throughout the title area. Do not restyle the timeline, move elements, add content, resize the gallery, or redraw the source crest. This is a consistency correction of the selected composition, not a new layout proposal.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip.png",
+    "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png"
+  ],
+  "approved": false,
+  "fictionalData": true,
+  "compositionAlreadyApproved": true,
+  "approvalScope": "Illustrates Sam's requested color consistency on approved Q33 composition B; this image is not a new layout choice.",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Keep original source artwork in implementation; generated artwork is only part of the layout preview."
+}

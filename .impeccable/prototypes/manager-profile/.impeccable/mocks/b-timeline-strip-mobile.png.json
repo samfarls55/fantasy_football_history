@@ -1,0 +1,19 @@
+{
+  "id": "B-mobile",
+  "name": "Timeline strip on phone",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip-mobile.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-99ae012c-2fb7-4a84-9353-07094622bce6.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-4a08a812-f743-4074-b8ed-65e07e86dd3c.png",
+  "prompt": "Refine this mobile manager-profile mockup for a real 390 by 900 CSS-pixel phone viewport. Keep the identity, authentic complete team crest, career results, 2019 takeover and 2022 rename, full franchise history link, three local tabs, and Regular season selector. Preserve the existing palette and type character. Make ordinary text readable at roughly 16 pixels when displayed 390 pixels wide, allowing the content to continue below the viewport. Replace the four-column season mini-tables with simple divided two-line rows. First row: 2025 linked at left and Champion linked at right; below them 9–5 and 1710 points. Second row: 2024 at left and Finalist at right; below them 10–4 and 1736 points. The next season may begin near the bottom. Remove the repeated YEAR, RECORD, POINTS, FINISH labels and the vertical cell dividers. Keep the rows on white with quiet horizontal separators instead of separate rounded boxes. Allow takeover and rename text to wrap naturally. Use only Sample stats for the fictional-data label. No explanations, new statistics, new events, added controls, calculations, update dates, or status messages. This is a narrow responsive web screen, never a shrunken desktop table or a device presentation.",
+  "initialPrompt": "Create the mobile adaptation of reference image 1, the Farls da bag manager profile with a timeline strip. Portrait web page at 390-pixel-wide phone proportions, showing enough vertical page to include three season rows. No device or browser frame. Carry the reference's palette, typography, complete team artwork, link styling, and content into a genuinely narrow layout; do not shrink the desktop grid. Header shows Farls da bag, Sample stats, and a Menu button. The compact profile presents the complete Monkey Buccaneers crest in a padded rounded white frame beside Sample manager, The Monkey Buccaneers, and 2019–2025. Under that identity, a single compact statistics row reads 60–36 record, 62.5% win rate, 2 titles, directly on pale aqua with no nested card. Adapt the desktop history strip into a short vertical timeline: 2019, Took over from Sample predecessor, Harbor Crew; 2022, Renamed The Monkey Buccaneers; then the link Full franchise history. Local tabs Seasons, Rivalries, Players follow, with Seasons selected, and a Regular season selector. Replace the wide desktop table with readable divided season rows. Each row retains its year, record, points, and finish: 2025, 9–5, 1710 points, Champion; 2024, 10–4, 1736 points, Finalist; 2023, 7–7, 1550 points, Semifinals. All names, events, and results are fictional sample data. No horizontal page overflow, clipped names, calculation panels, evidence actions, updated dates, status indicators, taglines, explanatory paragraphs, or decorative badges. Keep the portrait screen legible and restrained.",
+  "approved": true,
+  "fictionalData": true,
+  "kind": "ui-mockup",
+  "approvalScope": "Q33: phone adaptation of selected manager-profile arrangement B, approved by Sam. His shared-header and title-color consistency constraint applies.",
+  "approvalQuote": "We can use B. Yes.",
+  "references": [
+    "b-timeline-strip.png",
+    ".impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg"
+  ],
+  "sourceArtworkAuthority": "Original source image pixels take precedence over generated artwork."
+}

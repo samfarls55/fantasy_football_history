@@ -1,0 +1,19 @@
+{
+  "id": "player",
+  "name": "Player contributions for a manager",
+  "question": "Q39",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/player-contributions.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-a9ed28bd-1fa4-4045-a40d-cdfc4cdfd817.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-15d2d4fe-ce5a-40b1-a823-5da559a0be97.png",
+  "prompt": "Edit only the game-table navigation and result spacing in this player-contribution page. Make every Week cell a clear violet underlined link to its matchup: W2, W3, W4, W5, W6, W8, W9, W10. Keep the opponent names linked to their manager profiles. In every Team result cell add a readable space after the W or L: W 132.2–117.6; L 99.8–113.4; W 128.5–120.1; L 91.4–97.7; W 122.8–118.0; W 115.3–111.9; L 101.7–106.2; W 129.1–121.5. Preserve all numbers, the 359.0 starting-lineup points, 19 starts, season totals, selected 2023, shared header, typography, colors, spacing, scope context and Franchise contributions link. No other content, styling or layout changes. In particular, do not add the benched Week 7 performance to the starting totals or game table.",
+  "initialPrompt": "Desktop player-contribution history page for the Farls da bag league museum, edge-to-edge 1440 by 1100 proportions, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Managers is selected. Compact heading Sample receiver with a linked context line With Sample rival · 2025 Champion. This is contributions to that manager's history, not a generic NFL player profile. No player photo, avatar, biography or NFL-wide statistics. A modest summary shows 359.0 starting-lineup points and 19 starts. A small Franchise contributions link provides the separate franchise scope. First, a quiet Season totals table shows 2023:145.6 points,8 starts; 2022:213.4 points,11 starts. Then Games with a local 2023 year selector. Columns Week, Opponent, Player points, Team result. Eight rows: W2 / Sample manager C /12.4 /W132.2–117.6; W3 /D /18.6 /L99.8–113.4; W4 /E /25.7 /W128.5–120.1; W5 /F /7.8 /L91.4–97.7; W6 /G /24.1 /W122.8–118.0; W8 /H /19.3 /W115.3–111.9; W9 /I /21.2 /L101.7–106.2; W10 /J /16.5 /W129.1–121.5. Lettered opponents use Sample manager prefix. Games link to the relevant matchup. The 38.7 bench performance from Week 7 does not count in these starting totals. End with the game table, without a redundant footer. All results are visibly fictional sample data.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png"
+  ],
+  "approved": true,
+  "fictionalData": true,
+  "approvalScope": "Q37/Q39 desktop design pattern accepted by Sam. Not whole-platform implementation approval; figures remain synthetic.",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Use original source image pixels in implementation, never a generated likeness.",
+  "approvalQuote": "Yes, these are fine. Only thing in Q38 is I don't like the callout on the bottom for the record, it should be cleaner. That looks sloppy, everything else is fine"
+}

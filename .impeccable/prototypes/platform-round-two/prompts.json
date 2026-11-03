@@ -1,0 +1,49 @@
+[
+  {
+    "id": "profile-header",
+    "file": "profile-b-consistent-header.png",
+    "name": "Selected profile B with shared text roles",
+    "purpose": "Apply Sam's requested shared-header and title-color consistency to the already approved B composition.",
+    "prompt": "Edit reference image 1, the approved desktop manager-profile B. Keep the entire timeline arrangement, identity, career summary, local tabs, season table, every number and historical sample event unchanged. Reference image 2 supplies the established home-page header's font character, color and scale, but its three old navigation labels must become the agreed four section labels. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. Managers is selected. Change the large linked team name The Monkey Buccaneers from violet to dark ink while retaining its link underline. Keep the manager heading dark and dates muted. These same color roles apply throughout the title area. Do not restyle the timeline, move elements, add content, resize the gallery, or redraw the source crest. This is a consistency correction of the selected composition, not a new layout proposal.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png"
+    ]
+  },
+  {
+    "id": "profile-phone",
+    "file": "profile-b-consistent-phone.png",
+    "name": "Selected profile B on phone with shared text roles",
+    "purpose": "Apply the same title-color roles to B's approved phone adaptation.",
+    "prompt": "Edit only the text-color consistency in reference image 1, the selected narrow-phone manager profile. Keep every layout, text, event, number, season row, image, local tab, selector, link, and menu position unchanged. Brand Farls da bag stays dark brand ink #230b52. Primary page and team names use dark ink #0b1028. In particular, change The Monkey Buccaneers from violet to dark ink and retain the link underline. Dates and supporting text use muted #51447f. Violet stays on metric numbers, selected Seasons, and action links. Plain Sample stats uses muted ink. Keep the approved complete crest in its padded rounded white frame. Do not invent a new font, add a header badge, crop artwork, insert explanations, or change the structure. The phone header remains brand, Sample stats, Menu. This is a color correction, preserving the approved narrow-phone composition.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip-mobile.png"
+    ]
+  },
+  {
+    "id": "home",
+    "file": "expanded-home.png",
+    "name": "Six-category home page",
+    "purpose": "Q34 visual review of the accepted two prominent plus four compact highlights and recent top-ten results.",
+    "prompt": "Desktop web home page for the Farls da bag fantasy-football history museum, edge-to-edge 1440 by 1100 proportions, no browser frame. Extend reference image 1's approved gallery and record-index composition with more categories. Its palette, typography and component character carry over, while evidence actions do not. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. No section is selected on Home. Two prominent records lead: Best season without a title, The Monkey Buccaneers, +24%, PPG above league average, 2024, authentic complete crest; Highest-scoring benched player, Sample receiver, 38.7 points in one game, Week 7 · 2023, with the portrait explicitly captioned 2025 Champion as the team avatar. Both link to View rankings. Below, the compact full-width Record book has four linked rows with holder, result and date: Unluckiest season / Sample manager C / 3.0 wins below expected / 2022; Most productive pickup / Sample receiver / 169.4 starting points / 2024; Dropped players who delivered elsewhere / Sample running back / 148.2 starting points elsewhere / 2024; Longest winning streak / Sample manager D / 11 games / 2021–2022. An All records link opens the complete collection. Then a small unboxed Recent records list: Sample tight end, 33.8 benched points, Week 12 · 2025; Sample manager E, 48.6-point winning margin, Week 10 · 2025. All-time history leads before recent results. All results are fictional. Preserve complete source artwork in padded rounded white frames. No calculations, evidence actions, update dates, status panels, taglines, explanatory paragraphs, badges, or nested cards.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ]
+  },
+  {
+    "id": "season",
+    "file": "season-overview.png",
+    "name": "Season overview",
+    "purpose": "Q35 visual review of the accepted season header and Standings/Matchups/Playoffs/Players structure.",
+    "prompt": "Desktop season-history page for the Farls da bag fantasy-football museum, edge-to-edge 1440 by 1000 proportions, no browser frame. Reference images provide the approved visual system and complete source team avatars, not page content or home-gallery proportions. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. Seasons is selected. Lead with 2024 and a year selector. A compact championship band identifies Champion Sample rival with the source portrait as team avatar, and Runner-up Sample manager with the complete Monkey Buccaneers crest. Show the meaningful season format: 10 teams, 14 regular-season weeks, 4 playoff teams. Local tabs Standings, Matchups, Playoffs, Players, with Standings selected. The primary full-width standings table has rank, manager, record, points, playoff finish. Rows: Sample manager / 10–4 / 1736 / Finalist; Sample rival / 9–5 / 1600 / Champion; Sample manager C / 8–6 / 1500 / Semifinals; D / 8–6 / 1450 / Semifinals; E / 7–7 / 1400; F / 7–7 / 1350; G / 6–8 / 1300; H / 6–8 / 1250; I / 5–9 / 1200; J / 4–10 / 1214. Use the full Sample manager prefix for lettered names and clear linked identities. Beneath the standings, two compact linked season highlights show Most productive pickup, Sample receiver, 169.4 starting points; Highest-scoring benched player, Sample tight end, 32.1 points, Week 11. Keep the overview concise and the archive dominant. All results are fictional. Preserve complete source artwork in padded rounded white frames. No calculations, evidence actions, update dates, status panels, taglines, explanatory paragraphs, badges, or nested cards.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ]
+  }
+]

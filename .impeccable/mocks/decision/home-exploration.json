@@ -1,0 +1,54 @@
+{
+  "mode": "experience",
+  "frame": "portrait mobile web, 390 by 844 CSS viewport, high-resolution comp",
+  "groundedCandidates": [
+    {
+      "index": 1,
+      "name": "Sunday broadcast",
+      "reason": "Members already read televised football record graphics.",
+      "look": "Silver, navy, red; compact sports sans and stacked score strips."
+    },
+    {
+      "index": 2,
+      "name": "Trading-card binder",
+      "reason": "Collectible records tie people to specific seasons.",
+      "look": "Burgundy, white, foil edge; card numbering and binder spreads."
+    },
+    {
+      "index": 3,
+      "name": "League draft board",
+      "reason": "A shared league ritual turns facts into a visible matrix.",
+      "look": "Green magnetic board, white labels, orange picks; ordinals and rows."
+    },
+    {
+      "index": 4,
+      "name": "The league media guide",
+      "reason": "A team-issued statistical reference supports people, history, and source lookup.",
+      "look": "Cobalt, white, chartreuse; sturdy sports grotesk and tabbed stat indexes."
+    },
+    {
+      "index": 5,
+      "name": "Championship plaque wall",
+      "reason": "A literal museum reads achievements as permanent inscriptions.",
+      "look": "Limestone, bronze, dark ink; engraved names and grouped plaques."
+    },
+    {
+      "index": 6,
+      "name": "Stadium wayfinding",
+      "reason": "Stadium route systems give direct access to the league's exhibits.",
+      "look": "Concrete white, ultramarine, orange; large route numerals and directional bands."
+    },
+    {
+      "index": 7,
+      "name": "Ticket archive",
+      "reason": "Football tickets place individual events in a season chronology.",
+      "look": "Orange, white, carbon; serial numbers and perforated ticket fields."
+    }
+  ],
+  "rut": "Generic sports KPI dashboard and its predictable parchment newspaper opposite. Only candidate 5 literalizes the museum; candidate 3 is the single operated-tool form.",
+  "confirmed": {
+    "opening": "All-time history first, recent changes below",
+    "shortcut": "Record book and exhibits"
+  },
+  "syntheticData": "Northside, 2024, +24% vs league average, 14 games; Fourth & Regret, 2023 week 7, 38.7 bench points. All are demonstration content, not league facts."
+}

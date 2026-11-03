@@ -1,0 +1,14 @@
+[
+  {
+    "id": "home",
+    "prompt": "Edit this six-category Home mockup while preserving the shared header, both prominent record fields, complete artwork, four-row Record book, all statistics, dates, and typography. Remove the entire unsolicited All-time history section at the bottom left, including every takeover, rename, and championship line; that manager timeline does not belong on Home. Let Recent records occupy that full-width lower region as a short unboxed two-row list, retaining Sample tight end, 33.8 benched points, Week 12 · 2025, then Sample manager E, 48.6-point winning margin, Week 10 · 2025. Above the two lead records, add one compact functional context line All-time records · Regular season. Do not introduce a new hero or tagline. In the Most productive pickup row, show Sample manager and Sample receiver together in the Holder cell, on two compact lines. In the dropped-player row, show Sample manager F and Sample running back together in its Holder cell. Keep the original six category names, results, links and all other content unchanged. No new sections, timeline events, badges, explanations, evidence actions, or update/status indicators."
+  },
+  {
+    "id": "season",
+    "prompt": "Edit this season-overview mockup with three precise corrections, keeping the same shared header, selected Seasons navigation, champion and runner-up identities and team avatars, local tabs, ten standings rows, their exact statistics and playoff finishes, colors, and type. First, remove the duplicate small 2024 dropdown; put a small dropdown chevron directly beside the large 2024 heading so the year appears once and still reads as selectable. Second, replace the large boxed three-part format ribbon with one compact unboxed text line: 10 teams · 14 regular-season weeks · 4 playoff teams. Third, remove both avatars from the two bottom season-record highlights. These are team avatars, not player photos. Present those highlights as compact unboxed text links with category, player, metric and timeframe: Most productive pickup, Sample receiver, 169.4 starting points; Highest-scoring benched player, Sample tight end, 32.1 points, Week 11. Keep the highlight player names dark ink and actions violet. Do not add labels, explanations, illustrations, calculations, status, or extra cards."
+  },
+  {
+    "id": "profile-phone",
+    "prompt": "Edit only the two season-row point totals in this mobile profile. Change the full strings 1710 points and 1736 points from muted violet to dark ink #0b1028, matching the adjacent dark win-loss record values. Keep the dark primary manager and team names, muted dates, violet career metrics and selected navigation, complete source artwork, menu, all text, values, timeline, spacing and layout exactly as they are. No other changes."
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "id": "rivalry",
+  "name": "Rivalry comparison",
+  "question": "Q37",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/rivalry.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-11111b90-3f92-4ee8-9a4f-1f11bf14fc55.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-7b110867-1116-4be4-b037-03f19d1e7f76.png",
+  "prompt": "Edit this rivalry page with only two clarity refinements. Preserve the shared site header, complete manager/team avatars, selectors, all sample identities, exact head-to-head figures, ten game scores, margins, row order and Show all 13 games control. Replace the long bold narrative sentence with one quiet unboxed row of four concise facts: Head-to-head 8–5; 13 meetings; Average margin +4.6 points; Current streak Sample rival, 2 wins. Space those facts as a cohesive row with modest typography, no cards or backgrounds. Rewrite the date links in plain historical form: Week 12 · 2025, Week 3 · 2025, Week 9 · 2024, Week 2 · 2024, Week 7 · 2023, Week 1 · 2023, Week 8 · 2022, Week 1 · 2022, Week 10 · 2021, Week 2 · 2021. Keep their link styling and all other data unchanged. Do not add explanation, a hero panel, extra metrics, status, update dates or new content.",
+  "initialPrompt": "Desktop rivalry-history page for the Farls da bag league museum, edge-to-edge 1440 by 1000 proportions, crisp readable text, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Rivalries is selected. Two compact manager selectors show Sample manager and Sample rival, with their complete team avatars from references 2 and 3 in small padded rounded white frames. Include All seasons and Regular season selectors. A compact plain-text summary reads Sample manager leads 8–5; 13 meetings; average margin +4.6 points; Sample rival has won the last 2. The history is primary, with ten linked games in a single full-width table: When, Sample manager score, Sample rival score, Margin for Sample manager. Rows: 2025/W12 112.4/118.2/-5.8; 2025/W3 104.6/121.9/-17.3; 2024/W9 132.10/131.98/+0.12; 2024/W2 127.8/122.5/+5.3; 2023/W7 118.2/112.4/+5.8; 2023/W1 101.4/122.6/-21.2; 2022/W8 123.6/103.6/+20.0; 2022/W1 132.0/107.0/+25.0; 2021/W10 119.0/101.0/+18.0; 2021/W2 122.0/100.0/+22.0. Dates open their matchup. A quiet Show all 13 games action completes the table. Let visitors recognize a sustained rivalry and open an actual game, without a dashboard grid or repeated summary section. All identities and figures are synthetic. Preserve complete artwork; avatars identify teams/managers, never NFL players.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png",
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+  ],
+  "approved": true,
+  "fictionalData": true,
+  "approvalScope": "Q37/Q39 desktop design pattern accepted by Sam. Not whole-platform implementation approval; figures remain synthetic.",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Use original source image pixels in implementation, never a generated likeness.",
+  "approvalQuote": "Yes, these are fine. Only thing in Q38 is I don't like the callout on the bottom for the record, it should be cleaner. That looks sloppy, everything else is fine"
+}

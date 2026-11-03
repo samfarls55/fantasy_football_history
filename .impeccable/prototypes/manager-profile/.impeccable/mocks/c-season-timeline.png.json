@@ -1,0 +1,18 @@
+{
+  "id": "C",
+  "name": "History in the season archive",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/c-season-timeline.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-7d16814b-cd5c-4b8d-924f-661aca402ef5.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-4f4e1a4b-0ae4-49ba-a270-a9fe5775b9c8.png",
+  "prompt": "Edit this manager-profile mockup, preserving its structure, navigation, text, timeline placement, table rows, numbers, palette, and type. Make only these shared header corrections. Replace the long fictional-data sentence in the top-right header with the exact two words Sample stats, as small plain text without a badge or filled pill. Remove the smaller lilac rounded container behind the three career statistics; keep 60–36, 62.5%, and 2 with their meanings and separators, directly on the existing pale-aqua profile header. Keep the complete crest inside a padded rounded white frame, matching the source artwork in reference image 2; never crop or zoom it. Do not add any new card, caption, explanation, decorative border, content, or control. Preserve the chosen timeline arrangement exactly. The result remains a fictional design prototype.",
+  "initialPrompt": "Desktop manager career page for the Farls da bag fantasy-football history museum, rendered edge to edge at 1440 by 1000 proportions with crisp readable UI, no browser or device frame. Reference image 1 supplies only the established palette, condensed typography, rounded components, and complete-image framing; do not copy its home gallery, content, or evidence actions. Reference image 2 is the authentic current Monkey Buccaneers team artwork, shown complete with breathing room, never zoomed or cropped. Header: Farls da bag; Records, Managers, Seasons, Rivalries, with Managers selected; Sample stats visibly marks every result and historical event fictional. Main heading Sample manager, team The Monkey Buccaneers, career 2019–2025. A compact career summary shows 60–36, 62.5% win rate, 2 titles. Local tabs Seasons, Rivalries, Players, with Seasons active and a Regular season selector. The season archive has Year, Record, Points, Finish, using rows 2025 / 9–5 / 1710 / Champion; 2024 / 10–4 / 1736 / Finalist; 2023 / 7–7 / 1550 / Semifinals; 2022 / 8–6 / 1604 / Quarterfinals; 2021 / 9–5 / 1650 / Semifinals; 2020 / 8–5 / 1540 / Quarterfinals; 2019 / 9–4 / 1600 / Champion. Years and relevant identities are clear links. No taglines, calculation or evidence panels, status, update dates, badges, nested cards, or player photos. Structure: the compact identity and career summary include a clear line Took over from Sample predecessor in 2019 and a Full franchise history link. After the local tabs, the full-width season archive itself is the vertical timeline. Group the descending season rows beneath two dated team-name bands: The Monkey Buccaneers, 2022–2025, then Harbor Crew, 2019–2021. A subtle timeline spine connects the bands, with the 2022 rename visibly bridging the groups. Do not add a separate history sidebar or horizontal timeline. Finish with the 2019 takeover at the foot of the season archive.",
+  "approved": false,
+  "kind": "ui-mockup",
+  "approvalScope": "Manager-profile timeline arrangement only; proposed, not approved.",
+  "references": [
+    ".impeccable/review/refinement-native.png",
+    ".impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg"
+  ],
+  "fictionalData": true,
+  "sourceArtworkAuthority": "Original source image pixels take precedence over generated artwork."
+}

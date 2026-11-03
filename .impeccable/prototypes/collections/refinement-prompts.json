@@ -1,0 +1,14 @@
+[
+  {
+    "id": "records",
+    "prompt": "Edit only the Holder cells in the Players group of this Records collection. Preserve the full layout, shared header, all categories, values, dates, other groups, colors and typography. Make the person/player attribution explicit on two compact lines in each affected cell. Highest-scoring benched player: Sample rival, then Sample receiver. Most productive pickup: Sample manager, then Sample receiver. Dropped players who delivered elsewhere: Sample manager F, then Sample running back. Most starting points for one manager: Sample manager G, then Sample quarterback. Allow row height to fit these names without clipping. Keep the category names as the primary links and do not add photos, fields, explanatory paragraphs, badges or new records. No other changes."
+  },
+  {
+    "id": "managers",
+    "prompt": "Refine only the row rhythm and avatars in this manager directory. Preserve every name, year range, record, title count, link, section heading, column and the shared header. Make every avatar or initials frame the same compact square size, approximately 44 by 44 pixels at a 1440-pixel desktop viewport, with the same padded white background and rounded corners. Show complete source images without cropping; initials sit centered in that same frame. Make all manager rows uniformly compact, approximately 60 pixels high, with consistent vertical alignment, instead of oversized first rows for the photographs. Keep names the primary focus, not images. Preserve the current/former distinction and Franchise histories link. Do not stretch rows to fill the viewport or add content to occupy the remaining white space. No extra cards, captions, metrics, controls or styling changes."
+  },
+  {
+    "id": "playoffs",
+    "prompt": "Edit this playoff view with two interaction cleanups only, preserving the shared header, compact 2024 context, tabs, all participant names, seeds, scores, winners, bracket boxes and connector geometry. Replace the entire redundant Championship playoffs label, Championship dropdown, Consolation link and Placement link row with ONE compact native-style selector displaying Championship playoffs and a chevron. Consolation and Placement are choices inside that selector, not additional visible links. For each contest, make its existing round/week header the clear violet underlined link to the matchup. Keep participant names plain dark ink and preserve restrained bold emphasis on the winner; do not make those names look like separate competing links. Do not add Open matchup buttons, footers, badges, explanations or other controls. All data and bracket progression stay unchanged."
+  }
+]

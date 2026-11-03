@@ -1,0 +1,24 @@
+{
+  "id": "season",
+  "name": "Season overview",
+  "purpose": "Q35 visual review of the accepted season header and Standings/Matchups/Playoffs/Players structure.",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-b9cb5518-12c5-49fd-a4fc-9fe4b64b7fe4.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-052f7414-3dbb-43cb-9350-6de9a856e0d2.png",
+  "prompt": "Edit this season-overview mockup with three precise corrections, keeping the same shared header, selected Seasons navigation, champion and runner-up identities and team avatars, local tabs, ten standings rows, their exact statistics and playoff finishes, colors, and type. First, remove the duplicate small 2024 dropdown; put a small dropdown chevron directly beside the large 2024 heading so the year appears once and still reads as selectable. Second, replace the large boxed three-part format ribbon with one compact unboxed text line: 10 teams · 14 regular-season weeks · 4 playoff teams. Third, remove both avatars from the two bottom season-record highlights. These are team avatars, not player photos. Present those highlights as compact unboxed text links with category, player, metric and timeframe: Most productive pickup, Sample receiver, 169.4 starting points; Highest-scoring benched player, Sample tight end, 32.1 points, Week 11. Keep the highlight player names dark ink and actions violet. Do not add labels, explanations, illustrations, calculations, status, or extra cards.",
+  "initialPrompt": "Desktop season-history page for the Farls da bag fantasy-football museum, edge-to-edge 1440 by 1000 proportions, no browser frame. Reference images provide the approved visual system and complete source team avatars, not page content or home-gallery proportions. Use one identical shared header: Farls da bag in Roboto Condensed heavy brand ink #230b52; Records, Managers, Seasons, Rivalries in the same condensed font and muted #51447f, with violet text and underline only on the selected section. Plain Sample stats at the far right. Match the accepted home reference's header scale, spacing, and white ground. Primary headings and team names use dark ink #0b1028; supporting dates use #51447f. Seasons is selected. Lead with 2024 and a year selector. A compact championship band identifies Champion Sample rival with the source portrait as team avatar, and Runner-up Sample manager with the complete Monkey Buccaneers crest. Show the meaningful season format: 10 teams, 14 regular-season weeks, 4 playoff teams. Local tabs Standings, Matchups, Playoffs, Players, with Standings selected. The primary full-width standings table has rank, manager, record, points, playoff finish. Rows: Sample manager / 10–4 / 1736 / Finalist; Sample rival / 9–5 / 1600 / Champion; Sample manager C / 8–6 / 1500 / Semifinals; D / 8–6 / 1450 / Semifinals; E / 7–7 / 1400; F / 7–7 / 1350; G / 6–8 / 1300; H / 6–8 / 1250; I / 5–9 / 1200; J / 4–10 / 1214. Use the full Sample manager prefix for lettered names and clear linked identities. Beneath the standings, two compact linked season highlights show Most productive pickup, Sample receiver, 169.4 starting points; Highest-scoring benched player, Sample tight end, 32.1 points, Week 11. Keep the overview concise and the archive dominant. All results are fictional. Preserve complete source artwork in padded rounded white frames. No calculations, evidence actions, update dates, status panels, taglines, explanatory paragraphs, badges, or nested cards.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip.png",
+    "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png",
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+  ],
+  "approved": false,
+  "rejected": true,
+  "rejectionQuote": "For 35, I think the design is a little bit sloppy. It doesn't feel refined and the large sections in the middle don't really appear to meet the purpose of what this site is. It feels like it's regurgitating information that's already understood. Specifically the bottom feels bad.",
+  "fictionalData": true,
+  "compositionAlreadyApproved": false,
+  "approvalScope": "Proposed desktop composition pending Q34/Q35 review; phone adaptation remains pending.",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Keep original source artwork in implementation; generated artwork is only part of the layout preview."
+}

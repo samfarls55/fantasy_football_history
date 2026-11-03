@@ -1,0 +1,16 @@
+{
+  "round": 1,
+  "steer": "I like the Sunday broadcast the best, but it feels a little 2010-ish. It should feel more modern. Also, we have team logos and stuff, those should be included alongside the team names to keep the page from being only text. Images and icons are important to keep a webpage feeling fresh and lighter. It shouldn't be text-dense.",
+  "groundedCandidates": [
+    "1. Contemporary network identity package: real team art, white field, teal and coral, concise record overlays.",
+    "2. Tournament crest identity: distinct team marks organize a light circular chapter map, with straightforward labels.",
+    "3. Streaming chapter browser: logo-led story stage and a quiet vertical sequence of record chapters.",
+    "4. Stadium digital ribbon: flat light grounds and one saturated record band, with team marks as the image system.",
+    "5. Vertical sports recap: one visual record per section and stable page navigation, without required swiping.",
+    "6. Fixture identity program: two clearly separated team-led stories in a contemporary event identity.",
+    "7. Locker nameplate system: matte identity panels pair a real team image with a single memorable metric."
+  ],
+  "source": "Current league users from https://api.sleeper.app/v1/league/1385327861673529344/users retrieved 2026-10-27. Names and images are current, not historical proof.",
+  "exampleStats": "Synthetic preview statistics. Team assets are actual current images. Never present a synthetic achievement as actual league history.",
+  "scope": "shape only; no implementation or direction contract"
+}

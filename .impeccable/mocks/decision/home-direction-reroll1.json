@@ -1,0 +1,244 @@
+{
+  "title": "Farls da bag · modern, image-led home page",
+  "question": "Modern broadcast, real team images, and less text. Choose the direction to carry forward.",
+  "seed": "seed:cddb914a8311abbe",
+  "options": [
+    {
+      "id": "streaming-history",
+      "kind": "assigned",
+      "label": "History on demand",
+      "kicker": "THE ROLL",
+      "lineage": "Contemporary sports streaming chapter browsers",
+      "thesis": "Logo-led record stories make the archive feel ready to explore.",
+      "palette": [
+        "#F6F8FB",
+        "#17233D",
+        "#584BFF",
+        "#CBEDE6"
+      ],
+      "materials": [
+        "clean light canvas",
+        "large team artwork",
+        "quiet chapter strips"
+      ],
+      "viewport": "A real team logo anchors the first record story, a second story follows, and record-book access stays visible.",
+      "risk": "Story artwork must stay recognizably tied to a real team rather than become a generic thumbnail.",
+      "raised": [
+        {
+          "from": "Window-box shelf",
+          "raise": "Give each exhibit a distinct visual identity without burying its name."
+        },
+        {
+          "from": "Blackbook page",
+          "raise": "Let actual team artwork supply personality while labels remain readable."
+        },
+        {
+          "from": "Cyclorama",
+          "raise": "Use one confident color field and keep supporting records calm."
+        },
+        {
+          "from": "Brine calendar",
+          "raise": "Make the season and metric visible with very little text."
+        },
+        {
+          "from": "Oscilloscope",
+          "raise": "Keep source details directly accessible from every highlighted value."
+        },
+        {
+          "from": "HyperCard",
+          "raise": "Every story has a clear link and a predictable route back."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/reroll1-streaming.png"
+    },
+    {
+      "id": "on-air-now",
+      "kind": "pick",
+      "label": "On-air now",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "Contemporary sports network identity packages",
+      "thesis": "Big team identities and precise record graphics replace metallic broadcast chrome.",
+      "palette": [
+        "#FFFFFF",
+        "#12253D",
+        "#00A9A5",
+        "#FF7759"
+      ],
+      "materials": [
+        "flat color planes",
+        "real team logos",
+        "clean broadcast typography"
+      ],
+      "viewport": "The Monkey Buccaneers logo carries the lead record, with a lighter second feature and compact exhibit navigation.",
+      "risk": "The familiar sports language needs strong team imagery to feel specific to this league.",
+      "comp": ".impeccable/mocks/decision/reroll1-on-air.png"
+    },
+    {
+      "id": "toy-shelf",
+      "kind": "challenger",
+      "catalogId": "pop-culture-shelf-window-box-toy-shelf",
+      "label": "Window-box shelf",
+      "verdict": "declined",
+      "thesis": "Each record is a logo-led collectible box that opens its evidence.",
+      "palette": [
+        "#F8EFDA",
+        "#4E8857",
+        "#C36681"
+      ],
+      "materials": [
+        "cream board",
+        "gingham",
+        "cellophane"
+      ],
+      "viewport": "Logo windows occupy a shelf of record exhibits.",
+      "case": "Loses audience identification and product clarity against the requested modern broadcast direction.",
+      "kept": "Distinct exhibit identities.",
+      "risk": "Box packaging adds decorative layers around simple evidence.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-window-box-toy-shelf-hero.webp"
+    },
+    {
+      "id": "blackbook",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-wildstyle-blackbook-page",
+      "label": "Blackbook page",
+      "verdict": "declined",
+      "thesis": "Team marks connect the league's history through letterform routes.",
+      "palette": [
+        "#F1E7D0",
+        "#252124",
+        "#DB5A49"
+      ],
+      "materials": [
+        "marker",
+        "paper",
+        "heavy keylines"
+      ],
+      "viewport": "Team identity becomes the first record's large visual anchor.",
+      "case": "Loses audience identification and product clarity; letterform navigation fights readable broadcast presentation.",
+      "kept": "Team artwork as the source of personality.",
+      "risk": "Lettering can obscure team and exhibit names.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-wildstyle-blackbook-page-hero.webp"
+    },
+    {
+      "id": "cyclorama",
+      "kind": "challenger",
+      "catalogId": "stagecraft-theater-lighting-cyclorama-dawn",
+      "label": "Cyclorama",
+      "verdict": "declined",
+      "thesis": "Record stories occupy successive bands of colored stage light.",
+      "palette": [
+        "#060A14",
+        "#2545BA",
+        "#D981AD",
+        "#FFFFFF"
+      ],
+      "materials": [
+        "seamless color field",
+        "stage light"
+      ],
+      "viewport": "An illuminated team logo leads into bands of record evidence.",
+      "case": "Loses audience identification and product clarity; atmospheric phases add a metaphor the archive does not need.",
+      "kept": "One strong focal field with calm supporting content.",
+      "risk": "Lighting phases could imply unsupported progress or rankings.",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp"
+    },
+    {
+      "id": "brine",
+      "kind": "challenger",
+      "catalogId": "food-fermentation-culinary-theater-pickling-brine-calendar",
+      "label": "Brine calendar",
+      "verdict": "declined",
+      "thesis": "Season records line up as dated vessels of preserved history.",
+      "palette": [
+        "#F6F2E5",
+        "#CC685E",
+        "#557B4B"
+      ],
+      "materials": [
+        "glass",
+        "seasonal labels"
+      ],
+      "viewport": "Team logos identify dated season collections.",
+      "case": "Loses audience identification and product clarity; jars and preservation read as food rather than football.",
+      "kept": "Compact, visible season and metric labels.",
+      "risk": "The physical metaphor adds bulk and text.",
+      "hero": "https://impeccable.style/worlds/cards/food-fermentation-culinary-theater-pickling-brine-calendar-hero.webp"
+    },
+    {
+      "id": "scope",
+      "kind": "challenger",
+      "catalogId": "scientific-notation-oscilloscope-signal-bench",
+      "label": "Oscilloscope",
+      "verdict": "declined",
+      "thesis": "Selected record histories share one measured trace field.",
+      "palette": [
+        "#0A1310",
+        "#3FE58A",
+        "#E9B44E"
+      ],
+      "materials": [
+        "dark glass",
+        "phosphor",
+        "measurement grid"
+      ],
+      "viewport": "Team channels expose time-series results and their sources.",
+      "case": "Loses audience identification and product clarity; retro instrumentation repeats the dated impression.",
+      "kept": "Exact source access from a highlighted result.",
+      "risk": "Data traces would make a sparse home page feel analytical and dense.",
+      "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp"
+    },
+    {
+      "id": "hypercard",
+      "kind": "challenger",
+      "catalogId": "medium-native-hypercard-stack-shoebox",
+      "label": "HyperCard",
+      "verdict": "declined",
+      "thesis": "A stack of addressable record stories preserves a visitor's trail.",
+      "palette": [
+        "#FFFFFF",
+        "#101010",
+        "#939393"
+      ],
+      "materials": [
+        "one-bit image",
+        "painted buttons"
+      ],
+      "viewport": "One team-led record opens its supporting history.",
+      "case": "Loses audience identification and product clarity; monochrome retro controls contradict the requested modernity.",
+      "kept": "Direct story links and predictable return navigation.",
+      "risk": "Retro interface controls would dominate contemporary team images.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-hypercard-stack-shoebox-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "The familiar sports app",
+    "thesis": "A clean sports archive centered on team avatars and concise record cards.",
+    "palette": [
+      "#FFFFFF",
+      "#132338",
+      "#2162A5",
+      "#E7EDF3"
+    ],
+    "materials": [
+      "white interface",
+      "team avatars",
+      "blue actions"
+    ],
+    "viewport": "Two image-led record cards lead into the archive and current-season history.",
+    "risk": "A familiar layout puts most of the identity burden on the team images.",
+    "comp": ".impeccable/mocks/decision/reroll1-conventional.png"
+  },
+  "steer": true
+}

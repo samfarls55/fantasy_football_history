@@ -1,0 +1,17 @@
+{
+  "prompt": "Use case: ui-mockup edit. Edit image 1, the current desktop Farls da bag museum. Images 2 and 3 are the authoritative full team crest and portrait. Preserve the light History on Demand identity, aqua/violet/lilac palette, sports sans type, broad left achievement, quieter right stack, navigation and full-width record table. This is a clarity and information-layout pass, not a new visual direction. Render the entire desktop page edge to edge, readable text, same wide proportions.\n\nReduce repetition by grouping shared context. Add one compact line above the gallery: 'All-time records · Regular season'. Make room through tighter internal spacing, keeping the record table visible in the first viewport. Do not repeat that scope sentence inside either feature.\n\nLeft feature: 'Best season without a title'; 'The Monkey Buccaneers'; large '+24%'; concise unit 'PPG above league average'; year '2024'; 'View evidence'. Keep the entire crest in a padded frame beside the record. Remove '14 games'.\n\nRight top: 'Highest-scoring benched player'; '38.7' closely grouped with 'points in one game'; 'Week 7 · 2023'; 'View evidence'. Show the complete portrait with '2025 Champion' as a simple caption beside or below it, not a floating award badge. Remove the separate all-time scope sentence and crown.\n\nRight lower: heading 'Recently added', then a compact list entry: small complete crest, 'Best season without a title', 'The Monkey Buccaneers · 2024', chevron. Remove its repeated +24% and scoring explanation. Use proximity and hierarchy, not extra helper text.\n\nKeep the table's structure and two rows. Use the same record names and units, Regular season selector, dates and evidence links; remove game counts there too. Retain 'Sample stats'. No new statistics, slogans, helper paragraphs, controls, or cropped team images.",
+  "tool": "image_gen.imagegen",
+  "approved": false,
+  "supersededBy": ".impeccable/mocks/desktop-gallery-player.png",
+  "approval": "Sam approved the page canvas and 12 other items in review round 6. The approved layout remains the reference; his requested addition of the benched player's name is a pinned content correction still pending plan review.",
+  "approvalSession": "6b8017dee785fa82365906009408d000ba4917e653d8f08e26b92520e6e7239a",
+  "direction": "History on Demand",
+  "frame": "Desktop first, Gallery + record index",
+  "revisionOf": ".impeccable/mocks/desktop-gallery-clarified.png",
+  "reason": "Sam requested an Impeccable clarity pass, fewer repeated words, removal of home-page game counts, and a layout pass for Recently added.",
+  "syntheticData": true,
+  "identitySources": [
+    "assets/plates/achievement-logo.png",
+    "assets/plates/bench-portrait.png"
+  ]
+}

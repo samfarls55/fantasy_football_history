@@ -1,0 +1,53 @@
+[
+  {
+    "id": "rivalry",
+    "name": "Rivalry comparison",
+    "question": "Q37",
+    "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/rivalry.png",
+    "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-11111b90-3f92-4ee8-9a4f-1f11bf14fc55.png",
+    "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-7b110867-1116-4be4-b037-03f19d1e7f76.png",
+    "prompt": "Edit this rivalry page with only two clarity refinements. Preserve the shared site header, complete manager/team avatars, selectors, all sample identities, exact head-to-head figures, ten game scores, margins, row order and Show all 13 games control. Replace the long bold narrative sentence with one quiet unboxed row of four concise facts: Head-to-head 8–5; 13 meetings; Average margin +4.6 points; Current streak Sample rival, 2 wins. Space those facts as a cohesive row with modest typography, no cards or backgrounds. Rewrite the date links in plain historical form: Week 12 · 2025, Week 3 · 2025, Week 9 · 2024, Week 2 · 2024, Week 7 · 2023, Week 1 · 2023, Week 8 · 2022, Week 1 · 2022, Week 10 · 2021, Week 2 · 2021. Keep their link styling and all other data unchanged. Do not add explanation, a hero panel, extra metrics, status, update dates or new content.",
+    "initialPrompt": "Desktop rivalry-history page for the Farls da bag league museum, edge-to-edge 1440 by 1000 proportions, crisp readable text, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Rivalries is selected. Two compact manager selectors show Sample manager and Sample rival, with their complete team avatars from references 2 and 3 in small padded rounded white frames. Include All seasons and Regular season selectors. A compact plain-text summary reads Sample manager leads 8–5; 13 meetings; average margin +4.6 points; Sample rival has won the last 2. The history is primary, with ten linked games in a single full-width table: When, Sample manager score, Sample rival score, Margin for Sample manager. Rows: 2025/W12 112.4/118.2/-5.8; 2025/W3 104.6/121.9/-17.3; 2024/W9 132.10/131.98/+0.12; 2024/W2 127.8/122.5/+5.3; 2023/W7 118.2/112.4/+5.8; 2023/W1 101.4/122.6/-21.2; 2022/W8 123.6/103.6/+20.0; 2022/W1 132.0/107.0/+25.0; 2021/W10 119.0/101.0/+18.0; 2021/W2 122.0/100.0/+22.0. Dates open their matchup. A quiet Show all 13 games action completes the table. Let visitors recognize a sustained rivalry and open an actual game, without a dashboard grid or repeated summary section. All identities and figures are synthetic. Preserve complete artwork; avatars identify teams/managers, never NFL players.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ],
+    "approved": true,
+    "fictionalData": true,
+    "approvalScope": "Q37–Q39 desktop pattern approved by Sam; fictional design reference, not application code."
+  },
+  {
+    "id": "matchup-clean",
+    "name": "Historical matchup with quiet selected bench row",
+    "question": "Q38",
+    "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/matchup-clean.png",
+    "generatedPath": "C:/Users/sfarl/.codex/generated_images/01a17e68-d707-75b2-a6de-6c5fd50d0a47/exec-77e7925b-d1cc-4f4c-a3e9-fec929eda631.png",
+    "prompt": "Edit this historical matchup image with exactly one cleanup. Remove the separate text Highest-scoring benched player that appears to the right of the LEFT Bench heading, above the bench table. Leave that space blank. Keep the Bench heading, quiet lilac highlight on the Sample receiver row, linked player name, WR, score 38.7, all other player rows, every score, both complete team avatars, team names, page heading, navigation, fonts, colors, spacing and layout unchanged. Do not replace the removed text with a badge, icon, footnote, tooltip, caption, paragraph, callout or new action. The highlighted row alone carries the selected record context.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/matchup.png"
+    ],
+    "approved": true,
+    "fictionalData": true,
+    "approvalScope": "Q38 accepted layout with Sam's requested removal of the separate record callout. Inspected cleanup preserves the selected-row highlight and other content. No new layout approval required.",
+    "approvalQuote": "Yes, these are fine. Only thing in Q38 is I don't like the callout on the bottom for the record, it should be cleaner. That looks sloppy, everything else is fine",
+    "kind": "ui-mockup",
+    "sourceArtworkAuthority": "Use complete original source image pixels in implementation, never generated likenesses."
+  },
+  {
+    "id": "player",
+    "name": "Player contributions for a manager",
+    "question": "Q39",
+    "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/player-contributions.png",
+    "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-a9ed28bd-1fa4-4045-a40d-cdfc4cdfd817.png",
+    "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-15d2d4fe-ce5a-40b1-a823-5da559a0be97.png",
+    "prompt": "Edit only the game-table navigation and result spacing in this player-contribution page. Make every Week cell a clear violet underlined link to its matchup: W2, W3, W4, W5, W6, W8, W9, W10. Keep the opponent names linked to their manager profiles. In every Team result cell add a readable space after the W or L: W 132.2–117.6; L 99.8–113.4; W 128.5–120.1; L 91.4–97.7; W 122.8–118.0; W 115.3–111.9; L 101.7–106.2; W 129.1–121.5. Preserve all numbers, the 359.0 starting-lineup points, 19 starts, season totals, selected 2023, shared header, typography, colors, spacing, scope context and Franchise contributions link. No other content, styling or layout changes. In particular, do not add the benched Week 7 performance to the starting totals or game table.",
+    "initialPrompt": "Desktop player-contribution history page for the Farls da bag league museum, edge-to-edge 1440 by 1100 proportions, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Managers is selected. Compact heading Sample receiver with a linked context line With Sample rival · 2025 Champion. This is contributions to that manager's history, not a generic NFL player profile. No player photo, avatar, biography or NFL-wide statistics. A modest summary shows 359.0 starting-lineup points and 19 starts. A small Franchise contributions link provides the separate franchise scope. First, a quiet Season totals table shows 2023:145.6 points,8 starts; 2022:213.4 points,11 starts. Then Games with a local 2023 year selector. Columns Week, Opponent, Player points, Team result. Eight rows: W2 / Sample manager C /12.4 /W132.2–117.6; W3 /D /18.6 /L99.8–113.4; W4 /E /25.7 /W128.5–120.1; W5 /F /7.8 /L91.4–97.7; W6 /G /24.1 /W122.8–118.0; W8 /H /19.3 /W115.3–111.9; W9 /I /21.2 /L101.7–106.2; W10 /J /16.5 /W129.1–121.5. Lettered opponents use Sample manager prefix. Games link to the relevant matchup. The 38.7 bench performance from Week 7 does not count in these starting totals. End with the game table, without a redundant footer. All results are visibly fictional sample data.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png"
+    ],
+    "approved": true,
+    "fictionalData": true,
+    "approvalScope": "Q37–Q39 desktop pattern approved by Sam; fictional design reference, not application code."
+  }
+]

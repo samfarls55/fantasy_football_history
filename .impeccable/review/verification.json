@@ -1,0 +1,124 @@
+{
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "overflow": false
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024,
+      "overflow": false
+    },
+    {
+      "name": "narrow-desktop",
+      "width": 1280,
+      "height": 900,
+      "overflow": false
+    },
+    {
+      "name": "wide-desktop",
+      "width": 1600,
+      "height": 1000,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "states": [
+    "evidence desktop and mobile",
+    "empty scope",
+    "unknown record",
+    "keyboard focus and hover",
+    "long names",
+    "wide, tall and small-native-dimension synthetic images",
+    "missing images with initials fallback"
+  ],
+  "contrast": [
+    {
+      "selector": ".brand",
+      "ratio": 16.92,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".sample-notice",
+      "ratio": 6.89,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "selector": ".gallery-scope",
+      "ratio": 8.46,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "selector": ".lead-category",
+      "ratio": 5.66,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".lead-team",
+      "ratio": 17.45,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".lead-value",
+      "ratio": 9.19,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".lead-unit",
+      "ratio": 10.67,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".bench-category",
+      "ratio": 7.86,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".bench-unit",
+      "ratio": 8,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".recent-category",
+      "ratio": 8.46,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".table-unit",
+      "ratio": 8.46,
+      "required": 4.5,
+      "pass": true
+    },
+    {
+      "selector": ".record-title-link",
+      "ratio": 18.77,
+      "required": 3,
+      "pass": true
+    },
+    {
+      "selector": ".archive-footer",
+      "ratio": 6.61,
+      "required": 4.5,
+      "pass": true
+    }
+  ]
+}

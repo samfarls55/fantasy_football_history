@@ -1,0 +1,8 @@
+{
+  "prompt": "A high-fidelity portrait mobile web home page for Farls da bag, rendered edge to edge with crisp readable text at a 390 by 844 CSS viewport, at high resolution. No phone, browser window, or physical desk around it. This is a public fantasy football league museum. Friends arrive from their group chat to discover all-time achievements and disasters, open the record book, and inspect the evidence.\n\nThe page is a team-issued football media guide brought to the web. A continuous statistical index is the dominant move, with large record numbers and chapter tabs making real entries the opening, rather than a promotional hero. Cobalt print carries whole bands and chapter structure, white stock carries dense readable evidence, and chartreuse marks selected scope. Sturdy sports grotesk lettering and tabular numerals make it feel like a precise team reference, never a broadsheet newspaper.\n\nReading order: compact Farls da bag masthead and Records, Exhibits, Menu links; visibly set 'Design preview · synthetic records'; Regular season scope; an Uncrowned Kings entry for Northside, 2024, '+24% vs league average', '14 games'; a Bench Crimes entry for Fourth & Regret, '38.7 bench points', 'Week 7 · 2023'; plainly clickable Record book and Exhibits links; the beginning of Recent history below. These example names and numbers are synthetic, not real league facts. Show enough below the opening to establish a complete working page. No slogans, explanatory taglines, fictional headshots, or claims about actual champions.",
+  "tool": "image_gen.imagegen",
+  "direction": "The league media guide",
+  "frame": "390x844 mobile web, high-resolution portrait",
+  "approved": false,
+  "syntheticData": true
+}

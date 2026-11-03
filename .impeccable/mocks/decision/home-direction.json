@@ -1,0 +1,253 @@
+{
+  "title": "Farls da bag · home page",
+  "question": "Choose the visual direction for all-time history. Preview records are synthetic.",
+  "seed": "seed:cddb914a8311abbe",
+  "options": [
+    {
+      "id": "media-guide",
+      "kind": "assigned",
+      "label": "The league media guide",
+      "kicker": "THE ROLL",
+      "lineage": "Team-issued football media guides and statistical indexes",
+      "thesis": "A continuous record index puts the league's best and worst seasons in print.",
+      "palette": [
+        "#123EC8",
+        "#FFFFFF",
+        "#D9F042",
+        "#172134"
+      ],
+      "materials": [
+        "dense cobalt print",
+        "white stock",
+        "chapter tabs"
+      ],
+      "viewport": "The league masthead opens straight into large achievement and disaster entries, with a record-book index and recent history below.",
+      "risk": "Dense index entries need careful ordering on a phone.",
+      "raised": [
+        {
+          "from": "Cloud edge",
+          "raise": "Use color only to distinguish active scope and exceptional records."
+        },
+        {
+          "from": "Daylight section",
+          "raise": "Keep each exhibit, its metric, and its source aligned through the whole page."
+        },
+        {
+          "from": "Floating pigment",
+          "raise": "Make the page one coherent surface with one dominant opening."
+        },
+        {
+          "from": "VU bridge",
+          "raise": "Let visitors compare multiple records together without a carousel."
+        },
+        {
+          "from": "Torn billboard",
+          "raise": "Reveal deeper history through a clear sequence of linked evidence."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/media-guide.png"
+    },
+    {
+      "id": "broadcast",
+      "kind": "pick",
+      "label": "Sunday broadcast",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "Football broadcast record graphics",
+      "thesis": "A broadcast record slate gives achievements and disasters equal billing.",
+      "palette": [
+        "#E8EDF3",
+        "#162C50",
+        "#D8293A",
+        "#FFFFFF"
+      ],
+      "materials": [
+        "silver broadcast field",
+        "navy score strips",
+        "flat red emphasis"
+      ],
+      "viewport": "One stacked all-time record slate leads to the record book, followed by the current archive.",
+      "risk": "Familiar sports presentation can feel like another statistics site.",
+      "comp": ".impeccable/mocks/decision/broadcast.png"
+    },
+    {
+      "id": "fan-page",
+      "kind": "challenger",
+      "catalogId": "digital-design-canon-fansite-shrine-page",
+      "label": "The league fan page",
+      "verdict": "competitive",
+      "lineage": "Devoted single-subject fan pages",
+      "thesis": "A proudly personal fan page treats league records as shared obsession.",
+      "palette": [
+        "#080813",
+        "#FFFF00",
+        "#CC33FF",
+        "#00FFFF"
+      ],
+      "materials": [
+        "repeating pixel tile",
+        "outlined type banner",
+        "saturated link colors"
+      ],
+      "viewport": "One devoted column opens with a record wall, direct section links, and the start of the next exhibit.",
+      "case": "Holds audience identification through league devotion; the media guide makes dense records clearer.",
+      "risk": "Retro decoration can compete with evidence and mobile reading.",
+      "comp": ".impeccable/mocks/decision/fan-page.png",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-fansite-shrine-page-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/digital-design-canon-fansite-shrine-page.webp"
+    },
+    {
+      "id": "cloud",
+      "kind": "challenger",
+      "catalogId": "clouds-storms-auroras-iridescent-cloud-edge",
+      "label": "Cloud edge",
+      "verdict": "declined",
+      "lineage": "Iridescent cloud bands",
+      "thesis": "Season records appear as bands that open their supporting results.",
+      "palette": [
+        "#FFFFFF",
+        "#475569",
+        "#A7DCC7",
+        "#B79FDC"
+      ],
+      "materials": [
+        "white cloud field",
+        "narrow spectral fringe"
+      ],
+      "viewport": "A spectrum of record bands resolves into the underlying season table.",
+      "case": "Loses audience identification and product clarity; atmospheric bands give no familiar route into football history.",
+      "kept": "Disciplined color that marks meaningful distinctions.",
+      "risk": "Visitors must learn an unrelated visual metaphor.",
+      "hero": "https://impeccable.style/worlds/cards/clouds-storms-auroras-iridescent-cloud-edge-hero.webp"
+    },
+    {
+      "id": "daylight",
+      "kind": "challenger",
+      "catalogId": "architecture-inhabitable-space-daylight-section",
+      "label": "Daylight section",
+      "verdict": "declined",
+      "lineage": "Architectural daylight sections",
+      "thesis": "A continuous section connects each season's rooms to its records.",
+      "palette": [
+        "#F7F7EF",
+        "#24282D",
+        "#E8BD55",
+        "#879BAF"
+      ],
+      "materials": [
+        "limewash",
+        "charcoal section cuts",
+        "gold light bands"
+      ],
+      "viewport": "Seasons occupy connected bays with record annotations and source links.",
+      "case": "Loses audience identification and product clarity; architectural navigation slows access to records.",
+      "kept": "A continuous alignment system linking content and evidence.",
+      "risk": "The page requires reading an architectural diagram first.",
+      "hero": "https://impeccable.style/worlds/cards/architecture-inhabitable-space-daylight-section-hero.webp"
+    },
+    {
+      "id": "pigment",
+      "kind": "challenger",
+      "catalogId": "medium-native-ebru-floated-pigment",
+      "label": "Floating pigment",
+      "verdict": "declined",
+      "lineage": "Ebru marbling",
+      "thesis": "Each historical result forms a distinct pool within one continuous archive.",
+      "palette": [
+        "#F1E8D5",
+        "#1E6388",
+        "#A94B3C",
+        "#D9B756"
+      ],
+      "materials": [
+        "floating pigment",
+        "sized paper"
+      ],
+      "viewport": "A marbled record field opens the exact results behind a selected pool.",
+      "case": "Loses audience identification and product clarity; fluid navigation obscures stable categories.",
+      "kept": "One coherent surface and one dominant focal move.",
+      "risk": "The visual action can overshadow the record itself.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-ebru-floated-pigment-hero.webp"
+    },
+    {
+      "id": "vu",
+      "kind": "challenger",
+      "catalogId": "signals-instruments-vu-meter-bridge",
+      "label": "VU bridge",
+      "verdict": "declined",
+      "lineage": "Recording-desk meter bridges",
+      "thesis": "Parallel manager channels compare results before opening their history.",
+      "palette": [
+        "#EEE6D2",
+        "#1D1D1B",
+        "#8B563B",
+        "#C53030"
+      ],
+      "materials": [
+        "ivory meter faces",
+        "walnut frame",
+        "glass"
+      ],
+      "viewport": "A sweep of manager channels shows rate metrics with sample sizes.",
+      "case": "Loses audience identification and product clarity; instrument channels narrow the opening to rate comparisons.",
+      "kept": "Simultaneous comparison across a whole set of records.",
+      "risk": "Meter scales can imply comparisons the domain does not support.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-vu-meter-bridge-hero.webp"
+    },
+    {
+      "id": "billboard",
+      "kind": "challenger",
+      "catalogId": "design-canon-decollage-torn-billboard",
+      "label": "Torn billboard",
+      "verdict": "declined",
+      "lineage": "Layered street posters",
+      "thesis": "Older seasons sit beneath newer layers of league history.",
+      "palette": [
+        "#D6D1C7",
+        "#CC493D",
+        "#276889",
+        "#EEE6D9"
+      ],
+      "materials": [
+        "aged poster ink",
+        "paste board",
+        "torn fibers"
+      ],
+      "viewport": "An exposed all-time record opens a lower season layer and its source.",
+      "case": "Loses audience identification and product clarity; partial layers hide the clear record-book entrance.",
+      "kept": "Depth that earns each step through linked historical evidence.",
+      "risk": "Tearing can become a barrier to finding a fact.",
+      "hero": "https://impeccable.style/worlds/cards/design-canon-decollage-torn-billboard-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "kind": "canon",
+    "label": "The conventional record book",
+    "thesis": "A familiar sports archive with featured records and direct navigation.",
+    "palette": [
+      "#FFFFFF",
+      "#132338",
+      "#2162A5",
+      "#E7EDF3"
+    ],
+    "materials": [
+      "clean white interface",
+      "navy text",
+      "blue links"
+    ],
+    "viewport": "Featured all-time records lead into an exhibit grid and recent updates.",
+    "risk": "The league's identity relies almost entirely on its content.",
+    "comp": ".impeccable/mocks/decision/conventional.png"
+  },
+  "steer": true
+}

@@ -1,0 +1,9 @@
+Create a high-fidelity modern mobile web homepage for Farls da bag, edge to edge at 390 × 844 CSS pixels, rendered at high resolution with crisp readable UI text. No device or browser surround. Use case: ui-mockup. Members discover their league's all-time achievements and disasters, open the supporting records, and browse recent history.
+
+Both attached images are real current team identity assets, not layout references. Image 1 is The Monkey Buccaneers logo; image 2 is Scone’s Scones avatar. Preserve each image recognizably beside its team name. Their presence identifies the teams today; do not present them as historical logo evidence.
+
+This is the familiar modern sports-app direction. Use a white canvas, navy typography, blue interactive text, airy spacing, precise modern sans-serif type, and calm separators. Team imagery carries personality. The lead story is a concise avatar-led record card, followed by a lighter second record card. Avoid the bulky widgets and dense labeled tables of older sports websites.
+
+Reading order: compact Farls da bag header and Menu; navigation links “Record book” and “Exhibits”, each appearing only once; small visible “Design preview · sample stats”; “All-time” with “Regular season” scope; the dominant “Uncrowned Kings” story with the monkey logo, “The Monkey Buccaneers”, “+24%”, “vs league average”, “14 games”, “2024”; then “Bench Crimes” with the supplied Scone’s Scones avatar, “Scone’s Scones”, “38.7 bench points”, “Week 7 · 2023”. Each story plainly opens its evidence.
+
+Finish with “Recent history” and a real designed row using the monkey avatar, “2024”, “The Monkey Buccaneers”, “Uncrowned Kings”, and a link arrow. All statistics and award associations are sample content. No additional claims, tagline, helper labels, extra badges, giant decorative icons, stadium photos, gradients, skeleton bars, or metal chrome.

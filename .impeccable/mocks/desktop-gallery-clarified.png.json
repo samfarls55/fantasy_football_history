@@ -1,0 +1,14 @@
+{
+  "prompt": "Use case: text-localization. Edit target: image 1, the desktop Farls da bag museum home page. Supporting images 2 and 3 are the authoritative team crest and portrait. Produce the complete desktop page edge to edge with crisp readable UI text, at the same wide landscape proportions. Preserve the approved broad left record, stacked right modules, full-width record table, light aqua/lilac fields, violet actions, sports sans typography, and complete padded team images. This is a copy-clarity revision, not a redesign.\n\nMake the changes VISIBLE in the image, not annotations outside it. Header navigation: 'Featured records', 'Record book', 'Recently added'; retain 'Farls da bag' and 'Sample stats'.\n\nLeft record: replace 'Uncrowned Kings' with 'Best season without a title'. Keep 'The Monkey Buccaneers' and '+24%'. Directly below +24%, show the complete unit 'points per game above league average'. Context: '2024 regular season · 14 games'. Keep 'View evidence'.\n\nRight top record: heading 'Highest-scoring benched player'. Keep '2025 Champion' as the team name and '38.7'. Unit: 'points in one game'. Explicit record scope: 'All-time regular-season record'. Event: 'Week 7 · 2023'. These lines must all be visible and readable. Keep 'View evidence' and the complete portrait. Reflow text within the module as needed.\n\nRight lower module: 'Recently added', 'The Monkey Buccaneers', '+24%', 'points per game above league average', and '2024 regular season · 14 games'.\n\nRecord table: column 'Record' instead of 'Achievement'. Use the same plain record names, scoring units, team names and dates as above. Keep regular-season selector and evidence links. No slogans, new statistics, ranking ordinals, search, extra controls, or cropped identity images.",
+  "tool": "image_gen.imagegen",
+  "approved": false,
+  "direction": "History on Demand",
+  "frame": "1586x992 desktop, responsive implementation at 1440x900",
+  "revisionOf": ".impeccable/mocks/desktop-gallery.png",
+  "reason": "Sam requested visible scoring units and timeframe after the previous review displayed stale captions.",
+  "syntheticData": true,
+  "identitySources": [
+    "assets/plates/achievement-logo.png",
+    "assets/plates/bench-portrait.png"
+  ]
+}

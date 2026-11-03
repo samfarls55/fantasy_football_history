@@ -1,0 +1,20 @@
+{
+  "prompt": "Edit this exact mobile website comp, preserving its composition, real team artwork, typography, colors, dimensions, navigation, records, spacing, and recent-history section. Make one precise text replacement only: replace the small uppercase masthead subtitle \"FANTASY FOOTBALL LEAGUE MUSEUM\" beneath \"Farls da bag\" with the exact sentence-case text \"Design preview · sample stats\". That required visible provenance explains that the displayed achievement associations and statistics are demonstrations. Set it cleanly in the same modest navy sans style and keep it readable at the intended 390×844 CSS viewport.\n\nRetain the monkey pirate crest and the recognizable Scone’s Scones face avatar exactly. Keep the all-time records heading, Regular season scope, Uncrowned Kings, The Monkey Buccaneers, +24% vs league average, 2024 · 14 games, Bench Crimes, Scone’s Scones, 38.7 bench points, Week 7 · 2023, and the Recent history entry unchanged. Keep the Record book and Exhibits navigation accessible. Do not add text, icons, textures, effects, extra statistics, branding, or decorative details. The result remains the same clean white, teal, coral, and navy working webpage with clear sample provenance.",
+  "generationPrompt": "Create a high-fidelity mobile web homepage for Farls da bag, a public fantasy football league museum. Render a portrait 390×844 CSS viewport at high resolution, edge to edge, crisp readable text, no browser or device. Visitors open all-time achievements and disasters and inspect their records.\n\nThe supplied images are actual current team identities, not style references. Preserve image 1, the colorful monkey pirate crest, recognizably as the dominant lead artwork for The Monkey Buccaneers. Use image 2 as a small clean face-cropped avatar beside Scone’s Scones, excluding its overlaid caption and chest. Do not invent team marks.\n\nUse a contemporary sports network identity: clean white canvas, confident flat teal and coral planes, navy text, modest crisp sans typography. One large team-artwork feature is the expressive move. Keep the rest calm, airy, and concise. No metallic chrome, bevels, fake stadiums, giant condensed capitals, ranks, or branding-only hero.\n\nReading order: compact Farls da bag masthead with functional \"Record book\", \"Exhibits\", \"Menu\" navigation; \"All-time records\" heading with meaningful \"Regular season\" scope; clearly visible \"Design preview · sample stats\"; one dominant linked \"Uncrowned Kings\" feature with the monkey crest, \"The Monkey Buccaneers\", \"+24% vs league average\", \"2024 · 14 games\"; smaller linked \"Bench Crimes\" entry with the Scones avatar, \"Scone’s Scones\", \"38.7 bench points\", \"Week 7 · 2023\"; begin \"Recent history\" below with a real content entry linking \"2024 · The Monkey Buccaneers\". These stats and team associations are demonstration examples only. Never repeat navigation as duplicate CTA rows. No taglines, helper labels, placeholder bars, extra statistics, or invented history.",
+  "tool": "image_gen.imagegen",
+  "approved": false,
+  "syntheticData": true,
+  "direction": "On-air now",
+  "frame": {
+    "width": 390,
+    "height": 844,
+    "unit": "CSS px",
+    "orientation": "portrait",
+    "edgeToEdge": true
+  },
+  "referencedImagePaths": [
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+    "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/scones-scones.jpg"
+  ],
+  "editReason": "Replace invented masthead subtitle with required visible sample-stats provenance."
+}

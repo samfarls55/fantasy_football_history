@@ -1,0 +1,19 @@
+{
+  "id": "profile-phone",
+  "name": "Selected profile B on phone with shared text roles",
+  "purpose": "Apply the same title-color roles to B's approved phone adaptation.",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-phone.png",
+  "generatedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-24764bca-ac1a-4db7-a25e-553bb8659095.png",
+  "initialGeneratedPath": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-ac720eb0-72fc-416c-a343-ca8f3f4205ee.png",
+  "prompt": "Edit only the two season-row point totals in this mobile profile. Change the full strings 1710 points and 1736 points from muted violet to dark ink #0b1028, matching the adjacent dark win-loss record values. Keep the dark primary manager and team names, muted dates, violet career metrics and selected navigation, complete source artwork, menu, all text, values, timeline, spacing and layout exactly as they are. No other changes.",
+  "initialPrompt": "Edit only the text-color consistency in reference image 1, the selected narrow-phone manager profile. Keep every layout, text, event, number, season row, image, local tab, selector, link, and menu position unchanged. Brand Farls da bag stays dark brand ink #230b52. Primary page and team names use dark ink #0b1028. In particular, change The Monkey Buccaneers from violet to dark ink and retain the link underline. Dates and supporting text use muted #51447f. Violet stays on metric numbers, selected Seasons, and action links. Plain Sample stats uses muted ink. Keep the approved complete crest in its padded rounded white frame. Do not invent a new font, add a header badge, crop artwork, insert explanations, or change the structure. The phone header remains brand, Sample stats, Menu. This is a color correction, preserving the approved narrow-phone composition.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/manager-profile/.impeccable/mocks/b-timeline-strip-mobile.png"
+  ],
+  "approved": false,
+  "fictionalData": true,
+  "compositionAlreadyApproved": true,
+  "approvalScope": "Illustrates Sam's requested color consistency on approved Q33 composition B; this image is not a new layout choice.",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Keep original source artwork in implementation; generated artwork is only part of the layout preview."
+}

@@ -1,0 +1,15 @@
+{
+  "prompt": "Edit only the upper-right benched-player module in image 1, the complete approved desktop Farls da bag home-page layout. Keep the entire page, shared scope line, navigation, main achievement, Recently added entry, table, imagery, palette and typography unchanged. Image 2 is a targeted preview of the one requested content correction, not a new page layout.\n\nAdd the exact player name 'Sample receiver' above the upper-right module's 38.7 score. Preserve 'Highest-scoring benched player', 'points in one game', 'Week 7 · 2023', 'View evidence', and the full team image with its '2025 Champion' caption. Fit the player name by tightening the module's vertical spacing and modestly reducing the score size if necessary. Keep the module in its existing bounds, with the player and score on the left and team image on the right. Do not copy the extra outer shared-context or Sample stats labels from image 2; image 1 already has those once globally. No changes anywhere else. The global Sample stats notice remains; this name and score are synthetic fixture data. Render the complete desktop page at the same landscape proportions.",
+  "tool": "image_gen.imagegen",
+  "approved": true,
+  "approval": "Sam approved all 14 plan and asset items and confirmed inventory in review round 8.",
+  "approvalSession": "6b8017dee785fa82365906009408d000ba4917e653d8f08e26b92520e6e7239a",
+  "inheritsApprovedLayoutFrom": ".impeccable/mocks/desktop-gallery-concise.png",
+  "userRequestedCorrection": "Since this is about a player, we should say who the player was.",
+  "direction": "History on Demand",
+  "syntheticData": true,
+  "identitySources": [
+    "assets/plates/achievement-logo.png",
+    "assets/plates/bench-portrait.png"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "prompt": "A high-fidelity mobile web homepage for Farls da bag, a fantasy football league record book and museum, rendered edge to edge as a 390 × 844 CSS viewport at high resolution. Crisp readable text, no device, browser, desk, photography, or surrounding scene. Use case: ui-mockup.\n\nLeague members arrive to discover the all-time achievements and disasters, inspect the records behind them, then explore recent history. Lead with the historical record, with the direct actions “Record book” and “Exhibits” clearly clickable. Read from the finished league header and navigation into the visible notice “Design preview · synthetic records”, the “Regular season” scope selector, an “All-time” section containing the two named exhibit entries, then the start of “Recent history”.\n\nThe first exhibit is “Uncrowned Kings”, showing “Northside”, “2024”, “+24% vs league average”, and “14 games”. The second is “Bench Crimes”, showing “Fourth & Regret”, “2023 · Week 7”, and “38.7 bench points”. Use only these demonstration records. Do not invent champions, league totals, photos, dates of updates, or additional statistics. No tagline or redundant helper text.\n\nThis is the category-standard direction, a polished conventional sports record-book website. White is the page ground; navy carries headings and data; blue identifies links and the primary action. Use precise familiar sans-serif typography, aligned tabular numbers, fine rules, calm spacing, and unmistakable navigation. A tidy evidence-led record list is the dominant composition, finished with the same care as a premium sports statistics publication. The frame includes the plain wordmark “Farls da bag”, navigation “Records”, “Exhibits”, “Menu”, the scope control, both direct actions, and the next section beginning naturally at the lower edge.",
+  "tool": "image_gen.imagegen",
+  "direction": "category standard",
+  "frame": {
+    "width": 390,
+    "height": 844,
+    "unit": "CSS pixels",
+    "orientation": "portrait",
+    "render": "high resolution",
+    "edgeToEdge": true
+  },
+  "approved": false,
+  "syntheticData": true
+}

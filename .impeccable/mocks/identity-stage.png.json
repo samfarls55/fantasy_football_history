@@ -1,0 +1,14 @@
+{
+  "prompt": "Edit this mobile home-page layout with two small corrections. Keep the light aqua and violet History on Demand design, both current team images shown in full, their names, the concise metrics, dates, exhibit titles, navigation row, and all existing spacing. Remove the standalone hamburger icon in the upper-right masthead, because the navigation row already has Menu. In Recent history, replace the invented helmet matchup artwork and invented opponent with the existing Monkey Buccaneers logo, the concise text '2024 · The Monkey Buccaneers', and an arrow. Keep the visible 'Design preview · sample stats' notice. Do not add any other copy, helper text, imagery, or controls.",
+  "initialPrompt": "A high-fidelity portrait mobile web home page for Farls da bag, edge to edge at a 390 by 844 CSS viewport rendered at high resolution. Crisp readable text, no device or browser around it. This public fantasy football museum lets league friends discover all-time achievements and disasters and open the evidence. It must feel contemporary, light, image-led, and easy to scan.\n\nUse the History on Demand world: a white canvas, violet navigation, pale aqua and lilac story fields, modern sports sans lettering, and genuine team images. The composition is an identity-stage record story. The complete team logo has its own generous padded space, visibly separated from the record words, with one large result and clear next action. Every logo must fit in full, including lettering around its edges. No zoomed-in crops, no image running behind text. This should carry a wide logo or a portrait equally well. One dominant achievement leads a smaller disaster and a quiet recent-history row.\n\nThe input images are exact identity assets: The Monkey Buccaneers crest and 2025 Champion photo. Preserve them recognizably; do not invent another team mark. Reading order: Farls da bag; Record book, Exhibits and Menu; small 'Design preview · sample stats'; Uncrowned Kings, The Monkey Buccaneers, '+24% vs league average', '2024 · 14 games'; Bench Crimes, 2025 Champion, '38.7 bench points', 'Week 7 · 2023'; Recent history with one concise illustrated entry. Each feature has a clear arrow to its evidence. Regular season is the meaningful game scope. All numbers and award associations are synthetic. Use small meaningful icons, not decorative extra badges. No tagline, dense tables, repeated CTA rows, metallic effects, or invented chart.",
+  "tool": "image_gen.imagegen",
+  "approved": false,
+  "direction": "History on Demand",
+  "frame": "390x844 mobile web",
+  "syntheticData": true,
+  "identitySources": [
+    "decision/team-assets/monkey-buccaneers.jpg",
+    "decision/team-assets/champion-team.jpg"
+  ],
+  "supersededBy": "Desktop-first revision requested by Sam"
+}

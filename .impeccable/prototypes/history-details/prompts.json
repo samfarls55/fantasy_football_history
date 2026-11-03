@@ -1,0 +1,36 @@
+[
+  {
+    "id": "rivalry",
+    "file": "rivalry.png",
+    "name": "Rivalry comparison",
+    "question": "Q37",
+    "prompt": "Desktop rivalry-history page for the Farls da bag league museum, edge-to-edge 1440 by 1000 proportions, crisp readable text, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Rivalries is selected. Two compact manager selectors show Sample manager and Sample rival, with their complete team avatars from references 2 and 3 in small padded rounded white frames. Include All seasons and Regular season selectors. A compact plain-text summary reads Sample manager leads 8–5; 13 meetings; average margin +4.6 points; Sample rival has won the last 2. The history is primary, with ten linked games in a single full-width table: When, Sample manager score, Sample rival score, Margin for Sample manager. Rows: 2025/W12 112.4/118.2/-5.8; 2025/W3 104.6/121.9/-17.3; 2024/W9 132.10/131.98/+0.12; 2024/W2 127.8/122.5/+5.3; 2023/W7 118.2/112.4/+5.8; 2023/W1 101.4/122.6/-21.2; 2022/W8 123.6/103.6/+20.0; 2022/W1 132.0/107.0/+25.0; 2021/W10 119.0/101.0/+18.0; 2021/W2 122.0/100.0/+22.0. Dates open their matchup. A quiet Show all 13 games action completes the table. Let visitors recognize a sustained rivalry and open an actual game, without a dashboard grid or repeated summary section. All identities and figures are synthetic. Preserve complete artwork; avatars identify teams/managers, never NFL players.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ]
+  },
+  {
+    "id": "matchup",
+    "file": "matchup.png",
+    "name": "Historical matchup with selected bench performance",
+    "question": "Q38",
+    "prompt": "Desktop historical matchup page for the Farls da bag museum, edge-to-edge 1440 by 1000 proportions, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Seasons is selected. A Back to 2023 season link precedes Week 7 · 2023. Two compact aligned team score headers identify 2025 Champion, 112.4, on the LEFT with the complete portrait from reference 3; The Monkey Buccaneers, 118.2, on the RIGHT with the complete crest from reference 2. These are team avatars in padded rounded white frames. Under each team show aligned Starters and Bench tables with position, sample player name and points. Nine starter slots are QB, RB, RB, WR, WR, TE, FLEX, K, DEF. Left scores in slot order: 24.6,18.2,12.4,14.8,10.6,8.3,9.5,8.0,6.0. Right scores: 22.5,16.8,11.3,19.2,14.6,9.4,12.4,7.0,5.0. Use compact sample quarterback/running back/receiver/tight end/flex/kicker/defense names. In the LEFT Bench, highlight Sample receiver, WR, 38.7 using a quiet lilac row; the category Highest-scoring benched player identifies this performance near that row. Other left bench rows score 7.6 and 4.2; ordinary right bench rows score 9.8,6.4,2.3. The highlighted player name links to that manager's player-contribution history. All other rows stay calm. Complete both bench sections. Never claim that starting this player was legal or would have won. All figures are fictional.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ]
+  },
+  {
+    "id": "player",
+    "file": "player-contributions.png",
+    "name": "Player contributions for a manager",
+    "question": "Q39",
+    "prompt": "Desktop player-contribution history page for the Farls da bag league museum, edge-to-edge 1440 by 1100 proportions, no browser frame. Reference 1 supplies only the established shared header, condensed typography, palette and quiet table styling; do not copy its season title or data. Header Farls da bag; Records, Managers, Seasons, Rivalries; plain Sample stats. Keep the same header colors, font sizes and spacing. Primary headings and title-area names are dark ink. No giant context panels, metric cards, badges, explanations, calculation panels, update dates or status indicators. Managers is selected. Compact heading Sample receiver with a linked context line With Sample rival · 2025 Champion. This is contributions to that manager's history, not a generic NFL player profile. No player photo, avatar, biography or NFL-wide statistics. A modest summary shows 359.0 starting-lineup points and 19 starts. A small Franchise contributions link provides the separate franchise scope. First, a quiet Season totals table shows 2023:145.6 points,8 starts; 2022:213.4 points,11 starts. Then Games with a local 2023 year selector. Columns Week, Opponent, Player points, Team result. Eight rows: W2 / Sample manager C /12.4 /W132.2–117.6; W3 /D /18.6 /L99.8–113.4; W4 /E /25.7 /W128.5–120.1; W5 /F /7.8 /L91.4–97.7; W6 /G /24.1 /W122.8–118.0; W8 /H /19.3 /W115.3–111.9; W9 /I /21.2 /L101.7–106.2; W10 /J /16.5 /W129.1–121.5. Lettered opponents use Sample manager prefix. Games link to the relevant matchup. The 38.7 bench performance from Week 7 does not count in these starting totals. End with the game table, without a redundant footer. All results are visibly fictional sample data.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/season-overview-refined.png"
+    ]
+  }
+]

@@ -42,4 +42,4 @@ The running prototype's inline evidence behavior is historical. The approved ful
 - [docs/requirements.md](docs/requirements.md) accounts for all original stories and walkthrough additions.
 - [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) supplies local tickets and blocking relationships for implement-spec.
 
-Sam confirmed the complete written design handoff at Q44 on November 3, 2026. Repository/tracker, hosting, persistence, refresh scheduling and license setup remain implementation tasks; no full-platform implementation or issue publication has started.
+Sam confirmed the complete written design handoff at Q44 on November 3, 2026. The public repository and GitHub Issues are configured at [samfarls55/fantasy_football_history](https://github.com/samfarls55/fantasy_football_history), with shared agent configuration in AGENTS.md and docs/agents/. Hosting, persistence, refresh scheduling and license remain open. The spec and tickets have not been published, and full-platform implementation has not started.

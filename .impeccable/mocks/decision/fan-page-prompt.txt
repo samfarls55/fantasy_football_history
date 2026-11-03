@@ -1,0 +1,9 @@
+Create a high-fidelity mobile web home page for Farls da bag, a public fantasy-football league museum. Portrait 390×844 CSS viewport at high resolution, edge to edge, crisp readable text, no device or browser. Visitors revisit all-time achievements and disasters, inspect the evidence, and browse recent history.
+
+The two attached images are STYLE inspiration adapted into a working product; copy neither their layout nor their content. Translate their obsolete fixed-width treatment into a fully readable phone page. Use shape-only web graphics, no photography or illustration.
+
+One devoted, continuous column is led by a dominant all-time record wall, not a hero pitch or equal-card grid. Reading order: league-name banner; navigation links "Records", "Exhibits", "Menu"; clearly visible "Design preview · synthetic records"; selected scope "Regular season"; the record wall; direct "Record book" and "Exhibits" actions; the beginning of a separate "Recent history" section at the bottom edge.
+
+The wall holds both "Uncrowned Kings" and "Bench Crimes" as linked evidence entries. First entry: "Northside", "2024", "+24% vs league average", "14 games". Second entry: "Fourth & Regret", "2023 · Week 7", "38.7 bench points". Give the metric and its owner unmistakable hierarchy. These are demonstration records only. No invented league claims, championships, real people, dates beyond these, or extra statistics.
+
+Make the record wall the sole theatrical move. Navigation, controls, and the following section stay calm, with generous readable line spacing and steady vertical rhythm. Working links must look clickable. No slogans, taglines, helper copy, guestbook, accounts, visitor counter, or photos.

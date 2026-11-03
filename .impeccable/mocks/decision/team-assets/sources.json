@@ -1,0 +1,31 @@
+{
+  "source": "https://api.sleeper.app/v1/league/1385327861673529344/users",
+  "retrieved": "2026-10-27",
+  "scope": "Current account/team images only; no proof of historical names or championship results.",
+  "assets": [
+    {
+      "file": "monkey-buccaneers.jpg",
+      "userId": "331855652555063296",
+      "teamName": "The Monkey Buccaneers",
+      "url": "https://sleepercdn.com/uploads/3cb1a2249156178e5a7d372b7e34b83f.jpg"
+    },
+    {
+      "file": "scones-scones.jpg",
+      "userId": "345285364686077952",
+      "teamName": "Scone’s Scones",
+      "url": "https://sleepercdn.com/uploads/ad90a9fd43dff99620f3467ef1db47ca.jpg"
+    },
+    {
+      "file": "team-brandon.jpg",
+      "userId": "472614535706963968",
+      "teamName": "Team Brandon",
+      "url": "https://sleepercdn.com/uploads/76f6f802ba2d25dbe13f976542d574a3.jpg"
+    },
+    {
+      "file": "champion-team.jpg",
+      "userId": "333650773403529216",
+      "teamName": "2025 Champion",
+      "url": "https://sleepercdn.com/uploads/50ad7a3e74ca1dd81d358601df4c9b9f.jpg"
+    }
+  ]
+}

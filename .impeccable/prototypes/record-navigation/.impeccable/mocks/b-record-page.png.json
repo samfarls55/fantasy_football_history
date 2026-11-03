@@ -1,0 +1,18 @@
+{
+  "prompt": "Edit image 1 only to correct the record holder's team identity. Keep all layout, typography, colors, score 38.7, Sample receiver name, Week 7 · 2023, Open matchup button, and the lower table unchanged. In the main result field, change the large linked team name from The Monkey Buccaneers to 2025 Champion. Replace the large pirate crest with the complete team portrait provided in image 2, inside the same padded rounded white image frame. Image 2 is 2025 Champion's team avatar, not the player's face. The smaller line 2025 Champion · Week 7 · 2023 · Regular season is already correct and remains. Do not add any calculations, evidence labels, update dates, or status messages.",
+  "initialPrompt": "Use case: ui-mockup. Create the destination screen reached after a visitor clicks Highest-scoring benched player in the Farls da bag record book. This option opens a concise dedicated record page before the visitor chooses whether to open the matchup. Use the reference screenshot only for Farls da bag's existing palette, typography character, rounded padded team images, and component styling; its home-gallery composition and evidence wording do not carry over. Header brand Farls da bag, navigation Records, Managers, Seasons, Rivalries, and a small Sample stats label. All results are synthetic. Render a complete desktop web screen, 1440×900 proportions, crisp text, no browser frame. No calculation panels, formulas, methodology, source JSON, evidence labels/buttons, update dates, freshness/status indicators, warning banners, decorative badge chips, or invented claims that a substitution was legal.\n\nAfter the compact header and Back to records, the main heading is Highest-scoring benched player. Lead with Sample receiver, 38.7 points, 2025 Champion, Week 7 · 2023, Regular season, and a complete rounded team portrait. That portrait identifies the team only, never the player. A primary Open matchup button is the clear next action. Below the leading result, a small table titled Other high bench performances provides historical record context: Sample running back, 34.1 points, Week 3 · 2022; Sample tight end, 33.8 points, Week 9 · 2021. Mark the whole screen Sample stats in the header, so every invented value is visibly synthetic. Link the team name to a profile and provide a quiet return to the record book. Use one generous pale-lilac result field and a simple compact list beneath it, with no nested cards or giant repeated metrics. This screen should feel like a short sports-record entry, with a meaningful next step to the actual game; no matchup scoreboard or lineup is visible yet.",
+  "tool": "image_gen.imagegen",
+  "approved": true,
+  "question": "Q4 record click destination",
+  "variant": "B",
+  "name": "Record page",
+  "reference": "C:/dev/active/fantasy_football_history/.impeccable/review/refinement-native.png",
+  "initialOutput": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-5fd80223-49cd-4615-af51-e871ed15c246.png",
+  "finalOutput": "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-34828d37-6e01-4c63-9743-fc442c94840f.png",
+  "editReferences": [
+    "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-5fd80223-49cd-4615-af51-e871ed15c246.png",
+    "C:/dev/active/fantasy_football_history/assets/plates/bench-portrait.png"
+  ],
+  "approval": "Sam selected B: a record opens its category page and shows the top people in that category.",
+  "approvalScope": "Record navigation and category-ranking pattern; all depicted statistics remain synthetic."
+}

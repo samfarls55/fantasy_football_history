@@ -1,0 +1,21 @@
+[
+  {
+    "id": "season-refined",
+    "name": "Refined season comparison",
+    "file": "season-overview-refined.png",
+    "prompt": "A refined desktop season-comparison page for Farls da bag, a fantasy-football history museum, at 1440 by 900 proportions, edge-to-edge, no browser frame. The visitor compares how each manager performed against that season's league and schedule. Use reference 1 only for the shared header, typography, colors and quiet tab/table styling, never its profile content, crest, or timeline. Header Farls da bag, Records, Managers, Seasons selected, Rivalries, and plain Sample stats. Keep identical header scale and colors: dark brand, muted navigation, violet selected underline. On white, a compact 2024 heading with a year-selection chevron and a Season records link. Beneath it, one restrained line identifies Champion Sample rival and Runner-up Sample manager, with linked dark-ink names. A small Season format disclosure replaces the always-visible format statistics. Local tabs Standings selected, Matchups, Playoffs, Players. No large colored header band. The main content is one well-spaced full-width comparison table: Rank, Manager, Record, Scoring vs league, Wins vs expected. Rows: Sample manager / 10–4 / +24.0% / +0.7; Sample rival / 9–5 / +14.3% / -0.2; C / 8–6 / +7.1% / -0.7; D / 8–6 / +3.6% / +0.8; E / 7–7 / 0.0% / -0.4; F / 7–7 / -3.6% / +0.2; G / 6–8 / -7.1% / -2.6; H / 6–8 / -10.7% / -0.2; I / 5–9 / -14.3% / +0.9; J / 4–10 / -13.3% / +1.5. Lettered managers use Sample manager prefix. Right-align measured values, dark ink, calm weights, quiet row dividers. The page ends with the table. No footer summaries, player highlights, metric ribbons, cards, avatars, explanations, calculations, status or update dates. All results are fictional.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-header.png"
+    ]
+  },
+  {
+    "id": "home-phone",
+    "name": "Approved expanded Home on phone",
+    "file": "expanded-home-phone.png",
+    "prompt": "Create the narrow-phone adaptation of this approved Farls da bag home-page composition. A tall scrolling web page at 390 by 1350 CSS-pixel proportions, no browser or device frame. Preserve the same six fictional category leaders and recent results. Use the approved phone header: Farls da bag in dark brand ink, plain Sample stats, Menu. Condensed typography and color roles stay consistent: names dark ink, dates muted, metrics and actions violet. All-time records · Regular season appears once. Stack the aqua Best season without a title feature and lilac Highest-scoring benched player feature. The first retains The Monkey Buccaneers, complete padded rounded crest, +24%, PPG above league average, 2024, View rankings. The second retains Sample receiver, 38.7 points in one game, Week 7 · 2023, View rankings, and the complete portrait explicitly captioned 2025 Champion as a team avatar. Keep artwork modest beside the content and preserve the full image. Record book follows with All records and four simple divided rows, not a shrunken desktop table. Each row retains its category, holder, result and year: Unluckiest season, Sample manager C, 3.0 wins below expected, 2022; Most productive pickup, Sample manager with Sample receiver, 169.4 starting points, 2024; Dropped players who delivered elsewhere, Sample manager F with Sample running back, 148.2 starting points elsewhere, 2024; Longest winning streak, Sample manager D, 11 games, 2021–2022. Finish with compact Recent records: Sample tight end, 33.8 benched points, Week 12 · 2025; Sample manager E, 48.6-point winning margin, Week 10 · 2025. Use readable 16-pixel body text, natural wrapping and two-line rows. No repeated table headers, horizontal overflow, extra stories, badges, timeline, calculations, status or update dates.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/expanded-home.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-phone.png"
+    ]
+  }
+]

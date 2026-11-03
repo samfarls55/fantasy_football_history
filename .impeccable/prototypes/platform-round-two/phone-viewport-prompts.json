@@ -1,0 +1,32 @@
+[
+  {
+    "id": "home-phone-opening",
+    "file": "expanded-home-phone-opening.png",
+    "name": "Expanded Home, opening phone viewport",
+    "prompt": "Keep reference image 1's exact narrow portrait canvas, edge-to-edge phone viewport and shared Farls da bag / Sample stats / Menu header. Replace everything below that header with the opening of the approved Home page. Remove all profile identity, career totals, timeline, profile tabs and seasons. This is a 390-by-900 CSS-pixel phone viewport, not a phone page centered inside a wider artboard; keep only 16-pixel side margins. One line reads All-time records · Regular season. Stack two record fields. In the first aqua field the full-width category heading must read exactly Best season without a title, with all six words visible. Beneath it: The Monkey Buccaneers, +24%, PPG above league average, 2024, View rankings; use the complete source crest from reference 2 in a modest padded rounded white frame alongside the content. In the second lilac field: Highest-scoring benched player, Sample receiver, 38.7, points in one game, Week 7 · 2023, View rankings. The complete source portrait from reference 3 is a team avatar and is explicitly captioned 2025 Champion. The Record book heading and All records link can begin near the bottom, with its list continuing below the viewport. Use readable 16-pixel ordinary text and natural wrapping. Names use dark ink, dates muted, metrics/actions violet. No desktop table, wide gutters, device frame, new claims, timelines, calculations or status.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-phone.png",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/monkey-buccaneers.jpg",
+      "C:/dev/active/fantasy_football_history/.impeccable/mocks/decision/team-assets/champion-team.jpg"
+    ]
+  },
+  {
+    "id": "home-phone-records",
+    "file": "expanded-home-phone-records.png",
+    "name": "Expanded Home, scrolled phone record index",
+    "prompt": "Use reference image 1's narrow portrait canvas, fonts, color roles and legible phone sizing, but replace its content with a scrolled viewport of the approved Home page. The image itself is a 390-by-900 CSS-pixel phone viewport, edge to edge with 16-pixel margins. It starts at Record book and an All records link. The site header and two large featured records have scrolled out of view; do not draw them, the profile content, a browser or device. Show four unboxed, full-width, vertically stacked list entries with quiet horizontal dividers. Each entry has category first, then holder, then result and date. Unluckiest season; Sample manager C; 3.0 wins below expected; 2022. Most productive pickup; Sample manager with Sample receiver; 169.4 starting points; 2024. Dropped players who delivered elsewhere; Sample manager F with Sample running back; 148.2 starting points elsewhere; 2024. Longest winning streak; Sample manager D; 11 games; 2021–2022. Each category is linked. Follow with Recent records and two compact unboxed entries: Sample tight end, 33.8 benched points, Week 12 · 2025; Sample manager E, 48.6-point winning margin, Week 10 · 2025. Keep normal text at least 16 pixels and let long names wrap. No four-column mini-table, repeated field labels, individual card boxes, side gutters, extra stories, avatars, calculations, status or update dates. All results are fictional.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-phone.png"
+    ]
+  },
+  {
+    "id": "season-refined-phone",
+    "file": "season-overview-refined-phone.png",
+    "name": "Refined season comparison on phone",
+    "prompt": "Keep reference image 1's exact narrow portrait canvas and shared Farls da bag / Sample stats / Menu header. Replace every element below that header with the refined season-comparison content in reference image 2. No profile crest, career metrics or timeline. A 390-by-900 CSS-pixel phone viewport, edge to edge, 16-pixel side margins. Compact heading 2024 with year chevron and Season records link. Beneath it show Champion Sample rival and Runner-up Sample manager as two quiet linked facts, then a closed disclosure labeled only Season format. Local tabs Standings selected, Matchups, Playoffs, Players, all at readable phone size. Adapt the comparison table into unboxed divided manager rows, not a compressed desktop grid. Each row begins with rank and manager on the left, record on the right; below that show Scoring vs league with its value, then Wins vs expected with its value. First row: 1, Sample manager, 10–4, +24.0%, +0.7. Second: 2, Sample rival, 9–5, +14.3%, -0.2. Third: 3, Sample manager C, 8–6, +7.1%, -0.7. Further rows continue below the viewport. Keep ordinary text 16 pixels, dark data ink, restrained weights, violet selected navigation and actions, natural line wrapping, and quiet separators. No metric banners, player highlights, footer summaries, visible format-statistics strip, avatars, cards, source calculations, operational status or update dates. All results are fictional.",
+    "references": [
+      "C:/dev/active/fantasy_football_history/.impeccable/prototypes/platform-round-two/.impeccable/mocks/profile-b-consistent-phone.png",
+      "C:\\Users\\sfarl\\.codex\\generated_images\\01a17e68-d707-75b2-a6de-6c5fd50d0a47\\exec-215bafba-6854-4de5-938a-eac3633dab32.png"
+    ]
+  }
+]

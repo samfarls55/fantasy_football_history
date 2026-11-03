@@ -1,0 +1,17 @@
+{
+  "id": "matchup-clean",
+  "name": "Historical matchup with quiet selected bench row",
+  "question": "Q38",
+  "file": "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/matchup-clean.png",
+  "generatedPath": "C:/Users/sfarl/.codex/generated_images/01a17e68-d707-75b2-a6de-6c5fd50d0a47/exec-77e7925b-d1cc-4f4c-a3e9-fec929eda631.png",
+  "prompt": "Edit this historical matchup image with exactly one cleanup. Remove the separate text Highest-scoring benched player that appears to the right of the LEFT Bench heading, above the bench table. Leave that space blank. Keep the Bench heading, quiet lilac highlight on the Sample receiver row, linked player name, WR, score 38.7, all other player rows, every score, both complete team avatars, team names, page heading, navigation, fonts, colors, spacing and layout unchanged. Do not replace the removed text with a badge, icon, footnote, tooltip, caption, paragraph, callout or new action. The highlighted row alone carries the selected record context.",
+  "references": [
+    "C:/dev/active/fantasy_football_history/.impeccable/prototypes/history-details/.impeccable/mocks/matchup.png"
+  ],
+  "approved": true,
+  "fictionalData": true,
+  "approvalScope": "Q38 accepted layout with Sam's requested removal of the separate record callout. Inspected cleanup preserves the selected-row highlight and other content. No new layout approval required.",
+  "approvalQuote": "Yes, these are fine. Only thing in Q38 is I don't like the callout on the bottom for the record, it should be cleaner. That looks sloppy, everything else is fine",
+  "kind": "ui-mockup",
+  "sourceArtworkAuthority": "Use complete original source image pixels in implementation, never generated likenesses."
+}
