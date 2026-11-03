@@ -25,6 +25,8 @@ Tests start with controlled provider responses, use the real import/refresh entr
 | A13 Setup | A documented configured league ID drives the same calculations without editing domain logic. Import, repeat refresh, tests and production build have reproducible commands. License/setup choices are recorded before public release. |
 | A14 Whole journey | Open Home, a category, a ranked performance, its actual matchup or season, and scoped player history. Share each relevant view, reload and navigate Back without losing identity or filter context. |
 
+The implementation checks and remaining review/delivery boundaries are recorded in [verification.md](verification.md). This scope ledger does not itself certify release completion.
+
 A scenario can be covered by more than one focused fixture. Do not write a mirror of every private function. A small fixture should make each expected result understandable.
 
 ## Original stories

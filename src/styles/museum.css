@@ -159,7 +159,7 @@ h1 { font-size: clamp(42px, 3.65vw, 62px); font-weight: 900; line-height: 1.08; 
   .standing-points::before, .standing-comparison::before { content: attr(data-label); color: var(--muted); font-weight: 400; text-align: left; }
   .team-identity { gap: 10px; }
   .seasons-table tr { grid-template-columns: 1fr; }
-  .seasons-table tbody th { font-size: 30px; }
+  .seasons-table tbody th:first-child { width: auto; font-size: 30px; }
   .seasons-table td { display: flex; justify-content: space-between; gap: 16px; }
   .seasons-table td::before { content: attr(data-label); color: var(--muted); font-size: 18px; font-weight: 400; }
   .matchup-controls { align-items: stretch; gap: 12px; }

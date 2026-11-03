@@ -37,6 +37,8 @@ Current team names and images came from the configured league's Sleeper users en
 
 Home and category rankings open actual historical destinations. Public pages omit calculation/source panels and update-status UI; internal metric and coverage contracts remain documented and tested.
 
+Local acceptance checks, native browser zoom evidence, detector dispositions and remaining review/deployment limits are recorded in [verification](docs/verification.md).
+
 ## Full-platform handoff
 
 - [SPEC.md](SPEC.md) defines the reconciled scope and application-boundary testing requirements.
