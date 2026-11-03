@@ -1,0 +1,106 @@
+import { loadArchive } from './store.ts';
+import { completedContests, inScope } from './read.ts';
+import { sumPoints } from './decimal.ts';
+import type { Archive, Person, Scope, Season, SeasonTeam } from './types.ts';
+
+export interface HistorySelection { storePath?: string; scope?: Scope; season?: string }
+export interface CareerFacts {
+  wins: number; losses: number; ties: number; games: number; record: string;
+  winPercentage: number | null; points: number; championships: number; playoffAppearances: number;
+}
+export interface TimelineEvent {
+  year: string; kind: 'recorded' | 'takeover' | 'return' | 'name'; label: string;
+  predecessor: Person | null;
+}
+export interface Tenure {
+  franchiseId: string; start: string; end: string; range: string; events: TimelineEvent[];
+}
+type TeamSeason = { season: Season; team: SeasonTeam };
+
+/** Shared person/franchise facts. Contest results and weekly official points have distinct units. */
+export function careerFacts(archive: Archive, identity: { personId?: string; franchiseId?: string }, options: HistorySelection = {}): CareerFacts {
+  const includes = (row: { personId: string; franchiseId: string }) => identity.personId ? row.personId === identity.personId : row.franchiseId === identity.franchiseId;
+  const seasons = archive.seasons.filter(season => !options.season || season.year === options.season);
+  const seasonIds = new Set(seasons.map(season => season.id));
+  const games = completedContests(archive, { scope: options.scope }).filter(game => seasonIds.has(game.seasonId) && game.sides.some(includes));
+  const wins = games.filter(game => game.sides.some(side => includes(side) && side.personId === game.winnerId)).length;
+  const ties = games.filter(game => game.tie).length;
+  const losses = games.length - wins - ties;
+  const points = sumPoints(archive.performances.filter(row => includes(row) && seasonIds.has(row.seasonId) && inScope(row.competition, options.scope ?? 'regular')).map(row => row.points));
+  const ownerIds = (season: Season) => season.teams.filter(includes).map(team => team.personId);
+  return { wins, losses, ties, games: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, winPercentage: games.length ? 100 * (wins + ties / 2) / games.length : null, points,
+    championships: seasons.filter(season => season.championId && ownerIds(season).includes(season.championId)).length,
+    playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => ownerIds(season).includes(id))).length };
+}
+
+export function recordedRange(start: string, end: string) { return start === end ? start : `${start}–${end}`; }
+
+function personSeasons(archive: Archive, personId: string): TeamSeason[] {
+  return archive.seasons.flatMap(season => season.teams.filter(team => team.personId === personId).map(team => ({ season, team }))).sort((a, b) => a.season.year.localeCompare(b.season.year));
+}
+
+/** Year precision comes from season rosters; account metadata never establishes historical names. */
+function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
+  const tenures: Tenure[] = [];
+  for (const [index, { season, team }] of entries.entries()) {
+    const previous = entries[index - 1];
+    const continuous = previous && previous.team.franchiseId === team.franchiseId && Number(previous.season.year) + 1 === Number(season.year);
+    if (!continuous) {
+      const predecessorTeam = archive.seasons.find(item => Number(item.year) === Number(season.year) - 1)?.teams.find(item => item.franchiseId === team.franchiseId && item.personId !== team.personId);
+      const predecessor = archive.people.find(person => person.id === predecessorTeam?.personId) ?? null;
+      const kind = predecessor ? 'takeover' : index ? 'return' : 'recorded';
+      const label = predecessor ? `Took over from ${predecessor.name}` : index ? 'Recorded again' : 'First recorded season';
+      const events: TimelineEvent[] = [{ year: season.year, kind, label, predecessor }];
+      if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Team name: ${team.name}`, predecessor: null });
+      tenures.push({ franchiseId: team.franchiseId, start: season.year, end: season.year, range: season.year, events });
+    } else {
+      const tenure = tenures.at(-1)!;
+      tenure.end = season.year; tenure.range = recordedRange(tenure.start, tenure.end);
+      if (team.nameSource === 'historical-roster' && team.name !== previous.team.name) tenure.events.push({ year: season.year, kind: 'name', label: previous.team.nameSource === 'historical-roster' ? `Renamed ${team.name}` : `Team name: ${team.name}`, predecessor: null });
+    }
+  }
+  return tenures;
+}
+
+function profile(archive: Archive, person: Person, options: HistorySelection) {
+  const entries = personSeasons(archive, person.id);
+  const tenures = personTenures(archive, entries);
+  const latest = entries.at(-1)!;
+  const seasons = entries.filter(({ season }) => !options.season || season.year === options.season).reverse().map(({ season, team }) => ({ ...team, year: season.year, complete: season.complete, facts: careerFacts(archive, { personId: person.id }, { ...options, season: season.year }), championship: season.championId === person.id, runnerUp: season.runnerUpId === person.id, playoffAppearance: season.playoffPersonIds.includes(person.id) }));
+  return { ...person, avatar: latest.team.avatar, teamName: latest.team.name, franchiseId: latest.team.franchiseId, range: tenures.map(tenure => tenure.range).join(', '), tenures, seasons, years: entries.map(({ season }) => season.year).reverse(), facts: careerFacts(archive, { personId: person.id }, options), scope: options.scope ?? 'regular', selectedSeason: options.season ?? null };
+}
+
+export async function readManagers(options: HistorySelection = {}) {
+  const archive = await loadArchive(options.storePath);
+  if (!archive) return null;
+  return archive.people.map(person => profile(archive, person, options)).sort((a, b) => Number(b.current) - Number(a.current) || a.name.localeCompare(b.name));
+}
+
+export async function readManager(personId: string, options: HistorySelection = {}) {
+  const archive = await loadArchive(options.storePath);
+  const person = archive?.people.find(person => person.id === personId);
+  return archive && person ? profile(archive, person, options) : null;
+}
+
+export const managerGameSorts = ['newest', 'oldest', 'points'] as const;
+export type ManagerGameSort = typeof managerGameSorts[number];
+
+export async function readManagerSeason(personId: string, year: string, options: HistorySelection & { sort?: ManagerGameSort } = {}) {
+  const archive = await loadArchive(options.storePath);
+  const person = archive?.people.find(person => person.id === personId);
+  const season = archive?.seasons.find(season => season.year === year);
+  const team = season?.teams.find(team => team.personId === personId);
+  if (!archive || !person || !season || !team) return null;
+  const context = profile(archive, person, { ...options, season: year });
+  const games = archive.contests.filter(game => game.seasonId === season.id && inScope(game.competition, options.scope ?? 'regular') && game.sides.some(side => side.personId === personId) && game.performanceIds.length).map(game => {
+    const side = game.sides.find(side => side.personId === personId)!;
+    const opponent = game.sides.find(side => side.personId !== personId)!;
+    const opponentTeam = season.teams.find(team => team.personId === opponent.personId)!;
+    const completedWeek = Math.max(...archive.performances.filter(row => row.contestId === game.id).map(row => row.week));
+    return { ...game, side, opponent: { ...opponent, name: archive.people.find(person => person.id === opponent.personId)!.name, avatar: opponentTeam.avatar }, completedWeek,
+      result: !game.complete ? '—' : game.tie ? 'T' : game.winnerId === personId ? 'W' : 'L',
+      href: `/seasons/${year}/matchups/${game.id}/?scope=${options.scope ?? 'regular'}&week=${completedWeek}` };
+  });
+  games.sort((a, b) => options.sort === 'oldest' ? a.weeks[0] - b.weeks[0] || a.id.localeCompare(b.id) : options.sort === 'points' ? b.side.points - a.side.points || b.weeks[0] - a.weeks[0] : b.weeks[0] - a.weeks[0] || a.id.localeCompare(b.id));
+  return { ...context, year, team, games, sort: options.sort ?? 'newest' };
+}

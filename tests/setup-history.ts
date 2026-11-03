@@ -6,6 +6,8 @@ export default async function setup() {
   // Browser-only source edge cases, kept separate from the worked metric history.
   fixture.responses['league/900000000000002021/users'][0].avatar = 'controlled-source-image';
   fixture.responses['league/900000000000002021/rosters'][1].metadata = { team_name: 'The Museum Team With A Very Long Historical Name That Wraps Across Lines' };
+  fixture.responses['league/900000000000002020/rosters'][0].metadata = { team_name: 'Harbor Crew' };
+  fixture.responses['league/900000000000002021/rosters'][2].metadata = { team_name: 'Buccaneers' };
   fixture.responses['league/900000000000002020/matchups/1'][0].players.push('90');
   const native = JSON.parse(await readFile(new URL('./fixtures/playoff-type-1.json', import.meta.url), 'utf8'));
   native.responses[`league/${native.seedLeagueId}`].previous_league_id = fixture.seedLeagueId;

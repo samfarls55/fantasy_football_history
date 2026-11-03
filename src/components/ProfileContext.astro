@@ -1,0 +1,34 @@
+---
+import TeamImage from './TeamImage.astro';
+import Chevron from './Chevron.astro';
+import type { readManager } from '../history/managers';
+interface Props { profile: NonNullable<Awaited<ReturnType<typeof readManager>>>; year?: string }
+const { profile, year } = Astro.props;
+const team = year ? profile.seasons.find(season => season.year === year) : null;
+const number = (value: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(value);
+const tenures = year ? profile.tenures.filter(tenure => tenure.start <= year && tenure.end >= year).map(tenure => ({ ...tenure, events: tenure.events.filter(event => event.year === year || event === tenure.events[0]) })) : profile.tenures;
+---
+<section class="profile-context" aria-label={year ? `${year} season summary` : 'Career summary'}>
+  <div class="profile-identity">
+    <TeamImage name={team?.name ?? profile.name} src={team?.avatar ?? profile.avatar} />
+    <div><h1>{profile.name}</h1>
+      <p class="profile-team"><a href={`/franchises/${team?.franchiseId ?? profile.franchiseId}/${year ? `seasons/${year}/?scope=${profile.scope}` : `?scope=${profile.scope}`}`}>{team?.name ?? profile.teamName}</a></p>
+      <p class="profile-period">{year ? <><a href={`/seasons/${year}/`}>{year}</a><span aria-hidden="true"> · </span><a href={`/managers/${profile.id}/?scope=${profile.scope}`}>Career history</a></> : <>Recorded {profile.range}</>}</p>
+      {team && <p class="profile-finish">Finish {team.finish ?? '—'}{team.championship ? ' · Champion' : team.runnerUp ? ' · Runner-up' : team.playoffAppearance ? ' · Playoff appearance' : ''}</p>}
+    </div>
+  </div>
+  <dl class="profile-facts">
+    <div><dt>W–L{profile.facts.ties ? '–T' : ''}</dt><dd>{profile.facts.record}</dd></div>
+    <div><dt>Win rate <span>· {profile.facts.games} {profile.facts.games === 1 ? 'game' : 'games'}</span></dt><dd>{profile.facts.winPercentage === null ? '—' : `${number(Number(profile.facts.winPercentage.toFixed(2)))}%`}</dd></div>
+    <div><dt>Official points</dt><dd>{number(profile.facts.points)}</dd></div>
+    <div><dt>Championships</dt><dd>{profile.facts.championships}</dd></div>
+    <div><dt>Playoff appearances</dt><dd>{profile.facts.playoffAppearances}</dd></div>
+  </dl>
+</section>
+<section class="tenure-timeline" aria-label="Tenure timeline">
+  {tenures.map(tenure => <div class="timeline-tenure">
+    <h2>Recorded {tenure.range}</h2>
+    <ol>{tenure.events.map(event => <li><strong>{event.year}</strong><p>{event.predecessor ? <>Took over from <a href={`/managers/${event.predecessor.id}/`}>{event.predecessor.name}</a></> : event.label}</p></li>)}</ol>
+    <a class="franchise-history-link" href={`/franchises/${tenure.franchiseId}/?scope=${profile.scope}`}>Full franchise history <Chevron /></a>
+  </div>)}
+</section>

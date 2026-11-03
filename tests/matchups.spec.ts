@@ -12,12 +12,12 @@ test('season matchups share week and game scope, open official totals and restor
   await page.getByLabel('Week', { exact: true }).selectOption('1');
   await page.getByRole('button', { name: 'Show matchups' }).click();
   await expect(page).toHaveURL(/tab=matchups&scope=regular&week=1/);
-  await expect(page.getByRole('article', { name: 'Timh17 versus alecswartout' })).toContainText('25.5');
+  await expect(page.getByRole('article', { name: 'Harbor Crew versus alecswartout' })).toContainText('25.5');
   await page.getByRole('link', { name: 'View matchup' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Week 1 · 2020');
-  await expect(page.getByLabel('Official score for Timh17')).toHaveText('25.5');
-  await expect(page.getByRole('table', { name: 'Timh17 starters' }).getByRole('row').filter({ hasText: 'Synthetic Player 107' })).toContainText('20');
-  await expect(page.getByRole('table', { name: 'Timh17 bench' }).getByRole('row').filter({ hasText: 'Synthetic Player 90' })).toContainText('—');
+  await expect(page.getByLabel('Official score for Harbor Crew')).toHaveText('25.5');
+  await expect(page.getByRole('table', { name: 'Harbor Crew starters' }).getByRole('row').filter({ hasText: 'Synthetic Player 107' })).toContainText('20');
+  await expect(page.getByRole('table', { name: 'Harbor Crew bench' }).getByRole('row').filter({ hasText: 'Synthetic Player 90' })).toContainText('—');
   await page.getByRole('link', { name: 'Back to 2020 season' }).click();
   await expect(page).toHaveURL(/tab=matchups&scope=regular&week=1/);
   await page.getByLabel('Game scope').focus();
