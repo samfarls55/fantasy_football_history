@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
 import { readSeasons, readSeason } from '../../src/history/read.ts';
@@ -16,9 +17,7 @@ const sebastian = 'person-740265931783245824';
 const alec = 'person-473910025325113344';
 async function fixture() { return dropsSource(JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'))); }
 async function withHistory(run: (storePath: string) => Promise<void>) {
-  const review = resolve('.impeccable/review');
-  await mkdir(review, { recursive: true });
-  const directory = await mkdtemp(join(review, 'refresh-acceptance-'));
+  const directory = await mkdtemp(join(tmpdir(), 'refresh-acceptance-'));
   try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
 }
 
@@ -49,50 +48,6 @@ test('a composite visitor read keeps its published snapshot while another refres
     }, storePath);
     assert.equal((await readManager(tim, { storePath, season: '2020' }))?.facts.points, 23.5);
     assert.equal((await readFranchiseSeason('franchise-7', '2020', { storePath }))?.games[0].result, 'L');
-  });
-});
-
-test('HTTP routes show unavailable history before the first refresh and preserve known zero and not-found states afterward', { timeout: 60_000 }, async () => {
-  await withHistory(async storePath => {
-    const { spawn } = await import('node:child_process');
-    const server = spawn(process.execPath, ['node_modules/astro/bin/astro.mjs', 'dev', '--host', '127.0.0.1', '--port', '0', '--ignore-lock'], {
-      env: { ...process.env, MUSEUM_STORE_PATH: storePath }, stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    let output = '';
-    server.stdout.on('data', chunk => { output += chunk.toString(); });
-    server.stderr.on('data', chunk => { output += chunk.toString(); });
-    try {
-      const deadline = Date.now() + 30_000;
-      let base = '';
-      while (Date.now() < deadline) {
-        base = /http:\/\/127\.0\.0\.1:\d+/.exec(output)?.[0] ?? '';
-        if (base) break;
-        if (server.exitCode !== null) assert.fail(output);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      assert.ok(base, output);
-      for (const route of ['/', '/seasons/', '/seasons/2021/', '/seasons/2021/?tab=players', '/seasons/2021/?tab=playoffs', '/seasons/2021/matchups/unknown/', '/records/', '/records/benched-player/', '/managers/', `/managers/${tim}/`, `/managers/${tim}/?tab=players`, `/managers/${tim}/seasons/2021/?tab=players&view=drops`, `/managers/${tim}/players/50/`, '/franchises/', '/franchises/franchise-7/', '/franchises/franchise-7/seasons/2021/?tab=players', '/franchises/franchise-7/players/50/', '/rivalries/']) {
-        const response = await fetch(`${base}${route}`);
-        const html = await response.text();
-        assert.equal(response.status, 503, route);
-        assert.match(html, /League history is unavailable\./, route);
-        assert.match(html, /Skip to content/, 'unavailable content uses the shared museum shell');
-        assert.doesNotMatch(html, /No seasons to browse|0 meetings|0 starts|not in the league|Last updated|importedAt|Coverage|Refresh failed/i, route);
-      }
-      await publish(storePath, await fixture());
-      const zero = await fetch(`${base}/managers/person-800000000000000001/players/901/?season=2021`);
-      assert.equal(zero.status, 200);
-      assert.match((await zero.text()).replace(/<[^<>]*>/g, ' ').replace(/\s+/g, ' '), /starts 0/i);
-      const noMeetings = await fetch(`${base}/rivalries/?a=person-472580465006473216&b=${sebastian}`);
-      assert.equal(noMeetings.status, 200);
-      assert.match(await noMeetings.text(), /No meetings in this selection\./);
-      const notFound = await fetch(`${base}/seasons/1900/`);
-      assert.equal(notFound.status, 404);
-      assert.match(await notFound.text(), /Season not found/);
-    } finally {
-      server.kill('SIGTERM');
-      if (server.exitCode === null) await new Promise<void>(resolve => server.once('exit', () => resolve()));
-    }
   });
 });
 

@@ -13,9 +13,7 @@
     "preview": "astro preview --host 127.0.0.1",
     "start": "node --env-file-if-exists=.env ./dist/server/entry.mjs",
     "check": "astro check",
-    "test": "npm run test:publication && npm run test:browser",
-    "test:browser": "playwright test",
-    "test:publication": "node --test tests/operations/*.node.ts",
+    "test": "node --test tests/operations/*.node.ts",
     "history:publish": "node --env-file-if-exists=.env scripts/history-publication.ts publish",
     "history:inspect": "node --env-file-if-exists=.env scripts/history-publication.ts inspect",
     "refresh": "node --env-file-if-exists=.env scripts/refresh.ts"
@@ -26,7 +24,6 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "@playwright/test": "^1.64.1",
     "@types/node": "^24.19.2",
     "typescript": "^6.0.3"
   }

@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { readSeason } from '../../src/history/read.ts';
 
@@ -16,9 +18,7 @@ const expectedCoverage = [{
 }];
 
 test('the refresh command reports successful publication, repeat runs and retained or missing history after failure', async () => {
-  const reviewDirectory = join(project, '.impeccable/review');
-  await mkdir(reviewDirectory, { recursive: true });
-  const directory = await mkdtemp(join(reviewDirectory, 'refresh-command-'));
+  const directory = await mkdtemp(join(tmpdir(), 'refresh-command-'));
   try {
     const storePath = join(directory, 'history.json');
     const preloadPath = join(directory, 'controlled-provider.mjs');
@@ -44,7 +44,7 @@ globalThis.fetch = async input => {
 `);
 
     function command(script: string, now: string, fail = false) {
-      const result = spawnSync(process.execPath, ['--import', preloadPath, script, ...(script.includes('history-publication') ? ['inspect'] : [])], {
+      const result = spawnSync(process.execPath, ['--import', pathToFileURL(preloadPath).href, script, ...(script.includes('history-publication') ? ['inspect'] : [])], {
         cwd: project, encoding: 'utf8',
         env: { ...process.env, MUSEUM_STORE_PATH: storePath, SLEEPER_LEAGUE_ID: '900000000000002021', MUSEUM_TEST_NOW: now, MUSEUM_TEST_FAIL: fail ? 'yes' : 'no' },
       });

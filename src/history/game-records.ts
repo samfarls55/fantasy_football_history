@@ -25,11 +25,12 @@ export const marginCandidates: NonNullable<CategoryDefinition['candidates']> = (
   completedContests(archive, selection).filter(game => !selection.season || game.year === selection.season).map(game => {
     const [side, opponent] = game.sides;
     const scope = selection.scope ?? 'regular';
+    const owner = identity(archive, side.personId, game.year);
     const other = identity(archive, opponent.personId, game.year);
-    return { ...identity(archive, side.personId, game.year), id: game.id,
+    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`,
       metric: Exact.from(side.points).subtract(opponent.points).abs(), sample: null,
       period: { year: game.year, week: Math.max(...game.weeks), playedAt: game.playedAt },
-      leaderContext: `vs ${other.name} · Week ${Math.max(...game.weeks)} · ${game.year}`,
+      leaderContext: `Week ${Math.max(...game.weeks)} · ${game.year}`,
       href: `/seasons/${game.year}/matchups/${game.id}/?scope=${scope}&week=${Math.max(...game.weeks)}`,
       detail: `${side.teamName} vs ${opponent.teamName}`, historyLabel: 'Open matchup',
       secondary: [{ name: other.name, href: `/managers/${opponent.personId}/seasons/${game.year}/?scope=${scope}` }],
