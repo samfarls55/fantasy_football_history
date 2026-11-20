@@ -21,7 +21,7 @@ if (leagues?.length === 1) return Astro.redirect(`/leagues/${leagues[0].id}`);
       <ul class="leagues">
         {leagues.map((league, index) => (
           <li style={`--i: ${index}`}>
-            <a href={`/leagues/${league.id}`}>
+            <a href={`/leagues/${league.id}?u=${encodeURIComponent(username)}`}>
               {league.avatar ? <img src={league.avatar} alt="" width="52" height="52" /> : <span class="avatar-blank" />}
               <span class="league-title">{league.name}</span>
               <span class="league-meta">{league.teams} teams</span>

@@ -19,7 +19,9 @@
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-bottom: 96px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+[id] { scroll-margin-top: 28px; }
 body {
   margin: 0;
   color: var(--paint);
@@ -58,8 +60,9 @@ h1, h2, h3, p { margin: 0; }
 .field:not(:has(*)) { display: none; }
 .endzone-inner, .field { max-width: 1120px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
 .endzone-inner { padding-bottom: 32px; }
-.site { padding-top: 22px; }
+.site { padding-top: 10px; }
 .site a {
+  display: inline-flex; align-items: center; min-height: 44px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase;
   text-decoration: none; color: var(--chalk);
 }
@@ -75,7 +78,7 @@ h1, h2, h3, p { margin: 0; }
 .league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--chalk); }
 
 /* Field: sidelines with hash marks, faint painted yard numbers in the margin. */
-.field { padding-top: 8px; padding-bottom: 96px; position: relative; }
+.field { padding-top: 8px; padding-bottom: 160px; position: relative; }
 .field::before, .field::after {
   content: ''; position: absolute; top: 0; bottom: 0; width: 22px; pointer-events: none;
   background:
@@ -86,7 +89,7 @@ h1, h2, h3, p { margin: 0; }
 .field::before { left: -40px; background-position: left top, left top; }
 .field::after { right: -40px; background-position: right top, right top; }
 .block { margin-top: 72px; }
-.field > .block:first-child { margin-top: 44px; }
+.field > .block:first-of-type { margin-top: 44px; }
 h2.painted { font-size: clamp(40px, 6vw, 64px); }
 /* The yard number shares the heading's row, reaching up into the empty gap above it, so it never sits behind data. */
 h2[data-yard] { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 0.25em; }
@@ -94,6 +97,34 @@ h2[data-yard]::after {
   content: attr(data-yard) / ''; margin-left: auto; margin-top: -0.35em;
   font-size: 2em; line-height: 0.8; color: rgba(248, 248, 243, 0.1);
 }
+
+/* Jump bar: the yard markers along the bottom edge, in reach of a thumb. */
+.jump {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; margin: 0 auto; width: min(100%, 600px);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 0 8px env(safe-area-inset-bottom);
+  background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px);
+  border-top: 4px solid var(--paint);
+  box-shadow: 0 -8px 24px rgba(0, 10, 3, 0.4);
+  animation: rise 450ms ease-out 1100ms both;
+}
+.jump a {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; padding: 6px 2px;
+  font-family: var(--stencil); font-weight: 700; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
+  text-decoration: none; color: var(--chalk);
+  transition: color 160ms ease-out;
+}
+.jump span { font-weight: 900; font-size: 26px; letter-spacing: 0.02em; color: var(--paint); }
+.jump a:hover, .jump a:hover span { color: var(--flag); }
+.jump a:focus-visible { outline-offset: -5px; }
+.copied {
+  position: fixed; left: 0; right: 0; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 2; width: max-content; margin: 0 auto;
+  padding: 8px 16px; border-radius: 2px;
+  font-family: var(--stencil); font-weight: 900; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #1a1600; background: var(--flag); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+  animation: rise 220ms ease-out both;
+}
+.copied:empty { display: none; }
 
 /* Champions: one chalked yard line per season, the oldest first, down to the ball in play. */
 .drive { list-style: none; padding: 0; margin: 24px 0 0; }
@@ -135,6 +166,15 @@ h2[data-yard]::after {
 .play.wide { grid-column: 1 / -1; }
 .play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
 .play h3 { font-size: 19px; font-weight: 800; color: var(--chalk); }
+/* A linked record lands with its chalk line painted solid. */
+.play:target { border-top-style: solid; border-top-color: var(--paint); }
+.play.shame:target { border-top-color: var(--flag); }
+/* The share mark stays faint beside the record's name; ::after stretches it to a 44px target. */
+.share { position: relative; display: inline-block; width: 20px; height: 20px; margin-left: 8px; vertical-align: -3px; color: var(--chalk-faint); transition: color 160ms ease-out; }
+.share::after { content: ''; position: absolute; inset: -12px; }
+.share svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.share:hover, .share:focus-visible { color: var(--paint); }
+.shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
 .play.shame h3 { padding-right: 88px; }
 .play-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }

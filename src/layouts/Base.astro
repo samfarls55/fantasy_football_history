@@ -1,13 +1,13 @@
 ---
 import '../styles/site.css';
-interface Props { title: string; full?: boolean }
-const { title, full = false } = Astro.props;
+interface Props { title: string; full?: boolean; back?: { href: string; label: string } }
+const { title, full = false, back = { href: '/', label: 'League history' } } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#123a22" />
     <title>{title}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,7 +17,7 @@ const { title, full = false } = Astro.props;
   <body>
     <div class:list={['endzone', { full }]}>
       <div class="endzone-inner">
-        <header class="site"><a href="/">League history</a></header>
+        <header class="site"><a href={back.href}>{back.label}</a></header>
         <slot name="endzone" />
       </div>
     </div>

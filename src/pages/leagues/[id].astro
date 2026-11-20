@@ -9,6 +9,8 @@ import { readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
 if (!/^\d+$/.test(id)) return new Response(null, { status: 404 });
+const username = Astro.url.searchParams.get('u')?.trim();
+const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : undefined;
 let failure: string | null = null;
 try {
   await ensureLeague(id);
@@ -69,7 +71,7 @@ const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${fea
 // Player records lead their context with the manager, already named in who().
 const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.split(' · ').slice(1).join(', ').replace(/ (pickup|drop)$/, '') : row.leaderContext?.replaceAll(' · ', ', ')) ?? '';
 ---
-<Base title={history ? `${history.name} history` : 'League history'}>
+<Base title={history ? `${history.name} history` : 'League history'} back={back}>
   <Fragment slot="endzone">
     {failure && <p class="notice">{failure}</p>}
     {history && (
@@ -82,7 +84,14 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
 
   {history && (
     <>
-      <section class="block">
+      <nav class="jump" aria-label="Sections">
+        <a href="#champions"><span>10</span>Champions</a>
+        <a href="#records"><span>20</span>Records</a>
+        <a href="#careers"><span>30</span>Careers</a>
+        {history.streaks.length > 0 && <a href="#streaks"><span>40</span>Streaks</a>}
+      </nav>
+
+      <section class="block" id="champions">
         <h2 class="painted" data-yard="10">Champions</h2>
         <ol class="drive">
           {history.plates.map((plate, index) => (
@@ -96,14 +105,14 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
         </ol>
       </section>
 
-      <section class="block">
+      <section class="block" id="records">
         <h2 class="painted" data-yard="20">Hall of fame <span class="shame-word">&amp; shame</span></h2>
         <ul class="plays">
           {[...(history.headline ? [[history.headline]] : []), ...history.pairs].flatMap((pair, pairIndex) => pair.map((record, side) => {
             const leaders = record.rows.filter(row => row.rank === 1);
             const others = record.rows.filter(row => row.rank !== 1);
             return (
-              <li class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}`}>
+              <li id={record.feature.key} class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}`}>
                 {record.feature.shame && (
                   <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
                     <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
@@ -111,7 +120,7 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
                     <circle class="flag-knot" cx="11" cy="11" r="7" />
                   </svg>
                 )}
-                <h3>{record.feature.name}</h3>
+                <h3>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h3>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
@@ -128,7 +137,7 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
         </ul>
       </section>
 
-      <section class="block">
+      <section class="block" id="careers">
         <h2 class="painted" data-yard="30">Careers</h2>
         <div class="table-wrap">
           <table>
@@ -151,7 +160,7 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
       </section>
 
       {history.streaks.length > 0 && (
-        <section class="block">
+        <section class="block" id="streaks">
           <h2 class="painted" data-yard="40">Head-to-head streaks</h2>
           <ul class="streaks">
             {history.streaks.map(streak => (
@@ -163,6 +172,30 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
           </ul>
         </section>
       )}
+      <p class="copied" role="status"></p>
     </>
   )}
 </Base>
+
+<script>
+  // Without JS the share link is a plain anchor; with it, phones get the share sheet and desktops copy the link.
+  let timer = 0;
+  document.addEventListener('click', event => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a.share');
+    if (!link) return;
+    const url = `${location.origin}${location.pathname}${link.hash}`;
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+      event.preventDefault();
+      navigator.share({ title: `${link.closest('h3')!.textContent} · ${document.title}`, url }).catch(() => {});
+    } else if (navigator.clipboard) {
+      event.preventDefault();
+      history.replaceState(null, '', link.hash);
+      navigator.clipboard.writeText(url).then(() => {
+        const status = document.querySelector('.copied')!;
+        status.textContent = 'Link copied';
+        clearTimeout(timer);
+        timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
+      });
+    }
+  });
+</script>
