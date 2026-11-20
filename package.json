@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@astrojs/node": "11.1.9",
+    "@astrojs/vercel": "11.0.22",
     "astro": "7.4.2"
   },
   "devDependencies": {

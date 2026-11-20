@@ -8,4 +8,4 @@ Keep Astro SSR on the standalone Node adapter, because league pages import data 
 
 Imports use `sleeperImportProvider`, which starts every predictable request for each linked season as soon as its league loads, ten at a time, so a full eight-season import takes about 3 seconds instead of 43. The Sleeper player list (14 MB) is cached on disk for a day at `data/players-nfl.json`, as Sleeper asks.
 
-`HISTORY_DATA_PATH` moves the data directory. Hosting is undecided; any host needs a writable, persistent disk for `data/`, or a different store.
+`HISTORY_DATA_PATH` moves the data directory. Production runs on Vercel, which has no persistent disk: `HISTORY_DATA_PATH=/tmp/data` keeps archives per function instance, so a cold instance reimports a league on its first visit. A shared store such as Vercel Blob would remove those reimports.
