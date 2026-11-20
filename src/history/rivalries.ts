@@ -82,7 +82,7 @@ export async function readRivalriesPage(options: HistorySelection & { a?: string
   const pairs = new Map<string, { a: Person; b: Person; meetings: number }>();
   if (!comparison) for (const game of completedContests(archive, options)) {
     if (options.season && game.year !== options.season) continue;
-    const [first, second] = game.sides.map(side => side.personId).sort();
+    const [first, second] = game.sides.map(side => side.personId).sort((a, b) => a.localeCompare(b));
     const key = `${first}/${second}`;
     const pair = pairs.get(key);
     if (pair) pair.meetings++;
