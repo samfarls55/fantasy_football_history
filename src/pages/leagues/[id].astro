@@ -85,6 +85,8 @@ const markHref = (name: string | null) => {
   return query ? `?${query}` : Astro.url.pathname;
 };
 const mine = (name: string) => name === history?.marked?.name;
+// Every manager name on the page is this one link, so each takes the highlight the same way.
+const person = (name: string) => ({ href: markHref(name), 'data-person': name, class: mine(name) ? 'me' : undefined, 'aria-current': mine(name) ? 'true' as const : undefined });
 
 type Row = { value: number; name: string; manager: string; opponent?: string; leaderContext?: string };
 const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -139,7 +141,7 @@ const landing = (key: string) => {
             <li class="yard" style={`--i: ${index}`}>
               <span class="yard-year">{plate.year}</span>
               {plate.complete
-                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<a href={markHref(champion)} data-person={champion} class:list={{ me: mine(champion) }} aria-current={mine(champion) ? 'true' : undefined}>{champion}</a></>) : '—'}</span>
+                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<a {...person(champion)}>{champion}</a></>) : '—'}</span>
                 : <span class="yard-live"><span class="ball" aria-hidden="true" />In play</span>}
             </li>
           ))}
@@ -169,12 +171,12 @@ const landing = (key: string) => {
                 <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 <div class="play-who">
-                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <span data-person={part.person} class:list={{ me: mine(part.person) }}>{part.person}</span>)}</strong><span>{when(record.feature, row)}</span></p>)}
+                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
                   <details class="play-next" open={others.some(involves)} data-marked={others.some(involves) || undefined}>
                     <summary>{others.length > 1 ? 'Runners-up' : 'Runner-up'}</summary>
                     <ol>
-                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <span data-person={part.person} class:list={{ me: mine(part.person) }}>{part.person}</span>)}</span><span>{value(record, row)}</span></li>)}
+                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span>{value(record, row)}</span></li>)}
                     </ol>
                   </details>
                 )}
@@ -196,7 +198,7 @@ const landing = (key: string) => {
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
-                  <th scope="row"><a href={markHref(manager.name)} data-person={manager.name} class:list={{ me: mine(manager.name) }} aria-current={mine(manager.name) ? 'true' : undefined}>{manager.name}</a><span class="career-range">{manager.range}</span></th>
+                  <th scope="row"><a {...person(manager.name)}>{manager.name}</a><span class="career-range">{manager.range}</span></th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>
@@ -216,7 +218,7 @@ const landing = (key: string) => {
           {history.streaks.slice(0, 1).map(streak => (
             <div class="streak-top">
               <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
-              <p class="streak-who"><strong data-person={streak.winner} class:list={{ me: mine(streak.winner) }}>{streak.winner}</strong> has beaten <strong data-person={streak.loser} class:list={{ me: mine(streak.loser) }}>{streak.loser}</strong></p>
+              <p class="streak-who"><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a></p>
               <p class="streak-record">{streak.record} all time, playoffs included</p>
             </div>
           ))}
@@ -225,7 +227,7 @@ const landing = (key: string) => {
               {history.streaks.slice(1).map(streak => (
                 <li>
                   <span class="streak-count">{streak.count}</span>
-                  <p><strong data-person={streak.winner} class:list={{ me: mine(streak.winner) }}>{streak.winner}</strong> has beaten <strong data-person={streak.loser} class:list={{ me: mine(streak.loser) }}>{streak.loser}</strong><span>{streak.record} all time, playoffs included</span></p>
+                  <p><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a><span>{streak.record} all time, playoffs included</span></p>
                 </li>
               ))}
             </ul>
@@ -238,7 +240,7 @@ const landing = (key: string) => {
   {history?.reigning && (
     <footer slot="close" class="endzone close">
       <div class="endzone-inner">
-        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<span data-person={champion} class:list={{ me: mine(champion) }}>{champion}</span></>)}</p>
+        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<a {...person(champion)}>{champion}</a></>)}</p>
         <p class="league-years">{history.reigning.year} champion{history.reigning.titles > 1 && ` · ${history.reigning.titles} titles`}</p>
       </div>
     </footer>
@@ -278,15 +280,13 @@ const landing = (key: string) => {
     const top = link.getBoundingClientRect().top;
     if (next) url.searchParams.set('manager', next); else url.searchParams.delete('manager');
     history.replaceState(null, '', url.pathname + url.search + url.hash);
-    document.querySelectorAll<HTMLElement>('[data-person]').forEach(element => {
-      const on = !!next && element.dataset.person === next;
+    document.querySelectorAll<HTMLAnchorElement>('a[data-person]').forEach(element => {
+      const on = element.dataset.person === next;
       element.classList.toggle('me', on);
-      if (element instanceof HTMLAnchorElement && element.dataset.person) {
-        on ? element.setAttribute('aria-current', 'true') : element.removeAttribute('aria-current');
-        const target = new URL(url);
-        if (on) target.searchParams.delete('manager'); else target.searchParams.set('manager', element.dataset.person);
-        element.href = target.pathname + target.search;
-      }
+      on ? element.setAttribute('aria-current', 'true') : element.removeAttribute('aria-current');
+      const target = new URL(url);
+      if (on) target.searchParams.delete('manager'); else target.searchParams.set('manager', element.dataset.person!);
+      element.href = target.pathname + target.search;
     });
     // A highlighted runner-up opens its box so the mark is never hidden; a box opened that way closes when the mark moves on.
     document.querySelectorAll<HTMLDetailsElement>('.play-next').forEach(box => {
