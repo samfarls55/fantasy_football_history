@@ -111,8 +111,12 @@ h2.painted { font-size: clamp(40px, 6vw, 64px); }
   font-family: var(--stencil); font-weight: 900; font-size: clamp(32px, 5vw, 52px); line-height: 1; text-transform: uppercase;
   overflow-wrap: anywhere; animation: rise 500ms ease-out both; animation-delay: calc(var(--i) * 90ms + 750ms);
 }
+.yard-live {
+  display: flex; align-items: center; gap: 18px; color: var(--chalk);
+  font-family: var(--stencil); font-weight: 900; font-size: clamp(32px, 5vw, 52px); line-height: 1; text-transform: uppercase;
+}
 .ball {
-  display: inline-block; position: relative; width: 58px; height: 34px; border-radius: 50%;
+  display: inline-block; flex: none; position: relative; width: 58px; height: 34px; border-radius: 50%;
   background: radial-gradient(ellipse at 40% 30%, #a65530, var(--leather) 60%, #4f220f);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.35);
   animation: toss 900ms cubic-bezier(.2, .8, .3, 1.2) both; animation-delay: calc(var(--i) * 90ms + 900ms);
