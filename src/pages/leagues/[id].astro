@@ -4,7 +4,7 @@ import { ensureLeague, leagueStorePath } from '../../leagues.ts';
 import { withHistorySnapshot } from '../../history/store.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
-import { readCategory, formatRecordValue } from '../../history/records.ts';
+import { readCategory } from '../../history/records.ts';
 import { readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
@@ -19,16 +19,17 @@ try {
   failure = 'Sleeper didn’t return this league’s history. Check the league link, or pick the league again from your username.';
 }
 
-interface Feature { key: string; name: string; unit: string; shame?: boolean; verb?: string }
+// digits: one fixed precision per record so a figure and its runners-up line up (points 2, percentages 1, counts 0).
+interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string }
 // The headline: the best team that went home empty is the record every league argues about.
-const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average', shame: true };
+const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average', digits: 1, shame: true };
 // Opposites face each other across the field: fame in white paint, shame under a flag.
 const pairFeatures: Feature[][] = [
-  [{ key: 'highest-score', name: 'Highest score', unit: 'points' }, { key: 'lowest-score', name: 'Lowest score', unit: 'points', shame: true }],
-  [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row' }, { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', shame: true }],
-  [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin' }, { key: 'closest-game', name: 'Closest game', unit: 'point margin' }],
-  [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', verb: 'dropped', shame: true }],
-  [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', verb: 'benched', shame: true }],
+  [{ key: 'highest-score', name: 'Highest score', unit: 'points', digits: 2 }, { key: 'lowest-score', name: 'Lowest score', unit: 'points', digits: 2, shame: true }],
+  [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row', digits: 0 }, { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', digits: 0, shame: true }],
+  [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin', digits: 2 }, { key: 'closest-game', name: 'Closest game', unit: 'point margin', digits: 2 }],
+  [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true }],
+  [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
 ];
 
 const storePath = leagueStorePath(id);
@@ -43,7 +44,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const load = async (feature: Feature) => {
     const view = await readCategory(feature.key, { storePath });
     if (!view || view.blocked || !view.rows.length) return null;
-    return { feature, percent: view.category.unit === '%', precision: view.category.displayPrecision ?? 2,
+    return { feature, percent: view.category.unit === '%',
       rows: view.rows.filter(row => row.rank <= 3).slice(0, 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
   };
   const headline = await load(headlineFeature);
@@ -64,12 +65,13 @@ const history = failure ? null : await withHistorySnapshot(async () => {
 }, storePath);
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
-const value = (record: { percent: boolean; precision: number }, row: Row) =>
-  record.percent ? `${row.value > 0 ? '+' : ''}${formatRecordValue(row.value, 1)}%` : formatRecordValue(row.value, record.precision);
+const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
+  record.percent ? `${row.value > 0 ? '+' : ''}${fixed(row.value, record.feature.digits)}%` : fixed(row.value, record.feature.digits);
 const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${feature.verb} ${row.name}`
   : row.matchupLabel && row.secondary?.[0] ? `${row.name} over ${row.secondary[0].name}` : row.name;
-// Player records lead their context with the manager, already named in who().
-const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.split(' · ').slice(1).join(', ').replace(/ (pickup|drop)$/, '') : row.leaderContext?.replaceAll(' · ', ', ')) ?? '';
+// Every context reads "Week 3, 2020", and a date never breaks across lines. Player records lead it with the manager, already named in who().
+const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 ---
 <Base title={history ? `${history.name} history` : 'League history'} back={back}>
   <Fragment slot="endzone">
@@ -148,8 +150,8 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
                   <th scope="row">{manager.name}</th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
-                  <td>{manager.facts.winPercentage === null ? '—' : formatRecordValue(manager.facts.winPercentage, 1)}</td>
-                  <td>{formatRecordValue(manager.facts.points, 0)}</td>
+                  <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>
+                  <td>{fixed(manager.facts.points, 0)}</td>
                   <td>{manager.facts.playoffAppearances}</td>
                   <td class:list={['titles', { won: manager.facts.championships > 0 }]}>{manager.facts.championships}</td>
                 </tr>
@@ -161,7 +163,7 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
 
       {history.streaks.length > 0 && (
         <section class="block" id="streaks">
-          <h2 class="painted" data-yard="40">Head-to-head streaks</h2>
+          <h2 class="painted" data-yard="40"><span class="whole">Head-to-head</span> streaks</h2>
           <ul class="streaks">
             {history.streaks.map(streak => (
               <li>

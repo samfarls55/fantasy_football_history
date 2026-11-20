@@ -40,7 +40,7 @@ export function selectedDrop(archive: Archive, identity: ContributionIdentity, s
 }
 export function dropCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   return drops(archive, {}, selection).map(row => ({ id: row.event.id, personId: row.person.id, name: row.player.name, avatar: null, metric: row.metric,
-    sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · ${row.event.year} · Week ${row.event.week} drop`,
+    sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · Week ${row.event.week} · ${row.event.year}`,
     period: row.starts.length ? { year: row.event.year, week: Math.max(...row.starts.map(start => start.performance.week)), playedAt: null } : null, href: row.href, historyLabel: 'Open drop history',
-    secondary: [{ name: `${row.person.name} · ${row.event.year} · Week ${row.event.week} drop`, href: `/managers/${row.person.id}/seasons/${row.event.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));
+    secondary: [{ name: `${row.person.name} · Week ${row.event.week} · ${row.event.year}`, href: `/managers/${row.person.id}/seasons/${row.event.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));
 }
