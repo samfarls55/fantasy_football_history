@@ -50,6 +50,8 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const headline = await load(headlineFeature);
   const pairs = (await Promise.all(pairFeatures.map(pair => Promise.all(pair.map(load)))))
     .map(pair => pair.filter(record => record !== null)).filter(pair => pair.length);
+  // The headline stands alone in the first row; a pair missing one side spans the row.
+  const rows = headline ? [[headline], ...pairs] : pairs;
   const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
   const current = managers.filter(manager => manager.current);
@@ -66,7 +68,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champion: winners.map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, pairs, careers, streaks: streaks.slice(0, 5), reigning };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, rows, careers, streaks: streaks.slice(0, 5), reigning };
 }, storePath);
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
@@ -76,12 +78,12 @@ const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
 const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${feature.verb} ${row.name}`
   : row.matchupLabel && row.secondary?.[0] ? `${row.name} over ${row.secondary[0].name}` : row.name;
 // Every context reads "Week 3, 2020", and a date never breaks across lines. Player records lead it with the manager, already named in who().
+const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 // Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
 const landing = (key: string) => {
   const hash = [...key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
   return `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
 };
-const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 ---
 <Base title={history ? `${history.name} history` : 'League history'} back={back}>
   <Fragment slot="endzone">
@@ -89,16 +91,16 @@ const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' �
     {history && (
       <>
         <h1 class="painted league-name">{history.name}</h1>
-        <p class="league-years">{history.first}–{history.last}</p>
+        <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
       </>
     )}
   </Fragment>
 
   {history && (
     <>
-      <nav class="jump" aria-label="Sections">
+      <nav class="jump" aria-label="Sections" style={`--i: ${history.plates.length - 1}`}>
         <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
-        <a href="#records"><span aria-hidden="true">20</span>Records</a>
+        {history.rows.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Records</a>}
         <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
         {history.streaks.length > 0 && <a href="#streaks"><span aria-hidden="true">40</span>Streaks</a>}
       </nav>
@@ -117,10 +119,11 @@ const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' �
         </ol>
       </section>
 
+      {history.rows.length > 0 && (
       <section class="block" id="records">
         <h2 class="painted" data-yard="20">Hall of fame <span class="shame-word">&amp; shame</span></h2>
         <ul class="plays">
-          {[...(history.headline ? [[history.headline]] : []), ...history.pairs].flatMap((pair, pairIndex) => pair.map((record, side) => {
+          {history.rows.flatMap((pair, pairIndex) => pair.map((record, side) => {
             const leaders = record.rows.filter(row => row.rank === 1);
             const others = record.rows.filter(row => row.rank !== 1);
             return (
@@ -148,6 +151,7 @@ const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' �
           }))}
         </ul>
       </section>
+      )}
 
       <section class="block" id="careers">
         <h2 class="painted" data-yard="30">Careers</h2>
