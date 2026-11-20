@@ -129,13 +129,9 @@ const landing = (key: string) => {
       <>
         <h1 class="painted league-name">{history.name}</h1>
         <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
-        <p class="marking" hidden={!history.marked}>
-          <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
-          <a href={markHref(null)}>Clear</a>
-        </p>
         {/* A mistyped ?manager= says so, rather than quietly highlighting no one. */}
         {history.missed && (
-          <p class="marking miss">
+          <p class="miss">
             <span>No manager named <strong>{history.missed}</strong> in this league.</span>
             <a href={markHref(null)}>Clear</a>
           </p>
@@ -146,11 +142,11 @@ const landing = (key: string) => {
 
   {history && (
     <>
-      {/* The bar along the bottom: who is highlighted with the way out and the next sighting, then the sections, each marked when the highlight is in it.
+      {/* The bar along the bottom names who is highlighted, with the next sighting and the way out, then the sections, each marked when the highlight is in it.
           Confirmations take over the section strip for a moment, so they never cover the field. */}
       <div class="jump">
         <div class="jump-mark" hidden={!history.marked}>
-          <span class="me marking-name">{history.marked?.name}</span>
+          <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
           <button type="button" class="jump-next">Next</button>
           <a href={markHref(null)}>Clear</a>
         </div>
@@ -245,7 +241,7 @@ const landing = (key: string) => {
       </section>
 
       {/* Always rendered, hidden when it has nothing, so a highlight's head-to-head can swap in without a reload. */}
-        <section class="block" id="rivalries" hidden={!history.streaks.length && !history.versus.length}>
+      <section class="block" id="rivalries" hidden={!history.streaks.length && !history.versus.length}>
           <h2 class="painted" data-yard="40" tabindex="-1">Rivalries</h2>
           {history.versus.length > 0 ? (
             <div class="table-wrap">
@@ -282,7 +278,7 @@ const landing = (key: string) => {
             </ul>
           )}
           </>}
-        </section>
+      </section>
     </>
   )}
   {history?.reigning && (
@@ -296,7 +292,9 @@ const landing = (key: string) => {
 </Base>
 
 <script>
+  // Next's place in the walk, and whether its own scroll is still travelling.
   let stepped = -Infinity;
+  let travelling = false;
   // One live region, in the jump bar's section strip, for the copied link, the highlight and each step.
   let timer = 0;
   const say = (text: string) => {
@@ -323,7 +321,7 @@ const landing = (key: string) => {
   const sectionOf = (link: HTMLAnchorElement) => document.getElementById(link.hash.slice(1))!;
   // Each section holding the highlighted manager gets a dab of the same paint on its bar entry.
   const paintBar = () => {
-    const name = document.querySelector('.jump-mark .marking-name')!.textContent;
+    const name = document.querySelector('.marking-name')!.textContent;
     links.forEach(link => {
       const holds = !!sectionOf(link).querySelector('a.me');
       link.classList.toggle('holds', holds);
@@ -334,12 +332,12 @@ const landing = (key: string) => {
 
   // With JS, highlighting a manager repaints in place instead of reloading to the top; the URL still carries it for sharing.
   document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .marking a, .jump-mark a');
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .miss a, .jump-mark a');
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
     const url = new URL(location.href);
     const next = link.dataset.person && link.dataset.person !== url.searchParams.get('manager') ? link.dataset.person : null;
-    // The end zone's highlight row and opened runners-up change height above the tap; the tapped name holds still.
+    // Runners-up opening or closing above the tap change its height; the tapped name holds still.
     const top = link.getBoundingClientRect().top;
     if (next) url.searchParams.set('manager', next); else url.searchParams.delete('manager');
     history.replaceState(null, '', url.pathname + url.search + url.hash);
@@ -358,13 +356,13 @@ const landing = (key: string) => {
       box.toggleAttribute('data-marked', holds);
     });
     document.querySelector('.miss')?.remove();
-    document.querySelectorAll('.marking-name').forEach(element => { element.textContent = next; });
-    document.querySelectorAll<HTMLElement>('.marking:not(.miss), .jump-mark').forEach(element => { element.hidden = !next; });
+    document.querySelector('.marking-name')!.textContent = next;
+    document.querySelector<HTMLElement>('.jump-mark')!.hidden = !next;
     stepped = -Infinity;
     travelling = false;
     paintBar();
     // The tapped name holds still, and stays clear of the bar's highlight row that may have just risen over it.
-    if (!link.closest('.marking, .jump')) {
+    if (!link.closest('.miss, .jump')) {
       const bar = document.querySelector('.jump')!.getBoundingClientRect().top;
       const { top: moved, height } = link.getBoundingClientRect();
       scrollBy({ top: moved - top + Math.max(0, top + height + 12 - bar), behavior: 'instant' });
@@ -387,7 +385,6 @@ const landing = (key: string) => {
 
   // Next walks the page's sightings of the highlighted manager top to bottom, landing each a third of the way down, then wraps.
   // It counts on from the last sighting it landed (a smooth scroll may still be travelling, or the page may end short of it) until the visitor scrolls on their own.
-  let travelling = false;
   addEventListener('scrollend', () => { if (travelling) travelling = false; else stepped = -Infinity; });
   document.querySelector('.jump-next')!.addEventListener('click', () => {
     const line = innerHeight / 3;
@@ -404,10 +401,11 @@ const landing = (key: string) => {
     say(`${target + 1} of ${sightings.length}`);
   });
 
-  // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
+  // The jump bar marks the section under a line 30% down the screen. Without JS it just has no mark.
+  // The observer watches a band from 30% to 31%; a section counts once its top is inside it, so a top resting in the band still marks.
   const mark = () => {
     const sections = links.map(sectionOf);
-    const current = sections.findLast(section => !section.hidden && section.getBoundingClientRect().top <= innerHeight * 0.3);
+    const current = sections.findLast(section => !section.hidden && section.getBoundingClientRect().top <= innerHeight * 0.31);
     links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
   };
   const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
