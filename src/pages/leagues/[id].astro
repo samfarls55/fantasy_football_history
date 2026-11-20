@@ -59,7 +59,8 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const named = await Promise.all(groupFeatures.map(async group => ({ name: group.name,
     rows: (await Promise.all(group.pairs.map(pair => Promise.all(pair.map(load))))).map(pair => pair.filter(record => record !== null)).filter(pair => pair.length) })));
   const groups = [...(headline ? [{ name: '', rows: [[headline]] }] : []), ...named.filter(group => group.rows.length)];
-  const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
+  // Current managers first, then former ones, each by titles, then win %.
+  const careers = managers.toSorted((a, b) => Number(b.current) - Number(a.current) || b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
   const current = managers.filter(manager => manager.current);
   for (const [index, a] of current.entries()) for (const b of current.slice(index + 1)) {
@@ -216,14 +217,14 @@ const landing = (key: string) => {
       )}
 
       <section class="block" id="careers">
-        <h2 class="painted" data-yard="30">Careers</h2>
+        <h2 class="painted" data-yard="30" id="careers-name">Careers</h2>
         <div class="table-wrap">
-          <table>
+          <table aria-labelledby="careers-name">
             <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Points</th><th scope="col">Playoffs</th><th scope="col">Titles</th></tr></thead>
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
-                  <th scope="row"><a {...person(manager.name)}>{manager.name}</a><span class="career-range">{manager.range}</span></th>
+                  <th scope="row"><a {...person(manager.name)}>{manager.name}</a></th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>

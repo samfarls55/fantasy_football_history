@@ -322,20 +322,37 @@ a[data-person]::before { content: ''; position: absolute; inset: -12px 0; }
   .flag { animation-timeline: view(); animation-range: entry 10% entry 70%; animation-delay: 0s; }
 }
 
-/* Careers */
+/* Careers: painted column labels over the goal line, a faint yard line under each manager, a painted line to close.
+   Former managers trail under a dashed line, here and in Rivalries. */
 .table-wrap { overflow-x: auto; margin: 20px 0 0 -0.3em; padding-left: 0.3em; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
 th, td { padding: 13px 14px; text-align: right; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
-thead th { font-weight: 800; font-size: 15px; color: var(--chalk); border-bottom: 6px solid var(--paint); }
+thead th {
+  font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;
+  color: var(--chalk); border-bottom: 6px solid var(--paint);
+}
 tbody th { font-weight: 800; font-size: 20px; }
 tbody tr { border-bottom: 2px solid var(--chalk-faint); }
+#careers tbody tr:last-child { border-bottom: 4px solid var(--paint); }
+tr:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
 tr.former { color: var(--chalk); }
 tr.former th { font-weight: 600; }
-.career-range { display: none; }
 /* No title reads as plain table text; a title is painted. A zero stays a zero: a dash here means missing data. */
 .titles { color: var(--chalk); }
 .titles.won { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--flag); }
+/* Too narrow for every column, the managers hold the left edge like a sideline and the stats run under them.
+   Turf fades in at the right edge while columns remain, and the sideline shades once anything has passed under it. */
+.table-wrap th:first-child { position: sticky; left: 0; z-index: 1; }
+/* The wrap's room for a highlight's paint sits left of the column; the shade covers it too. */
+.table-wrap th:first-child::before { content: ''; position: absolute; top: 0; bottom: 0; right: 100%; width: 0.4em; background: inherit; }
+@property --more { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@keyframes more { from, 90% { --more: 56px; } to { --more: 0px; } }
+@keyframes sideline { from { background-color: transparent; } 4%, to { background-color: var(--turf-b); box-shadow: 10px 0 12px -10px rgba(0, 20, 5, 0.7); } }
+@supports (animation-timeline: scroll()) {
+  .table-wrap { mask-image: linear-gradient(to left, transparent, #000 var(--more)); animation: more linear both; animation-timeline: scroll(self inline); }
+  .table-wrap th:first-child { animation: sideline linear both; animation-timeline: scroll(inline); }
+}
 
 /* Rivalries: the longest gets the headline's painted line and size; the rest line up as a set. */
 .streak-top { margin-top: 20px; padding: 28px 0 36px; border-top: 6px solid var(--paint); }
@@ -356,8 +373,7 @@ tr.former th { font-weight: 600; }
 .versus-record.up { color: var(--paint); }
 .versus-record.down { color: var(--flag); }
 .versus-streak { font-weight: 800; }
-/* Former managers trail under a dashed line, their records in quiet chalk. */
-.versus tr:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
+/* Former opponents' records sit in quiet chalk. */
 .versus .former .versus-record { color: var(--chalk-quiet); }
 .versus .former .versus-streak { font-weight: 600; }
 
@@ -395,12 +411,6 @@ tr.former th { font-weight: 600; }
 
 @media (max-width: 1240px) {
   .field::before, .field::after { display: none; }
-}
-/* Below this the full table would push Titles out of view, so the secondary columns go. */
-@media (max-width: 720px) {
-  #careers :is(th:nth-child(2), td:nth-child(2), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6)) { display: none; }
-  /* The hidden Seasons column moves under the name, so former managers read by their last year. */
-  .career-range { display: block; margin-top: 2px; font-size: 14px; font-weight: 600; color: var(--chalk); }
 }
 /* Phones: one record per row, each fame record followed by its shame twin under a short chalk hash. */
 @media (max-width: 600px) {
@@ -451,6 +461,7 @@ tr.former th { font-weight: 600; }
 @media (max-width: 400px) {
   .jump-links a { font-size: 16px; letter-spacing: 0.02em; }
 }
+/* The table edges follow the scroll position rather than move on their own, so they stay. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  :not(.table-wrap, .table-wrap th:first-child), *::before, *::after { animation: none !important; transition: none !important; }
 }
