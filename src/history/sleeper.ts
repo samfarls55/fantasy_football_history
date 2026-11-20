@@ -37,9 +37,10 @@ export function sleeperImportProvider(playerCachePath: string, source: Provider 
     const league = await fetchOnce(path).catch(() => null) as { previous_league_id?: string | null; settings?: { last_scored_leg?: number } } | null;
     if (!league) return;
     const last = Math.max(18, Number(league.settings?.last_scored_leg) || 0);
-    for (const endpoint of ['users', 'rosters', 'winners_bracket', 'losers_bracket', 'drafts']) fetchOnce(`${path}/${endpoint}`);
-    for (let week = 1; week <= last; week++) fetchOnce(`${path}/matchups/${week}`);
-    for (let round = 0; round <= last; round++) fetchOnce(`${path}/transactions/${round}`);
+    // Prefetches run in the background; a failure is kept in its response and surfaces only if refresh asks for that path.
+    for (const endpoint of ['users', 'rosters', 'winners_bracket', 'losers_bracket', 'drafts']) void fetchOnce(`${path}/${endpoint}`);
+    for (let week = 1; week <= last; week++) void fetchOnce(`${path}/matchups/${week}`);
+    for (let round = 0; round <= last; round++) void fetchOnce(`${path}/transactions/${round}`);
     if (league.previous_league_id) void prefetchLeague(league.previous_league_id);
   }
   async function players() {

@@ -168,6 +168,10 @@ h2[data-yard]::after {
   color: var(--chalk); text-decoration: underline 2px var(--chalk-faint); text-underline-offset: 5px;
 }
 .jump-mark .jump-prev { margin-left: auto; }
+/* The highlight row's share: the record share's icon at a full 44px. */
+.jump-mark .share-view { width: 44px; height: 44px; margin: 0; padding: 12px; text-decoration: none; }
+.jump-mark .share-view::after { inset: 0; }
+.jump-mark .share-view:is(:hover, :focus-visible) { color: var(--paint); }
 .jump-mark :is(button, a):hover, .miss > a:hover, .retry:hover { color: var(--paint); text-decoration-color: var(--paint); }
 /* Confirmations are chalk notes in the bar's top row. They may name a handle, so they're set in its face; a long one wraps to a second line.
    Empty, it's clipped rather than hidden, so the live region stays in the accessibility tree and announces each one. */
@@ -199,11 +203,11 @@ body:has(.jump-mark:not([hidden])) .close .endzone-inner { padding-bottom: calc(
 }
 .me { background-size: 100% 100%; color: var(--ink-on-paint); text-shadow: none; }
 :is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, .versus caption, table th) > [data-person]:first-child { margin-left: -0.12em; }
-/* Every name sets the highlight, so every name carries the same faint chalk line, scaled to its size;
+/* Every name sets the highlight, so every name carries the same chalk line, scaled to its size, at 3:1 on the turf so it reads as a link;
    it firms up under a pointer or focus, and the paint replaces it once the name is highlighted. */
 a[data-person] {
   position: relative; overflow-wrap: anywhere;
-  text-decoration: underline max(2px, 0.05em) var(--chalk-faint); text-underline-offset: max(4px, 0.14em);
+  text-decoration: underline max(2px, 0.05em) var(--chalk-quiet); text-underline-offset: max(4px, 0.14em);
 }
 a[data-person]:is(:hover, :focus-visible) { text-decoration-color: var(--paint); }
 a[data-person].me { text-decoration-color: transparent; }
@@ -275,7 +279,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .share svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .share:hover, .share:focus-visible { color: var(--paint); }
 .shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
-.play.shame .play-title { padding-right: 88px; }
+.play.shame .play-title { padding-right: 64px; }
 .play-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }
 .shame .play-value { color: var(--flag); }
@@ -313,7 +317,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play-next summary::after { content: ''; position: absolute; inset: -9px -10px; }
 .play-next summary {
   display: inline-flex; align-items: center; gap: 6px; min-height: 26px;
-  font-family: var(--stencil); font-weight: 900; font-size: 20px; letter-spacing: 0.04em; color: var(--chalk);
+  font-family: var(--stencil); font-weight: 700; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk);
   transition: color 160ms ease-out;
 }
 .play-next summary::before {
@@ -324,7 +328,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play-next[open] summary::before { transform: rotate(90deg); }
 /* A derived record's unit is its own disclosure: a dotted chalk underline, opening onto how it's counted. */
 /* The summary is its own 44px box, so opening it never puts the explanation over its target. */
-.play-how summary { display: flex; align-items: center; min-height: 44px; text-decoration: underline dotted var(--chalk-quiet) 2px; text-underline-offset: 4px; }
+.play-how summary { display: flex; align-items: center; min-height: 44px; min-width: 44px; text-decoration: underline dotted var(--chalk-quiet) 2px; text-underline-offset: 4px; }
 .play-how summary:hover, .play-how[open] summary { color: var(--paint); }
 /* Clear of the holder's name below, whose target reaches up past its line. */
 .play-how { margin-bottom: 6px; }
@@ -343,7 +347,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .next-who:has(a + a) + .next-when { margin-top: -8px; }
 .flag {
-  position: absolute; right: 0; top: 8px; width: 78px; height: 64px; overflow: visible; pointer-events: none;
+  position: absolute; right: 0; top: 10px; width: 56px; height: 46px; overflow: visible; pointer-events: none;
   transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--tilt, -8deg)) scaleX(var(--flip, 1)); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, 0.35));
   animation: throw 750ms cubic-bezier(.2, .8, .3, 1.1) both; animation-delay: calc(var(--i) * 80ms + 150ms);
 }
@@ -364,6 +368,16 @@ thead th {
   font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;
   color: var(--chalk); border-bottom: 6px solid var(--paint);
 }
+/* With JS each Careers label is a full-cell button; the sorted one is painted and carries a caret pointing the way it runs. */
+#careers thead th:has(button) { padding: 0; }
+#careers thead button {
+  display: inline-flex; align-items: center; gap: 6px; width: 100%; min-height: 44px; padding: 13px 14px; justify-content: flex-end;
+  border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit;
+}
+#careers thead th:first-child button { justify-content: flex-start; padding-left: 0; }
+#careers thead button:hover, #careers thead th[aria-sort] button { color: var(--paint); }
+#careers thead th[aria-sort] button::after { content: ''; width: 0; height: 0; border-inline: 5px solid transparent; border-top: 7px solid currentColor; }
+#careers thead th[aria-sort='ascending'] button::after { transform: rotate(180deg); }
 tbody th { font-weight: 800; font-size: 20px; }
 tbody tr { border-bottom: 2px solid var(--chalk-faint); }
 #careers tbody tr:last-child { border-bottom: 4px solid var(--paint); }
@@ -409,6 +423,27 @@ tr.former th { font-weight: 600; }
 .versus-record.up { color: var(--paint); }
 .versus-record.down { color: var(--flag); }
 .versus-streak { font-weight: 800; }
+/* Each head-to-head record is the link to every meeting with that opponent; the open one is underscored in its own color. */
+.versus-open {
+  position: relative; display: inline-flex; align-items: center; justify-content: flex-end; min-height: 44px; min-width: 44px;
+  color: inherit; text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 5px;
+}
+.versus-open:is(:hover, :focus-visible) { text-decoration-color: currentColor; }
+.versus-open[aria-current] { text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
+/* Every meeting, newest first: the highlighted manager's result in fame paint or shame yellow, the score from their side, then when. */
+.meetings { max-width: 46rem; margin-top: 28px; padding-top: 20px; border-top: 3px dashed var(--chalk-faint); scroll-margin-top: 24px; }
+.meetings h3 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; line-height: max(44px, 1.15em); }
+.meetings-record { margin-top: 4px; font-size: 20px; color: var(--chalk); }
+.meetings ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 20px; }
+.meetings li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 10px 0; border-top: 2px solid var(--chalk-faint); }
+.meet-result { font-family: var(--stencil); font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 0.04em; }
+.meetings .won .meet-result { color: var(--paint); }
+.meetings .lost .meet-result { color: var(--flag); }
+.meetings .tied .meet-result { color: var(--chalk); }
+.meet-score { font-weight: 800; font-size: 20px; text-align: right; white-space: nowrap; }
+.meet-when { font-size: 17px; color: var(--chalk); }
+.meet-playoffs { margin-left: 4px; white-space: nowrap; font-family: var(--stencil); font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paint); }
+.meetings + .streak-top, .table-wrap + .streak-top { margin-top: 40px; }
 /* Former opponents' records sit in quiet chalk. */
 .versus .former .versus-record { color: var(--chalk-quiet); }
 .versus .former .versus-streak { font-weight: 600; }
@@ -471,14 +506,19 @@ tr.former th { font-weight: 600; }
   .hits { order: -1; margin: 0; font-size: 13px; padding: 2px 4px 1px; }
 }
 @media (max-width: 560px) {
+  /* A meeting is two lines on a phone: the result and score, then when it was. */
+  .meetings ol { grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; }
+  .meet-score { text-align: left; }
+  .meet-when { grid-column: 2; }
+  .meet-result { font-size: 20px; }
   tbody th { font-size: 18px; }
   body { font-size: 16px; }
   .yard { grid-template-columns: 4rem 1fr; gap: 12px; min-height: 52px; }
   .yard-year { font-size: 28px; }
   .play { padding: 20px 0 22px; }
   .play-title { font-size: 18px; line-height: 1.2; }
-  .play.shame .play-title { padding-right: 72px; }
-  .play .flag { width: 60px; height: 50px; top: 6px; --dx: 0px; }
+  .play.shame .play-title { padding-right: 52px; }
+  .play .flag { width: 44px; height: 36px; top: 8px; --dx: 0px; }
   .play-value { font-size: 56px; }
   .play-unit { font-size: 16px; line-height: 1.2; }
   .play-holder strong { font-size: 20px; }

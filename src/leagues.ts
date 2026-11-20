@@ -13,20 +13,23 @@ export function leagueStorePath(leagueId: string): string {
   return resolve(dataDirectory, 'leagues', `${leagueId}.json`);
 }
 
-/** Sleeper answers an unknown username with null. */
-export async function findLeagues(username: string): Promise<LeagueChoice[] | null> {
-  const user = await sleeperProvider.get(`user/${encodeURIComponent(username)}`) as { user_id: string } | null;
+/**
+ * A username's leagues this season (or last), with the display name the league pages call that manager.
+ * Sleeper answers an unknown username with null.
+ */
+export async function findLeagues(username: string): Promise<{ name: string; leagues: LeagueChoice[] } | null> {
+  const user = await sleeperProvider.get(`user/${encodeURIComponent(username)}`) as { user_id: string; display_name: string } | null;
   if (!user) return null;
   const state = await sleeperProvider.get('state/nfl') as { league_season: string; previous_season: string };
   for (const season of [state.league_season, state.previous_season]) {
     const leagues = await sleeperProvider.get(`user/${user.user_id}/leagues/nfl/${season}`) as
       { league_id: string; name: string; season: string; total_rosters: number; avatar: string | null }[];
-    if (leagues.length) return leagues.map(league => ({
+    if (leagues.length) return { name: user.display_name, leagues: leagues.map(league => ({
       id: league.league_id, name: league.name, season: league.season, teams: league.total_rosters,
       avatar: league.avatar ? `https://sleepercdn.com/avatars/thumbs/${league.avatar}` : null,
-    }));
+    })) };
   }
-  return [];
+  return { name: user.display_name, leagues: [] };
 }
 
 /** Import a league on its first visit and again once its archive is older than 12 hours. */

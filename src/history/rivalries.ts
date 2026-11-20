@@ -20,7 +20,7 @@ function rivalry(archive: Archive, a: Person, b: Person, options: HistorySelecti
       const side = game.sides.find(side => side.personId === a.id)!;
       const opponent = game.sides.find(side => side.personId === b.id)!;
       const week = Math.max(...game.weeks);
-      return { id: game.id, year: game.year, week, playedAt: game.playedAt, weeks: game.weeks, side, opponent,
+      return { id: game.id, year: game.year, week, playedAt: game.playedAt, weeks: game.weeks, competition: game.competition, side, opponent,
         margin: Exact.from(side.points).subtract(opponent.points).toNumber(),
         result: game.tie ? 'T' as const : game.winnerId === a.id ? 'W' as const : 'L' as const,
         href: `/seasons/${game.year}/matchups/${game.id}/?scope=${options.scope ?? 'regular'}&week=${week}` };
