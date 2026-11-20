@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Lookup from '../../components/Lookup.astro';
 import { ensureLeague, leagueStorePath } from '../../leagues.ts';
 import { withHistorySnapshot } from '../../history/store.ts';
 import { readSeasons } from '../../history/read.ts';
@@ -8,16 +9,12 @@ import { readCategory } from '../../history/records.ts';
 import { readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
-if (!/^\d+$/.test(id)) return new Response(null, { status: 404 });
-const username = Astro.url.searchParams.get('u')?.trim();
-const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : { href: '/', label: 'Find your league' };
-let failure: string | null = null;
-try {
-  await ensureLeague(id);
-} catch (error) {
-  console.error(`League ${id} import failed`, error);
-  failure = 'Sleeper didn’t return this league’s history. Check the league link, or pick the league again from your username.';
-}
+const username = Astro.url.searchParams.get('u')?.trim() ?? '';
+const status = /^\d+$/.test(id) ? await ensureLeague(id) : 'missing';
+// A league that can't be shown says why, with the username lookup right there to pick it again.
+const failure = { ready: null, missing: `Sleeper has no league with ID ${id}.`, failed: 'Sleeper didn’t send this league’s history. Try again in a minute.' }[status];
+if (failure) Astro.response.status = status === 'missing' ? 404 : 502;
+const back = failure ? undefined : username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : { href: '/', label: 'Find your league' };
 
 // digits: one fixed precision per record so a figure and its runners-up line up (points 2, percentages 1, counts 0).
 interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string }
@@ -51,7 +48,8 @@ const history = failure ? null : await withHistorySnapshot(async () => {
     const view = await readCategory(feature.key, { storePath });
     if (!view || view.blocked || !view.rows.length) return null;
     return { feature, percent: view.category.unit === '%',
-      rows: view.rows.filter(row => row.rank <= 3).slice(0, 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
+      // Ties share a rank, so every row ranked third or better shows; none drops silently.
+      rows: view.rows.filter(row => row.rank <= 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
   };
   const headline = await load(headlineFeature);
   // The headline stands alone in an unnamed first group; a pair missing one side spans the row.
@@ -91,9 +89,14 @@ const landing = (key: string) => {
   return `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
 };
 ---
-<Base title={history ? `${history.name} history` : 'League history'} back={back}>
+<Base title={history ? `${history.name} history` : status === 'missing' ? 'League not found' : 'League history'} back={back} full={!history}>
   <Fragment slot="endzone">
-    {failure && <p class="notice">{failure}</p>}
+    {failure && (
+      <>
+        <p class="notice lead">{failure}</p>
+        <Lookup username={username} />
+      </>
+    )}
     {history && (
       <>
         <h1 class="painted league-name">{history.name}</h1>
@@ -144,7 +147,7 @@ const landing = (key: string) => {
                     <circle class="flag-knot" cx="11" cy="11" r="7" />
                   </svg>
                 )}
-                <h4>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
+                <h4><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
@@ -242,4 +245,14 @@ const landing = (key: string) => {
       });
     }
   });
+
+  // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump a')];
+  const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
+  const mark = () => {
+    const current = sections.findLast(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
+    links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
+  };
+  const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
+  sections.forEach(section => watch.observe(section));
 </script>

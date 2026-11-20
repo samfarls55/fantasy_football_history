@@ -30,9 +30,9 @@ export async function findLeagues(username: string): Promise<LeagueChoice[] | nu
 }
 
 /** Import a league on its first visit and again once its archive is older than 12 hours. */
-export async function ensureLeague(leagueId: string): Promise<void> {
+export async function ensureLeague(leagueId: string): Promise<'ready' | 'missing' | 'failed'> {
   const archive = await loadArchive(leagueStorePath(leagueId));
-  if (archive && Date.now() - Date.parse(archive.importedAt) < maxAge) return;
+  if (archive && Date.now() - Date.parse(archive.importedAt) < maxAge) return 'ready';
   let pending = imports.get(leagueId);
   if (!pending) {
     pending = refresh({ leagueId, storePath: leagueStorePath(leagueId), provider: sleeperImportProvider(resolve(dataDirectory, 'players-nfl.json')) })
@@ -40,6 +40,12 @@ export async function ensureLeague(leagueId: string): Promise<void> {
       .finally(() => imports.delete(leagueId));
     imports.set(leagueId, pending);
   }
-  // A failed refresh keeps the previous archive, which is still worth showing.
-  await (archive ? pending.catch(error => console.error(`League ${leagueId} refresh failed`, error)) : pending);
+  return pending.then(() => 'ready' as const, async error => {
+    console.error(`League ${leagueId} import failed`, error);
+    // A failed refresh keeps the previous archive, which is still worth showing.
+    if (archive) return 'ready';
+    // Sleeper answers an unknown league ID with 404; anything else is Sleeper failing.
+    const response = await fetch(`https://api.sleeper.app/v1/league/${leagueId}`, { signal: AbortSignal.timeout(10_000) }).catch(() => null);
+    return response?.status === 404 ? 'missing' : 'failed';
+  });
 }

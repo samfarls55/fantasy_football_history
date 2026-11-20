@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Lookup from '../components/Lookup.astro';
 import { findLeagues } from '../leagues.ts';
 
 const username = Astro.url.searchParams.get('u')?.trim() ?? '';
@@ -8,13 +9,7 @@ if (leagues?.length === 1) return Astro.redirect(`/leagues/${leagues[0].id}`);
 ---
 <Base title="League history" full>
   <Fragment slot="endzone">
-    <form class="lookup" method="get" action="/">
-      <h1 class="painted">Find your league</h1>
-      <div class="lookup-row">
-        <input name="u" value={username} placeholder="Sleeper username" aria-label="Sleeper username" autocomplete="username" required autofocus />
-        <button>Find leagues</button>
-      </div>
-    </form>
+    <Lookup username={username} autofocus />
     {leagues === null && <p class="notice">No Sleeper user is named {username}. Check the spelling and try again.</p>}
     {leagues?.length === 0 && <p class="notice">{username} isn’t in any leagues this season or last.</p>}
     {leagues && leagues.length > 1 && (

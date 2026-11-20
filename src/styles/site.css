@@ -47,6 +47,8 @@ h1, h2, h3, h4, p { margin: 0; }
 h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 :focus-visible { outline: 3px solid var(--flag); outline-offset: 3px; }
+/* Read aloud, never painted: what the field says with color alone. */
+.unseen { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .painted {
   font-family: var(--stencil); font-weight: 900; text-transform: uppercase; letter-spacing: 0.02em; line-height: 0.9;
@@ -72,14 +74,17 @@ p { text-wrap: pretty; }
 .site a {
   display: inline-flex; align-items: center; min-height: 44px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
-  gap: 8px; text-decoration: none; color: var(--chalk);
+  gap: 8px; text-decoration: none; color: var(--chalk); overflow-wrap: anywhere;
 }
 .site a:hover { color: var(--paint); }
-.notice { margin-top: 24px; max-width: 56ch; font-size: 20px; color: var(--paint); }
+.notice { margin-top: 24px; max-width: 56ch; font-size: 20px; color: var(--paint); overflow-wrap: anywhere; }
+/* A league that can't be shown: the reason first, then the lookup to pick it again. */
+.notice.lead { margin-top: 0; padding-top: 13vh; font-weight: 600; }
+.lead + .lookup { padding-top: 20px; }
 
 .league-name, .close-name { font-size: clamp(56px, 10.5vw, 136px); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
 .league-name {
-  margin-top: 28px;
+  margin-top: 28px; overflow-wrap: anywhere;
   animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
 }
 .league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--chalk); }
@@ -122,7 +127,7 @@ h2[data-yard]::after {
   transition: color 160ms ease-out;
 }
 .jump span { font-weight: 900; font-size: 26px; letter-spacing: 0.02em; color: var(--paint); }
-.jump a:hover, .jump a:hover span { color: var(--flag); }
+.jump a:hover, .jump a:hover span, .jump a[aria-current], .jump a[aria-current] span { color: var(--flag); }
 .jump a:focus-visible { outline-offset: -5px; }
 .copied {
   position: fixed; left: 0; right: 0; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 2; width: max-content; margin: 0 auto;
@@ -220,7 +225,7 @@ h2[data-yard]::after {
 .play-next[open] summary { color: var(--ink-on-paint); background: var(--paint); border-color: var(--paint); }
 .play.shame .play-next summary:hover { color: var(--flag); border-color: var(--flag); }
 .play.shame .play-next[open] summary { color: var(--ink-on-flag); background: var(--flag); border-color: var(--flag); }
-.play-next ol { margin: 12px 0 0; padding-left: 1.5em; color: var(--chalk); }
+.play-next ol { margin: 12px 0 0; padding-left: 1.5em; color: var(--chalk); overflow-wrap: anywhere; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
 .play-next li::marker { font-weight: 800; color: var(--paint); }
@@ -288,7 +293,7 @@ tr.former th { font-weight: 600; }
 .leagues li:last-child { border-bottom: 4px solid var(--paint); }
 .leagues a { display: grid; grid-template-columns: 52px 1fr auto; gap: 18px; align-items: center; padding: 16px 4px; text-decoration: none; }
 .leagues img, .avatar-blank { width: 52px; height: 52px; border-radius: 50%; background: var(--chalk-faint); box-shadow: 0 0 0 3px var(--paint); }
-.league-title { font-family: var(--stencil); font-weight: 900; font-size: 36px; line-height: 1; text-transform: uppercase; }
+.league-title { min-width: 0; overflow-wrap: anywhere; font-family: var(--stencil); font-weight: 900; font-size: 36px; line-height: 1; text-transform: uppercase; }
 .league-meta { font-weight: 600; color: var(--chalk); }
 .leagues a:hover .league-title { color: var(--flag); }
 
@@ -341,6 +346,11 @@ tr.former th { font-weight: 600; }
   .streaks p { font-size: 19px; }
   .streaks p span { font-size: 15px; }
   .streak-record { font-size: 17px; }
+}
+/* Small phones: the four yard markers tighten so the last one stays on screen. */
+@media (max-width: 400px) {
+  .jump { padding-left: 4px; padding-right: 4px; }
+  .jump a { padding: 6px 3px; font-size: 16px; letter-spacing: 0.02em; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
