@@ -1,4 +1,5 @@
 .directory-franchises { border-left: 1px solid #e8e7f1; padding-left: 24px; font-size: 24px; font-weight: 700; }
+.directory-context { margin: -12px 0 24px; font-size: 21px; color: var(--muted); }
 .directory-controls { justify-content: end; margin-bottom: 16px; }
 .directory-table th:first-child { width: 44%; }
 .directory-table th:nth-child(2) { width: 25%; }
@@ -16,11 +17,13 @@
 .profile-team a { color: var(--ink); }
 .profile-period, .profile-finish { color: var(--muted); font-size: 20px; margin-top: 8px; }
 .profile-period a { color: inherit; }
+.profile-facts-heading { color: var(--muted); font-size: 20px; font-weight: 500; margin-bottom: 10px; }
 .profile-facts { margin: 0; display: flex; flex-wrap: wrap; column-gap: 24px; row-gap: 18px; font-variant-numeric: tabular-nums; }
 .profile-facts > div { display: flex; flex-direction: column-reverse; align-self: start; }
 .profile-facts dt { color: var(--muted); font-size: 18px; }
 .profile-facts dt span { white-space: nowrap; }
 .profile-facts dd { margin: 0; font-size: clamp(28px, 2.9vw, 44px); font-weight: 900; color: var(--violet); line-height: 1.1; }
+.profile-honors { border-top: 1px solid #c5dedd; padding-top: 16px; margin-top: 16px; }
 .tenure-timeline { background: var(--lilac); padding: 16px 24px; border-radius: 16px; margin-bottom: 24px; }
 .timeline-tenure { display: grid; grid-template-columns: 1fr auto; column-gap: 24px; align-items: center; }
 .timeline-tenure + .timeline-tenure { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e8e7f1; }

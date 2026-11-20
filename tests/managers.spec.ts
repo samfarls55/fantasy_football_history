@@ -12,7 +12,7 @@ test('directory opens distinct current and former careers with shareable scoped 
   await page.getByRole('link', { name: 'Timh17', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Timh17', exact: true })).toBeVisible();
   await expect(page.getByLabel('Tenure timeline')).toContainText('Took over from Woody14');
-  await expect(page.getByLabel('Tenure timeline')).toContainText('Renamed Buccaneers');
+  await expect(page.getByLabel('Tenure timeline')).toContainText('Played as Buccaneers');
   await expect(page.getByRole('table', { name: 'Season history' })).not.toContainText('2019');
   await page.getByLabel('Game scope').selectOption('combined');
   await page.getByLabel('Season', { exact: true }).selectOption('2020');
@@ -41,8 +41,8 @@ test('phone timeline is vertical above the season archive and complete image fra
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/managers/person-800000000000000001/');
-    await expect(page.getByLabel('Tenure timeline')).toContainText('First recorded season');
-    await expect(page.getByLabel('Tenure timeline')).toContainText('Recorded again');
+    await expect(page.getByLabel('Tenure timeline')).toContainText('First season in the archive');
+    await expect(page.getByLabel('Tenure timeline')).toContainText('Next season in the archive');
     const timeline = await page.getByLabel('Tenure timeline').boundingBox();
     const tabs = await page.getByRole('navigation', { name: 'Manager views' }).boundingBox();
     expect(timeline!.y + timeline!.height).toBeLessThan(tabs!.y);

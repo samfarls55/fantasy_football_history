@@ -40,6 +40,11 @@ const heading = (game: typeof games[number]) => {
   const weeks = game.weeks.length > 1 ? `Weeks ${game.weeks[0]}–${game.weeks.at(-1)}` : `Week ${game.weeks[0]}`;
   return `${name} · ${weeks}`;
 };
+const roundHeading = (round: typeof selection.rounds[number]) => round.games.length === 1 && (round.games[0].championship || round.games[0].placement === 1) ? 'Final' : `Round ${round.round}`;
+const progression = selection.rounds.flatMap(round => round.games.flatMap((game, index) => [game.fromA, game.fromB].flatMap(edge => {
+  const parent = edge && games.find(parent => parent.family === game.family && parent.match === edge.match);
+  return parent ? [{ from: parent.id, to: game.id, label: `${edge.outcome === 'w' ? 'Advancing side' : 'Other side'} to ${roundHeading(round)}${round.games.length > 1 ? `, game ${index + 1}` : ''}` }] : [];
+})));
 ---
 <form class="matchup-controls bracket-controls" method="get">
   <input type="hidden" name="tab" value="playoffs" />
@@ -47,23 +52,37 @@ const heading = (game: typeof games[number]) => {
   <button type="submit">Show bracket</button>
 </form>
 {selection.rounds.length ? <>
+  <nav class="bracket-round-links" aria-label="Bracket rounds">{selection.rounds.map(round => <a href={`#bracket-round-${round.round}`}>{roundHeading(round)}</a>)}</nav>
   {selection.byes.length > 0 && <p class="bracket-byes">Round 1 byes: {selection.byes.map((team, index) => <>{index > 0 && ', '}<a href={`/managers/${team.personId}/seasons/${selection.year}/?scope=playoffs`}>{team.personName}</a></>)}</p>}
+  <p id="bracket-scroll-hint" class="bracket-scroll-hint" hidden>Scroll across rounds</p>
   <div class="bracket-scroll" role="region" aria-label={`${competitionLabels[selection.scope]} bracket`} tabindex="0">
     <div class="bracket-canvas" style={`width:${canvasWidth}px;height:${canvasHeight}px;grid-template-columns:repeat(${selection.rounds.length},${width}px)`}>
       <svg class="bracket-connections" width={canvasWidth} height={canvasHeight} aria-hidden="true">{connections.map(path => <path d={path} />)}</svg>
-      {selection.rounds.map(round => <section class="bracket-round" aria-label={`Round ${round.round}`}>
-        {round.games.map(game => <article class="bracket-contest" style={`top:${positions.get(game.id)! * rowStep}px`}>
+      {selection.rounds.map(round => <section id={`bracket-round-${round.round}`} class="bracket-round" aria-label={roundHeading(round)} tabindex="-1">
+        <h2 class="bracket-round-heading">{roundHeading(round)}</h2>
+        {round.games.map((game, index) => <article id={`bracket-${game.id}`} class="bracket-contest" aria-label={`${heading(game)}, game ${index + 1}`} tabindex="-1" style={`top:${positions.get(game.id)! * rowStep}px`}>
           <h3>{game.href ? <a href={game.href}>{heading(game)}</a> : heading(game)}</h3>
           <ol class="bracket-sides">{game.sides.map(side => <li class:list={{ 'bracket-advanced': side && game.advancingRosterId === side.rosterId }}>
             <span class="bracket-identity">{side ? <>
               {side.playoffSeed !== null && <span class="bracket-seed">{side.playoffSeed}<span class="visually-hidden"> seed</span></span>}
               <a href={`/managers/${side.personId}/seasons/${selection.year}/?scope=${selection.scope}`}>{side.personName}</a>
               {game.advancingRosterId === side.rosterId && <span class="bracket-outcome">{game.championship ? 'Champion' : 'Advanced'}</span>}
-            </> : <span aria-label="Participant unassigned">—</span>}</span>
+            </> : <span>Not yet determined</span>}</span>
             <span class="bracket-score">{side?.points == null ? '—' : format(side.points)}</span>
           </li>)}</ol>
+          <div class="bracket-progression">{progression.filter(edge => edge.from === game.id).map(edge => <a href={`#bracket-${edge.to}`}>{edge.label}</a>)}</div>
         </article>)}
       </section>)}
     </div>
   </div>
 </> : <p class="empty-history">No results for this selection.</p>}
+<script>
+  const bracket = document.querySelector<HTMLElement>('.bracket-scroll');
+  const hint = document.querySelector<HTMLElement>('#bracket-scroll-hint');
+  if (bracket && hint) new ResizeObserver(() => {
+    const overflows = bracket.scrollWidth > bracket.clientWidth;
+    hint.hidden = !overflows;
+    if (overflows) bracket.setAttribute('aria-describedby', hint.id);
+    else bracket.removeAttribute('aria-describedby');
+  }).observe(bracket);
+</script>

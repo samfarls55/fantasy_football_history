@@ -16,9 +16,9 @@ function ownershipTenures(archive: Archive, entries: TeamSeason[]): OwnershipTen
       const predecessor = adjacent ? archive.people.find(person => person.id === previous.team.personId) ?? null : null;
       const returning = entries.slice(0, index).some(entry => entry.team.personId === team.personId);
       const kind = predecessor ? 'takeover' : returning ? 'return' : 'recorded';
-      const label = predecessor ? `Took over from ${predecessor.name}` : returning ? 'Recorded again' : 'First recorded season';
+      const label = predecessor ? `Took over from ${predecessor.name}` : returning ? 'Next season in the archive' : 'First season in the archive';
       const events: TimelineEvent[] = [{ year: season.year, kind, label, predecessor }];
-      if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Team name: ${team.name}`, predecessor: null });
+      if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Played as ${team.name}`, predecessor: null });
       tenures.push({ franchiseId: team.franchiseId, owner, start: season.year, end: season.year, range: season.year, events });
     } else {
       extendTenure(tenures.at(-1)!, season.year, team, previous.team);

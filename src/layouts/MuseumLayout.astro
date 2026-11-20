@@ -15,6 +15,18 @@ const { title, section } = Astro.props;
   <body>
     <a class="museum-skip" href="#main-content">Skip to content</a>
     <SiteHeader section={section} />
-    <main class="museum-main" id="main-content" tabindex="-1"><slot /></main>
+    <main class="museum-main" id="main-content" tabindex="-1">
+      <slot />
+      {(Astro.response.status === 404 || Astro.response.status === 503) && <nav class="recovery-navigation" aria-label="Explore the museum">
+        <a href="/">Home</a>
+        <a href="/records/">Records</a>
+        <a href="/managers/">Managers</a>
+        <a href="/seasons/">Seasons</a>
+      </nav>}
+    </main>
   </body>
 </html>
+<style>
+  .recovery-navigation { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 20px; }
+  .recovery-navigation a { display: inline-flex; align-items: center; min-height: 44px; }
+</style>

@@ -32,9 +32,9 @@ test('championship history opens the season bracket and each competition keeps w
   await expect(page.getByText(/trophy|How it’s measured|Last updated|Source fixture/i)).toHaveCount(0);
 });
 
-test('future brackets show unknown scores and phone bracket scrolling stays inside its region', async ({ page }) => {
+test('future brackets show unknown outcomes and responsive brackets stay inside their region', async ({ page }) => {
   await page.goto('/seasons/2021/?tab=playoffs');
-  await expect(page.locator('.season-results')).toHaveText('Champion — · Runner-up —');
+  await expect(page.locator('.season-results')).toHaveText('Champion Not yet determined · Runner-up Not yet determined');
   await expect(page.locator('.bracket-score')).toHaveText(['—', '—', '—', '—', '—', '—']);
   await expect(page.locator('.bracket-contest h3 a')).toHaveCount(0);
   for (const width of [1440, 768, 390, 320]) {

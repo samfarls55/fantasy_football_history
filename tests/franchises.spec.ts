@@ -31,7 +31,7 @@ test('franchise history crosses owners and links each season to its person and o
   await page.getByLabel('Season', { exact: true }).selectOption('2019');
   await page.getByRole('button', { name: 'Show matchups' }).click();
   await expect(page).toHaveURL('/franchises/franchise-7/seasons/2019/?scope=combined&sort=oldest');
-  await expect(page.getByRole('link', { name: 'Woody14', exact: true }).first()).toHaveAttribute('href', '/managers/person-472580465006473216/seasons/2019/?scope=combined');
+  await expect(page.getByRole('region', { name: '2019 season summary' }).getByRole('link', { name: 'Manager season', exact: true })).toHaveAttribute('href', '/managers/person-472580465006473216/seasons/2019/?scope=combined');
   await expect(page.getByText(/Source fixture|How it’s measured|Last updated|Sample stats/)).toHaveCount(0);
 });
 

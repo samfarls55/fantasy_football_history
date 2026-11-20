@@ -15,9 +15,13 @@ function viewHref(view: string) {
   return `?${params}`;
 }
 ---
-{views && <nav class="local-tabs player-views" aria-label="Player history views">{[['all', 'All players'], ['pickups', 'Pickups'], ['drops', 'Drops']].map(([key, label]) => <a href={viewHref(key)} aria-current={selection.view === key ? 'page' : undefined}>{label}</a>)}</nav>}
+<nav class="player-story-links" aria-label={views ? 'Player history views' : 'Player stories'}>
+  {views ? [['all', 'All players'], ['pickups', 'Pickups'], ['drops', 'Drops']].map(([key, label]) => <a href={viewHref(key)} aria-current={selection.view === key ? 'page' : undefined}>{label}</a>) : <><a href="#pickup-heading">Pickups</a><a href="#drops-heading">Drops</a></>}
+  <a href={`/records/benched-player/?${rankings}`}>{selection.season ? `${selection.season} bench records` : 'Bench records'}</a>
+</nav>
 {selection.view === 'all' && <>
 <div class="contributor-heading"><h2>Starting contributors</h2><a href={`/records/player-contributions/?${rankings}`}>View rankings</a></div>
+<p class="contribution-definition">Points from actual starts. Bench points are excluded.</p>
 {selection.rows.length ? <table class="history-table contributors-table">
   <caption class="visually-hidden">Starting player contributions</caption>
   <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Starting points</th><th scope="col">Starts</th><th scope="col">Seasons</th></tr></thead>
@@ -29,9 +33,10 @@ function viewHref(view: string) {
 </>}
 {selection.view !== 'drops' && <>
 <section class="contextual-pickups" aria-labelledby="pickup-heading">
-  <div class="contributor-heading"><h2 id="pickup-heading">Productive pickups</h2><a href={`/records/productive-pickup/?${rankings}`}>View pickup rankings</a></div>
+  <div class="contributor-heading"><h2 id="pickup-heading">Pickups by starting points</h2><a href={`/records/productive-pickup/?${rankings}`}>View pickup rankings</a></div>
+  <p class="contribution-definition">Actual starts in later full weeks with the acquiring manager. Pickup and departure weeks are excluded.</p>
   {selection.pickups.length ? <table class="history-table pickups-table">
-    <caption class="visually-hidden">Productive pickup spells</caption>
+    <caption class="visually-hidden">Pickup periods ranked by actual starting points</caption>
     <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Pickup</th><th scope="col">Starting points</th><th scope="col">Starts</th></tr></thead>
     <tbody>{selection.pickups.map(row => <tr><th scope="row"><a href={row.href}>{row.player.name}</a>{attribution && <span class="contributor-owners"><a href={`/managers/${row.person.id}/seasons/${row.year}/?tab=players&scope=${selection.scope}`}>{row.person.name}</a></span>}</th><td data-label="Pickup">{row.year} · Week {row.week}</td><td data-label="Starting points">{formatRecordValue(row.points)}</td><td data-label="Starts">{row.starts}</td></tr>)}</tbody>
   </table> : <p class="empty-history">No pickups for this selection.</p>}
@@ -41,6 +46,7 @@ function viewHref(view: string) {
 {selection.selectedDrop && <DropHistory history={selection.selectedDrop} />}
 <section class="contextual-drops" aria-labelledby="drops-heading">
   <div class="contributor-heading"><h2 id="drops-heading">Drops</h2><a href={`/records/productive-drop/?${rankings}`}>View drop rankings</a></div>
+  <p class="contribution-definition">Actual starts for other managers in later weeks of the same season. The drop week is excluded.</p>
   {selection.drops.length ? <table class="history-table drops-table">
     <caption class="visually-hidden">Dropped players' later contributions elsewhere</caption>
     <thead><tr><th scope="col">Player{attribution ? ' / manager' : ''}</th><th scope="col">Drop</th><th scope="col">Starting points elsewhere</th><th scope="col">Starts</th></tr></thead>

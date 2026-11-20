@@ -1,6 +1,6 @@
 # Record and contribution rules
 
-Status: Implementation contract derived from the approved walkthrough. Internal documentation only. Do not add a public methodology or source-data screen.
+Status: Implementation contract derived from the approved walkthrough and spec 21. Keep calculations here; public views use concise contextual definitions without a methodology or source-data screen.
 
 ## Identity and source boundary
 
@@ -34,9 +34,9 @@ Completed current-season games count in career/game/player totals. Completed-sea
 
 ## Ranking and tie policy
 
-Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin.
+Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the selected ranking when distinct values would otherwise share a label.
 
-Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank.
+Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a link to all tied results. Summary compaction never removes qualifying ranking rows.
 
 Career categories have one aggregate result per person. Season, game, bench and move categories rank individual qualifying performances. A person may appear repeatedly. A player-career contribution category ranks the player/person pair.
 
@@ -62,8 +62,8 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
 | benched-player | Players: Highest-scoring benched player | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
-| productive-pickup | Players: Most productive pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
-| productive-drop | Players: Dropped players who delivered elsewhere | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
+| productive-pickup | Players: Pickups by starting points | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
+| productive-drop | Players: Dropped players' starting points elsewhere | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
 | player-contributions | Players: Most starting points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
 
 Championship totals are title outcomes, not regular-season game statistics. Completed-season filters omit unfinished years from those award candidates. Underlying season pages can still show partial comparisons from completed eligible weeks.
@@ -98,11 +98,13 @@ Best season without a title uses dominance among completed nonchampionship team-
 
 Comparisons use played regular-season team-weeks; source-confirmed unpaired byes supply no team score or actual win. The league scoring denominator includes every eligible team-week across the season, giving all teams the same league PPG even when their played weeks differ. Expected wins still compares each team with the eligible scores in its own played weeks. No played weeks, fewer than two eligible weekly scoring teams, or a zero league scoring denominator leave the relevant comparison unknown. Zero league points invalidate dominance while completed all-zero games still have genuine tied results and all-play expectation. Required score/roster coverage is validated by refresh. A source-declared completed season missing scheduled regular weeks rejects publication and retains the previous archive. An unresolved title outcome leaves Best season without a title ineligible, rather than treating every team as a nonchampion; the other two awards can use their established complete regular scoring coverage.
 
-Season award history uses the completed season's latest completed week and its supported year, including supported postseason completion, with no invented calendar date. The award's recognition period is separate from its regular-only calculation inputs. Category links open the manager-season history. Season comparison values display at one decimal; this does not change exact ranks. Standings expose `sort=scoring` and `sort=wins-expected`, descending with unknown values last, while retaining official standings as the default. Displayed Wins vs expected is actual minus expected, the exact negative of the Unluckiest season measure.
+Season award history uses the completed season's latest completed week and its supported year, including supported postseason completion, with no invented calendar date. The award's recognition period is separate from its regular-only calculation inputs. Public season awards identify the measured season and eligible-week sample, rather than presenting the recognition week as the accomplishment. Category links open the manager-season history. Standings comparisons display at one decimal; category percentages follow the ranking precision rule above. Standings expose `sort=scoring` and `sort=wins-expected`, descending with unknown values last, while retaining official standings as the default. Displayed Wins vs expected is actual minus expected, the exact negative of the Unluckiest season measure. Explain both directions where those values appear, along with scoring versus the season's league average and expected wins from weekly all-play results.
 
 ## Rivalries and nemesis
 
 Each selected pair uses completed contests in the selected season/game scope. Show W-L-T, meetings, average official margin from the first person's perspective, and the current streak. Changing the pair order reverses score-margin signs and W/L perspective.
+
+Before a pair is selected, suggest up to three pairs ordered by completed meetings in the selected season/game scope, descending. Break equal counts by manager names and stable IDs. Each pair appears once and links to the same comparison calculation used by custom selection. No eligible meetings produces an empty state, not an invented rivalry.
 
 Average margin = sum of first person's final scores minus opponent's final scores, divided by meetings. A tie contributes zero margin and ends a winning/losing streak. Zero meetings has no average or streak.
 
@@ -134,7 +136,7 @@ Productive drop = actual starting points for other league people in weeks strict
 
 A drop detail retains the dropping person/year at the top and lists actual receiving-person contributions with game links. It can link to each receiving person's scoped player history. Do not put those later points into the dropping person's career contribution total.
 
-Rank observed contributions, with no invented significance cutoff. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
+Rank observed contributions, with no invented significance cutoff. Keep zero-start acquisitions and drops as zero-value history with no invented contribution period. Neutral public headings describe starting points rather than claiming every move was productive. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
 
 Order completed ownership events by source week and recorded `status_updated` chronology within that week. Validate missing or tied same-player/week recorded timestamps at import rather than inventing a tie-break. This order resolves recorded ownership changes only. Weekly snapshots establish initial observed ownership; they never create a synthetic pickup. Draft picks identify the receiving roster using `roster_id`, independently of `picked_by` or original draft-pick ownership. Completed events of unfamiliar types preserve their ownership assets. Failed, pending and unknown-status events never change a spell.
 
@@ -144,7 +146,7 @@ Keeper flags remain nullable where unknown. Preserve source picks and transactio
 
 ## Recent Home results
 
-Select performances currently in a category's first ten ranks, including ties. Order by historical event date, not import time. Deduplicate the same category/result identity. A category entry links to its ranking with that result retained.
+Label the list Recent top-ten results. Select performances currently in a category's first ten ranks, including ties, with a supported historical period. Order by historical event date, not import time, then category key and result ID for stable ties. Deduplicate the same category/result identity. Select the newest result from each distinct category until six places are filled, then fill any spare places from the remaining candidates. Present the selected results in their original historical order. A category entry links to its ranking with that result retained. This selection does not establish that a record was newly broken.
 
 For a game or bench score use the played game's date; for a streak use its final counted game; for a completed-season award use the season's completion; for a title use the resolved final. For a career or contribution aggregate use its latest contributing historical event. Derivation alone does not create a new event timestamp.
 

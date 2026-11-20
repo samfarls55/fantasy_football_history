@@ -7,7 +7,8 @@ const managers = await readManagers();
 if (!managers) Astro.response.status = 503;
 ---
 <MuseumLayout title="Managers" section="Managers">
-  <div class="page-heading"><h1>Managers</h1><a class="directory-franchises" href="/franchises/">Franchise histories</a></div>
+  <div class="page-heading"><h1>Managers</h1></div>
+  <p class="directory-context">Manager careers follow people. <a href="/franchises/">Franchise histories</a> follow one league slot across owners.</p>
   {managers ? <table class="history-table directory-table">
     <caption class="visually-hidden">Manager directory · regular season</caption>
     <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Titles</th></tr></thead>

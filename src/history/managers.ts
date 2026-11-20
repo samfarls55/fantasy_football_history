@@ -20,7 +20,7 @@ export function recordedRange(start: string, end: string) { return start === end
 export function extendTenure(tenure: Tenure, year: string, team: SeasonTeam, previousTeam: SeasonTeam): void {
   tenure.end = year;
   tenure.range = recordedRange(tenure.start, tenure.end);
-  if (team.nameSource === 'historical-roster' && team.name !== previousTeam.name) tenure.events.push({ year, kind: 'name', label: previousTeam.nameSource === 'historical-roster' ? `Renamed ${team.name}` : `Team name: ${team.name}`, predecessor: null });
+  if (team.nameSource === 'historical-roster' && team.name !== previousTeam.name) tenure.events.push({ year, kind: 'name', label: `Played as ${team.name}`, predecessor: null });
 }
 
 function personSeasons(archive: Archive, personId: string): TeamSeason[] {
@@ -37,9 +37,9 @@ function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
       const predecessorTeam = archive.seasons.find(item => Number(item.year) === Number(season.year) - 1)?.teams.find(item => item.franchiseId === team.franchiseId && item.personId !== team.personId);
       const predecessor = archive.people.find(person => person.id === predecessorTeam?.personId) ?? null;
       const kind = predecessor ? 'takeover' : index ? 'return' : 'recorded';
-      const label = predecessor ? `Took over from ${predecessor.name}` : index ? 'Recorded again' : 'First recorded season';
+      const label = predecessor ? `Took over from ${predecessor.name}` : index ? 'Next season in the archive' : 'First season in the archive';
       const events: TimelineEvent[] = [{ year: season.year, kind, label, predecessor }];
-      if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Team name: ${team.name}`, predecessor: null });
+      if (team.nameSource === 'historical-roster') events.push({ year: season.year, kind: 'name', label: `Played as ${team.name}`, predecessor: null });
       tenures.push({ franchiseId: team.franchiseId, start: season.year, end: season.year, range: season.year, events });
     } else {
       extendTenure(tenures.at(-1)!, season.year, team, previous.team);

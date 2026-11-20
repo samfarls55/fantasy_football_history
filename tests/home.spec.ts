@@ -7,6 +7,36 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://sleepercdn.com/**', route => route.fulfill({ path: resolve('public/assets/plates/achievement-logo.png'), contentType: 'image/png' }));
 });
 
+test('Home offers varied recent top-ten results without claiming newly broken records', async ({ page }) => {
+  await page.goto('/');
+  const recent = page.getByRole('region', { name: 'Recent top-ten results', exact: true });
+  await expect(recent).toBeVisible();
+  const links = recent.getByRole('link');
+  await expect(links).toHaveCount(6);
+  const destinations = await links.evaluateAll(links => links.map(link => (link as HTMLAnchorElement).href));
+  expect(new Set(destinations.map(href => new URL(href).pathname)).size).toBe(6);
+  await expect(recent).not.toContainText(/new record|record broken/i);
+  for (const label of await recent.locator('.home-recent-identity > span:last-child').allTextContents()) expect(label).toMatch(/ · Rank (?:[1-9]|10)$/);
+  await page.reload();
+  expect(await links.evaluateAll(links => links.map(link => (link as HTMLAnchorElement).href))).toEqual(destinations);
+});
+
+test('Home season awards show their season and regular-season sample instead of their recognition week', async ({ page }) => {
+  await page.goto('/');
+  const season = page.locator('[data-category="best-without-title"]');
+  await expect(season).toContainText('2019 season');
+  await expect(season).toContainText('1 regular-season week');
+  await expect(season).not.toContainText('Week 4');
+  const unlucky = page.locator('[data-category="unluckiest-season"]');
+  await expect(unlucky).toContainText('2025 season');
+  await expect(unlucky).toContainText('1 regular-season week');
+  await expect(unlucky).not.toContainText(/Week \d/);
+  await season.getByRole('link', { name: 'View rankings' }).click();
+  await page.locator('.record-ranking tbody tr').first().locator('th a').first().click();
+  await expect(page).toHaveURL(/\/managers\/[^/]+\/seasons\/2019\/\?scope=regular$/);
+  await expect(page.getByLabel('2019 season summary')).toContainText('Woody14');
+});
+
 test('Home composes six all-time categories and historical recent results from the published archive', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link')).toHaveText(['Records', 'Managers', 'Seasons', 'Rivalries']);
@@ -108,7 +138,7 @@ test('Home keeps approved feature artwork complete, wraps names and stacks its i
       const row = page.locator('.home-index tbody tr').first();
       expect((await row.locator('.home-index-result').boundingBox())!.y).toBeGreaterThan((await row.locator('th').boundingBox())!.y);
     }
-    if ([1440, 390, 320].includes(width)) await page.screenshot({ path: `.impeccable/review/ticket-17-synthetic-home-${width}.png`, fullPage: true });
+    if ([1440, 390, 320].includes(width)) await page.screenshot({ path: `.impeccable/review/ticket-22-home-${width}.png`, fullPage: true });
   }
   expect(errors).toEqual([]);
 });
@@ -116,12 +146,18 @@ test('Home keeps approved feature artwork complete, wraps names and stacks its i
 test('failed artwork preserves owning identity without a fictional image or result', async ({ page }) => {
   await page.unroute('https://sleepercdn.com/**');
   await page.route('https://sleepercdn.com/**', route => route.abort());
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await expect(page.locator('.home-feature').first().locator('.home-artwork')).toBeVisible();
-  await expect(page.locator('.home-feature').first().locator('.home-artwork img')).toBeHidden();
-  await expect(page.locator('.home-feature').first().locator('.home-artwork .team-image')).toHaveText('W');
-  await expect(page.locator('[data-category="benched-player"]')).toContainText('Results unavailable');
-  await expect(page.locator('[data-category="benched-player"] .home-value')).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    const feature = page.locator('.home-feature').first();
+    await expect(feature.locator('.home-artwork')).toBeVisible();
+    await expect(feature.locator('.home-artwork img')).toBeHidden();
+    await expect(feature.locator('.home-artwork .team-image > span')).toBeVisible();
+    await expect(feature.locator('.home-artwork .team-image')).toHaveText('W');
+    await expect(feature.locator('figcaption')).toContainText('Woody14');
+    await expect(page.locator('[data-category="benched-player"]')).toContainText('Results unavailable');
+    await expect(page.locator('[data-category="benched-player"] .home-value')).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `failed artwork at ${width}px`).toBe(true);
+    if (width === 390) await page.screenshot({ path: '.impeccable/review/ticket-22-home-failed-artwork.png', fullPage: true });
+  }
 });

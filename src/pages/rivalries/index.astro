@@ -24,8 +24,14 @@ const comparison = view?.comparison;
 const margin = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : ''}${formatRecordValue(value)}`;
 ---
 <MuseumLayout title="Rivalries" section="Rivalries">
-  <h1 class:list={[comparison ? 'visually-hidden' : 'page-heading']}>Rivalries</h1>
+  <h1 class="page-heading">Rivalries</h1>
   {view ? <>
+    {!comparison && <section class="rivalry-suggestions" aria-labelledby="rivalry-suggestions-heading">
+      <h2 id="rivalry-suggestions-heading">Most meetings</h2>
+      {view.suggestions.length ? <ul>{view.suggestions.map(pair => <li>
+        <a href={pair.href}><span>{pair.a.name} vs {pair.b.name}</span><span>{pair.meetings} {pair.meetings === 1 ? 'meeting' : 'meetings'}</span></a>
+      </li>)}</ul> : <p class="empty-history">No completed meetings in this selection.</p>}
+    </section>}
     <form method="get" class="rivalry-controls">
       {(['a', 'b'] as const).map((key, index) => {
         const person = view.people.find(person => person.id === view[key]);
@@ -42,9 +48,12 @@ const margin = (value: number | null) => value === null ? '—' : `${value > 0 ?
       <button type="submit">Compare managers</button>
     </form>
     {comparison ? <>
-      <div class="rivalry-actions"><a href={rivalryHref(comparison.b.id, comparison.a.id, { scope, season, limit })}>Reverse pair</a></div>
+      <div class="rivalry-comparison-heading">
+        <h2>{comparison.a.name} vs {comparison.b.name}</h2>
+        <a href={rivalryHref(comparison.b.id, comparison.a.id, { scope, season, limit })}>Reverse pair</a>
+      </div>
       <dl class="rivalry-summary" aria-label="Head-to-head summary">
-        <div><dt>Head-to-head</dt><dd>{comparison.record}</dd></div>
+        <div><dt>Record for {comparison.a.name}</dt><dd>{comparison.record}</dd></div>
         <div><dt class="visually-hidden">Meetings</dt><dd>{comparison.meetings} {comparison.meetings === 1 ? 'meeting' : 'meetings'}</dd></div>
         <div><dt>Average margin</dt><dd>{margin(comparison.averageMargin)}{comparison.averageMargin !== null && ' points'}</dd></div>
         <div><dt>Current streak</dt><dd>{streakLabel(comparison)}</dd></div>
@@ -60,6 +69,6 @@ const margin = (value: number | null) => value === null ? '—' : `${value > 0 ?
         </tr>)}</tbody>
       </table> : <p class="empty-history">No meetings in this selection.</p>}
       {view.nextHref && <a class="rivalry-show-all" href={view.nextHref}>Show all {comparison.meetings} games</a>}
-    </> : <p class="empty-history">Choose two different managers to compare.</p>}
+    </> : (view.a || view.b) && <p class="empty-history">Choose two different managers to compare.</p>}
   </> : <p class="empty-history">League history is unavailable.</p>}
 </MuseumLayout>

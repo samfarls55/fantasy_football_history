@@ -38,9 +38,10 @@ export function seasonCandidates(key: 'dominant-season' | 'unluckiest-season' | 
       if (!comparison.fullSeasonCoverage || key === 'best-without-title' && (!season.championId || season.championId === team.personId)) return [];
       const metric = key === 'unluckiest-season' ? comparison.winsVsExpected?.multiply(-1) : comparison.dominance;
       if (!metric) return [];
+      const sample = `${comparison.playedWeeks} regular-season ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`;
       return [{ id: team.id, personId: person.id, name: person.name, avatar: team.avatar, metric,
-        detail: team.name === person.name ? season.year : `${season.year} · ${team.name}`,
-        sample: `${comparison.playedWeeks} ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`,
+        detail: team.name === person.name ? undefined : team.name,
+        sample, leaderContext: `${season.year} season · ${sample}`,
         period: { year: season.year, week: Math.max(...season.completedWeeks), playedAt: null },
         href: `/managers/${person.id}/seasons/${season.year}/?scope=regular`, historyLabel: 'Open season' }];
     }));
