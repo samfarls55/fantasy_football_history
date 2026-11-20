@@ -85,10 +85,10 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
   {history && (
     <>
       <nav class="jump" aria-label="Sections">
-        <a href="#champions"><span>10</span>Champions</a>
-        <a href="#records"><span>20</span>Records</a>
-        <a href="#careers"><span>30</span>Careers</a>
-        {history.streaks.length > 0 && <a href="#streaks"><span>40</span>Streaks</a>}
+        <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
+        <a href="#records"><span aria-hidden="true">20</span>Records</a>
+        <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
+        {history.streaks.length > 0 && <a href="#streaks"><span aria-hidden="true">40</span>Streaks</a>}
       </nav>
 
       <section class="block" id="champions">

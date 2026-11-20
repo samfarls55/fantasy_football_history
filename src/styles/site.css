@@ -1,13 +1,16 @@
 /* The page is a football field seen from above: end zone, mowed turf, chalk, a thrown flag. */
 :root {
-  --turf-a: #2c7a3a;
-  --turf-b: #276e34;
+  /* Turf, highlight and chalk are tuned together: chalk text holds 4.5:1 on either stripe and under the highlight. */
+  --turf-a: #246a30;
+  --turf-b: #1f5e2a;
   --turf-deep: #1d5428;
   --endzone-a: #133f24;
   --endzone-b: #0f351e;
   --paint: #f8f8f3;
-  --chalk: #d5e8d6;
+  --chalk: #e2f0e1;
   --chalk-faint: rgba(248, 248, 243, 0.22);
+  /* Large text and icons only: 3:1 on the turf. */
+  --chalk-quiet: rgba(248, 248, 243, 0.62);
   --flag: #ffd21f;
   --flag-deep: #d9a900;
   --leather: #7b3a1c;
@@ -28,7 +31,7 @@ body {
   font: 400 17px/1.45 var(--text);
   font-variant-numeric: tabular-nums;
   background:
-    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(255, 255, 230, 0.10), transparent 70%),
+    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(255, 255, 230, 0.06), transparent 70%),
     radial-gradient(ellipse 140% 100% at 50% 50%, transparent 55%, rgba(0, 20, 5, 0.45) 100%),
     repeating-linear-gradient(180deg, var(--turf-a) 0 160px, var(--turf-b) 160px 320px);
   background-attachment: fixed, fixed, scroll;
@@ -124,7 +127,8 @@ h2[data-yard]::after {
   color: #1a1600; background: var(--flag); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
   animation: rise 220ms ease-out both;
 }
-.copied:empty { display: none; }
+/* Kept in the accessibility tree while empty so the live region announces the copy. */
+.copied:empty { padding: 0; background: none; box-shadow: none; }
 
 /* Champions: one chalked yard line per season, the oldest first, down to the ball in play. */
 .drive { list-style: none; padding: 0; margin: 24px 0 0; }
@@ -170,7 +174,7 @@ h2[data-yard]::after {
 .play:target { border-top-style: solid; border-top-color: var(--paint); }
 .play.shame:target { border-top-color: var(--flag); }
 /* The share mark stays faint beside the record's name; ::after stretches it to a 44px target. */
-.share { position: relative; display: inline-block; width: 20px; height: 20px; margin-left: 8px; vertical-align: -3px; color: var(--chalk-faint); transition: color 160ms ease-out; }
+.share { position: relative; display: inline-block; width: 20px; height: 20px; margin-left: 8px; vertical-align: -3px; color: var(--chalk-quiet); transition: color 160ms ease-out; }
 .share::after { content: ''; position: absolute; inset: -12px; }
 .share svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .share:hover, .share:focus-visible { color: var(--paint); }
@@ -230,9 +234,10 @@ th:first-child, td:first-child { text-align: left; padding-left: 0; }
 thead th { font-weight: 800; font-size: 15px; color: var(--chalk); border-bottom: 6px solid var(--paint); }
 tbody th { font-weight: 800; font-size: 20px; }
 tbody tr { border-bottom: 2px solid var(--chalk-faint); }
-tr.former { color: var(--chalk); opacity: 0.72; }
-.titles { font-family: var(--stencil); font-weight: 900; font-size: 30px; line-height: 1; color: var(--chalk-faint); }
-.titles.won { color: var(--flag); }
+tr.former { color: var(--chalk); }
+tr.former th { font-weight: 600; }
+.titles { font-family: var(--stencil); font-weight: 500; font-size: 30px; line-height: 1; color: var(--chalk-quiet); }
+.titles.won { font-weight: 900; color: var(--flag); }
 
 /* Head-to-head streaks */
 .streaks { list-style: none; padding: 0; margin: 20px 0 0; max-width: 820px; }
@@ -249,7 +254,7 @@ tr.former { color: var(--chalk); opacity: 0.72; }
   font: 800 22px/1.2 var(--text); color: var(--ink-on-paint); background: var(--paint);
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
 }
-.lookup input::placeholder { color: rgba(18, 63, 36, 0.5); font-weight: 600; }
+.lookup input::placeholder { color: rgba(18, 63, 36, 0.72); font-weight: 600; }
 .lookup button {
   padding: 16px 26px; border: 0; border-radius: 2px; cursor: pointer;
   font: 900 24px/1 var(--stencil); text-transform: uppercase; letter-spacing: 0.04em;
@@ -275,8 +280,11 @@ tr.former { color: var(--chalk); opacity: 0.72; }
 @media (max-width: 1240px) {
   .field::before, .field::after { display: none; }
 }
-@media (max-width: 560px) {
+/* Below this the full table would push Titles out of view, so the secondary columns go. */
+@media (max-width: 720px) {
   th:nth-child(2), td:nth-child(2), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6) { display: none; }
+}
+@media (max-width: 560px) {
   table { font-size: 17px; }
   tbody th { font-size: 18px; }
   body { font-size: 16px; }
