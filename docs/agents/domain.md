@@ -13,6 +13,5 @@ Surface conflicts with existing ADRs before overriding them.
 
 ## Product contracts
 
-Read SPEC.md for requirements.
-For interface work, also read DESIGN-BRIEF.md.
+README.md describes what the project is.
 For record calculations or attribution, read docs/metrics.md.

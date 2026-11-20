@@ -4,7 +4,7 @@ Read-only audit performed November 3, 2026, for seed league `1385327861673529344
 
 ## Scope and reproducibility
 
-The audit followed `previous_league_id` to the null reference in 2019. Eight linked seasons were reachable; the chain does not establish the league's founding year. Requests were cached once in `.impeccable/review/coverage/cache/`, using the v1 API path with `/` replaced by `__` as the filename. The audit and summary scripts, full responses, and summaries remain disposable internal review artifacts, not public assets.
+The audit followed `previous_league_id` to the null reference in 2019. Eight linked seasons were reachable; the chain does not establish the league's founding year. Requests were cached once in local scratch, using the v1 API path with `/` replaced by `__` as the filename. The audit and summary scripts, full responses, and summaries remain disposable internal review artifacts, not public assets.
 
 The 354 cached JSON responses cover eight league objects, each season's users, rosters, winners bracket, losers bracket and drafts; all matchup weeks 1–18; transaction rounds 0–18; eight draft-pick responses; one NFL-state response; and one NFL player lookup. Transaction round 0 returned an empty list for every season. Completed and failed events were deduplicated by string transaction ID when counting. No draft/transaction endpoint is intended as a public route.
 

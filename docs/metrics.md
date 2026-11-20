@@ -154,7 +154,7 @@ Use dates at supported precision and stable ordering for equal dates. Do not inv
 
 ## Coverage and publication
 
-The existing research in [.impeccable/player-impact-feasibility.md](../.impeccable/player-impact-feasibility.md) found player-point fields in one sampled response, not complete historical coverage. Its old Decisions still needed paragraph is superseded by the approved pickup/drop policies above. The complete bounded source audit and its historical exact-timing limitation are recorded in [coverage.md](coverage.md); validate required fields on every refresh.
+The complete bounded source audit and its historical exact-timing limitation are recorded in [coverage.md](coverage.md); validate required fields on every refresh.
 
 Initial implementation must establish linked-season, completed-game, lineup, player-point and completed-event coverage for the claims it publishes. Keep missing, empty, zero and incomplete distinct. Preserve the last complete successful snapshot on later failures. Do not mix a new partial import into previously correct public totals.
 

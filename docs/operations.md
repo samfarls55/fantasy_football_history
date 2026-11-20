@@ -19,8 +19,6 @@ npm start
 
 Use `npm run dev` for development. `npm start` serves the built standalone Node server. Development and production reads must call `loadArchive` at request time; importing JSON into a build would freeze the history. Server-only archive data must never be copied into a public source endpoint or client bundle.
 
-Browser checks use an installed Google Chrome by default. For another installed Chromium binary, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its absolute path, for example `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test` on this Linux environment.
-
 The operator owns `.env` locally and `/etc/farls-museum.env` in the systemd examples. Keep web and refresh processes on the same configuration:
 
 | Variable | Ownership and meaning |
@@ -38,7 +36,7 @@ Operator commands run independently of Astro. The publication command also accep
 ```sh
 npm run history:publish -- /absolute/path/to/candidate.json
 npm run history:inspect
-npm run test:publication
+npm test
 ```
 
 `publish` checks the archive envelope and atomically replaces the persisted publication. `inspect` reports whether a publication exists and, when present, its league, `importedAt`, season names, counts and coverage issues. Coverage includes the affected season, area, endpoint/roster/player detail and blocked record categories. These are operator-only diagnostics. Tests exercise these actual commands in separate processes against a temporary durable directory, demonstrate a later correction, and prove incomplete or malformed candidate failure retains the previous successful history. They do not inspect private files to assert success.
@@ -55,7 +53,7 @@ Successful refreshes emit one JSON result with `changed`, `importedAt`, imported
 
 Each public request captures one persisted snapshot for all of its reads; the next request sees a newly published archive. Public routes use that history for standings, person/franchise profiles, records, season comparisons, rivalries, player contributions, move rankings and Home. Corrections require no frontend rebuild or server restart. Completed weekly legs can contribute player points while a multiweek contest remains unfinished; finalized wins and season awards still require their completion evidence. There is no public source endpoint or operational panel.
 
-`npm run test:publication` includes controlled-provider import-to-public-read tests as well as the independent publication command tests. Browser checks run a real controlled import into a dedicated per-run `MUSEUM_STORE_PATH`, then exercise the SSR pages. They never replace the default archive. The browser-only fixture adds a long historical roster name and a controlled avatar response to check wrapping and image failure. All recurring checks run without live provider requests.
+`npm test` includes controlled-provider import-to-public-read tests as well as the independent publication command tests. All recurring checks run without live provider requests.
 
 ## Production installation arrangement
 
