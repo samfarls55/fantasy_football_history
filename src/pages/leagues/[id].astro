@@ -107,7 +107,7 @@ const landing = (key: string) => {
 
   {history && (
     <>
-      <nav class="jump" aria-label="Sections" style={`--i: ${history.plates.length - 1}`}>
+      <nav class="jump" aria-label="Sections">
         <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
         {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Fame &amp; shame</a>}
         <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
@@ -116,7 +116,8 @@ const landing = (key: string) => {
 
       <section class="block" id="champions">
         <h2 class="painted" data-yard="10">Champions</h2>
-        <ol class="drive">
+        {/* The seasons' stagger shares a fixed span, so a long history loads as fast as a short one. */}
+        <ol class="drive" style={`--step: ${Math.min(90, Math.round(360 / Math.max(1, history.plates.length - 1)))}ms`}>
           {history.plates.map((plate, index) => (
             <li class="yard" style={`--i: ${index}`}>
               <span class="yard-year">{plate.year}</span>
@@ -149,6 +150,7 @@ const landing = (key: string) => {
                 )}
                 <h4><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
+                <div class="play-who">
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
                   <details class="play-next">
@@ -158,6 +160,7 @@ const landing = (key: string) => {
                     </ol>
                   </details>
                 )}
+                </div>
               </li>
             );
           }))}

@@ -110,23 +110,24 @@ h2[data-yard]::after {
   font-size: 2em; line-height: 0.8; color: rgba(248, 248, 243, 0.1);
 }
 
-/* Jump bar: the yard markers along the bottom edge, in reach of a thumb. It rises as the ball lands, last in the load. */
+/* Jump bar: a strip of end zone along the bottom edge. Phones get the labels alone, in reach of a thumb;
+   wider screens stretch it edge to edge with the yard markers lined up on the field's column. It rises as the ball lands, last in the load. */
 .jump {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; margin: 0 auto; width: min(100%, 600px);
-  display: grid; grid-auto-flow: column; justify-content: space-evenly;
-  padding: 0 8px env(safe-area-inset-bottom);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  padding: 0 calc(max(20px, (100% - 1080px) / 2)) env(safe-area-inset-bottom);
   background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px);
   border-top: 4px solid var(--paint);
   box-shadow: 0 -8px 24px rgba(0, 10, 3, 0.4);
-  animation: rise 450ms ease-out both; animation-delay: calc(var(--i) * 90ms + 1500ms);
+  animation: rise 450ms ease-out both; animation-delay: 1150ms;
 }
 .jump a {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; padding: 6px; white-space: nowrap;
-  font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
+  display: flex; align-items: baseline; gap: 12px; min-height: 64px; padding: 18px 0 0; white-space: nowrap;
+  font-family: var(--stencil); font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   text-decoration: none; color: var(--chalk);
   transition: color 160ms ease-out;
 }
-.jump span { font-weight: 900; font-size: 26px; letter-spacing: 0.02em; color: var(--paint); }
+.jump span { font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: var(--paint); }
 .jump a:hover, .jump a:hover span, .jump a[aria-current], .jump a[aria-current] span { color: var(--flag); }
 .jump a:focus-visible { outline-offset: -5px; }
 .copied {
@@ -147,14 +148,15 @@ h2[data-yard]::after {
 }
 .yard::before {
   content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--paint);
-  transform-origin: left; animation: chalk 700ms cubic-bezier(.3, .7, .2, 1) both; animation-delay: calc(var(--i) * 90ms + 500ms);
+  transform-origin: left; animation: chalk 600ms cubic-bezier(.3, .7, .2, 1) both; animation-delay: calc(var(--i) * var(--step) + 350ms);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 .yard:last-child::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--paint); }
 .yard-year { font-family: var(--stencil); font-weight: 700; font-size: 34px; line-height: 1; color: var(--chalk); }
+/* Stencil is paint, and paint is capitals: a name painted on the field is upper case; in text it keeps its typed case. */
 .yard-champ {
-  font-family: var(--stencil); font-weight: 900; font-size: clamp(30px, 4vw, 44px); line-height: 1;
-  overflow-wrap: anywhere; animation: rise 500ms ease-out both; animation-delay: calc(var(--i) * 90ms + 750ms);
+  font-family: var(--stencil); font-weight: 900; text-transform: uppercase; font-size: clamp(30px, 4vw, 44px); line-height: 1;
+  overflow-wrap: anywhere; animation: rise 450ms ease-out both; animation-delay: calc(var(--i) * var(--step) + 500ms);
 }
 .yard-live {
   display: flex; align-items: center; gap: 18px; color: var(--chalk);
@@ -164,7 +166,7 @@ h2[data-yard]::after {
   display: inline-block; flex: none; position: relative; width: 58px; height: 34px; border-radius: 50%;
   background: radial-gradient(ellipse at 40% 30%, #a65530, var(--leather) 60%, #4f220f);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.35);
-  animation: toss 900ms cubic-bezier(.2, .8, .3, 1.2) both; animation-delay: calc(var(--i) * 90ms + 900ms);
+  animation: toss 700ms cubic-bezier(.2, .8, .3, 1.2) both; animation-delay: calc(var(--i) * var(--step) + 500ms);
 }
 .ball::before { content: ''; position: absolute; left: 18px; right: 18px; top: 15px; height: 3px; background: var(--paint); border-radius: 2px; }
 .ball::after {
@@ -210,6 +212,15 @@ h2[data-yard]::after {
 .play.headline .play-unit { font-size: 20px; max-width: 18ch; line-height: 1.2; }
 .play.headline .play-holder strong { font-size: 32px; }
 .play.headline .flag { width: 132px; height: 108px; top: 16px; }
+/* On wide screens the holder stands beside the figure, so number, name and flag read as one play. */
+@media (min-width: 900px) {
+  .play.headline { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; column-gap: 56px; }
+  .play.headline h4 { grid-column: 1; }
+  .play.headline .flag { position: static; grid-column: 2; grid-row: 1 / 3; align-self: start; margin-top: -12px; }
+  .play.headline .play-figure { grid-row: 2; }
+  .play.headline .play-who { grid-column: 2; grid-row: 2; padding-bottom: 6px; }
+  .play.headline .play-holder:first-child { margin-top: 0; }
+}
 /* Runners-up wait behind a chalked box; opening it paints the box in. */
 .play-next { margin-top: 12px; }
 /* The painted box stays small; ::after stretches the tap target to 44px. */
@@ -223,7 +234,8 @@ h2[data-yard]::after {
 .play-next summary::after { content: ''; position: absolute; inset: -8px -6px; }
 .play-next summary:hover { color: var(--paint); border-color: var(--paint); }
 .play-next[open] summary { color: var(--ink-on-paint); background: var(--paint); border-color: var(--paint); }
-.play.shame .play-next summary:hover { color: var(--flag); border-color: var(--flag); }
+/* Flag yellow is large-type only on the turf (3.98:1 under the highlight), so the small label stays white and the box takes the flag. */
+.play.shame .play-next summary:hover { color: var(--paint); border-color: var(--flag); }
 .play.shame .play-next[open] summary { color: var(--ink-on-flag); background: var(--flag); border-color: var(--flag); }
 .play-next ol { margin: 12px 0 0; padding-left: 1.5em; color: var(--chalk); overflow-wrap: anywhere; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
@@ -253,8 +265,9 @@ tbody tr { border-bottom: 2px solid var(--chalk-faint); }
 tr.former { color: var(--chalk); }
 tr.former th { font-weight: 600; }
 .career-range { display: none; }
-.titles { font-family: var(--stencil); font-weight: 500; font-size: 28px; line-height: 1; color: var(--chalk-quiet); }
-.titles.won { font-weight: 900; color: var(--flag); }
+/* No title reads as plain table text; a title is painted. A zero stays a zero: a dash here means missing data. */
+.titles { color: var(--chalk); }
+.titles.won { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--flag); }
 
 /* Rivalries: the longest gets the headline's painted line and size; the rest line up as a set. */
 .streak-top { margin-top: 20px; padding: 28px 0 36px; border-top: 6px solid var(--paint); }
@@ -347,10 +360,14 @@ tr.former th { font-weight: 600; }
   .streaks p span { font-size: 15px; }
   .streak-record { font-size: 17px; }
 }
-/* Small phones: the four yard markers tighten so the last one stays on screen. */
+/* Phones: the yard numbers would crowd four labels, so the bar keeps the labels, centered under each thumb. */
+@media (max-width: 600px) {
+  .jump { padding: 0 4px env(safe-area-inset-bottom); }
+  .jump a { justify-content: center; align-items: center; min-height: 56px; padding: 4px 2px; font-size: 18px; text-align: center; }
+  .jump span { display: none; }
+}
 @media (max-width: 400px) {
-  .jump { padding-left: 4px; padding-right: 4px; }
-  .jump a { padding: 6px 3px; font-size: 16px; letter-spacing: 0.02em; }
+  .jump a { font-size: 16px; letter-spacing: 0.02em; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
