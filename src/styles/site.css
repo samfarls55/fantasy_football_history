@@ -80,8 +80,12 @@ p { text-wrap: pretty; }
 .site a:hover { color: var(--paint); }
 .notice { margin-top: 24px; max-width: 56ch; font-size: 20px; color: var(--paint); overflow-wrap: anywhere; }
 /* A league that can't be shown: the reason first, then the lookup to pick it again. */
-.notice.lead { margin-top: 0; padding-top: 13vh; font-weight: 600; }
-.lead + .lookup { padding-top: 20px; }
+.failure {
+  padding-top: 13vh; max-width: 14ch; font-size: clamp(48px, 8vw, 112px); line-height: 0.95; overflow-wrap: anywhere;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
+}
+.failure + .lookup { padding-top: 0; }
+.failure + .lookup .lookup-row { margin-top: 40px; }
 
 .league-name, .close-name { font-size: clamp(56px, 10.5vw, 136px); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
 .league-name {
@@ -287,29 +291,37 @@ a[data-person]::before { content: ''; position: absolute; inset: -12px 0; }
   .play.headline .play-who { grid-column: 2; grid-row: 2; padding-bottom: 6px; }
   .play.headline .play-holder:first-child { margin-top: 0; }
 }
-/* Runners-up wait behind a chalked box; opening it paints the box in. */
-.play-next { margin-top: 12px; }
-/* The painted box stays small; ::after stretches the tap target to 44px. */
+/* Runners-up wait behind a chalked count with a caret; opening it turns the caret down and paints the count. */
+.play-next { margin-top: 6px; }
+.play-next summary, .play-how summary { position: relative; cursor: pointer; list-style: none; }
+.play-next summary::-webkit-details-marker, .play-how summary::-webkit-details-marker { display: none; }
+/* ::after stretches each small disclosure to a 44px target. */
+.play-next summary::after { content: ''; position: absolute; inset: -9px -10px; }
 .play-next summary {
-  position: relative; display: inline-flex; align-items: center; min-height: 32px; padding: 2px 12px; cursor: pointer; list-style: none;
-  font-family: var(--stencil); font-weight: 900; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--chalk); border: 3px solid var(--chalk-faint); border-radius: 2px;
-  transition: color 160ms ease-out, background-color 160ms ease-out, border-color 160ms ease-out;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 26px;
+  font-family: var(--stencil); font-weight: 900; font-size: 20px; letter-spacing: 0.04em; color: var(--chalk);
+  transition: color 160ms ease-out;
 }
-.play-next summary::-webkit-details-marker { display: none; }
-.play-next summary::after { content: ''; position: absolute; inset: -8px -6px; }
-.play-next summary:hover { color: var(--paint); border-color: var(--paint); }
-.play-next[open] summary { color: var(--ink-on-paint); background: var(--paint); border-color: var(--paint); }
-/* Flag yellow is large-type only on the turf (3.98:1 under the highlight), so the small label stays white and the box takes the flag. */
-.play.shame .play-next summary:hover { color: var(--paint); border-color: var(--flag); }
-.play.shame .play-next[open] summary { color: var(--ink-on-flag); background: var(--flag); border-color: var(--flag); }
+.play-next summary::before {
+  content: ''; width: 0; height: 0; border-block: 5px solid transparent; border-left: 7px solid currentColor;
+  transition: transform 160ms ease-out;
+}
+.play-next summary:hover, .play-next[open] summary { color: var(--paint); }
+.play-next[open] summary::before { transform: rotate(90deg); }
+/* A derived record's unit is its own disclosure: a dotted chalk underline, opening onto how it's counted. */
+.play-how summary { text-decoration: underline dotted var(--chalk-quiet) 2px; text-underline-offset: 4px; }
+.play-how summary::after { content: ''; position: absolute; inset: -13px -4px; }
+.play-how summary:hover, .play-how[open] summary { color: var(--paint); }
+.play-how p { margin-top: 6px; max-width: 32ch; font-size: 15px; line-height: 1.35; color: var(--chalk); }
+.play-how[open] p { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 /* Each row is a full 44px tap tall, so two runners-up never share a name's target. */
 .play-next li { padding: 11px 0 11px 0.3em; }
 .play-next ol { margin: 1px 0 0; padding-left: 1.5em; color: var(--chalk); overflow-wrap: anywhere; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
 .play-next li::marker { font-weight: 800; color: var(--paint); }
-.play-next li > span + span { margin-left: 10px; font-weight: 800; color: var(--paint); }
+.next-value { margin-left: 10px; font-weight: 800; white-space: nowrap; color: var(--paint); }
+.next-when { margin-left: 10px; font-size: 15px; white-space: nowrap; color: var(--chalk); }
 .flag {
   position: absolute; right: 0; top: 8px; width: 78px; height: 64px; overflow: visible;
   transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--tilt, -8deg)) scaleX(var(--flip, 1)); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, 0.35));

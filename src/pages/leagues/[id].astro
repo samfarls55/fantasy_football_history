@@ -15,12 +15,15 @@ const status = /^\d+$/.test(id) ? await ensureLeague(id) : 'missing';
 // A league that can't be shown says why, with the username lookup right there to pick it again.
 const failure = { ready: null, missing: `Sleeper has no league with ID ${id}.`, failed: 'Sleeper didn’t send this league’s history. Try again in a minute.' }[status];
 if (failure) Astro.response.status = status === 'missing' ? 404 : 502;
-const back = failure ? undefined : username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : { href: '/', label: 'Find your league' };
+// A failed page keeps the way back to the username's leagues; without one, the lookup under the reason is the way back.
+const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : failure ? undefined : { href: '/', label: 'Find your league' };
 
 // digits: one fixed precision per record so a figure and its runners-up line up (points 2, percentages 1, counts 0).
-interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string }
+// how: one line on how a derived record is counted, behind its unit (docs/metrics.md, Season dominance and schedule).
+interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string; how?: string }
 // The headline: the best team that went home empty is the record every league argues about.
-const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'above the league’s average weekly score', digits: 1, shame: true };
+const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'above the league’s average weekly score', digits: 1, shame: true,
+  how: 'Their regular-season points per game against the league’s, among teams that didn’t win the title.' };
 // Opposites face each other across the field: fame in white paint, shame under a flag. Pairs sit in themed groups so the run has structure.
 const groupFeatures: { name: string; pairs: Feature[][] }[] = [
   { name: 'Scoring', pairs: [
@@ -32,7 +35,8 @@ const groupFeatures: { name: string; pairs: Feature[][] }[] = [
   ] },
   { name: 'Roster & luck', pairs: [
     [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true }],
-    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'wins short of what their points deserved', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
+    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'wins short of what their points deserved', digits: 1, shame: true,
+      how: 'Each regular-season week is worth the share of the league they outscored, in expected wins. This is expected wins minus actual wins.' }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
   ] },
 ];
 
@@ -117,8 +121,8 @@ const landing = (key: string) => {
   <Fragment slot="endzone">
     {failure && (
       <>
-        <p class="notice lead">{failure}</p>
-        <Lookup username={username} />
+        <h1 class="painted failure">{failure}</h1>
+        <Lookup username={username} heading={false} />
       </>
     )}
     {history && (
@@ -195,14 +199,16 @@ const landing = (key: string) => {
                   </svg>
                 )}
                 <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
-                <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
+                <div class="play-figure"><span class="play-value">{value(record, leaders[0])}</span>{record.feature.how
+                  ? <details class="play-how"><summary class="play-unit">{record.feature.unit}</summary><p>{record.feature.how}</p></details>
+                  : <span class="play-unit">{record.feature.unit}</span>}</div>
                 <div class="play-who">
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
                   <details class="play-next" open={others.some(involves)} data-marked={others.some(involves) || undefined}>
-                    <summary>{others.length > 1 ? 'Runners-up' : 'Runner-up'}</summary>
+                    <summary><span aria-hidden="true">+{others.length}</span><span class="unseen">{others.length} {others.length > 1 ? 'runners-up' : 'runner-up'}</span></summary>
                     <ol>
-                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span>{value(record, row)}</span></li>)}
+                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span class="next-value">{value(record, row)}</span><span class="next-when">{when(record.feature, row)}</span></li>)}
                     </ol>
                   </details>
                 )}
@@ -270,7 +276,7 @@ const landing = (key: string) => {
               {history.streaks.slice(1).map(streak => (
                 <li>
                   <span class="streak-count">{streak.count}</span>
-                  <p><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a><span>{streak.record} all time, playoffs included</span></p>
+                  <p><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a><span>{streak.record}</span></p>
                 </li>
               ))}
             </ul>
