@@ -23,6 +23,8 @@ export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
+  /** Matchup records: the game was tied, so the first person didn't beat the second. */
+  tied?: boolean;
   /** Season records: the regular-season record and points per game behind the figure. */
   record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }

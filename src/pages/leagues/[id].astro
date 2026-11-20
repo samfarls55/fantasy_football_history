@@ -62,7 +62,8 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const load = async (feature: Feature) => {
     const view = await readCategory(feature.key, { storePath });
     if (!view || view.blocked || !view.rows.length) return null;
-    return { feature, percent: view.category.unit === '%',
+    // A percentage record keeps the precision its category chose so distinct ranked values never share a label (docs/metrics.md).
+    return { feature, percent: view.category.unit === '%', digits: view.category.unit === '%' ? view.category.displayPrecision ?? feature.digits : feature.digits,
       // Ties share a rank, so every row ranked third or better shows; none drops silently.
       // A matchup row names its loser only through a link to their page, which carries their person id.
       rows: view.rows.filter(row => row.rank <= 3).map(row => ({ ...row, manager: nameOf.get(row.personId)!,
@@ -82,7 +83,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
     if (!rivalry?.streak || rivalry.streak.result !== 'W' && rivalry.streak.result !== 'L' || rivalry.streak.count < 3) continue;
     const winnerIsA = rivalry.streak.person.id === a.id;
     streaks.push({ winner: rivalry.streak.person.name, loser: winnerIsA ? b.name : a.name, count: rivalry.streak.count,
-      record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
+      record: `${winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}`}${rivalry.ties ? `–${rivalry.ties}` : ''}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
   // ?manager=<username> highlights one manager everywhere they appear, readable in a group chat; an unknown name highlights no one.
@@ -130,13 +131,13 @@ const mine = (name: string) => name === history?.marked?.name;
 // Every manager name on the page is this one link, so each takes the highlight the same way.
 const person = (name: string) => ({ href: markHref(name), 'data-person': name, class: mine(name) ? 'me' : undefined, 'aria-current': mine(name) ? 'true' as const : undefined });
 
-type Row = { value: number; name: string; manager: string; opponent?: string; leaderContext?: string; record?: string; pointsPerGame?: number };
+type Row = { value: number; name: string; manager: string; opponent?: string; tied?: boolean; leaderContext?: string; record?: string; pointsPerGame?: number };
 const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
-  record.percent ? `${row.value > 0 ? '+' : ''}${fixed(row.value, record.feature.digits)}%` : fixed(row.value, record.feature.digits);
+const value = (record: { percent: boolean; digits: number }, row: Row) =>
+  record.percent ? `${row.value > 0 ? '+' : ''}${fixed(row.value, record.digits)}%` : fixed(row.value, record.digits);
 // Who holds a record, as text and the managers in it, so each manager's own name takes the highlight.
 const who = (feature: Feature, row: Row): (string | { person: string })[] => feature.verb ? [{ person: row.manager }, ` ${feature.verb} ${row.name}`]
-  : row.opponent ? [{ person: row.manager }, ' beat ', { person: row.opponent }] : [{ person: row.manager }];
+  : row.opponent ? [{ person: row.manager }, row.tied ? ' tied ' : ' beat ', { person: row.opponent }] : [{ person: row.manager }];
 const involves = (row: Row) => mine(row.manager) || !!row.opponent && mine(row.opponent);
 // Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named in who().
 // A season record reads the way the league remembers it: "11–3, 128.4 points a game in 2024".
@@ -263,7 +264,7 @@ const landing = (key: string) => {
                 <tr class:list={{ former: !manager.current }}>
                   <th scope="row" data-sort={manager.name}><a {...person(manager.name)}>{manager.name}</a></th>
                   <td class:list={['titles', { won: manager.facts.championships > 0 }]} data-sort={manager.facts.championships}>{manager.facts.championships}</td>
-                  <td data-sort={manager.facts.wins}>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
+                  <td data-sort={manager.facts.wins}>{manager.facts.record}</td>
                   <td data-sort={manager.facts.winPercentage ?? -1}>{manager.facts.winPercentage === null ? '—' : `${fixed(manager.facts.winPercentage, 1)}%`}</td>
                   <td data-sort={manager.facts.playoffAppearances}>{manager.facts.playoffAppearances}</td>
                   <td data-sort={manager.facts.points}>{fixed(manager.facts.points, 0)}</td>
