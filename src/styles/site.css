@@ -209,6 +209,8 @@ a[data-person]:is(:hover, :focus-visible) { text-decoration-color: var(--paint);
 a[data-person].me { text-decoration-color: transparent; }
 /* Stretched so every name, however short, is at least a 44px target. */
 a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100% - 44px) / 2) min(0px, (100% - 44px) / 2); }
+/* Champion rows sit 60px apart, so their names keep a plain 44px target instead of reaching into the next row. */
+.yard-champ a[data-person]::before { inset-block: min(0px, (100% - 44px) / 2); }
 /* A mistyped ?manager= says so in the end zone, offers the nearest handle, with the way out beside it. */
 .miss { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 24px; font-size: 20px; animation: rise 320ms ease-out both; }
 .miss strong { font-weight: 800; overflow-wrap: anywhere; }
@@ -341,7 +343,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .next-who:has(a + a) + .next-when { margin-top: -8px; }
 .flag {
-  position: absolute; right: 0; top: 8px; width: 78px; height: 64px; overflow: visible;
+  position: absolute; right: 0; top: 8px; width: 78px; height: 64px; overflow: visible; pointer-events: none;
   transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--tilt, -8deg)) scaleX(var(--flip, 1)); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, 0.35));
   animation: throw 750ms cubic-bezier(.2, .8, .3, 1.1) both; animation-delay: calc(var(--i) * 80ms + 150ms);
 }

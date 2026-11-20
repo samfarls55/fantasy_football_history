@@ -399,17 +399,19 @@ const landing = (key: string) => {
     say(next ? `${next} highlighted` : 'Highlight cleared');
     // Rivalries change shape with the highlight, so the server renders it for the new URL and it swaps in; a later tap wins.
     const wanted = url.pathname + url.search;
-    fetch(wanted).then(response => response.text()).then(html => {
-      const old = document.getElementById('rivalries')!;
-      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries')!;
+    // If the swap fails, load the URL whole so the section never shows the previous manager under the new highlight.
+    fetch(wanted).then(response => response.ok ? response.text() : Promise.reject()).then(html => {
       if (location.pathname + location.search !== wanted) return;
+      const old = document.getElementById('rivalries')!;
+      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries');
+      if (!fresh) return Promise.reject();
       const focused = old.contains(document.activeElement);
       old.replaceWith(fresh);
       links.find(link => link.hash === '#rivalries')!.hidden = fresh.hidden;
       watch.observe(fresh);
       paintBar();
       if (focused) fresh.querySelector('h2')!.focus({ preventScroll: true });
-    });
+    }).catch(() => { if (location.pathname + location.search === wanted) location.assign(wanted); });
   });
 
   // Next and Prev walk the page's sightings of the highlighted manager, landing each a third of the way down, and wrap at either end.
@@ -447,4 +449,7 @@ const landing = (key: string) => {
   };
   const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
   links.forEach(link => watch.observe(sectionOf(link)));
+  // A jump that lands without crossing a section edge fires no observer callback, so mark on load and whenever scrolling settles.
+  mark();
+  addEventListener('scrollend', mark);
 </script>
