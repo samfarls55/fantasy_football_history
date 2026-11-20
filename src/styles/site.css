@@ -57,7 +57,7 @@ h1, h2, h3, p { margin: 0; }
 .endzone.full { min-height: 100vh; border-bottom: 0; }
 .field:not(:has(*)) { display: none; }
 .endzone-inner, .field { max-width: 1120px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
-.endzone-inner { padding-bottom: 48px; }
+.endzone-inner { padding-bottom: 32px; }
 .site { padding-top: 22px; }
 .site a {
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase;
@@ -67,12 +67,12 @@ h1, h2, h3, p { margin: 0; }
 .notice { margin-top: 24px; max-width: 56ch; font-size: 19px; color: var(--paint); }
 
 .league-name {
-  margin-top: 48px;
-  font-size: clamp(56px, 13vw, 168px);
+  margin-top: 28px;
+  font-size: clamp(56px, 10.5vw, 136px);
   text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
   animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
 }
-.league-years { margin-top: 12px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--chalk); }
+.league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--chalk); }
 
 /* Field: sidelines with hash marks, faint painted yard numbers in the margin. */
 .field { padding-top: 8px; padding-bottom: 96px; position: relative; }
@@ -85,20 +85,21 @@ h1, h2, h3, p { margin: 0; }
 }
 .field::before { left: -40px; background-position: left top, left top; }
 .field::after { right: -40px; background-position: right top, right top; }
-.block { position: relative; margin-top: 72px; }
-.block { isolation: isolate; }
-.block[data-yard]::before {
-  content: attr(data-yard); position: absolute; right: 0; top: -64px; z-index: -1;
-  font-family: var(--stencil); font-weight: 900; font-size: clamp(120px, 20vw, 240px); line-height: 1;
-  color: rgba(248, 248, 243, 0.09); pointer-events: none;
-}
+.block { margin-top: 72px; }
+.field > .block:first-child { margin-top: 44px; }
 h2.painted { font-size: clamp(40px, 6vw, 64px); }
+/* The yard number shares the heading's row, reaching up into the empty gap above it, so it never sits behind data. */
+h2[data-yard] { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 0.25em; }
+h2[data-yard]::after {
+  content: attr(data-yard) / ''; margin-left: auto; margin-top: -0.35em;
+  font-size: 2em; line-height: 0.8; color: rgba(248, 248, 243, 0.1);
+}
 
 /* Champions: one chalked yard line per season, the oldest first, down to the ball in play. */
 .drive { list-style: none; padding: 0; margin: 24px 0 0; }
 .yard {
   position: relative; display: grid; grid-template-columns: 7.5rem 1fr; align-items: center; gap: 20px;
-  min-height: 76px; padding: 10px 0;
+  min-height: 56px; padding: 6px 0;
 }
 .yard::before {
   content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--paint);
@@ -106,14 +107,14 @@ h2.painted { font-size: clamp(40px, 6vw, 64px); }
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
 }
 .yard:last-child::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--paint); }
-.yard-year { font-family: var(--stencil); font-weight: 700; font-size: 40px; line-height: 1; color: var(--chalk); }
+.yard-year { font-family: var(--stencil); font-weight: 700; font-size: 34px; line-height: 1; color: var(--chalk); }
 .yard-champ {
-  font-family: var(--stencil); font-weight: 900; font-size: clamp(32px, 5vw, 52px); line-height: 1; text-transform: uppercase;
+  font-family: var(--stencil); font-weight: 900; font-size: clamp(30px, 4vw, 44px); line-height: 1; text-transform: uppercase;
   overflow-wrap: anywhere; animation: rise 500ms ease-out both; animation-delay: calc(var(--i) * 90ms + 750ms);
 }
 .yard-live {
   display: flex; align-items: center; gap: 18px; color: var(--chalk);
-  font-family: var(--stencil); font-weight: 900; font-size: clamp(32px, 5vw, 52px); line-height: 1; text-transform: uppercase;
+  font-family: var(--stencil); font-weight: 900; font-size: clamp(30px, 4vw, 44px); line-height: 1; text-transform: uppercase;
 }
 .ball {
   display: inline-block; flex: none; position: relative; width: 58px; height: 34px; border-radius: 50%;
@@ -127,13 +128,14 @@ h2.painted { font-size: clamp(40px, 6vw, 64px); }
   background: repeating-linear-gradient(90deg, var(--paint) 0 2px, transparent 2px 5px);
 }
 
-/* Halls: fame in white paint, shame under a thrown flag. */
-.halls { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr)); gap: 56px 72px; }
-.shame h2.painted { color: var(--flag); }
-.plays { list-style: none; padding: 0; margin: 20px 0 0; }
-.play { position: relative; padding: 24px 0 26px; border-top: 3px dashed var(--chalk-faint); }
+/* Records: opposites face each other across a chalk line; fame in white paint, shame under a thrown flag. */
+.shame-word { color: var(--flag); }
+.plays { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
+.play { position: relative; min-width: 0; padding: 24px 0 26px; border-top: 3px dashed var(--chalk-faint); }
+.play.wide { grid-column: 1 / -1; }
+.play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
 .play h3 { font-size: 19px; font-weight: 800; color: var(--chalk); }
-.shame .play h3 { padding-right: 88px; }
+.play.shame h3 { padding-right: 88px; }
 .play-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }
 .shame .play-value { color: var(--flag); }
@@ -141,6 +143,13 @@ h2.painted { font-size: clamp(40px, 6vw, 64px); }
 .play-holder { display: flex; flex-direction: column; margin-top: 8px; }
 .play-holder strong { font-size: 22px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
 .play-holder span { color: var(--chalk); }
+/* The headline record: a solid painted line and the biggest number on the field. */
+.play.headline { padding: 28px 0 40px; border-top: 6px solid var(--flag); }
+.play.headline h3 { font-size: 24px; color: var(--paint); padding-right: 140px; }
+.play.headline .play-value { font-size: clamp(96px, 15vw, 176px); line-height: 0.85; }
+.play.headline .play-unit { font-size: 22px; max-width: 18ch; line-height: 1.2; }
+.play.headline .play-holder strong { font-size: 32px; }
+.play.headline .flag { width: 132px; height: 108px; top: 16px; }
 /* Runners-up wait behind a chalked box; opening it paints the box in. */
 .play-next { margin-top: 12px; }
 /* The painted box stays small; ::after stretches the tap target to 44px. */
@@ -154,8 +163,8 @@ h2.painted { font-size: clamp(40px, 6vw, 64px); }
 .play-next summary::after { content: ''; position: absolute; inset: -8px -6px; }
 .play-next summary:hover { color: var(--paint); border-color: var(--paint); }
 .play-next[open] summary { color: var(--ink-on-paint); background: var(--paint); border-color: var(--paint); }
-.shame .play-next summary:hover { color: var(--flag); border-color: var(--flag); }
-.shame .play-next[open] summary { color: #1a1600; background: var(--flag); border-color: var(--flag); }
+.play.shame .play-next summary:hover { color: var(--flag); border-color: var(--flag); }
+.play.shame .play-next[open] summary { color: #1a1600; background: var(--flag); border-color: var(--flag); }
 .play-next ol { margin: 12px 0 0; padding-left: 1.5em; color: var(--chalk); }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
@@ -231,10 +240,25 @@ tr.former { color: var(--chalk); opacity: 0.72; }
   table { font-size: 17px; }
   tbody th { font-size: 18px; }
   body { font-size: 16px; }
-  .yard { grid-template-columns: 4.5rem 1fr; gap: 12px; min-height: 64px; }
-  .yard-year { font-size: 30px; }
-  .play-value { font-size: 56px; }
-  .halls { gap: 40px; }
+  .yard { grid-template-columns: 4rem 1fr; gap: 12px; min-height: 52px; }
+  .yard-year { font-size: 28px; }
+  .plays { column-gap: 24px; }
+  .play { padding: 18px 0 20px; }
+  .play.across::before { left: -14px; top: 18px; bottom: 18px; }
+  .play h3 { font-size: 16px; line-height: 1.2; }
+  .play.shame h3 { padding-right: 44px; }
+  .play .flag { width: 44px; height: 36px; top: 4px; }
+  .play-value { font-size: 40px; }
+  .play-unit { font-size: 14px; line-height: 1.2; }
+  .play-holder { font-size: 14px; }
+  .play-holder strong { font-size: 17px; }
+  .play-next summary { font-size: 15px; padding: 2px 8px; }
+  .play-next ol { font-size: 14px; }
+  .play.headline h3 { font-size: 19px; padding-right: 72px; }
+  .play.headline .play-value { font-size: 88px; }
+  .play.headline .play-unit { font-size: 17px; }
+  .play.headline .play-holder strong { font-size: 24px; }
+  .play.headline .flag { width: 72px; height: 60px; }
   .block { margin-top: 56px; }
   .league-title { font-size: 28px; }
 }

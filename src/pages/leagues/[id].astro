@@ -17,23 +17,16 @@ try {
   failure = 'Sleeper didn’t return this league’s history. Check the league link, or pick the league again from your username.';
 }
 
-interface Feature { key: string; name: string; unit: string; verb?: string }
-const halls: { name: string; features: Feature[] }[] = [
-  { name: 'Hall of fame', features: [
-    { key: 'highest-score', name: 'Highest score', unit: 'points' },
-    { key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin' },
-    { key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row' },
-    { key: 'closest-game', name: 'Closest game', unit: 'point margin' },
-    { key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', verb: 'picked up' },
-  ] },
-  { name: 'Hall of shame', features: [
-    { key: 'lowest-score', name: 'Lowest score', unit: 'points' },
-    { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row' },
-    { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average' },
-    { key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned' },
-    { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', verb: 'benched' },
-    { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', verb: 'dropped' },
-  ] },
+interface Feature { key: string; name: string; unit: string; shame?: boolean; verb?: string }
+// The headline: the best team that went home empty is the record every league argues about.
+const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average', shame: true };
+// Opposites face each other across the field: fame in white paint, shame under a flag.
+const pairFeatures: Feature[][] = [
+  [{ key: 'highest-score', name: 'Highest score', unit: 'points' }, { key: 'lowest-score', name: 'Lowest score', unit: 'points', shame: true }],
+  [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row' }, { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', shame: true }],
+  [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin' }, { key: 'closest-game', name: 'Closest game', unit: 'point margin' }],
+  [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', verb: 'dropped', shame: true }],
+  [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', verb: 'benched', shame: true }],
 ];
 
 const storePath = leagueStorePath(id);
@@ -45,13 +38,15 @@ const history = failure ? null : await withHistorySnapshot(async () => {
     year: season.year, complete: season.complete,
     champion: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
   }));
-  const recordHalls = await Promise.all(halls.map(async hall => ({
-    name: hall.name,
-    records: (await Promise.all(hall.features.map(async feature => ({ feature, view: await readCategory(feature.key, { storePath }) }))))
-      .filter(({ view }) => view && !view.blocked && view.rows.length)
-      .map(({ feature, view }) => ({ feature, percent: view!.category.unit === '%', precision: view!.category.displayPrecision ?? 2,
-        rows: view!.rows.filter(row => row.rank <= 3).slice(0, 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) })),
-  })));
+  const load = async (feature: Feature) => {
+    const view = await readCategory(feature.key, { storePath });
+    if (!view || view.blocked || !view.rows.length) return null;
+    return { feature, percent: view.category.unit === '%', precision: view.category.displayPrecision ?? 2,
+      rows: view.rows.filter(row => row.rank <= 3).slice(0, 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
+  };
+  const headline = await load(headlineFeature);
+  const pairs = (await Promise.all(pairFeatures.map(pair => Promise.all(pair.map(load)))))
+    .map(pair => pair.filter(record => record !== null)).filter(pair => pair.length);
   const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
   const current = managers.filter(manager => manager.current);
@@ -63,7 +58,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
       record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, recordHalls, careers, streaks: streaks.slice(0, 5) };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, pairs, careers, streaks: streaks.slice(0, 5) };
 }, storePath);
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
@@ -87,8 +82,8 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
 
   {history && (
     <>
-      <section class="block" data-yard="10">
-        <h2 class="painted">Champions</h2>
+      <section class="block">
+        <h2 class="painted" data-yard="10">Champions</h2>
         <ol class="drive">
           {history.plates.map((plate, index) => (
             <li class="yard" style={`--i: ${index}`}>
@@ -101,44 +96,40 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
         </ol>
       </section>
 
-      <div class="halls block">
-        {history.recordHalls.map((hall, hallIndex) => (
-          <section class:list={['hall', hallIndex ? 'shame' : 'fame']}>
-            <h2 class="painted">{hall.name}</h2>
-            <ul class="plays">
-              {hall.records.map((record, index) => {
-                const leaders = record.rows.filter(row => row.rank === 1);
-                const others = record.rows.filter(row => row.rank !== 1);
-                return (
-                  <li class="play" style={`--i: ${index}`}>
-                    {hallIndex > 0 && (
-                      <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
-                        <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
-                        <path class="flag-fold" d="M30 7c-2 9-1 19 1 29" />
-                        <circle class="flag-knot" cx="11" cy="11" r="7" />
-                      </svg>
-                    )}
-                    <h3>{record.feature.name}</h3>
-                    <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
-                    {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
-                    {others.length > 0 && (
-                      <details class="play-next">
-                        <summary>{[...new Set(others.map(row => row.rank))].map(rank => ['', '1st', '2nd', '3rd'][rank]).join(' & ')}</summary>
-                        <ol>
-                          {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
-                        </ol>
-                      </details>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
-      </div>
+      <section class="block">
+        <h2 class="painted" data-yard="20">Hall of fame <span class="shame-word">&amp; shame</span></h2>
+        <ul class="plays">
+          {[...(history.headline ? [[history.headline]] : []), ...history.pairs].flatMap((pair, pairIndex) => pair.map((record, side) => {
+            const leaders = record.rows.filter(row => row.rank === 1);
+            const others = record.rows.filter(row => row.rank !== 1);
+            return (
+              <li class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}`}>
+                {record.feature.shame && (
+                  <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
+                    <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
+                    <path class="flag-fold" d="M30 7c-2 9-1 19 1 29" />
+                    <circle class="flag-knot" cx="11" cy="11" r="7" />
+                  </svg>
+                )}
+                <h3>{record.feature.name}</h3>
+                <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
+                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
+                {others.length > 0 && (
+                  <details class="play-next">
+                    <summary>{[...new Set(others.map(row => row.rank))].map(rank => ['', '1st', '2nd', '3rd'][rank]).join(' & ')}</summary>
+                    <ol>
+                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
+                    </ol>
+                  </details>
+                )}
+              </li>
+            );
+          }))}
+        </ul>
+      </section>
 
-      <section class="block" data-yard="20">
-        <h2 class="painted">Careers</h2>
+      <section class="block">
+        <h2 class="painted" data-yard="30">Careers</h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Points</th><th scope="col">Playoffs</th><th scope="col">Titles</th></tr></thead>
@@ -160,8 +151,8 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
       </section>
 
       {history.streaks.length > 0 && (
-        <section class="block" data-yard="30">
-          <h2 class="painted">Head-to-head streaks</h2>
+        <section class="block">
+          <h2 class="painted" data-yard="40">Head-to-head streaks</h2>
           <ul class="streaks">
             {history.streaks.map(streak => (
               <li>
