@@ -122,9 +122,12 @@ const when = (feature: Feature, row: Row) => (feature.verb ? row.leaderContext?.
                     <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                     {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                     {others.length > 0 && (
-                      <ol class="play-next">
-                        {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
-                      </ol>
+                      <details class="play-next">
+                        <summary>{[...new Set(others.map(row => row.rank))].map(rank => ['', '1st', '2nd', '3rd'][rank]).join(' & ')}</summary>
+                        <ol>
+                          {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
+                        </ol>
+                      </details>
                     )}
                   </li>
                 );
