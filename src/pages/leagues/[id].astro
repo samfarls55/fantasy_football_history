@@ -6,7 +6,7 @@ import { withHistorySnapshot } from '../../history/store.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
 import { readCategory } from '../../history/records.ts';
-import { readRivalry } from '../../history/rivalries.ts';
+import { readManagerRivalries, readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
 const username = Astro.url.searchParams.get('u')?.trim() ?? '';
@@ -70,14 +70,21 @@ const history = failure ? null : await withHistorySnapshot(async () => {
       record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
+  // ?manager=<username> highlights one manager everywhere they appear, readable in a group chat; an unknown name highlights no one.
+  const marked = managers.find(manager => manager.name === markParam) ?? null;
+  // A highlighted manager's rivalries become their record against everyone they've played, counted like the streaks.
+  // Most-played leads, since that's where a record settles anything; among equals the most lopsided goes first. Former managers trail.
+  const currentIds = new Set(current.map(manager => manager.id));
+  const versus = marked ? (await readManagerRivalries(marked.id, { storePath, scope: 'combined' }))!.rows
+    .map(row => ({ name: row.b.name, current: currentIds.has(row.b.id), record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
+      streak: row.streak && `${row.streak.result}${row.streak.count}` }))
+    .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name)) : [];
   // The field ends in the other end zone, painted with the last season that finished.
   const lastDone = seasons.find(season => season.complete);
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  // ?manager=<username> highlights one manager everywhere they appear, readable in a group chat; an unknown name highlights no one.
-  const marked = managers.find(manager => manager.name === markParam) ?? null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), reigning, marked };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), versus, reigning, marked };
 }, storePath);
 // A manager's name links to the page with them highlighted, or back to no one when they already are. ?u= rides along.
 const markHref = (name: string | null) => {
@@ -130,7 +137,7 @@ const landing = (key: string) => {
         <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
         {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Fame &amp; shame</a>}
         <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
-        {history.streaks.length > 0 && <a href="#rivalries"><span aria-hidden="true">40</span>Rivalries</a>}
+        {(history.streaks.length > 0 || history.versus.length > 0) && <a href="#rivalries"><span aria-hidden="true">40</span>Rivalries</a>}
       </nav>
 
       <section class="block" id="champions">
@@ -212,9 +219,26 @@ const landing = (key: string) => {
         </div>
       </section>
 
-      {history.streaks.length > 0 && (
+      {(history.streaks.length > 0 || history.versus.length > 0) && (
         <section class="block" id="rivalries">
-          <h2 class="painted" data-yard="40">Rivalries</h2>
+          <h2 class="painted" data-yard="40" tabindex="-1">Rivalries</h2>
+          {history.versus.length > 0 ? (
+            <div class="table-wrap">
+              <table class="versus">
+                <caption><a {...person(history.marked!.name)}>{history.marked!.name}</a> head to head</caption>
+                <thead><tr><th scope="col">Opponent</th><th scope="col">Record</th><th scope="col">Streak</th></tr></thead>
+                <tbody>
+                  {history.versus.map(row => (
+                    <tr class:list={{ former: !row.current }}>
+                      <th scope="row"><a {...person(row.name)}>{row.name}</a></th>
+                      <td class:list={['versus-record', { up: row.edge > 0, down: row.edge < 0 }]}>{row.record}</td>
+                      <td class="versus-streak">{row.streak ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : <>
           {history.streaks.slice(0, 1).map(streak => (
             <div class="streak-top">
               <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
@@ -232,6 +256,7 @@ const landing = (key: string) => {
               ))}
             </ul>
           )}
+          </>}
         </section>
       )}
       <p class="copied" role="status"></p>
@@ -298,15 +323,27 @@ const landing = (key: string) => {
     document.querySelector<HTMLElement>('.marking')!.hidden = !next;
     if (!link.closest('.marking')) scrollBy({ top: link.getBoundingClientRect().top - top, behavior: 'instant' });
     say(next ? `${next} highlighted` : 'Highlight cleared');
+    // Rivalries change shape with the highlight, so the server renders it for the new URL and it swaps in; a later tap wins.
+    const wanted = url.pathname + url.search;
+    fetch(wanted).then(response => response.text()).then(html => {
+      const old = document.getElementById('rivalries');
+      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries');
+      if (location.pathname + location.search !== wanted || !old || !fresh) return;
+      const focused = old.contains(document.activeElement);
+      old.replaceWith(fresh);
+      watch.observe(fresh);
+      if (focused) fresh.querySelector('h2')!.focus({ preventScroll: true });
+    });
   });
 
   // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
   const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump a')];
-  const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
   const mark = () => {
+    // Looked up each time: Rivalries is replaced when the highlight changes.
+    const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
     const current = sections.findLast(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
     links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
   };
   const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
-  sections.forEach(section => watch.observe(section));
+  links.forEach(link => watch.observe(document.getElementById(link.hash.slice(1))!));
 </script>

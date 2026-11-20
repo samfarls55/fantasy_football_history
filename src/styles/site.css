@@ -156,7 +156,7 @@ h2[data-yard]::after {
   transition: background-size 420ms cubic-bezier(.2, .7, .2, 1), color 200ms ease-out, text-decoration-color 160ms ease-out;
 }
 .me { background-size: 100% 100%; color: var(--ink-on-paint); text-shadow: none; }
-:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, #careers th) > [data-person]:first-child { margin-left: -0.12em; }
+:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, .versus caption, table th) > [data-person]:first-child { margin-left: -0.12em; }
 /* Every name sets the highlight, so every name carries the same faint chalk line, scaled to its size;
    it firms up under a pointer or focus, and the paint replaces it once the name is highlighted. */
 a[data-person] {
@@ -320,6 +320,17 @@ tr.former th { font-weight: 600; }
 .streak-count { font-family: var(--stencil); font-weight: 900; font-size: 64px; line-height: 0.9; }
 .streaks p { font-size: 22px; line-height: 44px; }
 .streaks p span { display: block; font-size: 17px; line-height: 1.3; color: var(--chalk); }
+/* Highlighted, Rivalries is that manager's record against each opponent: a winning record in paint, a losing one under the flag's yellow. */
+.versus { max-width: 46rem; }
+.versus caption { padding: 8px 0 24px; text-align: left; white-space: normal; font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: max(44px, 1.15em); }
+.versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
+.versus-record.up { color: var(--paint); }
+.versus-record.down { color: var(--flag); }
+.versus-streak { font-weight: 800; }
+/* Former managers trail under a dashed line, their records in quiet chalk. */
+.versus tr:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
+.versus .former .versus-record { color: var(--chalk-quiet); }
+.versus .former .versus-streak { font-weight: 600; }
 
 /* Home: the whole screen is the end zone. */
 .lookup { padding-top: 13vh; max-width: 720px; }
@@ -358,7 +369,7 @@ tr.former th { font-weight: 600; }
 }
 /* Below this the full table would push Titles out of view, so the secondary columns go. */
 @media (max-width: 720px) {
-  th:nth-child(2), td:nth-child(2), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6) { display: none; }
+  #careers :is(th:nth-child(2), td:nth-child(2), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6)) { display: none; }
   /* The hidden Seasons column moves under the name, so former managers read by their last year. */
   .career-range { display: block; margin-top: 2px; font-size: 14px; font-weight: 600; color: var(--chalk); }
 }
