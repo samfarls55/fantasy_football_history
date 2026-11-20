@@ -22,7 +22,9 @@ export function latestPeriod(rows: HistoricalPeriod[]): HistoricalPeriod | null 
 export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
-  detail?: string; matchupLabel?: string; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
+  detail?: string; matchupLabel?: string;
+  /** Season records: the regular-season record and points per game behind the figure. */
+  record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {

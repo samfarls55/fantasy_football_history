@@ -135,15 +135,16 @@ h2[data-yard]::after {
   text-decoration: none; color: var(--chalk);
   transition: color 160ms ease-out;
 }
-.jump-links span { font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: var(--paint); }
+.jump-links .yard-no { font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: var(--paint); }
 /* The current section is painted and thickens the goal line above it, so it reads without color. */
 .jump-links a:hover, .jump-links a[aria-current] { color: var(--paint); }
 .jump-links a[aria-current]::before { content: ''; position: absolute; left: 0; right: 16px; top: -4px; height: 9px; background: var(--paint); }
 .jump a:focus-visible, .jump button:focus-visible { outline-offset: -5px; }
-/* A section holding the highlighted manager carries a dab of the highlight's paint after its label. */
-.jump-links a.holds::after {
-  content: ''; flex: none; align-self: center; width: 9px; height: 9px; margin-left: -4px; border-radius: 2px;
-  background: var(--paint); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+/* A section holding the highlighted manager carries a chip of the highlight's paint after its label, counting their appearances in it. */
+.hits {
+  flex: none; align-self: center; min-width: 1.5em; margin-left: -4px; padding: 3px 4px 2px; border-radius: 2px;
+  font-family: var(--text); font-weight: 800; font-size: 15px; line-height: 1; letter-spacing: 0; text-align: center;
+  color: var(--ink-on-paint); background: var(--paint); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 /* While a highlight is on, a row above the sections names it, steps to its next sighting and clears it, in reach of a thumb. */
 .jump-mark {
@@ -280,6 +281,8 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play.headline .play-value, .streak-big { font-size: clamp(96px, 15vw, 176px); line-height: 0.85; }
 .play.headline .play-unit { font-size: 20px; max-width: 18ch; line-height: 1.2; }
 .play.headline .play-holder strong { font-size: 32px; }
+/* The holder's record and scoring are what the league remembers, so they read at the unit's size. */
+.play.headline .play-holder > span { margin-top: 4px; font-size: 20px; color: var(--paint); }
 .play.headline .flag { width: 132px; height: 108px; top: 16px; }
 /* On wide screens the holder stands beside the figure and the flag lands past the holder, so number, name and flag read as one play. */
 @media (min-width: 900px) {
@@ -326,7 +329,8 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .next-rank { font-weight: 800; color: var(--paint); }
 .next-value { font-weight: 800; white-space: nowrap; text-align: right; color: var(--paint); }
 .next-who:has(a + a) { line-height: 44px; }
-.next-when { grid-column: 3; font-size: 15px; line-height: 1.3; white-space: nowrap; color: var(--chalk); }
+/* Dates hold together with no-break spaces, so a season's longer line can still wrap. */
+.next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .next-who:has(a + a) + .next-when { margin-top: -8px; }
 .flag {
   position: absolute; right: 0; top: 8px; width: 78px; height: 64px; overflow: visible;
@@ -381,9 +385,13 @@ tr.former th { font-weight: 600; }
 .streak-record { margin-top: 8px; font-size: 20px; color: var(--chalk); }
 .streaks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
 .streaks li { display: grid; grid-template-columns: 4.5rem 1fr; gap: 16px; align-items: center; padding: 18px 0; border-top: 3px dashed var(--chalk-faint); }
-.streak-count { font-family: var(--stencil); font-weight: 900; font-size: 64px; line-height: 0.9; }
-.streaks p { font-size: 22px; line-height: 44px; }
+.streak-count { display: flex; flex-direction: column; font-family: var(--stencil); font-weight: 900; font-size: 64px; line-height: 0.9; }
+.streak-count span { margin-top: 4px; font-size: 15px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
+.streaks p { font-size: 22px; line-height: 1.3; }
 .streaks p span { display: block; font-size: 17px; line-height: 1.3; color: var(--chalk); }
+/* Each name's 44px target grows away from the other one, so when "has beaten" wraps the two never overlap. */
+.streaks a[data-person]:first-of-type::before { inset: calc(100% - 44px) 0 0; }
+.streaks a[data-person]:last-of-type::before { inset: 0 0 calc(100% - 44px); }
 /* Highlighted, Rivalries is that manager's record against each opponent: a winning record in paint, a losing one is shame, so it takes the flag's yellow (28px stencil, large text: 4:1). */
 .versus { max-width: 46rem; }
 .versus caption { padding: 8px 0 24px; text-align: left; white-space: normal; font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: max(44px, 1.15em); }
@@ -442,11 +450,11 @@ tr.former th { font-weight: 600; }
   .jump { padding: 0 4px env(safe-area-inset-bottom); }
   .jump-mark { padding-left: 8px; gap: 4px 8px; }
   .copied { height: calc(56px + env(safe-area-inset-bottom)); padding-inline: 12px; font-size: 18px; }
-  .jump-links a { position: relative; justify-content: center; align-items: center; min-height: 56px; padding: 4px 2px; font-size: 18px; text-align: center; }
-  .jump-links span { display: none; }
+  .jump-links a { position: relative; flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 56px; padding: 6px 2px 4px; font-size: 18px; text-align: center; }
+  .jump-links .yard-no { display: none; }
   .jump-links a[aria-current]::before { left: 10px; right: 10px; }
-  /* No room beside a phone's labels, so the dab sits above, centered like a hash mark. */
-  .jump-links a.holds::after { position: absolute; top: 9px; left: 50%; width: 16px; height: 5px; margin-left: -8px; }
+  /* No room beside a phone's labels, so the chip sits above, centered like a hash mark. */
+  .hits { order: -1; align-self: center; margin: 0; font-size: 13px; padding: 2px 4px 1px; }
 }
 @media (max-width: 560px) {
   tbody th { font-size: 18px; }
@@ -466,12 +474,14 @@ tr.former th { font-weight: 600; }
   .play.headline .play-value, .streak-big { font-size: 88px; }
   .play.headline .play-unit { font-size: 17px; }
   .play.headline .play-holder strong { font-size: 24px; }
+  .play.headline .play-holder > span { font-size: 17px; }
   .play.headline .flag { width: 72px; height: 60px; }
   .block { margin-top: 56px; }
   .league-title { font-size: 28px; }
   .streaks { grid-template-columns: 1fr; }
   .streaks li { grid-template-columns: 3.5rem 1fr; gap: 12px; padding: 14px 0; }
   .streak-count { font-size: 52px; }
+  .streak-count span { font-size: 13px; }
   .streaks p { font-size: 19px; }
   .streaks p span { font-size: 15px; }
   .streak-record { font-size: 17px; }

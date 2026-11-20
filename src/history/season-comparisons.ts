@@ -26,7 +26,10 @@ export function seasonComparisons(archive: Archive, season: Season) {
     const games = archive.contests.filter(game => game.seasonId === season.id && game.competition === 'regular' && game.complete && game.sides.some(side => side.rosterId === team.rosterId) && game.weeks.every(week => played.some(row => row.week === week)));
     const actualWins = Exact.from(games.filter(game => game.winnerId === team.personId).length).add(Exact.from(games.filter(game => game.tie).length).divide(2));
     const winsVsExpected = expectedWins ? actualWins.subtract(expectedWins) : null;
-    return { teamId: team.id, dominance, expectedWins, actualWins, winsVsExpected, fullSeasonCoverage, playedWeeks: played.length, lastWeek: played.at(-1)?.week ?? null };
+    const ties = games.filter(game => game.tie).length;
+    const record = [games.filter(game => game.winnerId === team.personId).length, games.filter(game => game.winnerId && game.winnerId !== team.personId).length, ...ties ? [ties] : []].join('–');
+    const pointsPerGame = played.length ? points.divide(played.length).toNumber() : null;
+    return { teamId: team.id, dominance, record, pointsPerGame, expectedWins, actualWins, winsVsExpected, fullSeasonCoverage, playedWeeks: played.length, lastWeek: played.at(-1)?.week ?? null };
   });
 }
 
@@ -41,7 +44,7 @@ export function seasonCandidates(key: 'dominant-season' | 'unluckiest-season' | 
       const sample = `${comparison.playedWeeks} regular-season ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`;
       return [{ id: team.id, personId: person.id, name: person.name, avatar: team.avatar, metric,
         detail: team.name === person.name ? undefined : team.name,
-        sample, leaderContext: `${season.year} season`,
+        sample, leaderContext: `${season.year} season`, record: comparison.record, pointsPerGame: comparison.pointsPerGame ?? undefined,
         period: { year: season.year, week: Math.max(...season.completedWeeks), playedAt: null },
         href: `/managers/${person.id}/seasons/${season.year}/?scope=regular`, historyLabel: 'Open season' }];
     }));
