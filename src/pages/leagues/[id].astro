@@ -1,0 +1,136 @@
+---
+import Base from '../../layouts/Base.astro';
+import { ensureLeague, leagueStorePath } from '../../leagues.ts';
+import { withHistorySnapshot } from '../../history/store.ts';
+import { readSeasons } from '../../history/read.ts';
+import { readManagers } from '../../history/managers.ts';
+import { readCategory, formatRecordValue, recordUnit } from '../../history/records.ts';
+import { readRivalry } from '../../history/rivalries.ts';
+
+const { id = '' } = Astro.params;
+if (!/^\d+$/.test(id)) return new Response(null, { status: 404 });
+let failure: string | null = null;
+try {
+  await ensureLeague(id);
+} catch (error) {
+  console.error(`League ${id} import failed`, error);
+  failure = 'This league’s history couldn’t be imported from Sleeper.';
+}
+
+const featured = ['best-without-title', 'unluckiest-season', 'winning-streak', 'losing-streak', 'highest-score', 'lowest-score', 'closest-game', 'biggest-blowout', 'benched-player', 'productive-drop'];
+const storePath = leagueStorePath(id);
+const history = failure ? null : await withHistorySnapshot(async () => {
+  const seasons = (await readSeasons(storePath))!;
+  const managers = (await readManagers({ storePath }))!;
+  const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));
+  const champions = seasons.map(season => ({
+    year: season.year, complete: season.complete,
+    champion: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name).join(', '),
+    runnerUp: season.teams.filter(team => team.finish === 2).map(team => nameOf.get(team.personId) ?? team.name).join(', '),
+  }));
+  const records = (await Promise.all(featured.map(key => readCategory(key, { storePath }))))
+    .filter(view => view && !view.blocked && view.rows.length)
+    .map(view => ({ ...view!, rows: view!.rows.filter(row => row.rank <= 3).slice(0, 3) }));
+  const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
+  const streaks = [];
+  for (const [index, a] of managers.entries()) for (const b of managers.slice(index + 1)) {
+    const rivalry = await readRivalry(a.id, b.id, { storePath });
+    if (!rivalry?.streak || rivalry.streak.result !== 'W' && rivalry.streak.result !== 'L' || rivalry.streak.count < 3) continue;
+    const winnerIsA = rivalry.streak.person.id === a.id;
+    streaks.push({ winner: rivalry.streak.person.name, loser: winnerIsA ? b.name : a.name, count: rivalry.streak.count,
+      record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
+  }
+  streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
+  return { name: seasons[0].name, range: `${seasons.at(-1)!.year}–${seasons[0].year}`, champions, records, careers, streaks: streaks.slice(0, 5) };
+}, storePath);
+
+type RecordView = NonNullable<typeof history>['records'][number];
+function value(view: RecordView, row: { value: number }) {
+  return view.category.unit === '%' ? `${row.value > 0 ? '+' : ''}${formatRecordValue(row.value, 1)}%` : formatRecordValue(row.value, view.category.displayPrecision ?? 2);
+}
+function unit(view: RecordView, row: { value: number }) {
+  return view.category.unit === '%' ? 'scoring vs league' : recordUnit(view.category.unit, row.value);
+}
+---
+<Base title={history ? `${history.name} history` : 'League history'}>
+  {failure && <p class="notice">{failure}</p>}
+  {history && (
+    <>
+      <div class="league-head">
+        <h1>{history.name}</h1>
+        <span class="muted">{history.range}</span>
+      </div>
+
+      <section>
+        <h2>Champions</h2>
+        <ol class="champions">
+          {history.champions.map(season => (
+            <li>
+              <span class="year">{season.year}</span>
+              {season.complete
+                ? <><strong>{season.champion || "—"}</strong>{season.runnerUp && <span class="muted">over {season.runnerUp}</span>}</>
+                : <span class="muted">In progress</span>}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section>
+        <h2>Records</h2>
+        <div class="records">
+          {history.records.map(view => {
+            const leaders = view.rows.filter(row => row.rank === 1);
+            const others = view.rows.filter(row => row.rank !== 1);
+            return (
+              <article class="record">
+                <h3>{view.category.name}</h3>
+                <p class="record-value">{value(view, leaders[0])} <span class="unit">{unit(view, leaders[0])}</span></p>
+                {leaders.map(row => (
+                  <p class="record-who"><strong>{row.matchupLabel ?? row.name}</strong><span class="muted">{row.leaderContext}</span></p>
+                ))}
+                {others.length > 0 && (
+                  <ol class="runners">
+                    {others.map(row => <li><span>{row.rank}. {row.matchupLabel ?? row.name}</span><span class="muted">{value(view, row)}</span></li>)}
+                  </ol>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <h2>Careers</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Manager</th><th>Seasons</th><th>Record</th><th>Win %</th><th>Points</th><th>Titles</th><th>Playoffs</th></tr></thead>
+            <tbody>
+              {history.careers.map(manager => (
+                <tr class={manager.current ? '' : 'former'}>
+                  <td>{manager.name}</td>
+                  <td>{manager.range}</td>
+                  <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
+                  <td>{manager.facts.winPercentage === null ? '—' : formatRecordValue(manager.facts.winPercentage, 1)}</td>
+                  <td>{formatRecordValue(manager.facts.points, 0)}</td>
+                  <td>{manager.facts.championships}</td>
+                  <td>{manager.facts.playoffAppearances}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {history.streaks.length > 0 && (
+        <section>
+          <h2>Head-to-head streaks</h2>
+          <ul class="streaks">
+            {history.streaks.map(streak => (
+              <li><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong> {streak.count} straight<span class="muted">{streak.record} overall</span></li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
+  )}
+</Base>

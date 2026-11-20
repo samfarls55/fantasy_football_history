@@ -1,6 +1,6 @@
 # ADR 0001: Node SSR with an atomic local archive
 
-Status: accepted for V1, November 3, 2026. Implements delivery choices in [issue #3](https://github.com/samfarls55/fantasy_football_history/issues/3).
+Status: superseded by [ADR 0002](0002-on-demand-league-imports.md), November 19, 2026. Originally accepted for V1, November 3, 2026. Implements delivery choices in [issue #3](https://github.com/samfarls55/fantasy_football_history/issues/3).
 
 The public museum needs durable history through provider outages and process restarts. Refreshes must publish a coherent complete candidate, and new history must be readable without a new frontend build. V1 serves one configured league per deployment.
 

@@ -1,8 +1,6 @@
-# Farls da bag
+# Fantasy football history
 
-League history for the Farls da bag Sleeper league: careers that follow people through account changes, franchise histories, all-time records, rivalries and player contributions.
-
-This repo currently holds the history engine only. It imports every linked Sleeper season into one durable JSON archive and calculates records from it. The first museum UI and its planning documents were removed and are kept in tag `v0-archive`.
+Enter a Sleeper username, pick a league and see its whole history: champions, records, careers and head-to-head streaks. See [PRODUCT.md](PRODUCT.md).
 
 ## Run
 
@@ -10,18 +8,19 @@ Use Node.js 24.
 
 ```sh
 npm ci
-cp .env.example .env
-npm run refresh
-npm test
+npm run dev
 ```
 
-`npm run refresh` writes the archive to `MUSEUM_STORE_PATH`. `npm test` runs the engine tests against controlled provider fixtures, with no network.
+Open the printed local URL and enter a Sleeper username. A league imports on its first visit, in about 3 seconds, into `data/leagues/<league id>.json`.
+
+`npm test` runs the engine tests against controlled Sleeper fixtures, with no network. `npm run refresh` imports the league in `SLEEPER_LEAGUE_ID` into `MUSEUM_STORE_PATH` from the command line.
 
 ## Docs
 
+- [PRODUCT.md](PRODUCT.md): what this is and what's in scope.
 - [GLOSSARY.md](GLOSSARY.md): domain vocabulary.
 - [docs/metrics.md](docs/metrics.md): record eligibility, ranking and attribution rules.
-- [docs/coverage.md](docs/coverage.md) and [docs/sleeper-formats.md](docs/sleeper-formats.md): what the Sleeper source provides.
-- [docs/operations.md](docs/operations.md) and [ADR 0001](docs/adr/0001-local-node-delivery.md): refresh, publication and the current hosting plan.
+- [docs/coverage.md](docs/coverage.md) and [docs/sleeper-formats.md](docs/sleeper-formats.md): what Sleeper provides.
+- [ADR 0002](docs/adr/0002-on-demand-league-imports.md): on-demand imports and the per-league archive.
 
 Project-authored code and documentation use the [MIT license](LICENSE). Artwork, source data and dependencies keep the rights described in [third-party notices](THIRD_PARTY_NOTICES.md).

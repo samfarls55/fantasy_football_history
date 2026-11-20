@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { findLeagues } from '../leagues.ts';
+
+const username = Astro.url.searchParams.get('u')?.trim() ?? '';
+const leagues = username ? await findLeagues(username) : undefined;
+if (leagues?.length === 1) return Astro.redirect(`/leagues/${leagues[0].id}`);
+---
+<Base title="League history">
+  <form class="lookup" method="get" action="/">
+    <h1>Find your league</h1>
+    <div class="lookup-row">
+      <input name="u" value={username} placeholder="Sleeper username" aria-label="Sleeper username" autocomplete="username" required autofocus />
+      <button>Find leagues</button>
+    </div>
+  </form>
+  {leagues === null && <p class="notice">No Sleeper user named {username}.</p>}
+  {leagues?.length === 0 && <p class="notice">{username} has no leagues this season or last.</p>}
+  {leagues && leagues.length > 1 && (
+    <ul class="leagues">
+      {leagues.map(league => (
+        <li>
+          <a href={`/leagues/${league.id}`}>
+            {league.avatar ? <img src={league.avatar} alt="" width="44" height="44" /> : <span class="avatar-blank" />}
+            <span class="league-name">{league.name}</span>
+            <span class="muted">{league.season} · {league.teams} teams</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</Base>

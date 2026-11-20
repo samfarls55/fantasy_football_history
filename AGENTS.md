@@ -17,11 +17,12 @@ Before domain exploration or changes, read docs/agents/domain.md.
 
 ## Status
 
-The repo holds only the history engine: Sleeper import, identity and ownership resolution, record calculations and the durable archive. The previous museum UI and its planning documents were removed; tag `v0-archive` keeps them. Build new pages from real archive data.
+Enter a Sleeper username, pick a league, see its history. Read PRODUCT.md first, then ADR 0002 for how imports work. `src/history/` is the engine; `src/pages/` is the site. Tag `v0-archive` keeps the first single-league museum UI and its planning documents.
 
 ## Commands
 
-- `npm run refresh` imports the configured league into `MUSEUM_STORE_PATH`.
+- `npm run dev` serves the site locally; league pages import on first visit.
+- `npm run refresh` imports `SLEEPER_LEAGUE_ID` into `MUSEUM_STORE_PATH` from the command line.
 - `npm test` runs the engine tests against controlled provider fixtures, with no network.
 
 ## Development scratch

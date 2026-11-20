@@ -1,0 +1,90 @@
+:root {
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --ink: #16181d;
+  --muted: #646a73;
+  --line: #e2e0d9;
+  --accent: #1f6b45;
+  --accent-ink: #ffffff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121417;
+    --surface: #1b1e23;
+    --ink: #eceef1;
+    --muted: #9aa1ab;
+    --line: #2b2f36;
+    --accent: #4cc38a;
+    --accent-ink: #0d1a13;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+a { color: inherit; }
+main { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
+h1, h2, h3 { line-height: 1.15; margin: 0; }
+h2 { font-size: 1.25rem; margin-bottom: 12px; }
+section { margin-top: 40px; }
+.muted { color: var(--muted); }
+
+.site { max-width: 1040px; margin: 0 auto; padding: 16px; }
+.site a { font-weight: 700; text-decoration: none; letter-spacing: -0.01em; }
+
+.lookup { margin-top: 12vh; max-width: 520px; }
+.lookup h1 { font-size: clamp(1.75rem, 5vw, 2.5rem); margin-bottom: 16px; }
+.lookup-row { display: flex; gap: 8px; }
+input, button { font: inherit; border-radius: 8px; padding: 10px 14px; }
+input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+button { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+.notice { margin-top: 16px; }
+
+.leagues { list-style: none; padding: 0; margin: 24px 0 0; max-width: 520px; display: grid; gap: 8px; }
+.leagues a {
+  display: grid; grid-template-columns: 44px 1fr; column-gap: 12px; align-items: center;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; text-decoration: none;
+}
+.leagues a:hover { border-color: var(--accent); }
+.leagues img, .avatar-blank { grid-row: span 2; width: 44px; height: 44px; border-radius: 8px; background: var(--line); }
+.league-name { font-weight: 600; }
+
+.league-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.league-head h1 { font-size: clamp(1.75rem, 5vw, 2.75rem); letter-spacing: -0.02em; }
+
+.champions { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr)); gap: 8px; }
+.champions li { display: flex; flex-direction: column; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.champions .year { font-size: 0.85rem; color: var(--muted); }
+.champions strong { font-size: 1.1rem; }
+
+.records { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+.record { padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.record h3 { font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+.record-value { font-size: 1.9rem; font-weight: 750; letter-spacing: -0.02em; margin: 6px 0 4px; color: var(--accent); }
+.record-who { display: flex; flex-direction: column; margin: 0 0 6px; }
+.record-who .muted { font-size: 0.9rem; }
+.runners { list-style: none; padding: 10px 0 0; margin: 10px 0 0; border-top: 1px solid var(--line); font-size: 0.9rem; display: grid; gap: 2px; }
+.runners li { display: flex; justify-content: space-between; gap: 12px; }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+th, td { padding: 10px 14px; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 0.8rem; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); }
+tbody tr + tr td { border-top: 1px solid var(--line); }
+td:first-child { font-weight: 600; }
+tr.former td { color: var(--muted); }
+
+.streaks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.streaks li { padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.streaks .muted { margin-left: 8px; }
+.record-value .unit { font-size: 0.9rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+.runners li span:last-child { flex-shrink: 0; }
