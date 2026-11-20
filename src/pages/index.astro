@@ -7,11 +7,11 @@ const leagues = username ? await findLeagues(username) : undefined;
 if (leagues?.length === 1) return Astro.redirect(`/leagues/${leagues[0].id}`);
 ---
 <Base title="League history" full>
-  <Fragment slot="band">
+  <Fragment slot="endzone">
     <form class="lookup" method="get" action="/">
-      <h1>Find your league</h1>
+      <h1 class="painted">Find your league</h1>
       <div class="lookup-row">
-        <input class="plate-input" name="u" value={username} placeholder="Sleeper username" aria-label="Sleeper username" autocomplete="username" required autofocus />
+        <input name="u" value={username} placeholder="Sleeper username" aria-label="Sleeper username" autocomplete="username" required autofocus />
         <button>Find leagues</button>
       </div>
     </form>
@@ -19,10 +19,10 @@ if (leagues?.length === 1) return Astro.redirect(`/leagues/${leagues[0].id}`);
     {leagues?.length === 0 && <p class="notice">{username} isn’t in any leagues this season or last.</p>}
     {leagues && leagues.length > 1 && (
       <ul class="leagues">
-        {leagues.map(league => (
-          <li>
+        {leagues.map((league, index) => (
+          <li style={`--i: ${index}`}>
             <a href={`/leagues/${league.id}`}>
-              {league.avatar ? <img src={league.avatar} alt="" width="48" height="48" /> : <span class="avatar-blank" />}
+              {league.avatar ? <img src={league.avatar} alt="" width="52" height="52" /> : <span class="avatar-blank" />}
               <span class="league-title">{league.name}</span>
               <span class="league-meta">{league.teams} teams</span>
             </a>

@@ -71,48 +71,57 @@ const who = (row: Row) => row.matchupLabel && row.secondary?.[0] ? `${row.name} 
 const when = (row: Row) => row.leaderContext?.replaceAll(' · ', ', ') ?? '';
 ---
 <Base title={history ? `${history.name} history` : 'League history'}>
-  <Fragment slot="band">
+  <Fragment slot="endzone">
     {failure && <p class="notice">{failure}</p>}
     {history && (
       <>
-        <h1 class="league-name">{history.name}</h1>
+        <h1 class="painted league-name">{history.name}</h1>
         <p class="league-years">{history.first}–{history.last}</p>
-        <ol class="plates" aria-label="Champions">
-          {history.plates.map(plate => (
-            <li class:list={['plate', { blank: !plate.complete }]}>
-              <span class="plate-year">{plate.year}</span>
-              <span class="plate-name">{plate.complete ? plate.champion || '—' : ''}</span>
-            </li>
-          ))}
-        </ol>
       </>
     )}
   </Fragment>
 
   {history && (
     <>
-      <div class="halls">
-        {history.recordHalls.map(hall => (
-          <section class="hall">
-            <h2>{hall.name}</h2>
-            <ul class="feats">
-              {hall.records.map(record => {
+      <section class="block" data-yard="10">
+        <h2 class="painted">Champions</h2>
+        <ol class="drive">
+          {history.plates.map((plate, index) => (
+            <li class="yard" style={`--i: ${index}`}>
+              <span class="yard-year">{plate.year}</span>
+              {plate.complete
+                ? <span class="yard-champ">{plate.champion || '—'}</span>
+                : <span class="yard-live"><span class="ball" aria-hidden="true" /><span class="sr-only">Season in progress</span></span>}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <div class="halls block">
+        {history.recordHalls.map((hall, hallIndex) => (
+          <section class:list={['hall', hallIndex ? 'shame' : 'fame']}>
+            <h2 class="painted">{hall.name}</h2>
+            <ul class="plays">
+              {hall.records.map((record, index) => {
                 const leaders = record.rows.filter(row => row.rank === 1);
                 const others = record.rows.filter(row => row.rank !== 1);
                 return (
-                  <li class="feat">
+                  <li class="play" style={`--i: ${index}`}>
+                    {hallIndex > 0 && (
+                      <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
+                        <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
+                        <path class="flag-fold" d="M30 7c-2 9-1 19 1 29" />
+                        <circle class="flag-knot" cx="11" cy="11" r="7" />
+                      </svg>
+                    )}
                     <h3>{record.feature.name}</h3>
-                    <div class="feat-body">
-                      <p class="feat-figure"><span class="feat-value">{value(record, leaders[0])}</span><span class="feat-unit">{record.feature.unit}</span></p>
-                      <div class="feat-holders">
-                        {leaders.map(row => <p class="feat-holder"><strong>{who(row)}</strong><span>{when(row)}</span></p>)}
-                        {others.length > 0 && (
-                          <ol class="feat-next">
-                            {others.map(row => <li value={row.rank}><span>{who(row)}</span><span class="num">{value(record, row)}</span></li>)}
-                          </ol>
-                        )}
-                      </div>
-                    </div>
+                    <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
+                    {leaders.map(row => <p class="play-holder"><strong>{who(row)}</strong><span>{when(row)}</span></p>)}
+                    {others.length > 0 && (
+                      <ol class="play-next">
+                        {others.map(row => <li value={row.rank}><span>{who(row)}</span><span>{value(record, row)}</span></li>)}
+                      </ol>
+                    )}
                   </li>
                 );
               })}
@@ -121,8 +130,8 @@ const when = (row: Row) => row.leaderContext?.replaceAll(' · ', ', ') ?? '';
         ))}
       </div>
 
-      <section class="block">
-        <h2>Careers</h2>
+      <section class="block" data-yard="20">
+        <h2 class="painted">Careers</h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Points</th><th scope="col">Playoffs</th><th scope="col">Titles</th></tr></thead>
@@ -135,9 +144,7 @@ const when = (row: Row) => row.leaderContext?.replaceAll(' · ', ', ') ?? '';
                   <td>{manager.facts.winPercentage === null ? '—' : formatRecordValue(manager.facts.winPercentage, 1)}</td>
                   <td>{formatRecordValue(manager.facts.points, 0)}</td>
                   <td>{manager.facts.playoffAppearances}</td>
-                  <td class="titles" aria-label={`${manager.facts.championships} titles`}>
-                    {Array.from({ length: manager.facts.championships }, () => <span class="ring" />)}
-                  </td>
+                  <td class:list={['titles', { won: manager.facts.championships > 0 }]}>{manager.facts.championships}</td>
                 </tr>
               ))}
             </tbody>
@@ -146,8 +153,8 @@ const when = (row: Row) => row.leaderContext?.replaceAll(' · ', ', ') ?? '';
       </section>
 
       {history.streaks.length > 0 && (
-        <section class="block">
-          <h2>Head-to-head streaks</h2>
+        <section class="block" data-yard="30">
+          <h2 class="painted">Head-to-head streaks</h2>
           <ul class="streaks">
             {history.streaks.map(streak => (
               <li>
