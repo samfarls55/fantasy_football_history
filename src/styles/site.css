@@ -66,7 +66,8 @@ p { text-wrap: pretty; }
 /* The far end zone closes the field: goal line on top, room underneath for the jump bar. */
 .endzone.close { border-bottom: 0; border-top: 12px solid var(--paint); box-shadow: none; }
 .close .endzone-inner { padding-top: 56px; padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
-.close-name { overflow-wrap: anywhere; }
+/* A handle has descenders the stencil never did; the extra leading keeps the highlight off the line below. */
+.close-name { overflow-wrap: anywhere; line-height: 1.15; }
 .field:not(:has(*)) { display: none; }
 .endzone-inner, .field { max-width: 1120px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
 .endzone-inner { padding-bottom: 32px; }
@@ -87,7 +88,7 @@ p { text-wrap: pretty; }
   margin-top: 28px; overflow-wrap: anywhere;
   animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
 }
-.league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--chalk); }
+.league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
 
 /* Field: sidelines with hash marks, faint painted yard numbers in the margin. */
 .field { padding-top: 8px; padding-bottom: 120px; position: relative; z-index: 2; }
@@ -140,15 +141,22 @@ h2[data-yard]::after {
 /* Kept in the accessibility tree while empty so the live region announces the copy. */
 .copied:empty { padding: 0; background: none; box-shadow: none; }
 
-/* A highlighted manager gets white paint rolled behind their name wherever it appears, read in the end zone's ink.
-   Padding and margin cancel, so the paint never moves a line. */
+/* A manager is their Sleeper handle, so it is set as typed, in the heavy sans, wherever it appears: stencil caps
+   would turn o into 0 and l into 1. Around it, headings, figures, years and labels stay in paint. */
+[data-person], .marking-name {
+  font-family: var(--text); font-weight: 800; text-transform: none; letter-spacing: 0; font-variant-numeric: proportional-nums;
+}
+/* A highlighted manager gets white paint rolled behind their name, read in the end zone's ink.
+   Every name carries the padding, highlighted or not, so the paint never moves a line; the paint clears the next word by a full space.
+   A name that starts a line pulls back so its letters stay on the column edge. */
 .me, [data-person] {
-  padding: 0 0.18em; margin: 0 -0.18em; border-radius: 2px;
+  padding: 0 0.12em; border-radius: 2px;
   background: linear-gradient(var(--paint), var(--paint)) no-repeat 0 0 / 0 100%;
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
   transition: background-size 420ms cubic-bezier(.2, .7, .2, 1), color 200ms ease-out;
 }
-.me { background-size: 100% 100%; color: var(--ink-on-paint); }
+.me { background-size: 100% 100%; color: var(--ink-on-paint); text-shadow: none; }
+:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, #careers th) > [data-person]:first-child { margin-left: -0.12em; }
 /* Names that set the highlight: Careers shows them as links, champions take a tap without the underline. */
 a[data-person] { position: relative; text-decoration: none; }
 a[data-person]::after { content: ''; position: absolute; inset: -12px 0; }
@@ -159,7 +167,7 @@ a[data-person]::after { content: ''; position: absolute; inset: -12px 0; }
 /* The end zone names who is highlighted, in the same paint, with the way out beside it. */
 .marking { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 24px; animation: rise 320ms ease-out both; }
 .marking[hidden] { display: none; }
-.marking-name { margin: 0; padding: 0.12em 0.3em; font-family: var(--stencil); font-weight: 900; font-size: 30px; line-height: 1; text-transform: uppercase; overflow-wrap: anywhere; }
+.marking-name { margin: 0; padding: 0.12em 0.3em; font-size: 30px; line-height: 1; overflow-wrap: anywhere; }
 .marking a {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
@@ -180,9 +188,9 @@ a[data-person]::after { content: ''; position: absolute; inset: -12px 0; }
 }
 .yard:last-child::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--paint); }
 .yard-year { font-family: var(--stencil); font-weight: 700; font-size: 34px; line-height: 1; color: var(--chalk); }
-/* Stencil is paint, and paint is capitals: a name painted on the field is upper case; in text it keeps its typed case. */
+/* The champion's line: the handle in heavy sans, with the end zone's painted drop so it still reads as paint on grass. */
 .yard-champ {
-  font-family: var(--stencil); font-weight: 900; text-transform: uppercase; font-size: clamp(30px, 4vw, 44px); line-height: 1;
+  font-family: var(--stencil); font-weight: 900; font-size: clamp(30px, 4vw, 44px); line-height: 1; text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
   overflow-wrap: anywhere; animation: rise 450ms ease-out both; animation-delay: calc(var(--i) * var(--step) + 500ms);
 }
 .yard-live {
@@ -205,7 +213,7 @@ a[data-person]::after { content: ''; position: absolute; inset: -12px 0; }
 .shame-word { color: var(--flag); }
 /* A theme name chalked on the turf, with the yard line it starts on. */
 .group-name {
-  margin-top: 56px; font-family: var(--stencil); font-weight: 800; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+  margin-top: 56px; font-family: var(--stencil); font-weight: 700; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
   color: var(--chalk);
 }
 .group-name + .plays { margin-top: 12px; }
@@ -264,6 +272,7 @@ a[data-person]::after { content: ''; position: absolute; inset: -12px 0; }
 /* Flag yellow is large-type only on the turf (3.98:1 under the highlight), so the small label stays white and the box takes the flag. */
 .play.shame .play-next summary:hover { color: var(--paint); border-color: var(--flag); }
 .play.shame .play-next[open] summary { color: var(--ink-on-flag); background: var(--flag); border-color: var(--flag); }
+.play-next li { padding-left: 0.3em; }
 .play-next ol { margin: 12px 0 0; padding-left: 1.5em; color: var(--chalk); overflow-wrap: anywhere; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
