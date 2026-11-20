@@ -156,6 +156,7 @@ const landing = (key: string) => {
           {group.rows.flatMap((pair, pairIndex) => pair.map((record, side) => {
             const leaders = record.rows.filter(row => row.rank === 1);
             const others = record.rows.filter(row => row.rank !== 1);
+            const Title = group.name ? 'h4' : 'h3';
             return (
               <li id={record.feature.key} class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}; ${landing(record.feature.key)}`}>
                 {record.feature.shame && (
@@ -165,7 +166,7 @@ const landing = (key: string) => {
                     <circle class="flag-knot" cx="11" cy="11" r="7" />
                   </svg>
                 )}
-                <h4><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
+                <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 <div class="play-who">
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <span data-person={part.person} class:list={{ me: mine(part.person) }}>{part.person}</span>)}</strong><span>{when(record.feature, row)}</span></p>)}
