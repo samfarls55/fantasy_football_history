@@ -68,8 +68,9 @@ p { text-wrap: pretty; }
 /* The far end zone closes the field: goal line on top, room underneath for the jump bar. */
 .endzone.close { border-bottom: 0; border-top: 12px solid var(--paint); box-shadow: none; }
 .close .endzone-inner { padding-top: 56px; padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
-/* A handle has descenders the stencil never did; the extra leading keeps the highlight off the line below. */
-.close-name { overflow-wrap: anywhere; line-height: 1.15; }
+/* A handle has descenders the stencil never did; the extra leading keeps the highlight off the line below.
+   It's set in the wider sans, so it steps down sooner than the league name and a phone keeps it whole. */
+.close-name { font-size: clamp(40px, 12vw, 136px); overflow-wrap: anywhere; line-height: 1.15; }
 .field:not(:has(*)) { display: none; }
 .endzone-inner, .field { max-width: 1120px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
 .endzone-inner { padding-bottom: 32px; }
@@ -90,9 +91,9 @@ p { text-wrap: pretty; }
 .failure ~ .lookup .lookup-row { margin-top: 40px; }
 a.retry { margin-top: 28px; font-size: 24px; }
 
-.league-name, .close-name { font-size: clamp(56px, 10.5vw, 136px); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
+.league-name, .close-name { text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
 .league-name {
-  margin-top: 28px; overflow-wrap: anywhere;
+  margin-top: 28px; font-size: clamp(56px, 10.5vw, 136px); overflow-wrap: anywhere;
   animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
 }
 .league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
@@ -121,6 +122,7 @@ h2[data-yard]::after {
 /* Jump bar: a strip of end zone along the bottom edge. Phones get the labels alone, in reach of a thumb;
    wider screens stretch it edge to edge with the yard markers lined up on the field's column. It rises as the ball lands, last in the load. */
 .jump {
+  --row: 52px;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
   padding: 0 calc(max(20px, (100% - 1080px) / 2)) env(safe-area-inset-bottom);
   background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px) fixed;
@@ -140,6 +142,8 @@ h2[data-yard]::after {
 /* The current section is painted and thickens the goal line above it, so it reads without color. */
 .jump-links a:hover, .jump-links a[aria-current] { color: var(--paint); }
 .jump-links a[aria-current]::before { content: ''; position: absolute; left: 0; right: 16px; top: -4px; height: 9px; background: var(--paint); }
+/* The highlight row has one fixed height, so the mark can reach past it to the goal line. */
+.jump:has(.jump-mark:not([hidden]), .copied:not(:empty)) .jump-links a[aria-current]::before { top: calc(-4px - var(--row)); }
 .jump a:focus-visible, .jump button:focus-visible { outline-offset: -5px; }
 /* A section holding the highlighted manager carries a chip of the highlight's paint after its label, counting their appearances in it. */
 .hits {
@@ -150,12 +154,12 @@ h2[data-yard]::after {
 /* While a highlight is on, a row above the sections names it, steps back and forth through its sightings and clears it, in reach of a thumb.
    A confirmation takes the name's place there for a moment; with nothing highlighted, the row holds the confirmation alone. */
 .jump-row { display: flex; align-items: center; gap: 16px; }
-.jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { min-height: 52px; padding-top: 6px; border-bottom: 2px solid var(--chalk-faint); }
+.jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { height: var(--row); padding-top: 6px; border-bottom: 2px solid var(--chalk-faint); }
 .jump-mark { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px 16px; animation: rise 220ms ease-out both; }
 .jump-mark[hidden] { display: none; }
 .jump-row:has(.copied:not(:empty)) .jump-mark { flex: none; }
 .jump-row:has(.copied:not(:empty)) .marking-name { display: none; }
-.marking-name { flex: 0 1 auto; min-width: 0; font-size: 20px; line-height: 1; padding: 0.15em 0.3em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marking-name { flex: 0 1 auto; min-width: 0; font-size: 20px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* The bar's controls and a mistyped name's way out: painted labels on a faint chalk underline. */
 .jump-mark :is(button, a), .miss > a, .retry {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px;
@@ -168,7 +172,7 @@ h2[data-yard]::after {
 /* Confirmations are chalk notes in the bar's top row. They may name a handle, so they're set in its face; a long one wraps to a second line.
    Empty, it's clipped rather than hidden, so the live region stays in the accessibility tree and announces each one. */
 .copied {
-  flex: 1; min-width: 0; padding-left: 0.3em;
+  flex: 1; min-width: 0; padding-left: 0.12em;
   font-family: var(--text); font-weight: 600; font-size: 20px; line-height: 1.1;
   color: var(--chalk); overflow-wrap: anywhere;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
@@ -257,15 +261,12 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play.wide { grid-column: 1 / -1; }
 .play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
 .play-title { font-size: 20px; font-weight: 800; color: var(--chalk); }
-/* A linked record lands with its chalk line painted solid and paint swept once behind its name, flag yellow for shame. */
-.play:target { border-top-style: solid; border-top-color: var(--paint); }
-.play.shame:target { border-top-color: var(--flag); }
-.play-name { padding: 0 0.12em; margin-left: -0.12em; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.play:target .play-name {
-  color: var(--ink-on-paint); background: linear-gradient(var(--paint), var(--paint)) no-repeat 0 0 / 100% 100%;
-  animation: sweep 650ms 450ms cubic-bezier(.2, .7, .2, 1) both;
+/* A linked record lands with its yard line chalked fresh and thick, then settling back. It's a line, never paint behind a name,
+   so a landing can't pass for a highlight. Without motion the fresh line stays. */
+.play:target::after {
+  content: ''; position: absolute; left: 0; right: 0; top: -6px; height: 6px; background: var(--paint);
+  transform-origin: left; animation: land 2600ms 300ms cubic-bezier(.3, .7, .2, 1) both;
 }
-.play.shame:target .play-name { color: var(--ink-on-flag); background-image: linear-gradient(var(--flag), var(--flag)); }
 /* The share mark stays faint beside the record's name; ::after stretches it to a 44px target. */
 .share { position: relative; display: inline-block; width: 20px; height: 20px; margin-left: 8px; vertical-align: -3px; color: var(--chalk-quiet); transition: color 160ms ease-out; }
 .share::after { content: ''; position: absolute; inset: -12px; }
@@ -438,7 +439,7 @@ tr.former th { font-weight: 600; }
 
 @keyframes spray { from { clip-path: inset(0 100% 0 0); filter: blur(6px); } 60% { filter: blur(0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes chalk { from { transform: scaleX(0); } }
-@keyframes sweep { from { background-size: 0 100%; color: inherit; } }
+@keyframes land { from { transform: scaleX(0); } 20%, 70% { transform: none; opacity: 1; } to { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 @keyframes toss { from { opacity: 0; transform: translate(-160px, -60px) rotate(-540deg); } }
 @keyframes throw { from { opacity: 0; transform: translate(-120px, -150px) rotate(-200deg); } }
@@ -452,22 +453,20 @@ tr.former th { font-weight: 600; }
   .play.across { border-top: 0; padding-top: 18px; }
   .play.across::before { left: 0; top: 0; bottom: auto; width: 40px; border-left: 0; border-top: 3px solid var(--chalk-faint); }
   .group-name + .plays > .play.across { border-top: 0; }
-  .play.across:target::before { width: 100%; border-top-color: var(--paint); }
-  .play.shame.across:target::before { border-top-color: var(--flag); }
+  .play.across:target::after { top: -3px; }
   /* The yard numbers would crowd four labels, so the bar keeps the labels, centered under each thumb. */
-  .jump { padding: 0 4px env(safe-area-inset-bottom); }
+  .jump { --row: 44px; padding: 0 4px env(safe-area-inset-bottom); }
   /* The highlight row is one 44px line: the name gives way to Prev, Next and Clear, and the sections below tighten under it. */
   .jump-row { gap: 8px; padding-left: 8px; }
-  .jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { min-height: 44px; padding-top: 0; }
+  .jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { padding-top: 0; }
   .jump-mark { gap: 4px; }
-  .jump-mark .jump-prev { margin-left: auto; }
   .copied { font-size: 17px; }
   .jump:has(.jump-mark:not([hidden])) .jump-links a { min-height: 48px; padding: 4px 2px 2px; gap: 2px; }
-  .jump-links a { position: relative; flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 56px; padding: 6px 2px 4px; font-size: 18px; text-align: center; }
+  .jump-links a { flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 56px; padding: 6px 2px 4px; font-size: 18px; text-align: center; }
   .jump-links .yard-no { display: none; }
   .jump-links a[aria-current]::before { left: 10px; right: 10px; }
   /* No room beside a phone's labels, so the chip sits above, centered like a hash mark. */
-  .hits { order: -1; align-self: center; margin: 0; font-size: 13px; padding: 2px 4px 1px; }
+  .hits { order: -1; margin: 0; font-size: 13px; padding: 2px 4px 1px; }
 }
 @media (max-width: 560px) {
   tbody th { font-size: 18px; }

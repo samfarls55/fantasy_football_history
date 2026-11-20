@@ -209,7 +209,7 @@ const landing = (key: string) => {
                     <circle class="flag-knot" cx="11" cy="11" r="7" />
                   </svg>
                 )}
-                <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span><span class="play-name">{record.feature.name}</span><a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
+                <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
                 <div class="play-figure"><span class="play-value">{value(record, leaders[0])}</span>{record.feature.how
                   ? <details class="play-how"><summary class="play-unit">{record.feature.unit}</summary><p>{record.feature.how}</p></details>
                   : <span class="play-unit">{record.feature.unit}</span>}</div>
@@ -312,9 +312,10 @@ const landing = (key: string) => {
   let stepped = -1;
   let travelling = false;
   // One live region, in the jump bar's highlight row, for the copied link, the highlight and each step.
+  const status = document.querySelector('.copied')!;
+  const markRow = document.querySelector<HTMLElement>('.jump-mark')!;
   let timer = 0;
   const say = (text: string, hold = 1800) => {
-    const status = document.querySelector('.copied')!;
     status.textContent = text;
     clearTimeout(timer);
     timer = window.setTimeout(() => { status.textContent = ''; }, hold);
@@ -329,8 +330,11 @@ const landing = (key: string) => {
     const url = `${location.origin}${location.pathname}${link.hash}`;
     history.replaceState(null, '', link.hash);
     if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ url }).catch(() => {});
-    // A refused copy still leaves the record's link in the address bar, so the note points there.
-    else navigator.clipboard.writeText(url).then(() => say('Link copied'), () => say('Couldn’t copy. Copy it from the address bar.', 5000));
+    // A refused copy puts the shared link itself in the address bar for copying by hand, as a new entry so Back returns to the sharer's view.
+    else navigator.clipboard.writeText(url).then(() => say('Link copied'), () => {
+      history.pushState(null, '', url);
+      say('Not copied. Use the address bar.', 5000);
+    });
   });
 
   const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump-links a')];
@@ -341,7 +345,7 @@ const landing = (key: string) => {
     .filter(element => element.checkVisibility())
     .map(element => ({ element, top: Math.round(element.getBoundingClientRect().top + scrollY) }))
     .sort((a, b) => a.top - b.top);
-  // Each section's bar entry carries a paint chip counting the highlighted manager's sightings in it, and Next carries the total.
+  // Each section's bar entry carries a paint chip counting the highlighted manager's sightings in it.
   const paintBar = () => {
     const found = sightings();
     links.forEach(link => {
@@ -350,7 +354,6 @@ const landing = (key: string) => {
       link.querySelector('.hits')?.remove();
       if (count) link.insertAdjacentHTML('beforeend', `<b class="hits"><span aria-hidden="true">${count}</span><span class="unseen">, ${count} ${count > 1 ? 'appearances' : 'appearance'}</span></b>`);
     });
-    document.querySelector('.jump-next')!.innerHTML = found.length ? `<span aria-hidden="true">Next · ${found.length}</span><span class="unseen">Next, ${found.length} ${found.length > 1 ? 'appearances' : 'appearance'}</span>` : 'Next';
   };
   paintBar();
   // Closing a runner-up box hides its sightings, so the counts follow it. Toggle doesn't bubble.
@@ -382,8 +385,8 @@ const landing = (key: string) => {
       box.toggleAttribute('data-marked', holds);
     });
     document.querySelector('.miss')?.remove();
-    document.querySelector('.marking-name')!.textContent = next;
-    document.querySelector<HTMLElement>('.jump-mark')!.hidden = !next;
+    markRow.querySelector('.marking-name')!.textContent = next;
+    markRow.hidden = !next;
     stepped = -1;
     travelling = false;
     paintBar();
@@ -428,11 +431,11 @@ const landing = (key: string) => {
   }));
   // n and p step, Escape clears, whenever a highlight is on and the keys aren't meant for a text field.
   addEventListener('keydown', event => {
-    const control = { n: '.jump-next', p: '.jump-prev', Escape: '.jump-mark a' }[event.key];
-    if (!control || event.metaKey || event.ctrlKey || event.altKey || document.querySelector<HTMLElement>('.jump-mark')!.hidden
+    const control = { n: '.jump-next', p: '.jump-prev', Escape: 'a' }[event.key];
+    if (!control || event.metaKey || event.ctrlKey || event.altKey || markRow.hidden
       || (event.target as Element).closest('input, textarea, select, [contenteditable]')) return;
     event.preventDefault();
-    document.querySelector<HTMLElement>(control)!.click();
+    markRow.querySelector<HTMLElement>(control)!.click();
   });
 
   // The jump bar marks the section under a line 30% down the screen. Without JS it just has no mark.
