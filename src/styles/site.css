@@ -43,8 +43,8 @@ body::before {
 }
 body > * { position: relative; z-index: 1; }
 a { color: inherit; }
-h1, h2, h3, p { margin: 0; }
-h1, h2, h3 { text-wrap: balance; }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 :focus-visible { outline: 3px solid var(--flag); outline-offset: 3px; }
 
@@ -170,11 +170,18 @@ h2[data-yard]::after {
 /* Records: opposites face each other across a chalk line; fame in white paint, shame under a thrown flag. */
 .shame-word { color: var(--flag); }
 .whole { white-space: nowrap; }
+/* A theme name chalked on the turf, with the yard line it starts on. */
+.group-name {
+  margin-top: 56px; font-family: var(--stencil); font-weight: 800; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
+  color: var(--chalk);
+}
+.group-name + .plays { margin-top: 12px; }
+.group-name + .plays > .play:nth-child(-n + 2) { border-top: 4px solid var(--chalk-faint); }
 .plays { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
 .play { position: relative; min-width: 0; padding: 24px 0 26px; border-top: 3px dashed var(--chalk-faint); }
 .play.wide { grid-column: 1 / -1; }
 .play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
-.play h3 { font-size: 20px; font-weight: 800; color: var(--chalk); }
+.play h4 { font-size: 20px; font-weight: 800; color: var(--chalk); }
 /* A linked record lands with its chalk line painted solid. */
 .play:target { border-top-style: solid; border-top-color: var(--paint); }
 .play.shame:target { border-top-color: var(--flag); }
@@ -184,7 +191,7 @@ h2[data-yard]::after {
 .share svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .share:hover, .share:focus-visible { color: var(--paint); }
 .shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
-.play.shame h3 { padding-right: 88px; }
+.play.shame h4 { padding-right: 88px; }
 .play-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }
 .shame .play-value { color: var(--flag); }
@@ -194,7 +201,7 @@ h2[data-yard]::after {
 .play-holder span { color: var(--chalk); }
 /* The headline record: a solid painted line and the biggest number on the field. */
 .play.headline { padding: 28px 0 40px; border-top: 6px solid var(--flag); }
-.play.headline h3 { font-size: 24px; color: var(--paint); padding-right: 140px; }
+.play.headline h4 { font-size: 24px; color: var(--paint); padding-right: 140px; }
 .play.headline .play-value { font-size: clamp(96px, 15vw, 176px); line-height: 0.85; }
 .play.headline .play-unit { font-size: 20px; max-width: 18ch; line-height: 1.2; }
 .play.headline .play-holder strong { font-size: 32px; }
@@ -241,6 +248,7 @@ tbody th { font-weight: 800; font-size: 20px; }
 tbody tr { border-bottom: 2px solid var(--chalk-faint); }
 tr.former { color: var(--chalk); }
 tr.former th { font-weight: 600; }
+.career-range { display: none; }
 .titles { font-family: var(--stencil); font-weight: 500; font-size: 28px; line-height: 1; color: var(--chalk-quiet); }
 .titles.won { font-weight: 900; color: var(--flag); }
 
@@ -297,25 +305,31 @@ tr.former th { font-weight: 600; }
 /* Below this the full table would push Titles out of view, so the secondary columns go. */
 @media (max-width: 720px) {
   th:nth-child(2), td:nth-child(2), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6) { display: none; }
+  /* The hidden Seasons column moves under the name, so former managers read by their last year. */
+  .career-range { display: block; margin-top: 2px; font-size: 14px; font-weight: 600; color: var(--chalk); }
+}
+/* Phones: one record per row, each fame record followed by its shame twin under a short chalk hash. */
+@media (max-width: 600px) {
+  .plays { grid-template-columns: 1fr; }
+  .play.across { border-top: 0; padding-top: 18px; }
+  .play.across::before { left: 0; top: 0; bottom: auto; width: 40px; border-left: 0; border-top: 3px solid var(--chalk-faint); }
+  .group-name + .plays > .play.across { border-top: 0; }
 }
 @media (max-width: 560px) {
   tbody th { font-size: 18px; }
   body { font-size: 16px; }
   .yard { grid-template-columns: 4rem 1fr; gap: 12px; min-height: 52px; }
   .yard-year { font-size: 28px; }
-  .plays { column-gap: 24px; }
-  .play { padding: 18px 0 20px; }
-  .play.across::before { left: -14px; top: 18px; bottom: 18px; }
-  .play h3 { font-size: 16px; line-height: 1.2; }
-  .play.shame h3 { padding-right: 44px; }
-  .play .flag { width: 44px; height: 36px; top: 4px; --dx: 0px; }
-  .play-value { font-size: 40px; }
-  .play-unit { font-size: 15px; line-height: 1.2; }
-  .play-holder { font-size: 15px; }
-  .play-holder strong { font-size: 17px; }
-  .play-next summary { font-size: 15px; padding: 2px 8px; }
-  .play-next ol { font-size: 15px; }
-  .play.headline h3 { font-size: 20px; padding-right: 72px; }
+  .play { padding: 20px 0 22px; }
+  .play h4 { font-size: 18px; line-height: 1.2; }
+  .play.shame h4 { padding-right: 72px; }
+  .play .flag { width: 60px; height: 50px; top: 6px; --dx: 0px; }
+  .play-value { font-size: 56px; }
+  .play-unit { font-size: 16px; line-height: 1.2; }
+  .play-holder strong { font-size: 20px; }
+  .group-name { margin-top: 44px; font-size: 22px; }
+  th, td { padding: 12px 8px; }
+  .play.headline h4 { font-size: 20px; padding-right: 72px; }
   .play.headline .play-value { font-size: 88px; }
   .play.headline .play-unit { font-size: 17px; }
   .play.headline .play-holder strong { font-size: 24px; }

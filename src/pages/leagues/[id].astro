@@ -23,13 +23,19 @@ try {
 interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string }
 // The headline: the best team that went home empty is the record every league argues about.
 const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average', digits: 1, shame: true };
-// Opposites face each other across the field: fame in white paint, shame under a flag.
-const pairFeatures: Feature[][] = [
-  [{ key: 'highest-score', name: 'Highest score', unit: 'points', digits: 2 }, { key: 'lowest-score', name: 'Lowest score', unit: 'points', digits: 2, shame: true }],
-  [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row', digits: 0 }, { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', digits: 0, shame: true }],
-  [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin', digits: 2 }, { key: 'closest-game', name: 'Closest game', unit: 'point margin', digits: 2 }],
-  [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true }],
-  [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
+// Opposites face each other across the field: fame in white paint, shame under a flag. Pairs sit in themed groups so the run has structure.
+const groupFeatures: { name: string; pairs: Feature[][] }[] = [
+  { name: 'Scoring', pairs: [
+    [{ key: 'highest-score', name: 'Highest score', unit: 'points', digits: 2 }, { key: 'lowest-score', name: 'Lowest score', unit: 'points', digits: 2, shame: true }],
+    [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin', digits: 2 }, { key: 'closest-game', name: 'Closest game', unit: 'point margin', digits: 2 }],
+  ] },
+  { name: 'Streaks', pairs: [
+    [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row', digits: 0 }, { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', digits: 0, shame: true }],
+  ] },
+  { name: 'Roster & luck', pairs: [
+    [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true }],
+    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
+  ] },
 ];
 
 const storePath = leagueStorePath(id);
@@ -48,10 +54,10 @@ const history = failure ? null : await withHistorySnapshot(async () => {
       rows: view.rows.filter(row => row.rank <= 3).slice(0, 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
   };
   const headline = await load(headlineFeature);
-  const pairs = (await Promise.all(pairFeatures.map(pair => Promise.all(pair.map(load)))))
-    .map(pair => pair.filter(record => record !== null)).filter(pair => pair.length);
-  // The headline stands alone in the first row; a pair missing one side spans the row.
-  const rows = headline ? [[headline], ...pairs] : pairs;
+  // The headline stands alone in an unnamed first group; a pair missing one side spans the row.
+  const named = await Promise.all(groupFeatures.map(async group => ({ name: group.name,
+    rows: (await Promise.all(group.pairs.map(pair => Promise.all(pair.map(load))))).map(pair => pair.filter(record => record !== null)).filter(pair => pair.length) })));
+  const groups = [...(headline ? [{ name: '', rows: [[headline]] }] : []), ...named.filter(group => group.rows.length)];
   const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
   const current = managers.filter(manager => manager.current);
@@ -68,7 +74,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champion: winners.map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, rows, careers, streaks: streaks.slice(0, 5), reigning };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), reigning };
 }, storePath);
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
@@ -100,7 +106,7 @@ const landing = (key: string) => {
     <>
       <nav class="jump" aria-label="Sections" style={`--i: ${history.plates.length - 1}`}>
         <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
-        {history.rows.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Records</a>}
+        {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Records</a>}
         <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
         {history.streaks.length > 0 && <a href="#streaks"><span aria-hidden="true">40</span>Streaks</a>}
       </nav>
@@ -119,11 +125,14 @@ const landing = (key: string) => {
         </ol>
       </section>
 
-      {history.rows.length > 0 && (
+      {history.groups.length > 0 && (
       <section class="block" id="records">
         <h2 class="painted" data-yard="20">Hall of fame <span class="shame-word">&amp; shame</span></h2>
+        {history.groups.map(group => (
+        <>
+        {group.name && <h3 class="group-name">{group.name}</h3>}
         <ul class="plays">
-          {history.rows.flatMap((pair, pairIndex) => pair.map((record, side) => {
+          {group.rows.flatMap((pair, pairIndex) => pair.map((record, side) => {
             const leaders = record.rows.filter(row => row.rank === 1);
             const others = record.rows.filter(row => row.rank !== 1);
             return (
@@ -135,7 +144,7 @@ const landing = (key: string) => {
                     <circle class="flag-knot" cx="11" cy="11" r="7" />
                   </svg>
                 )}
-                <h3>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h3>
+                <h4>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
@@ -150,6 +159,8 @@ const landing = (key: string) => {
             );
           }))}
         </ul>
+        </>
+        ))}
       </section>
       )}
 
@@ -161,7 +172,7 @@ const landing = (key: string) => {
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
-                  <th scope="row">{manager.name}</th>
+                  <th scope="row">{manager.name}<span class="career-range">{manager.range}</span></th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>
@@ -219,7 +230,7 @@ const landing = (key: string) => {
     const url = `${location.origin}${location.pathname}${link.hash}`;
     if (navigator.share && matchMedia('(pointer: coarse)').matches) {
       event.preventDefault();
-      navigator.share({ title: `${link.closest('h3')!.textContent} · ${document.title}`, url }).catch(() => {});
+      navigator.share({ title: `${link.closest('h4')!.textContent} · ${document.title}`, url }).catch(() => {});
     } else if (navigator.clipboard) {
       event.preventDefault();
       history.replaceState(null, '', link.hash);
