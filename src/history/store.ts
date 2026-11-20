@@ -80,11 +80,14 @@ export async function publishArchive(archive: Archive, storePath?: string): Prom
       await file.close();
     }
     await rename(temporaryPath, path);
-    const parent = await open(directory, 'r');
-    try {
-      await parent.sync();
-    } finally {
-      await parent.close();
+    // Windows rejects fsync on a directory handle; NTFS journals the rename itself.
+    if (process.platform !== 'win32') {
+      const parent = await open(directory, 'r');
+      try {
+        await parent.sync();
+      } finally {
+        await parent.close();
+      }
     }
   } finally {
     await rm(temporaryPath, { force: true }).catch(() => undefined);
