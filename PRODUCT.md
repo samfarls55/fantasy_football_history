@@ -18,11 +18,11 @@ History follows each league's links to previous seasons back to its first Sleepe
 
 - Any Sleeper league, imported on first visit and refreshed when more than 12 hours old.
 - Managers appear by Sleeper username.
-- Local development preview only. Not hosted.
+- Hosted on Vercel at https://rafters-ff.vercel.app.
 
 ## Not now
 
-ESPN or Yahoo leagues, accounts, per-manager and per-season pages, live scoring, and hosting.
+ESPN or Yahoo leagues, accounts, per-manager and per-season pages, and live scoring.
 
 ## Principles
 
