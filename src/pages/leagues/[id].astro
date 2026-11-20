@@ -204,7 +204,7 @@ const landing = (key: string) => {
                   <details class="play-next" open={others.some(involves)} data-marked={others.some(involves) || undefined}>
                     <summary><span aria-hidden="true">+{others.length}</span><span class="unseen">{others.length} {others.length > 1 ? 'runners-up' : 'runner-up'}</span></summary>
                     <ol>
-                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span class="next-value">{value(record, row)}</span><span class="next-when">{when(record.feature, row)}</span></li>)}
+                      {others.map(row => <li><span class="next-rank">{row.rank}</span><span class="next-value">{value(record, row)}</span><span class="next-who">{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span class="next-when">{when(record.feature, row)}</span></li>)}
                     </ol>
                   </details>
                 )}
@@ -220,19 +220,20 @@ const landing = (key: string) => {
 
       <section class="block" id="careers">
         <h2 class="painted" data-yard="30" id="careers-name">Careers</h2>
+        {/* The sort key and the numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */}
         <div class="table-wrap">
           <table aria-labelledby="careers-name">
-            <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Points</th><th scope="col">Playoffs</th><th scope="col">Titles</th></tr></thead>
+            <thead><tr><th scope="col">Manager</th><th scope="col">Titles</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Playoffs</th><th scope="col">Points</th><th scope="col">Seasons</th></tr></thead>
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
                   <th scope="row"><a {...person(manager.name)}>{manager.name}</a></th>
-                  <td>{manager.range}</td>
+                  <td class:list={['titles', { won: manager.facts.championships > 0 }]}>{manager.facts.championships}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>
-                  <td>{fixed(manager.facts.points, 0)}</td>
                   <td>{manager.facts.playoffAppearances}</td>
-                  <td class:list={['titles', { won: manager.facts.championships > 0 }]}>{manager.facts.championships}</td>
+                  <td>{fixed(manager.facts.points, 0)}</td>
+                  <td>{manager.range}</td>
                 </tr>
               ))}
             </tbody>
