@@ -61,7 +61,12 @@ const history = failure ? null : await withHistorySnapshot(async () => {
       record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, pairs, careers, streaks: streaks.slice(0, 5) };
+  // The field ends in the other end zone, painted with the last season that finished.
+  const lastDone = seasons.find(season => season.complete);
+  const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
+  const reigning = winners.length ? { year: lastDone!.year, champion: winners.map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
+    titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, pairs, careers, streaks: streaks.slice(0, 5), reigning };
 }, storePath);
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
@@ -71,6 +76,11 @@ const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
 const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${feature.verb} ${row.name}`
   : row.matchupLabel && row.secondary?.[0] ? `${row.name} over ${row.secondary[0].name}` : row.name;
 // Every context reads "Week 3, 2020", and a date never breaks across lines. Player records lead it with the manager, already named in who().
+// Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
+const landing = (key: string) => {
+  const hash = [...key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+  return `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
+};
 const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 ---
 <Base title={history ? `${history.name} history` : 'League history'} back={back}>
@@ -114,7 +124,7 @@ const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' �
             const leaders = record.rows.filter(row => row.rank === 1);
             const others = record.rows.filter(row => row.rank !== 1);
             return (
-              <li id={record.feature.key} class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}`}>
+              <li id={record.feature.key} class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}; ${landing(record.feature.key)}`}>
                 {record.feature.shame && (
                   <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
                     <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
@@ -164,18 +174,35 @@ const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' �
       {history.streaks.length > 0 && (
         <section class="block" id="streaks">
           <h2 class="painted" data-yard="40"><span class="whole">Head-to-head</span> streaks</h2>
-          <ul class="streaks">
-            {history.streaks.map(streak => (
-              <li>
-                <span class="streak-count">{streak.count}</span>
-                <p><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong> {streak.count} straight. {streak.record} including playoffs.</p>
-              </li>
-            ))}
-          </ul>
+          {history.streaks.slice(0, 1).map(streak => (
+            <div class="streak-top">
+              <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
+              <p class="streak-who"><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong></p>
+              <p class="streak-record">{streak.record} all time, including playoffs</p>
+            </div>
+          ))}
+          {history.streaks.length > 1 && (
+            <ul class="streaks">
+              {history.streaks.slice(1).map(streak => (
+                <li>
+                  <span class="streak-count">{streak.count}</span>
+                  <p><strong>{streak.winner}</strong> over <strong>{streak.loser}</strong><span>{streak.record} including playoffs</span></p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
       <p class="copied" role="status"></p>
     </>
+  )}
+  {history?.reigning && (
+    <footer slot="close" class="endzone close">
+      <div class="endzone-inner">
+        <p class="painted close-name">{history.reigning.champion}</p>
+        <p class="league-years">{history.reigning.year} champion{history.reigning.titles > 1 && ` · ${history.reigning.titles} titles`}</p>
+      </div>
+    </footer>
   )}
 </Base>
 
