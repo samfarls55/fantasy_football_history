@@ -50,7 +50,9 @@ const history = failure ? null : await withHistorySnapshot(async () => {
     if (!view || view.blocked || !view.rows.length) return null;
     return { feature, percent: view.category.unit === '%',
       // Ties share a rank, so every row ranked third or better shows; none drops silently.
-      rows: view.rows.filter(row => row.rank <= 3).map(row => ({ ...row, manager: nameOf.get(row.personId)! })) };
+      // A matchup row names its loser only through a link to their page, which carries their person id.
+      rows: view.rows.filter(row => row.rank <= 3).map(row => ({ ...row, manager: nameOf.get(row.personId)!,
+        opponent: row.matchupLabel && row.secondary ? nameOf.get(row.secondary[0].href.split('/')[2]) : undefined })) };
   };
   const headline = await load(headlineFeature);
   // The headline stands alone in an unnamed first group; a pair missing one side spans the row.
@@ -84,12 +86,14 @@ const markHref = (name: string | null) => {
 };
 const mine = (name: string) => name === history?.marked?.name;
 
-type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
+type Row = { value: number; name: string; manager: string; opponent?: string; leaderContext?: string };
 const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
   record.percent ? `${fixed(row.value, record.feature.digits)}%` : fixed(row.value, record.feature.digits);
-const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${feature.verb} ${row.name}`
-  : row.matchupLabel && row.secondary?.[0] ? `${row.name} beat ${row.secondary[0].name}` : row.name;
+// Who holds a record, as text and the managers in it, so each manager's own name takes the highlight.
+const who = (feature: Feature, row: Row): (string | { person: string })[] => feature.verb ? [{ person: row.manager }, ` ${feature.verb} ${row.name}`]
+  : row.opponent ? [{ person: row.manager }, ' beat ', { person: row.opponent }] : [{ person: row.manager }];
+const involves = (row: Row) => mine(row.manager) || !!row.opponent && mine(row.opponent);
 // Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named in who().
 const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4}) – Week (\d+), \2/,'Weeks $1–$3, $2').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 // Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
@@ -112,7 +116,7 @@ const landing = (key: string) => {
         <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
         <p class="marking" hidden={!history.marked}>
           <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
-          <a href={markHref(null)} data-person="">Clear</a>
+          <a href={markHref(null)}>Clear</a>
         </p>
       </>
     )}
@@ -164,12 +168,12 @@ const landing = (key: string) => {
                 <h4><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 <div class="play-who">
-                {leaders.map(row => <p class="play-holder"><strong data-person={row.manager} class:list={{ me: mine(row.manager) }}>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
+                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <span data-person={part.person} class:list={{ me: mine(part.person) }}>{part.person}</span>)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
-                  <details class="play-next" open={others.some(row => mine(row.manager))}>
+                  <details class="play-next" open={others.some(involves)} data-marked={others.some(involves) || undefined}>
                     <summary>{others.length > 1 ? 'Runners-up' : 'Runner-up'}</summary>
                     <ol>
-                      {others.map(row => <li value={row.rank}><span data-person={row.manager} class:list={{ me: mine(row.manager) }}>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
+                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row).map(part => typeof part === 'string' ? part : <span data-person={part.person} class:list={{ me: mine(part.person) }}>{part.person}</span>)}</span><span>{value(record, row)}</span></li>)}
                     </ol>
                   </details>
                 )}
@@ -241,34 +245,36 @@ const landing = (key: string) => {
 </Base>
 
 <script>
-  // Without JS the share link is a plain anchor; with it, phones get the share sheet and desktops copy the link.
+  // One live region, shown briefly, for both the copied link and the highlight.
   let timer = 0;
+  const say = (text: string) => {
+    const status = document.querySelector('.copied')!;
+    status.textContent = text;
+    clearTimeout(timer);
+    timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
+  };
+
+  // Without JS the share link is a plain anchor; with it, phones get the share sheet and desktops copy the link.
+  // The shared link is the record alone: the sharer's ?u= and ?manager= describe their view, not the recipient's.
   document.addEventListener('click', event => {
     const link = (event.target as Element).closest<HTMLAnchorElement>('a.share');
-    if (!link) return;
+    if (!link || !navigator.share && !navigator.clipboard) return;
+    event.preventDefault();
     const url = `${location.origin}${location.pathname}${link.hash}`;
-    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
-      event.preventDefault();
-      navigator.share({ title: `${link.closest('h4')!.textContent} · ${document.title}`, url }).catch(() => {});
-    } else if (navigator.clipboard) {
-      event.preventDefault();
-      history.replaceState(null, '', link.hash);
-      navigator.clipboard.writeText(url).then(() => {
-        const status = document.querySelector('.copied')!;
-        status.textContent = 'Link copied';
-        clearTimeout(timer);
-        timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
-      });
-    }
+    history.replaceState(null, '', link.hash);
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ url }).catch(() => {});
+    else navigator.clipboard.writeText(url).then(() => say('Link copied'));
   });
 
   // With JS, highlighting a manager repaints in place instead of reloading to the top; the URL still carries it for sharing.
   document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person]');
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .marking a');
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
     const url = new URL(location.href);
     const next = link.dataset.person && link.dataset.person !== url.searchParams.get('manager') ? link.dataset.person : null;
+    // The end zone's highlight row and opened runners-up change height above the tap; the tapped name holds still.
+    const top = link.getBoundingClientRect().top;
     if (next) url.searchParams.set('manager', next); else url.searchParams.delete('manager');
     history.replaceState(null, '', url.pathname + url.search + url.hash);
     document.querySelectorAll<HTMLElement>('[data-person]').forEach(element => {
@@ -281,14 +287,16 @@ const landing = (key: string) => {
         element.href = target.pathname + target.search;
       }
     });
-    // A highlighted runner-up opens its box so the mark is never hidden.
-    document.querySelectorAll<HTMLDetailsElement>('.play-next').forEach(box => { if (box.querySelector('.me')) box.open = true; });
+    // A highlighted runner-up opens its box so the mark is never hidden; a box opened that way closes when the mark moves on.
+    document.querySelectorAll<HTMLDetailsElement>('.play-next').forEach(box => {
+      const holds = !!box.querySelector('.me');
+      if (holds || box.hasAttribute('data-marked')) box.open = holds;
+      box.toggleAttribute('data-marked', holds);
+    });
     document.querySelector('.marking-name')!.textContent = next;
     document.querySelector<HTMLElement>('.marking')!.hidden = !next;
-    const status = document.querySelector('.copied')!;
-    status.textContent = next ? `${next} highlighted` : 'Highlight cleared';
-    clearTimeout(timer);
-    timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
+    if (!link.closest('.marking')) scrollBy({ top: link.getBoundingClientRect().top - top, behavior: 'instant' });
+    say(next ? `${next} highlighted` : 'Highlight cleared');
   });
 
   // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
