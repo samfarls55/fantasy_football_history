@@ -4,7 +4,7 @@ import { ensureLeague, leagueStorePath } from '../../leagues.ts';
 import { withHistorySnapshot } from '../../history/store.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
-import { readCategory, formatRecordValue, recordUnit } from '../../history/records.ts';
+import { readCategory, formatRecordValue } from '../../history/records.ts';
 import { readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
@@ -14,23 +14,43 @@ try {
   await ensureLeague(id);
 } catch (error) {
   console.error(`League ${id} import failed`, error);
-  failure = 'This league’s history couldn’t be imported from Sleeper.';
+  failure = 'Sleeper didn’t return this league’s history. Check the league link, or pick the league again from your username.';
 }
 
-const featured = ['best-without-title', 'unluckiest-season', 'winning-streak', 'losing-streak', 'highest-score', 'lowest-score', 'closest-game', 'biggest-blowout', 'benched-player', 'productive-drop'];
+interface Feature { key: string; name: string; unit: string }
+const halls: { name: string; features: Feature[] }[] = [
+  { name: 'Hall of fame', features: [
+    { key: 'highest-score', name: 'Highest score', unit: 'points' },
+    { key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin' },
+    { key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row' },
+    { key: 'closest-game', name: 'Closest game', unit: 'point margin' },
+    { key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter' },
+  ] },
+  { name: 'Hall of shame', features: [
+    { key: 'lowest-score', name: 'Lowest score', unit: 'points' },
+    { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row' },
+    { key: 'best-without-title', name: 'Best season without a title', unit: 'above league scoring' },
+    { key: 'unluckiest-season', name: 'Unluckiest season', unit: 'wins below expected' },
+    { key: 'benched-player', name: 'Most points left on the bench', unit: 'points' },
+    { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams' },
+  ] },
+];
+
 const storePath = leagueStorePath(id);
 const history = failure ? null : await withHistorySnapshot(async () => {
   const seasons = (await readSeasons(storePath))!;
   const managers = (await readManagers({ storePath }))!;
   const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));
-  const champions = seasons.map(season => ({
+  const plates = seasons.toReversed().map(season => ({
     year: season.year, complete: season.complete,
-    champion: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name).join(', '),
-    runnerUp: season.teams.filter(team => team.finish === 2).map(team => nameOf.get(team.personId) ?? team.name).join(', '),
+    champion: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
   }));
-  const records = (await Promise.all(featured.map(key => readCategory(key, { storePath }))))
-    .filter(view => view && !view.blocked && view.rows.length)
-    .map(view => ({ ...view!, rows: view!.rows.filter(row => row.rank <= 3).slice(0, 3) }));
+  const recordHalls = await Promise.all(halls.map(async hall => ({
+    name: hall.name,
+    records: (await Promise.all(hall.features.map(async feature => ({ feature, view: await readCategory(feature.key, { storePath }) }))))
+      .filter(({ view }) => view && !view.blocked && view.rows.length)
+      .map(({ feature, view }) => ({ feature, percent: view!.category.unit === '%', precision: view!.category.displayPrecision ?? 2, rows: view!.rows.filter(row => row.rank <= 3).slice(0, 3) })),
+  })));
   const careers = managers.toSorted((a, b) => b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
   for (const [index, a] of managers.entries()) for (const b of managers.slice(index + 1)) {
@@ -41,79 +61,83 @@ const history = failure ? null : await withHistorySnapshot(async () => {
       record: winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
-  return { name: seasons[0].name, range: `${seasons.at(-1)!.year}–${seasons[0].year}`, champions, records, careers, streaks: streaks.slice(0, 5) };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, recordHalls, careers, streaks: streaks.slice(0, 5) };
 }, storePath);
 
-type RecordView = NonNullable<typeof history>['records'][number];
-function value(view: RecordView, row: { value: number }) {
-  return view.category.unit === '%' ? `${row.value > 0 ? '+' : ''}${formatRecordValue(row.value, 1)}%` : formatRecordValue(row.value, view.category.displayPrecision ?? 2);
-}
-function unit(view: RecordView, row: { value: number }) {
-  return view.category.unit === '%' ? 'scoring vs league' : recordUnit(view.category.unit, row.value);
-}
+type Row = { value: number; name: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
+const value = (record: { percent: boolean; precision: number }, row: Row) =>
+  record.percent ? `${row.value > 0 ? '+' : ''}${formatRecordValue(row.value, 1)}%` : formatRecordValue(row.value, record.precision);
+const who = (row: Row) => row.matchupLabel && row.secondary?.[0] ? `${row.name} over ${row.secondary[0].name}` : row.name;
+const when = (row: Row) => row.leaderContext?.replaceAll(' · ', ', ') ?? '';
 ---
 <Base title={history ? `${history.name} history` : 'League history'}>
-  {failure && <p class="notice">{failure}</p>}
-  {history && (
-    <>
-      <div class="league-head">
-        <h1>{history.name}</h1>
-        <span class="muted">{history.range}</span>
-      </div>
-
-      <section>
-        <h2>Champions</h2>
-        <ol class="champions">
-          {history.champions.map(season => (
-            <li>
-              <span class="year">{season.year}</span>
-              {season.complete
-                ? <><strong>{season.champion || "—"}</strong>{season.runnerUp && <span class="muted">over {season.runnerUp}</span>}</>
-                : <span class="muted">In progress</span>}
+  <Fragment slot="band">
+    {failure && <p class="notice">{failure}</p>}
+    {history && (
+      <>
+        <h1 class="league-name">{history.name}</h1>
+        <p class="league-years">{history.first}–{history.last}</p>
+        <ol class="plates" aria-label="Champions">
+          {history.plates.map(plate => (
+            <li class:list={['plate', { blank: !plate.complete }]}>
+              <span class="plate-year">{plate.year}</span>
+              <span class="plate-name">{plate.complete ? plate.champion || '—' : ''}</span>
             </li>
           ))}
         </ol>
-      </section>
+      </>
+    )}
+  </Fragment>
 
-      <section>
-        <h2>Records</h2>
-        <div class="records">
-          {history.records.map(view => {
-            const leaders = view.rows.filter(row => row.rank === 1);
-            const others = view.rows.filter(row => row.rank !== 1);
-            return (
-              <article class="record">
-                <h3>{view.category.name}</h3>
-                <p class="record-value">{value(view, leaders[0])} <span class="unit">{unit(view, leaders[0])}</span></p>
-                {leaders.map(row => (
-                  <p class="record-who"><strong>{row.matchupLabel ?? row.name}</strong><span class="muted">{row.leaderContext}</span></p>
-                ))}
-                {others.length > 0 && (
-                  <ol class="runners">
-                    {others.map(row => <li><span>{row.rank}. {row.matchupLabel ?? row.name}</span><span class="muted">{value(view, row)}</span></li>)}
-                  </ol>
-                )}
-              </article>
-            );
-          })}
-        </div>
-      </section>
+  {history && (
+    <>
+      <div class="halls">
+        {history.recordHalls.map(hall => (
+          <section class="hall">
+            <h2>{hall.name}</h2>
+            <ul class="feats">
+              {hall.records.map(record => {
+                const leaders = record.rows.filter(row => row.rank === 1);
+                const others = record.rows.filter(row => row.rank !== 1);
+                return (
+                  <li class="feat">
+                    <h3>{record.feature.name}</h3>
+                    <div class="feat-body">
+                      <p class="feat-figure"><span class="feat-value">{value(record, leaders[0])}</span><span class="feat-unit">{record.feature.unit}</span></p>
+                      <div class="feat-holders">
+                        {leaders.map(row => <p class="feat-holder"><strong>{who(row)}</strong><span>{when(row)}</span></p>)}
+                        {others.length > 0 && (
+                          <ol class="feat-next">
+                            {others.map(row => <li value={row.rank}><span>{who(row)}</span><span class="num">{value(record, row)}</span></li>)}
+                          </ol>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </div>
 
-      <section>
+      <section class="block">
         <h2>Careers</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Manager</th><th>Seasons</th><th>Record</th><th>Win %</th><th>Points</th><th>Titles</th><th>Playoffs</th></tr></thead>
+            <thead><tr><th scope="col">Manager</th><th scope="col">Seasons</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Points</th><th scope="col">Playoffs</th><th scope="col">Titles</th></tr></thead>
             <tbody>
               {history.careers.map(manager => (
-                <tr class={manager.current ? '' : 'former'}>
-                  <td>{manager.name}</td>
+                <tr class:list={{ former: !manager.current }}>
+                  <th scope="row">{manager.name}</th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : formatRecordValue(manager.facts.winPercentage, 1)}</td>
                   <td>{formatRecordValue(manager.facts.points, 0)}</td>
-                  <td>{manager.facts.championships}</td>
                   <td>{manager.facts.playoffAppearances}</td>
+                  <td class="titles" aria-label={`${manager.facts.championships} titles`}>
+                    {Array.from({ length: manager.facts.championships }, () => <span class="ring" />)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -122,11 +146,14 @@ function unit(view: RecordView, row: { value: number }) {
       </section>
 
       {history.streaks.length > 0 && (
-        <section>
+        <section class="block">
           <h2>Head-to-head streaks</h2>
           <ul class="streaks">
             {history.streaks.map(streak => (
-              <li><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong> {streak.count} straight<span class="muted">{streak.record} overall</span></li>
+              <li>
+                <span class="streak-count">{streak.count}</span>
+                <p><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong> {streak.count} straight. {streak.record} all time.</p>
+              </li>
             ))}
           </ul>
         </section>

@@ -1,7 +1,7 @@
 ---
 import '../styles/site.css';
-interface Props { title: string }
-const { title } = Astro.props;
+interface Props { title: string; full?: boolean }
+const { title, full = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -9,9 +9,17 @@ const { title } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Marcellus+SC&display=swap" />
   </head>
   <body>
-    <header class="site"><a href="/">League history</a></header>
+    <div class:list={['band', { full }]}>
+      <div class="band-inner">
+        <header class="site"><a href="/">League history</a></header>
+        <slot name="band" />
+      </div>
+    </div>
     <main><slot /></main>
   </body>
 </html>
