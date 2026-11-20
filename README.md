@@ -13,6 +13,8 @@ npm run dev
 
 Open the printed local URL and enter a Sleeper username. A league imports on its first visit, in about 3 seconds, into `data/leagues/<league id>.json`.
 
+Production runs on Vercel at https://rafters-liard.vercel.app, deployed with `vercel deploy --prod`. Vercel has no persistent disk, so `HISTORY_DATA_PATH=/tmp/data` there and a fresh instance reimports a league on its first visit.
+
 `npm test` runs the engine tests against controlled Sleeper fixtures, with no network. `npm run refresh` imports the league in `SLEEPER_LEAGUE_ID` into `MUSEUM_STORE_PATH` from the command line.
 
 ## Docs
