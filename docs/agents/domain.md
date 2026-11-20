@@ -13,5 +13,5 @@ Surface conflicts with existing ADRs before overriding them.
 
 ## Product contracts
 
-README.md describes what the project is.
+PRODUCT.md describes what the project is.
 For record calculations or attribution, read docs/metrics.md.

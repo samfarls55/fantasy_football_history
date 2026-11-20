@@ -23,11 +23,12 @@ export const scoreCandidates: NonNullable<CategoryDefinition['candidates']> = (a
 /** One final contest, with the two people retained; a tied final has a zero margin. */
 export const marginCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
   completedContests(archive, selection).filter(game => !selection.season || game.year === selection.season).map(game => {
-    const [side, opponent] = game.sides;
+    // The record belongs to the winner, so they lead whichever side the contest stored first; a tie keeps the stored order and says so.
+    const [side, opponent] = game.winnerId === game.sides[1].personId ? [game.sides[1], game.sides[0]] : game.sides;
     const scope = selection.scope ?? 'regular';
     const owner = identity(archive, side.personId, game.year);
     const other = identity(archive, opponent.personId, game.year);
-    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`,
+    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`, tied: game.tie,
       metric: Exact.from(side.points).subtract(opponent.points).abs(), sample: null,
       period: { year: game.year, week: Math.max(...game.weeks), playedAt: game.playedAt },
       leaderContext: `Week ${Math.max(...game.weeks)} · ${game.year}`,

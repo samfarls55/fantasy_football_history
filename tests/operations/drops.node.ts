@@ -26,7 +26,7 @@ test('published drops count other people strictly after each drop without mergin
     assert.equal(category.rows[0].exactKey, '400/1');
     assert.equal(category.rows[0].href, `/managers/${tim}/seasons/2021/?tab=players&scope=regular&view=drops&event=900000000000002021%3A920000000000000002%3A50%3A7`);
     assert.equal(category.leaders.length, 2);
-    assert.match(category.leaders[0].leaderContext!, /Timh17.*2021.*Week 4 drop/);
+    assert.match(category.leaders[0].leaderContext!, /Timh17 · Week 4 · 2021/);
   });
 });
 

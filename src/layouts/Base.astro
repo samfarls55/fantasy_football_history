@@ -1,0 +1,27 @@
+---
+import '../styles/site.css';
+interface Props { title: string; full?: boolean; back?: { href: string; label: string } }
+const { title, full = false, back } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#123a22" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;700;900&family=Sofia+Sans+Semi+Condensed:wght@400;600;800&display=swap" />
+  </head>
+  <body>
+    <div class:list={['endzone', { full }]}>
+      <div class="endzone-inner">
+        {back && <header class="site"><a href={back.href}><span aria-hidden="true">←</span>{back.label}</a></header>}
+        <slot name="endzone" />
+      </div>
+    </div>
+    <main class="field"><slot /></main>
+    <slot name="close" />
+  </body>
+</html>

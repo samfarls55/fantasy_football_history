@@ -1,0 +1,12 @@
+---
+// heading: false when the page's own headline already says why you're here.
+interface Props { username: string; autofocus?: boolean; heading?: boolean }
+const { username, autofocus = false, heading = true } = Astro.props;
+---
+<form class="lookup" method="get" action="/">
+  {heading && <h1 class="painted">Find your league</h1>}
+  <div class="lookup-row">
+    <input name="u" value={username} placeholder="Sleeper username" aria-label="Sleeper username" autocomplete="username" required autofocus={autofocus} />
+    <button>Find leagues</button>
+  </div>
+</form>

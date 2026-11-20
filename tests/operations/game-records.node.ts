@@ -26,6 +26,9 @@ test('published final margins preserve decimal equality, zero ties, unique conte
     assert.match(closest!.rows[2].href, /\/seasons\/2021\/matchups\/.+\?scope=regular&week=1/);
     assert.equal(closest!.rows[2].secondary?.[0].name, 'Record manager 02');
     assert.match(closest!.rows[2].secondary![0].href, /\/managers\/.+\/seasons\/2021\/\?scope=regular/);
+    // A margin record belongs to the game's winner, whichever side the contest stored first (99.9 lost to 100 here); a tied game says so.
+    assert.deepEqual([closest!.rows[1].name, closest!.rows[1].secondary?.[0].name, closest!.rows[1].tied], ['Record manager 02', 'Record manager 01', false]);
+    assert.equal(closest!.rows[0].tied, true);
     assert.deepEqual((await readCategory('biggest-blowout', { storePath }))?.leaders.map(row => [row.value, row.rank]), [[4, 1]]);
     assert.equal((await readRecordCollection({ storePath }))?.find(group => group.name === 'Matchups')?.categories.find(category => category.key === 'closest-game')?.leaders[0].value, 0);
     (source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[])[0].custom_points = 100.25;

@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Lookup from '../components/Lookup.astro';
+import { findLeagues } from '../leagues.ts';
+
+const username = Astro.url.searchParams.get('u')?.trim() ?? '';
+const lookup = username ? await findLeagues(username) : undefined;
+const leagues = lookup?.leagues;
+// You arrive in a league already highlighted: your name painted everywhere you appear and the bar ready to walk you through them,
+// which is also how you learn that any name can be tapped. With one league there's no list to go back to, so ?u= stays behind.
+const arrive = (id: string, back: boolean) => `/leagues/${id}?${new URLSearchParams({ ...(back && { u: username }), manager: lookup!.name })}`;
+if (leagues?.length === 1) return Astro.redirect(arrive(leagues[0].id, false));
+---
+<Base title="League history" full>
+  <Fragment slot="endzone">
+    <Lookup username={username} autofocus />
+    {lookup === null && <p class="notice">No Sleeper user is named {username}. Check the spelling and try again.</p>}
+    {leagues?.length === 0 && <p class="notice">{username} isn’t in any leagues this season or last.</p>}
+    {leagues && leagues.length > 1 && (
+      <ul class="leagues">
+        {leagues.map((league, index) => (
+          <li style={`--i: ${index}`}>
+            <a href={arrive(league.id, true)}>
+              {league.avatar ? <img src={league.avatar} alt="" width="52" height="52" /> : <span class="avatar-blank" />}
+              <span class="league-title">{league.name}</span>
+              <span class="league-meta">{league.teams} teams</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </Fragment>
+</Base>
