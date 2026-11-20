@@ -84,7 +84,8 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), versus, reigning, marked };
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), versus, reigning, marked,
+    missed: markParam && !marked ? markParam : null };
 }, storePath);
 // A manager's name links to the page with them highlighted, or back to no one when they already are. ?u= rides along.
 const markHref = (name: string | null) => {
@@ -127,18 +128,35 @@ const landing = (key: string) => {
           <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
           <a href={markHref(null)}>Clear</a>
         </p>
+        {/* A mistyped ?manager= says so, rather than quietly highlighting no one. */}
+        {history.missed && (
+          <p class="marking miss">
+            <span>No manager named <strong>{history.missed}</strong> in this league.</span>
+            <a href={markHref(null)}>Clear</a>
+          </p>
+        )}
       </>
     )}
   </Fragment>
 
   {history && (
     <>
-      <nav class="jump" aria-label="Sections">
-        <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
-        {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Fame &amp; shame</a>}
-        <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
-        {(history.streaks.length > 0 || history.versus.length > 0) && <a href="#rivalries"><span aria-hidden="true">40</span>Rivalries</a>}
-      </nav>
+      {/* The bar along the bottom: who is highlighted with the way out and the next sighting, then the sections, each marked when the highlight is in it.
+          Confirmations take over the section strip for a moment, so they never cover the field. */}
+      <div class="jump">
+        <div class="jump-mark" hidden={!history.marked}>
+          <span class="me marking-name">{history.marked?.name}</span>
+          <button type="button" class="jump-next">Next</button>
+          <a href={markHref(null)}>Clear</a>
+        </div>
+        <nav class="jump-links" aria-label="Sections">
+          <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
+          {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Fame &amp; shame</a>}
+          <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
+          <a href="#rivalries" hidden={!history.streaks.length && !history.versus.length}><span aria-hidden="true">40</span>Rivalries</a>
+        </nav>
+        <p class="copied" role="status"></p>
+      </div>
 
       <section class="block" id="champions">
         <h2 class="painted" data-yard="10">Champions</h2>
@@ -219,8 +237,8 @@ const landing = (key: string) => {
         </div>
       </section>
 
-      {(history.streaks.length > 0 || history.versus.length > 0) && (
-        <section class="block" id="rivalries">
+      {/* Always rendered, hidden when it has nothing, so a highlight's head-to-head can swap in without a reload. */}
+        <section class="block" id="rivalries" hidden={!history.streaks.length && !history.versus.length}>
           <h2 class="painted" data-yard="40" tabindex="-1">Rivalries</h2>
           {history.versus.length > 0 ? (
             <div class="table-wrap">
@@ -258,8 +276,6 @@ const landing = (key: string) => {
           )}
           </>}
         </section>
-      )}
-      <p class="copied" role="status"></p>
     </>
   )}
   {history?.reigning && (
@@ -273,7 +289,8 @@ const landing = (key: string) => {
 </Base>
 
 <script>
-  // One live region, shown briefly, for both the copied link and the highlight.
+  let stepped = -Infinity;
+  // One live region, in the jump bar's section strip, for the copied link, the highlight and each step.
   let timer = 0;
   const say = (text: string) => {
     const status = document.querySelector('.copied')!;
@@ -294,9 +311,23 @@ const landing = (key: string) => {
     else navigator.clipboard.writeText(url).then(() => say('Link copied'));
   });
 
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump-links a')];
+  // Looked up each time: Rivalries is replaced when the highlight changes.
+  const sectionOf = (link: HTMLAnchorElement) => document.getElementById(link.hash.slice(1))!;
+  // Each section holding the highlighted manager gets a dab of the same paint on its bar entry.
+  const paintBar = () => {
+    const name = document.querySelector('.jump-mark .marking-name')!.textContent;
+    links.forEach(link => {
+      const holds = !!sectionOf(link).querySelector('a.me');
+      link.classList.toggle('holds', holds);
+      holds ? link.setAttribute('aria-description', `${name} is here`) : link.removeAttribute('aria-description');
+    });
+  };
+  paintBar();
+
   // With JS, highlighting a manager repaints in place instead of reloading to the top; the URL still carries it for sharing.
   document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .marking a');
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .marking a, .jump-mark a');
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
     const url = new URL(location.href);
@@ -319,31 +350,59 @@ const landing = (key: string) => {
       if (holds || box.hasAttribute('data-marked')) box.open = holds;
       box.toggleAttribute('data-marked', holds);
     });
-    document.querySelector('.marking-name')!.textContent = next;
-    document.querySelector<HTMLElement>('.marking')!.hidden = !next;
-    if (!link.closest('.marking')) scrollBy({ top: link.getBoundingClientRect().top - top, behavior: 'instant' });
+    document.querySelector('.miss')?.remove();
+    document.querySelectorAll('.marking-name').forEach(element => { element.textContent = next; });
+    document.querySelectorAll<HTMLElement>('.marking:not(.miss), .jump-mark').forEach(element => { element.hidden = !next; });
+    stepped = -Infinity;
+    travelling = false;
+    paintBar();
+    // The tapped name holds still, and stays clear of the bar's highlight row that may have just risen over it.
+    if (!link.closest('.marking, .jump')) {
+      const bar = document.querySelector('.jump')!.getBoundingClientRect().top;
+      const { top: moved, height } = link.getBoundingClientRect();
+      scrollBy({ top: moved - top + Math.max(0, top + height + 12 - bar), behavior: 'instant' });
+    }
     say(next ? `${next} highlighted` : 'Highlight cleared');
     // Rivalries change shape with the highlight, so the server renders it for the new URL and it swaps in; a later tap wins.
     const wanted = url.pathname + url.search;
     fetch(wanted).then(response => response.text()).then(html => {
-      const old = document.getElementById('rivalries');
-      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries');
-      if (location.pathname + location.search !== wanted || !old || !fresh) return;
+      const old = document.getElementById('rivalries')!;
+      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries')!;
+      if (location.pathname + location.search !== wanted) return;
       const focused = old.contains(document.activeElement);
       old.replaceWith(fresh);
+      links.find(link => link.hash === '#rivalries')!.hidden = fresh.hidden;
       watch.observe(fresh);
+      paintBar();
       if (focused) fresh.querySelector('h2')!.focus({ preventScroll: true });
     });
   });
 
+  // Next walks the page's sightings of the highlighted manager top to bottom, landing each a third of the way down, then wraps.
+  // It counts on from the last sighting it landed (a smooth scroll may still be travelling, or the page may end short of it) until the visitor scrolls on their own.
+  let travelling = false;
+  addEventListener('scrollend', () => { if (travelling) travelling = false; else stepped = -Infinity; });
+  document.querySelector('.jump-next')!.addEventListener('click', () => {
+    const line = innerHeight / 3;
+    const sightings = [...document.querySelectorAll<HTMLAnchorElement>('.field a.me, .close a.me')]
+      .filter(element => element.getClientRects().length).map(element => Math.round(element.getBoundingClientRect().top + scrollY))
+      // Names side by side on one line are one stop.
+      .sort((a, b) => a - b).filter((top, index, tops) => !index || top - tops[index - 1] > 4);
+    const from = Math.max(stepped, scrollY + line);
+    const index = sightings.findIndex(top => top > from + 4);
+    const target = index < 0 ? 0 : index;
+    stepped = sightings[target];
+    travelling = true;
+    scrollTo({ top: stepped - line });
+    say(`${target + 1} of ${sightings.length}`);
+  });
+
   // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump a')];
   const mark = () => {
-    // Looked up each time: Rivalries is replaced when the highlight changes.
-    const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
-    const current = sections.findLast(section => section.getBoundingClientRect().top <= innerHeight * 0.3);
+    const sections = links.map(sectionOf);
+    const current = sections.findLast(section => !section.hidden && section.getBoundingClientRect().top <= innerHeight * 0.3);
     links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
   };
   const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
-  links.forEach(link => watch.observe(document.getElementById(link.hash.slice(1))!));
+  links.forEach(link => watch.observe(sectionOf(link)));
 </script>
