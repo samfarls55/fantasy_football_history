@@ -10,6 +10,7 @@ import { readRivalry } from '../../history/rivalries.ts';
 
 const { id = '' } = Astro.params;
 const username = Astro.url.searchParams.get('u')?.trim() ?? '';
+const markParam = Astro.url.searchParams.get('manager');
 const status = /^\d+$/.test(id) ? await ensureLeague(id) : 'missing';
 // A league that can't be shown says why, with the username lookup right there to pick it again.
 const failure = { ready: null, missing: `Sleeper has no league with ID ${id}.`, failed: 'Sleeper didn’t send this league’s history. Try again in a minute.' }[status];
@@ -42,7 +43,7 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));
   const plates = seasons.toReversed().map(season => ({
     year: season.year, complete: season.complete,
-    champion: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
+    champions: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name),
   }));
   const load = async (feature: Feature) => {
     const view = await readCategory(feature.key, { storePath });
@@ -70,10 +71,18 @@ const history = failure ? null : await withHistorySnapshot(async () => {
   // The field ends in the other end zone, painted with the last season that finished.
   const lastDone = seasons.find(season => season.complete);
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
-  const reigning = winners.length ? { year: lastDone!.year, champion: winners.map(team => nameOf.get(team.personId) ?? team.name).join(' & '),
+  const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), reigning };
+  // ?manager=<username> highlights one manager everywhere they appear, readable in a group chat; an unknown name highlights no one.
+  const marked = managers.find(manager => manager.name === markParam) ?? null;
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), reigning, marked };
 }, storePath);
+// A manager's name links to the page with them highlighted, or back to no one when they already are. ?u= rides along.
+const markHref = (name: string | null) => {
+  const query = new URLSearchParams({ ...(username && { u: username }), ...(name && name !== history?.marked?.name && { manager: name }) }).toString();
+  return query ? `?${query}` : Astro.url.pathname;
+};
+const mine = (name: string) => name === history?.marked?.name;
 
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
 const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -101,6 +110,10 @@ const landing = (key: string) => {
       <>
         <h1 class="painted league-name">{history.name}</h1>
         <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
+        <p class="marking" hidden={!history.marked}>
+          <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
+          <a href={markHref(null)} data-person="">Clear</a>
+        </p>
       </>
     )}
   </Fragment>
@@ -122,7 +135,7 @@ const landing = (key: string) => {
             <li class="yard" style={`--i: ${index}`}>
               <span class="yard-year">{plate.year}</span>
               {plate.complete
-                ? <span class="yard-champ">{plate.champion || '—'}</span>
+                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<a href={markHref(champion)} data-person={champion} class:list={{ me: mine(champion) }} aria-current={mine(champion) ? 'true' : undefined}>{champion}</a></>) : '—'}</span>
                 : <span class="yard-live"><span class="ball" aria-hidden="true" />In play</span>}
             </li>
           ))}
@@ -151,12 +164,12 @@ const landing = (key: string) => {
                 <h4><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></h4>
                 <p class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><span class="play-unit">{record.feature.unit}</span></p>
                 <div class="play-who">
-                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
+                {leaders.map(row => <p class="play-holder"><strong data-person={row.manager} class:list={{ me: mine(row.manager) }}>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
-                  <details class="play-next">
+                  <details class="play-next" open={others.some(row => mine(row.manager))}>
                     <summary>{others.length > 1 ? 'Runners-up' : 'Runner-up'}</summary>
                     <ol>
-                      {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
+                      {others.map(row => <li value={row.rank}><span data-person={row.manager} class:list={{ me: mine(row.manager) }}>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
                     </ol>
                   </details>
                 )}
@@ -178,7 +191,7 @@ const landing = (key: string) => {
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
-                  <th scope="row">{manager.name}<span class="career-range">{manager.range}</span></th>
+                  <th scope="row"><a href={markHref(manager.name)} data-person={manager.name} class:list={{ me: mine(manager.name) }} aria-current={mine(manager.name) ? 'true' : undefined}>{manager.name}</a><span class="career-range">{manager.range}</span></th>
                   <td>{manager.range}</td>
                   <td>{manager.facts.record}{manager.facts.ties ? `–${manager.facts.ties}` : ''}</td>
                   <td>{manager.facts.winPercentage === null ? '—' : fixed(manager.facts.winPercentage, 1)}</td>
@@ -198,7 +211,7 @@ const landing = (key: string) => {
           {history.streaks.slice(0, 1).map(streak => (
             <div class="streak-top">
               <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
-              <p class="streak-who"><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong></p>
+              <p class="streak-who"><strong data-person={streak.winner} class:list={{ me: mine(streak.winner) }}>{streak.winner}</strong> has beaten <strong data-person={streak.loser} class:list={{ me: mine(streak.loser) }}>{streak.loser}</strong></p>
               <p class="streak-record">{streak.record} all time, playoffs included</p>
             </div>
           ))}
@@ -207,7 +220,7 @@ const landing = (key: string) => {
               {history.streaks.slice(1).map(streak => (
                 <li>
                   <span class="streak-count">{streak.count}</span>
-                  <p><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong><span>{streak.record} all time, playoffs included</span></p>
+                  <p><strong data-person={streak.winner} class:list={{ me: mine(streak.winner) }}>{streak.winner}</strong> has beaten <strong data-person={streak.loser} class:list={{ me: mine(streak.loser) }}>{streak.loser}</strong><span>{streak.record} all time, playoffs included</span></p>
                 </li>
               ))}
             </ul>
@@ -220,7 +233,7 @@ const landing = (key: string) => {
   {history?.reigning && (
     <footer slot="close" class="endzone close">
       <div class="endzone-inner">
-        <p class="painted close-name">{history.reigning.champion}</p>
+        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<span data-person={champion} class:list={{ me: mine(champion) }}>{champion}</span></>)}</p>
         <p class="league-years">{history.reigning.year} champion{history.reigning.titles > 1 && ` · ${history.reigning.titles} titles`}</p>
       </div>
     </footer>
@@ -247,6 +260,35 @@ const landing = (key: string) => {
         timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
       });
     }
+  });
+
+  // With JS, highlighting a manager repaints in place instead of reloading to the top; the URL still carries it for sharing.
+  document.addEventListener('click', event => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person]');
+    if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    event.preventDefault();
+    const url = new URL(location.href);
+    const next = link.dataset.person && link.dataset.person !== url.searchParams.get('manager') ? link.dataset.person : null;
+    if (next) url.searchParams.set('manager', next); else url.searchParams.delete('manager');
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+    document.querySelectorAll<HTMLElement>('[data-person]').forEach(element => {
+      const on = !!next && element.dataset.person === next;
+      element.classList.toggle('me', on);
+      if (element instanceof HTMLAnchorElement && element.dataset.person) {
+        on ? element.setAttribute('aria-current', 'true') : element.removeAttribute('aria-current');
+        const target = new URL(url);
+        if (on) target.searchParams.delete('manager'); else target.searchParams.set('manager', element.dataset.person);
+        element.href = target.pathname + target.search;
+      }
+    });
+    // A highlighted runner-up opens its box so the mark is never hidden.
+    document.querySelectorAll<HTMLDetailsElement>('.play-next').forEach(box => { if (box.querySelector('.me')) box.open = true; });
+    document.querySelector('.marking-name')!.textContent = next;
+    document.querySelector<HTMLElement>('.marking')!.hidden = !next;
+    const status = document.querySelector('.copied')!;
+    status.textContent = next ? `${next} highlighted` : 'Highlight cleared';
+    clearTimeout(timer);
+    timer = window.setTimeout(() => { status.textContent = ''; }, 1800);
   });
 
   // The jump bar marks the section under the top third of the screen. Without JS it just has no mark.
