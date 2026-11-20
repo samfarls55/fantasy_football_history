@@ -10,7 +10,7 @@ import { readRivalry } from '../../history/rivalries.ts';
 const { id = '' } = Astro.params;
 if (!/^\d+$/.test(id)) return new Response(null, { status: 404 });
 const username = Astro.url.searchParams.get('u')?.trim();
-const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : undefined;
+const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : { href: '/', label: 'Find your league' };
 let failure: string | null = null;
 try {
   await ensureLeague(id);
@@ -22,7 +22,7 @@ try {
 // digits: one fixed precision per record so a figure and its runners-up line up (points 2, percentages 1, counts 0).
 interface Feature { key: string; name: string; unit: string; digits: number; shame?: boolean; verb?: string }
 // The headline: the best team that went home empty is the record every league argues about.
-const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'more points per game than the league average', digits: 1, shame: true };
+const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'above the league’s average weekly score', digits: 1, shame: true };
 // Opposites face each other across the field: fame in white paint, shame under a flag. Pairs sit in themed groups so the run has structure.
 const groupFeatures: { name: string; pairs: Feature[][] }[] = [
   { name: 'Scoring', pairs: [
@@ -34,7 +34,7 @@ const groupFeatures: { name: string; pairs: Feature[][] }[] = [
   ] },
   { name: 'Roster & luck', pairs: [
     [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up' }, { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true }],
-    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their points earned', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
+    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'wins short of what their points deserved', digits: 1, shame: true }, { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true }],
   ] },
 ];
 
@@ -80,11 +80,11 @@ const history = failure ? null : await withHistorySnapshot(async () => {
 type Row = { value: number; name: string; manager: string; leaderContext?: string; secondary?: { name: string }[]; matchupLabel?: string };
 const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const value = (record: { feature: Feature; percent: boolean }, row: Row) =>
-  record.percent ? `${row.value > 0 ? '+' : ''}${fixed(row.value, record.feature.digits)}%` : fixed(row.value, record.feature.digits);
+  record.percent ? `${fixed(row.value, record.feature.digits)}%` : fixed(row.value, record.feature.digits);
 const who = (feature: Feature, row: Row) => feature.verb ? `${row.manager} ${feature.verb} ${row.name}`
-  : row.matchupLabel && row.secondary?.[0] ? `${row.name} over ${row.secondary[0].name}` : row.name;
-// Every context reads "Week 3, 2020", and a date never breaks across lines. Player records lead it with the manager, already named in who().
-const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
+  : row.matchupLabel && row.secondary?.[0] ? `${row.name} beat ${row.secondary[0].name}` : row.name;
+// Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named in who().
+const when = (feature: Feature, row: Row) => (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4}) – Week (\d+), \2/,'Weeks $1–$3, $2').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
 // Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
 const landing = (key: string) => {
   const hash = [...key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
@@ -106,9 +106,9 @@ const landing = (key: string) => {
     <>
       <nav class="jump" aria-label="Sections" style={`--i: ${history.plates.length - 1}`}>
         <a href="#champions"><span aria-hidden="true">10</span>Champions</a>
-        {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Records</a>}
+        {history.groups.length > 0 && <a href="#records"><span aria-hidden="true">20</span>Fame &amp; shame</a>}
         <a href="#careers"><span aria-hidden="true">30</span>Careers</a>
-        {history.streaks.length > 0 && <a href="#streaks"><span aria-hidden="true">40</span>Streaks</a>}
+        {history.streaks.length > 0 && <a href="#rivalries"><span aria-hidden="true">40</span>Rivalries</a>}
       </nav>
 
       <section class="block" id="champions">
@@ -127,7 +127,7 @@ const landing = (key: string) => {
 
       {history.groups.length > 0 && (
       <section class="block" id="records">
-        <h2 class="painted" data-yard="20">Hall of fame <span class="shame-word">&amp; shame</span></h2>
+        <h2 class="painted" data-yard="20">Fame <span class="shame-word">&amp; shame</span></h2>
         {history.groups.map(group => (
         <>
         {group.name && <h3 class="group-name">{group.name}</h3>}
@@ -149,7 +149,7 @@ const landing = (key: string) => {
                 {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row)}</strong><span>{when(record.feature, row)}</span></p>)}
                 {others.length > 0 && (
                   <details class="play-next">
-                    <summary>{[...new Set(others.map(row => row.rank))].map(rank => ['', '1st', '2nd', '3rd'][rank]).join(' & ')}</summary>
+                    <summary>{others.length > 1 ? 'Runners-up' : 'Runner-up'}</summary>
                     <ol>
                       {others.map(row => <li value={row.rank}><span>{who(record.feature, row)}</span><span>{value(record, row)}</span></li>)}
                     </ol>
@@ -187,13 +187,13 @@ const landing = (key: string) => {
       </section>
 
       {history.streaks.length > 0 && (
-        <section class="block" id="streaks">
-          <h2 class="painted" data-yard="40"><span class="whole">Head-to-head</span> streaks</h2>
+        <section class="block" id="rivalries">
+          <h2 class="painted" data-yard="40">Rivalries</h2>
           {history.streaks.slice(0, 1).map(streak => (
             <div class="streak-top">
               <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
               <p class="streak-who"><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong></p>
-              <p class="streak-record">{streak.record} all time, including playoffs</p>
+              <p class="streak-record">{streak.record} all time, playoffs included</p>
             </div>
           ))}
           {history.streaks.length > 1 && (
@@ -201,7 +201,7 @@ const landing = (key: string) => {
               {history.streaks.slice(1).map(streak => (
                 <li>
                   <span class="streak-count">{streak.count}</span>
-                  <p><strong>{streak.winner}</strong> over <strong>{streak.loser}</strong><span>{streak.record} including playoffs</span></p>
+                  <p><strong>{streak.winner}</strong> has beaten <strong>{streak.loser}</strong><span>{streak.record} all time, playoffs included</span></p>
                 </li>
               ))}
             </ul>

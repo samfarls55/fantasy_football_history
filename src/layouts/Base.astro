@@ -1,7 +1,7 @@
 ---
 import '../styles/site.css';
 interface Props { title: string; full?: boolean; back?: { href: string; label: string } }
-const { title, full = false, back = { href: '/', label: 'League history' } } = Astro.props;
+const { title, full = false, back } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +17,7 @@ const { title, full = false, back = { href: '/', label: 'League history' } } = A
   <body>
     <div class:list={['endzone', { full }]}>
       <div class="endzone-inner">
-        <header class="site"><a href={back.href}>{back.label}</a></header>
+        {back && <header class="site"><a href={back.href}><span aria-hidden="true">←</span>{back.label}</a></header>}
         <slot name="endzone" />
       </div>
     </div>

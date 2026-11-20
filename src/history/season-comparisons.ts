@@ -41,7 +41,7 @@ export function seasonCandidates(key: 'dominant-season' | 'unluckiest-season' | 
       const sample = `${comparison.playedWeeks} regular-season ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`;
       return [{ id: team.id, personId: person.id, name: person.name, avatar: team.avatar, metric,
         detail: team.name === person.name ? undefined : team.name,
-        sample, leaderContext: `${season.year} season · ${sample}`,
+        sample, leaderContext: `${season.year} season`,
         period: { year: season.year, week: Math.max(...season.completedWeeks), playedAt: null },
         href: `/managers/${person.id}/seasons/${season.year}/?scope=regular`, historyLabel: 'Open season' }];
     }));

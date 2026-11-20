@@ -72,7 +72,7 @@ p { text-wrap: pretty; }
 .site a {
   display: inline-flex; align-items: center; min-height: 44px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
-  text-decoration: none; color: var(--chalk);
+  gap: 8px; text-decoration: none; color: var(--chalk);
 }
 .site a:hover { color: var(--paint); }
 .notice { margin-top: 24px; max-width: 56ch; font-size: 20px; color: var(--paint); }
@@ -108,7 +108,7 @@ h2[data-yard]::after {
 /* Jump bar: the yard markers along the bottom edge, in reach of a thumb. It rises as the ball lands, last in the load. */
 .jump {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 2; margin: 0 auto; width: min(100%, 600px);
-  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  display: grid; grid-auto-flow: column; justify-content: space-evenly;
   padding: 0 8px env(safe-area-inset-bottom);
   background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px);
   border-top: 4px solid var(--paint);
@@ -116,7 +116,7 @@ h2[data-yard]::after {
   animation: rise 450ms ease-out both; animation-delay: calc(var(--i) * 90ms + 1500ms);
 }
 .jump a {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; padding: 6px 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60px; padding: 6px; white-space: nowrap;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   text-decoration: none; color: var(--chalk);
   transition: color 160ms ease-out;
@@ -169,7 +169,6 @@ h2[data-yard]::after {
 
 /* Records: opposites face each other across a chalk line; fame in white paint, shame under a thrown flag. */
 .shame-word { color: var(--flag); }
-.whole { white-space: nowrap; }
 /* A theme name chalked on the turf, with the yard line it starts on. */
 .group-name {
   margin-top: 56px; font-family: var(--stencil); font-weight: 800; font-size: 26px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1;
@@ -252,7 +251,7 @@ tr.former th { font-weight: 600; }
 .titles { font-family: var(--stencil); font-weight: 500; font-size: 28px; line-height: 1; color: var(--chalk-quiet); }
 .titles.won { font-weight: 900; color: var(--flag); }
 
-/* Head-to-head streaks: the longest gets the headline's painted line and size; the rest line up as a set. */
+/* Rivalries: the longest gets the headline's painted line and size; the rest line up as a set. */
 .streak-top { margin-top: 20px; padding: 28px 0 36px; border-top: 6px solid var(--paint); }
 .streak-run { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 20px; }
 .streak-big { font-family: var(--stencil); font-weight: 900; font-size: clamp(120px, 18vw, 220px); line-height: 0.8; }
