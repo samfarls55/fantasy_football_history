@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { sleeperProvider } from './refresh.ts';
@@ -5,6 +6,9 @@ import type { Provider } from './types.ts';
 
 const playerCacheAge = 24 * 60 * 60 * 1000;
 const concurrency = 10;
+// Every import in this process shares one player-list load per cache file: two leagues opened at once would otherwise
+// each download the list and race two writes into the same file.
+const playerLists = new Map<string, Promise<unknown>>();
 
 /**
  * A Sleeper provider for on-demand imports. Refresh asks for paths one at a time; this
@@ -43,15 +47,24 @@ export function sleeperImportProvider(playerCachePath: string, source: Provider 
     for (let round = 0; round <= last; round++) void fetchOnce(`${path}/transactions/${round}`);
     if (league.previous_league_id) void prefetchLeague(league.previous_league_id);
   }
-  async function players() {
+  async function loadPlayers() {
     const cached = await stat(playerCachePath).catch(() => null);
     if (cached && Date.now() - cached.mtimeMs < playerCacheAge) return JSON.parse(await readFile(playerCachePath, 'utf8'));
     const value = await source.get('players/nfl');
     await mkdir(dirname(playerCachePath), { recursive: true });
-    const temporary = `${playerCachePath}.tmp-${process.pid}`;
+    // A writer of its own, so another process refreshing the same cache (the refresh command) can't rename this one away.
+    const temporary = `${playerCachePath}.tmp-${process.pid}-${randomUUID()}`;
     await writeFile(temporary, JSON.stringify(value));
     await rename(temporary, playerCachePath);
     return value;
+  }
+  function players() {
+    let list = playerLists.get(playerCachePath);
+    if (!list) {
+      list = loadPlayers().finally(() => playerLists.delete(playerCachePath));
+      playerLists.set(playerCachePath, list);
+    }
+    return list;
   }
 
   return {
