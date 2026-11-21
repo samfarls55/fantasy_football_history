@@ -5,7 +5,7 @@ export interface MetricSelection { scope?: Scope; season?: string }
 export interface MetricIdentity { personId?: string; franchiseId?: string }
 export interface CareerFacts {
   wins: number; losses: number; ties: number; games: number; record: string;
-  winPercentage: number | null; points: number; championships: number; playoffAppearances: number;
+  winPercentage: number | null; points: number; pointsAgainst: number; championships: number; playoffAppearances: number;
 }
 /** One calculation for rankings, careers and season standings, at source precision. */
 export function careerMetrics(archive: Archive, identity: MetricIdentity, options: MetricSelection = {}) {
@@ -18,12 +18,15 @@ export function careerMetrics(archive: Archive, identity: MetricIdentity, option
   const losses = games.length - wins - ties;
   const performances = archive.performances.filter(row => includes(row) && seasonIds.has(row.seasonId) && inScope(row.competition, options.scope ?? 'regular'));
   const points = exactSum(performances.map(row => row.points));
+  // Points against: the opponent's official score in each of those same contest weeks.
+  const faced = new Set(performances.map(row => `${row.contestId}/${row.week}`));
+  const pointsAgainst = exactSum(archive.performances.filter(row => !includes(row) && faced.has(`${row.contestId}/${row.week}`)).map(row => row.points));
   const actualWins = Exact.from(wins).add(Exact.from(ties).divide(2));
   const winPercentage = games.length ? actualWins.multiply(100).divide(games.length) : null;
   const owned = (season: typeof seasons[number]) => season.teams.filter(includes).map(team => team.personId);
   const titleSeasons = seasons.filter(season => season.championId && owned(season).includes(season.championId));
   const facts: CareerFacts = { wins, losses, ties, games: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, winPercentage: winPercentage?.toNumber() ?? null,
-    points: points.toNumber(), championships: titleSeasons.length, playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => owned(season).includes(id))).length };
+    points: points.toNumber(), pointsAgainst: pointsAgainst.toNumber(), championships: titleSeasons.length, playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => owned(season).includes(id))).length };
   return { facts, points, actualWins, winPercentage, games, performances, titleSeasons };
 }
 export function careerFacts(archive: Archive, identity: MetricIdentity, options: MetricSelection = {}): CareerFacts {

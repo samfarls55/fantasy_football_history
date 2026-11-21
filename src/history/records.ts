@@ -62,6 +62,7 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('winning') },
   { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('losing') },
   { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title') },
+  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', unit: 'wins above expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season') },
   { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'wins below expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season') },
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season') },
   { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games', candidates: scoreCandidates },
