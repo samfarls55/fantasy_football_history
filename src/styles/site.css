@@ -494,14 +494,16 @@ tr.former th { font-weight: 600; }
   .play.across:target::after { top: -3px; }
   /* The yard numbers would crowd four labels, so the bar keeps the labels, centered under each thumb. */
   .jump { --row: 44px; padding: 0 8px env(safe-area-inset-bottom); }
-  /* The highlight row is one 44px line: the name gives way to Prev, Next and Clear, and the sections below tighten under it. */
-  .jump-row { gap: 8px; padding-left: 8px; }
-  .jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { padding-top: 0; }
-  .jump-mark { gap: 4px; }
-  .copied { font-size: 17px; }
+  /* Phones get one bar: the sections alone. The highlight row stays off (tap the highlighted name to clear it)
+     and confirmations go to the screen reader only, so nothing stacks over the sections. */
+  .jump-mark, .jump-mark[hidden] { display: none; }
+  .jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { height: auto; padding: 0; border: 0; }
+  .copied, .copied:not(:empty) { position: absolute; width: 1px; height: 1px; padding: 0; clip-path: inset(50%); }
+  .jump:has(.jump-mark:not([hidden]), .copied:not(:empty)) .jump-links a[aria-current]::before { top: -4px; }
+  html:has(.jump-mark:not([hidden])) { scroll-padding-bottom: 96px; }
+  body:has(.jump-mark:not([hidden])) .close .endzone-inner { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
   /* Labels sit on one line along the bottom, so a section without a chip lines up with those that have one. */
-  .jump:has(.jump-mark:not([hidden])) .jump-links a { justify-content: flex-end; min-height: 48px; padding: 4px 2px 8px; gap: 2px; }
-  .jump-links a { flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 56px; padding: 6px 2px 4px; font-size: 16px; letter-spacing: 0.04em; text-align: center; white-space: normal; }
+  .jump-links a { flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; min-height: 56px; padding: 6px 2px 10px; font-size: 16px; letter-spacing: 0.04em; text-align: center; white-space: normal; }
   .jump-links .yard-no { display: none; }
   .jump-links a[aria-current]::before { left: 10px; right: 10px; }
   /* No room beside a phone's labels, so the chip sits above, centered like a hash mark. */
