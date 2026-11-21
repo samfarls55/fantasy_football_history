@@ -28,7 +28,7 @@ Do not infer championship-path membership from a week number alone. Preserve the
 
 [Sleeper format evidence](sleeper-formats.md) records supported round-type semantics, bracket/weekly identity pairing, raw lower-bracket advancement and coverage gates. Shared `completedContests` filters explicit completion for W-L-T; weekly points and starts use completed `performances`, including the available legs of an unfinished multiweek contest.
 
-Career points sum eligible official scored team performances. Win percentage uses decided contests, with half credit for tied contests. These units differ for a multiweek contest, so do not derive game count from the count of player-point rows.
+Career points sum eligible official scored team performances. Points against sum the opponent's official score in each of those same contest weeks; a bye adds none. Win percentage uses decided contests, with half credit for tied contests. These units differ for a multiweek contest, so do not derive game count from the count of player-point rows.
 
 Completed current-season games count in career/game/player totals. Completed-season awards wait for the season to finish. Champion and runner-up remain unknown until the title contest resolves. The visitor sees historical content, without an ongoing/update-status badge.
 
@@ -55,6 +55,7 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | winning-streak | Careers: Longest winning streak | Person's consecutive wins, descending | Season/all; game scope | Profile or season history retaining streak interval |
 | losing-streak | Careers: Longest losing streak | Person's consecutive losses, descending | Season/all; game scope | Profile or season history retaining streak interval |
 | best-without-title | Seasons: Best season without a title | Completed nonchampion team-season dominance, descending | Completed season/all; regular only | Manager-season history |
+| luckiest-season | Seasons: Luckiest season | Actual wins minus expected wins, descending | Completed season/all; regular only | Manager-season history |
 | unluckiest-season | Seasons: Unluckiest season | Expected wins minus actual wins, descending | Completed season/all; regular only | Manager-season history |
 | dominant-season | Seasons: Most dominant season | Completed team-season dominance, descending | Completed season/all; regular only | Manager-season history |
 | highest-score | Matchups: Highest team score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
@@ -90,7 +91,7 @@ An undefined league denominator gives no dominance result. A missing team-week i
 
 For a team in a completed week with n eligible scoring teams, expected wins for that week = (number of other teams outscored + 0.5 × number tied) / (n - 1). Require at least two eligible teams and complete required weekly scoring coverage. Sum weekly fractions. Actual wins over the same weeks = wins + 0.5 × ties.
 
-Unluckiest season ranks expected wins minus actual wins, with the largest positive difference first. The season table's Wins vs expected shows actual wins minus expected wins. These have opposite signs intentionally. Example: expected 8.5, actual 6 gives an unluckiest-season value of 2.5 and a season-table value of -2.5.
+Unluckiest season ranks expected wins minus actual wins, with the largest positive difference first. The season table's Wins vs expected shows actual wins minus expected wins. These have opposite signs intentionally. Example: expected 8.5, actual 6 gives an unluckiest-season value of 2.5 and a season-table value of -2.5. Luckiest season ranks actual wins minus expected wins, the same sign as the season table, largest first.
 
 Best season without a title uses dominance among completed nonchampionship team-seasons. Most dominant season uses the same dominance calculation across all completed candidates. Neither ranks a current unfinished season as a full-season award.
 

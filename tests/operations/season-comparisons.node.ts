@@ -68,6 +68,9 @@ test('published season awards share exact dominance ties, opposite schedule sign
     assert.equal(withoutTitle!.rows.some(row => row.name === 'Timh17' && row.period!.year === '2020'), false);
     const unlucky = await readCategory('unluckiest-season', { storePath, season: '2019' });
     assert.equal(unlucky!.leaders[0].value, 0.4);
+    const lucky = await readCategory('luckiest-season', { storePath, season: '2019' });
+    // The same measure as Unluckiest season with the sign flipped, so 2019's order runs the other way.
+    assert.deepEqual(lucky!.rows.map(row => [row.name, row.value]), [['Manager 4', 0.8], ['Manager 3', 0], ['Woody14', 0], ['Manager 1', -0.2], ['Manager 2', -0.2], ['alecswartout', -0.4]]);
     const season = await readSeason('2019', { storePath });
     assert.equal(season!.rows.find(row => row.personName === 'alecswartout')!.winsVsExpected, -0.4);
   });

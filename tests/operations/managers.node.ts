@@ -27,6 +27,8 @@ test('published manager careers retain the two replacements, supported names and
     assert.deepEqual(tim?.seasons.map(season => season.year), ['2021', '2020']);
     assert.equal(tim?.facts.record, '1–3');
     assert.equal(tim?.facts.points, 85.5);
+    // Opponents' official scores in Tim's three 2021 weeks (40 each) and the 2020 opener (24.25).
+    assert.equal(tim?.facts.pointsAgainst, 144.25);
     assert.equal(tim?.facts.games, 4);
     assert.equal(tim?.facts.winPercentage, 25);
     assert.equal(tim?.facts.championships, 1);

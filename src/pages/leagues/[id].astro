@@ -44,9 +44,11 @@ const groupFeatures: { name: string; pairs: Feature[][] }[] = [
       how: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
       { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true,
         how: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' }],
-    [{ key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their scores earned', digits: 1, shame: true,
-      how: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
-      { key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true, how: 'A player’s score in a regular-season week spent on the bench.' }],
+    [{ key: 'luckiest-season', name: 'Luckiest season', unit: 'more wins than their scores earned', digits: 1,
+      how: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
+      { key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their scores earned', digits: 1, shame: true,
+      how: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' }],
+    [{ key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true, how: 'A player’s score in a regular-season week spent on the bench.' }],
   ] },
 ];
 
@@ -258,7 +260,7 @@ const landing = (key: string) => {
         <div class="table-wrap">
           <table aria-labelledby="careers-name">
             {/* With JS each column label sorts the table (see the script); the order served is titles, then win %, and Titles says so. */}
-            <thead><tr><th scope="col">Manager</th><th scope="col" aria-sort="descending">Titles</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Playoffs</th><th scope="col">Points</th><th scope="col">Seasons</th></tr></thead>
+            <thead><tr><th scope="col">Manager</th><th scope="col" aria-sort="descending">Titles</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Playoffs</th><th scope="col">Points</th><th scope="col">Against</th><th scope="col">Seasons</th></tr></thead>
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
@@ -268,6 +270,7 @@ const landing = (key: string) => {
                   <td data-sort={manager.facts.winPercentage ?? -1}>{manager.facts.winPercentage === null ? '—' : `${fixed(manager.facts.winPercentage, 1)}%`}</td>
                   <td data-sort={manager.facts.playoffAppearances}>{manager.facts.playoffAppearances}</td>
                   <td data-sort={manager.facts.points}>{fixed(manager.facts.points, 0)}</td>
+                  <td data-sort={manager.facts.pointsAgainst}>{fixed(manager.facts.pointsAgainst, 0)}</td>
                   <td data-sort={manager.seasons.length}>{manager.range}</td>
                 </tr>
               ))}

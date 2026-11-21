@@ -5,7 +5,7 @@ import type { CategoryDefinition } from './records.ts';
 /** Official regular-season comparisons, shared by standings and season awards. */
 export function seasonComparisons(archive: Archive, season: Season) {
   const weeks = season.regularWeeks.map(week => ({ week, scores: archive.performances.filter(row => row.seasonId === season.id && row.competition === 'regular' && row.week === week) }));
-  const requiredCoverage = !archive.coverage.some(issue => issue.seasonId === season.id && issue.blocks.some(key => ['season-comparisons', 'dominant-season', 'unluckiest-season', 'best-without-title'].includes(key)));
+  const requiredCoverage = !archive.coverage.some(issue => issue.seasonId === season.id && issue.blocks.some(key => ['season-comparisons', 'dominant-season', 'luckiest-season', 'unluckiest-season', 'best-without-title'].includes(key)));
   const fullSeasonCoverage = requiredCoverage && season.complete && weeks.length === Number(season.settings.playoff_week_start) - Number(season.settings.start_week) && weeks.every(row => row.scores.length >= 2);
   const leaguePoints = exactSum(weeks.flatMap(week => week.scores.map(score => score.points)));
   const leagueWeeks = weeks.reduce((count, week) => count + week.scores.length, 0);
@@ -33,13 +33,13 @@ export function seasonComparisons(archive: Archive, season: Season) {
   });
 }
 
-export function seasonCandidates(key: 'dominant-season' | 'unluckiest-season' | 'best-without-title'): NonNullable<CategoryDefinition['candidates']> {
+export function seasonCandidates(key: 'dominant-season' | 'luckiest-season' | 'unluckiest-season' | 'best-without-title'): NonNullable<CategoryDefinition['candidates']> {
   return (archive, selection) => archive.seasons.filter(season => season.complete && (!selection.season || season.year === selection.season)).flatMap(season =>
     seasonComparisons(archive, season).flatMap(comparison => {
       const team = season.teams.find(team => team.id === comparison.teamId)!;
       const person = archive.people.find(person => person.id === team.personId)!;
       if (!comparison.fullSeasonCoverage || key === 'best-without-title' && (!season.championId || season.championId === team.personId)) return [];
-      const metric = key === 'unluckiest-season' ? comparison.winsVsExpected?.multiply(-1) : comparison.dominance;
+      const metric = key === 'unluckiest-season' ? comparison.winsVsExpected?.multiply(-1) : key === 'luckiest-season' ? comparison.winsVsExpected : comparison.dominance;
       if (!metric) return [];
       const sample = `${comparison.playedWeeks} regular-season ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`;
       return [{ id: team.id, personId: person.id, name: person.name, avatar: team.avatar, metric,
