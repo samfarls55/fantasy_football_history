@@ -4,6 +4,7 @@ import { careerMetrics } from './metrics.ts';
 import { pickupCandidates } from './pickups.ts';
 import { dropCandidates } from './drops.ts';
 import { contributionCandidates } from './contributions.ts';
+import { beltCandidates } from './belt.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { gameScopes } from './scope.ts';
@@ -81,6 +82,8 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
     rule: 'Their regular-season points per game vs the league average.' },
+  { key: 'belt-run', name: 'Longest belt run', group: 'Matchups', place: 'legacy', unit: 'defenses', displayPrecision: 0, scope: 'none', candidates: beltCandidates,
+    rule: 'Games in one reign the belt holder didn’t lose, regular season and championship playoffs together.' },
   { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week.' },
   { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
@@ -114,7 +117,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);

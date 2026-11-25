@@ -1,0 +1,46 @@
+---
+// Who held the belt, a row of weeks per season. Each reign is a radio button, so a tap or an arrow key names it without a script; the list below says the same.
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+import { isViewer } from '../league-page.ts';
+import { beltRule, reignStart, type readBelt } from '../history/belt.ts';
+import { recordUnit } from '../history/records.ts';
+
+interface Props { belt: NonNullable<Awaited<ReturnType<typeof readBelt>>> }
+const { reigns, seasons } = Astro.props.belt;
+const defenses = (count: number) => `${count} ${recordUnit('defenses', count)}`;
+// A reign runs up to the week the next one starts, over as many seasons as that takes. One that only passed on starts with its season.
+const rows = seasons.map(({ year, weeks }) => ({ year, spans: reigns.flatMap((reign, index) => {
+  const next = reigns[index + 1]?.from;
+  if (reign.from.year > year || next && (next.year < year || next.year === year && (next.week ?? 1) === 1)) return [];
+  return [{ ...reign, start: reign.from.year === year ? reign.from.week ?? 1 : 1, end: next?.year === year ? next.week! : weeks + 1 }];
+}) }));
+---
+{reigns.length > 0 && (
+  <Section id="belt" title="The belt">
+    <details class="play-how"><summary class="play-unit">holder by week, playoffs included</summary><p>{beltRule}</p></details>
+    <fieldset class="belt" style={`--weeks: ${Math.max(...seasons.map(season => season.weeks))}`}>
+      <legend class="unseen">Reigns</legend>
+      {rows.map(({ year, spans }) => (
+        <div class="belt-year">
+          <span class="finish-year">{year}</span>
+          {spans.map(({ person, from, defenses: count, start, end }, index) => (
+            <label class:list={['reign', { vacant: !person, mine: person && isViewer(Astro, person.name) }]} style={`grid-column: ${start + 1} / ${end + 1}`}>
+              <input type="radio" name="reign" checked={year === rows.at(-1)!.year && index === spans.length - 1} />
+              <span class="reign-name" aria-hidden="true"><span>{person?.name}</span></span>
+              <span class="reign-says"><strong data-person class:list={[{ me: person && isViewer(Astro, person.name) }]}>{person?.name ?? 'Vacant'}</strong> <span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></span>
+            </label>
+          ))}
+        </div>
+      ))}
+    </fieldset>
+    <details class="play-next belt-list">
+      <summary>Every reign</summary>
+      <ol>
+        {reigns.toReversed().map(({ person, from, defenses: count }) => (
+          <li><span>{person ? <Manager name={person.name} /> : 'Vacant'}</span><span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></li>
+        ))}
+      </ol>
+    </details>
+  </Section>
+)}

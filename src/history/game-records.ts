@@ -4,7 +4,7 @@ import { readArchive } from './store.ts';
 import type { Archive, Contest } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 
-function identity(archive: Archive, personId: string, year: string) {
+export function identity(archive: Archive, personId: string, year: string) {
   const person = archive.people.find(person => person.id === personId)!;
   const team = archive.seasons.find(season => season.year === year)!.teams.find(team => team.personId === personId)!;
   return { personId, name: person.name, avatar: team.avatar };
@@ -59,9 +59,10 @@ function longestStreak(archive: Archive, personId: string, kind: StreakKind, sel
   }
   return longest;
 }
-function interval(games: Contest[]) {
+export function interval(games: Contest[]) {
   const first = games[0], last = games.at(-1)!;
-  return `Week ${Math.min(...first.weeks)} · ${first.year} – Week ${Math.max(...last.weeks)} · ${last.year}`;
+  const from = `Week ${Math.min(...first.weeks)} · ${first.year}`, through = `Week ${Math.max(...last.weeks)} · ${last.year}`;
+  return from === through ? from : `${from} – ${through}`;
 }
 
 export function streakCandidates(kind: StreakKind): NonNullable<CategoryDefinition['candidates']> {

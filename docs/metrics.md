@@ -60,6 +60,7 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | dominant-season | Seasons: Most dominant season | Completed team-season dominance, descending | Completed season/all; regular only | Manager-season history |
 | highest-score | Matchups: Highest score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
 | lowest-score | Matchups: Lowest score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
+| belt-run | Matchups: Longest belt run | Defenses in one reign, descending | Season the reign began/all; no game-scope selector | Career profile |
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
 | benched-player | Players: Most points left on the bench | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
@@ -118,6 +119,14 @@ Each current and former person has one page, holding only results they earned. F
 A person holds a record category when they share its first rank in the default selection, all seasons and regular scope. A tied closest game belongs to both managers. A descending category led by zero is held by nobody, and a blocked category has no holder. `readRecordsHeld` in `src/history/records.ts` reads every registered category, fame before shame, so a category's name, unit, precision, one-line rule and shame flag live in the registry.
 
 `src/history/manager-names.ts` resolves a name from a link in any letter case, or offers the nearest one: a name it starts (three letters or more), or one within one edit per four letters, at least one.
+
+## The belt
+
+The belt starts with the first resolved champion in the archive, at that title contest, and moves in contests from the following season. It follows completed regular-season and championship-playoff contests in order of the week each resolves, so a multiweek contest counts once, when it resolves. The holder loses it to whoever beats them, and a tie keeps it. A defense is a decided or tied contest the holder did not lose.
+
+A season in the archive whose teams don't include the holder passes the belt as it opens, with no contest played: to the latest champion who has a team in it, or to nobody. A vacant belt goes to the next resolved champion, and a champion's return doesn't claim it. A vacancy is not a reign and holds no record. A league with no resolved title has no belt.
+
+`src/history/belt.ts` supplies the reigns to Home, Legacy, manager pages and `belt-run`, which ranks individual reigns with at least one defense, the current one included. Its interval covers the contests defended, not the one that took the belt, and its season filter selects the reigns that began then. A passed belt's start is the season alone.
 
 ## Player contributions and bench records
 
