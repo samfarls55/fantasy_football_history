@@ -55,6 +55,9 @@ test('published worst bust ranks first-round picks, leaving out known keepers al
 
 const draftTab = async (storePath: string) => (await readTabs({ storePath }))!.some(tab => tab.key === 'draft');
 
+const placeless = draftOf({ id: '20' });
+Object.assign(placeless.picks[5], { round: null, metadata: null });
+
 test('published auction, rookie and unfinished drafts supply no draft result', async () => {
   for (const [draft, tab] of [
     // The tab still opens for the scouting reports.
@@ -63,6 +66,10 @@ test('published auction, rookie and unfinished drafts supply no draft result', a
     [draftOf({ id: '20', settings: { player_type: 1 } }), true],
     [draftOf({ id: '20', rounds: 3, slots: 4 }), true],
     [draftOf({ id: '20', source: { status: 'paused' } }), false],
+    // A draft Sleeper sent without settings, or with a pick it can't place, can't be measured.
+    [draftOf({ id: '20', source: { settings: null } }), true],
+    [draftOf({ id: '20', source: { settings: { rounds: '4', slots_qb: 1, slots_flex: 1, slots_bn: 2 } } }), true],
+    [placeless, true],
   ] as const) await withHistory(async storePath => {
     await publish(storePath, draftsSource([{ year: '2020', drafts: [draft], lineups }]));
     assert.deepEqual(await readPlaceRecords(['draft'], { storePath }), []);

@@ -49,14 +49,17 @@ export interface Transaction {
   id: string; seasonId: string; year: string; week: number;
   type: string; status: string; completedAt: number | null;
   adds: Record<string, string>; drops: Record<string, string>;
-  /** Exact source event and assets retained internally, never exposed as a public feed. */
-  source: Record<string, unknown>;
+  /** The source event, retained internally and never exposed as a public feed. Assets it doesn't list are none. */
+  source: { [field: string]: unknown; roster_ids: number[]; draft_picks: unknown[]; waiver_budget: unknown[] };
   /** Production Sleeper has no documented per-player historical start timestamp. */
   orderingSupported: boolean;
 }
 export interface Draft {
-  id: string; seasonId: string; source: Record<string, unknown>;
-  picks: Array<{ playerId: string; rosterId: string | null; keeper: boolean | null; source: Record<string, unknown> }>;
+  id: string; seasonId: string;
+  /** The source draft and picks. The fields named here are checked at import: one Sleeper left out or mangled is null, or missing from its record. */
+  source: { [field: string]: unknown; status: string | null; type: string | null; start_time: number | null; draft_order: Record<string, number>; settings: Record<string, number> };
+  picks: Array<{ playerId: string; rosterId: string | null; keeper: boolean | null;
+    source: { [field: string]: unknown; round: number | null; pick_no: number | null; draft_slot: number | null; metadata: { [field: string]: unknown; team: string | null } } }>;
 }
 export interface CoverageIssue { seasonId: string | null; area: string; detail: string; blocks: string[] }
 export interface Archive {

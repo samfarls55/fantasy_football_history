@@ -9,7 +9,7 @@ import type { RecordCandidate, RecordSelection } from './records.ts';
 export function lopsidedTradeCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   const { spells } = resolveOwnership(archive);
   return completedTrades(archive).filter(({ transaction, personIds }) => personIds.length === 2 && (!selection.season || transaction.year === selection.season)
-    && ![transaction.source.draft_picks, transaction.source.waiver_budget].some(assets => Array.isArray(assets) && assets.length)).flatMap(({ transaction: trade, personIds }) => {
+    && !transaction.source.draft_picks.length && !transaction.source.waiver_budget.length).flatMap(({ transaction: trade, personIds }) => {
     const [winner, loser] = personIds.map(personId => {
       const received = spells.filter(spell => spell.seasonId === trade.seasonId && spell.arrival?.transactionId === trade.id && spell.personId === personId);
       const starts = received.flatMap(spell => pickupStarts(archive, spell, selection));

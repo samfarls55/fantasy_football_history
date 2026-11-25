@@ -5,8 +5,7 @@ import type { Archive } from './types.ts';
 export function completedTrades(archive: Archive) {
   return archive.transactions.filter(row => row.type === 'trade' && row.status === 'complete').map(transaction => {
     const { teams } = archive.seasons.find(season => season.id === transaction.seasonId)!;
-    const rosters = transaction.source.roster_ids as number[];
-    return { transaction, personIds: [...new Set(rosters.map(id => teams.find(team => team.rosterId === String(id))!.personId))] };
+    return { transaction, personIds: [...new Set(transaction.source.roster_ids.map(id => teams.find(team => team.rosterId === String(id))!.personId))] };
   });
 }
 

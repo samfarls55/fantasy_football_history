@@ -261,7 +261,7 @@ A steal is a pick from the second half of the rounds (round × 2 > rounds, so th
 
 Titles by draft slot counts the resolved champions who drafted from each slot, with competition ranks and every slot shown, including those with none. The champion's slot is the draft order's slot for their account. A champion the order doesn't name took the roster over, and has the slot most of that roster's picks came from. A traded pick never moves a manager's slot. A slot holds this record rather than a person, so it has no holder on a manager page and no place in Recent top-ten results.
 
-`src/history/drafts.ts` selects the draft and calculates all three. Pick results are dated by their season's completion.
+The import checks the draft and pick fields these read. A draft without usable settings, or with a pick missing its round, number or slot, is not measured, and its league still imports. `src/history/drafts.ts` selects the draft and calculates all three. Pick results are dated by their season's completion.
 
 ## Scouting reports
 
