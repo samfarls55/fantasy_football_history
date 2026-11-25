@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
+import { stores } from '../support/stores.ts';
 import { readSeasons, readSeason } from '../../src/history/read.ts';
 import { readManager } from '../../src/history/managers.ts';
 import { readFranchise } from '../../src/history/franchises.ts';
@@ -29,7 +30,7 @@ test('unpublished seasons remain unavailable rather than becoming known empty hi
   });
 });
 
-test('a composite visitor read keeps its published snapshot while another refresh publishes a correction', async () => {
+for (const withHistory of stores) test(`a composite visitor read keeps its published snapshot while another refresh publishes a correction (${withHistory.name})`, async () => {
   await withHistory(async storePath => {
     const source = await fixture();
     await publish(storePath, source);
