@@ -17,7 +17,7 @@ type Row = typeof rows[number];
 // Ties share a rank, so every row ranked third or better shows; none drops silently.
 const others = rows.filter(row => row.rank > 1 && (row.rank <= 3 || category.rest));
 // One fixed precision per record so a figure and its runners-up line up; a percentage keeps the precision its category chose so distinct ranked values never share a label (docs/metrics.md).
-const value = (row: Row) => `${category.signed && row.value > 0 ? '+' : ''}${fixed(row.value, category.displayPrecision)}${category.percent ? '%' : ''}`;
+const value = (row: Row) => row.shown ?? `${category.signed && row.value > 0 ? '+' : ''}${fixed(row.value, category.displayPrecision)}${category.percent ? '%' : ''}`;
 const unit = category.displayPrecision === 0 ? recordUnit(category.unit, leaders[0].value) : category.unit;
 // Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named as the holder.
 // A season record reads the way the league remembers it: "11–3, 128.4 points a game in 2024".
@@ -47,7 +47,7 @@ const landing = `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}
       <p class="play-holder"><strong>{row.manager ? <Manager name={row.manager} /> : row.name}{category.verb ? ` ${category.verb} ${row.name}` : row.opponent && <>{met(row)}<Manager name={row.opponent} /></>}</strong>{when(row) && <span>{when(row)}</span>}{row.winners && <Winners winners={row.winners} />}{hauls(row).map(haul => <span>{haul}</span>)}</p>
     ))}
     {others.length > 0 && (
-      <details class="play-next" open={others.some(involves)}>
+      <details class="play-next" open={category.open || others.some(involves)}>
         <summary>{category.rest ?? `${others.length} ${others.length > 1 ? 'runners-up' : 'runner-up'}`}</summary>
         <ol>
           {others.map(row => <li><span class="next-rank">{row.rank}</span><span class="next-value">{value(row)}{category.rest && ` ${recordUnit(category.unit, row.value)}`}</span><span class="next-who">{row.manager ? <Manager name={row.manager} /> : row.name}{category.verb ? ` ${category.verb} ${row.name}` : row.opponent && <>{met(row)}<Manager name={row.opponent} /></>}</span><span class="next-when">{when(row)}{row.winners && <Winners winners={row.winners} />}</span>{hauls(row).map(haul => <span class="next-when">{haul}</span>)}</li>)}

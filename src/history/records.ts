@@ -11,6 +11,7 @@ import { pickCandidates, slotCandidates } from './drafts.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
+import { armyCandidates, charmCandidates, journeymanCandidates } from './player-records.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
 import type { Place } from './tabs.ts';
@@ -28,6 +29,8 @@ export function latestPeriod(rows: HistoricalPeriod[]): HistoricalPeriod | null 
 export interface RecordCandidate {
   /** A record a draft slot holds has no person. */
   id: string; personId?: string; name: string; avatar: string | null; metric: Exact;
+  /** Shown in place of the figure: a record that ranks by its rate. */
+  shown?: string;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
   /** Matchup records: the second person, and whether the game was tied or the first person lost it, so they didn't beat them. */
@@ -55,6 +58,8 @@ export interface CategoryDefinition {
   verb?: string;
   /** What to call the places below first when all of them show, rather than the runners-up. */
   rest?: string;
+  /** The places below first show without opening them. */
+  open?: boolean;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
   candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
@@ -123,6 +128,14 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'The gap between what each side’s new players scored in its starting lineups in the weeks after the trade, until each player left or that regular season ended. Only trades between two managers, with no picks or waiver budget.' },
   { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', place: 'players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
     rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
+  { key: 'one-man-army', name: 'One-man army: largest share of a team’s score', group: 'Players', place: 'players', unit: 'of the team’s score', percent: true, displayPrecision: 1, verb: 'started', scope: 'regular', candidates: armyCandidates,
+    rule: 'What one starter scored in a regular-season week, out of the team’s official score. A team score of zero or below doesn’t count.' },
+  { key: 'lucky-charms', name: 'Lucky charms: teams win most when he starts', group: 'Players', place: 'players', unit: 'team’s record when he starts', displayPrecision: 1, open: true, scope: 'regular', candidates: charmCandidates('best'),
+    rule: 'Decided regular-season games he started for any manager, ranked by the share won. At least 5 starts for every season of the league.' },
+  { key: 'curses', name: 'Curses: teams lose most when he starts', group: 'Players', place: 'players', unit: 'team’s record when he starts', displayPrecision: 1, shame: true, open: true, scope: 'regular', order: 'ascending', candidates: charmCandidates('worst'),
+    rule: 'Decided regular-season games he started for any manager, ranked by the share lost. At least 5 starts for every season of the league.' },
+  { key: 'journeyman', name: 'Journeyman: on the most managers’ rosters', group: 'Players', place: 'players', unit: 'managers', displayPrecision: 0, scope: 'regular', candidates: journeymanCandidates,
+    rule: 'Managers who had him, starting or on the bench, in a regular-season week. Team defenses don’t count.' },
   { key: 'best-steal', name: 'Best steal', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
     rule: 'What a pick from the second half of the rounds scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
   { key: 'worst-bust', name: 'Worst bust', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
@@ -142,7 +155,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|places|seasons)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|places|seasons|managers)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
@@ -154,12 +167,6 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
   const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name, undefined, { numeric: true }) || a.id.localeCompare(b.id));
-  let displayPrecision = category.displayPrecision;
-  if (category.percent) {
-    const values = [...new Map(candidates.map(row => [row.metric.key, row.metric.toNumber()])).values()];
-    // Add decimals only when distinct ranked values would otherwise share a label.
-    while (displayPrecision < 20 && values.some((value, index) => index > 0 && formatRecordValue(value, displayPrecision) === formatRecordValue(values[index - 1], displayPrecision))) displayPrecision++;
-  }
   const nameOf = new Map(archive.people.map(person => [person.id, person.name]));
   let rank = 1;
   const ranked = candidates.map((row, index) => {
@@ -170,6 +177,12 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const selectedResult = ranked.find(row => row.id === options.result);
   limit = Math.max(limit, selectedResult?.rank ?? 10);
   selection.limit = limit;
+  let displayPrecision = category.displayPrecision;
+  if (category.percent) {
+    const values = [...new Map(ranked.filter(row => row.rank <= limit).map(row => [row.exactKey, row.value])).values()];
+    // Add decimals only when distinct ranked values would otherwise share a label.
+    while (displayPrecision < 20 && values.some((value, index) => index > 0 && formatRecordValue(value, displayPrecision) === formatRecordValue(values[index - 1], displayPrecision))) displayPrecision++;
+  }
   const leaders = ranked.filter(row => row.rank === 1);
   let rows = ranked.filter(row => row.rank <= limit);
   if (sort === 'name') rows.sort((a, b) => a.name.localeCompare(b.name) || a.rank - b.rank || a.id.localeCompare(b.id));

@@ -1,6 +1,7 @@
 import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { luckStats } from './luck.ts';
+import { playerStats } from './player-records.ts';
 import { recordUnit } from './records.ts';
 import type { Place } from './tabs.ts';
 import type { Archive } from './types.ts';
@@ -41,6 +42,7 @@ export const managerStats: ManagerStat[] = [
   ...luckStats,
   // Excuses, Lineups
   // Players
+  ...playerStats,
   // Draft
   // Moves
 ];
