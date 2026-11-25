@@ -183,7 +183,7 @@ h2.painted .share { margin-left: 0; }
   transition: background-size 420ms cubic-bezier(.2, .7, .2, 1), color 200ms ease-out, text-decoration-color 160ms ease-out;
 }
 .me { background-size: 100% 100%; color: var(--ink-on-paint); text-shadow: none; }
-:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, .meetings h3, table th) > [data-person]:first-child { margin-left: -0.12em; }
+:is(.yard-champ, .close-name, .play-holder strong, .winners, .streak-who, .streaks p, .meetings h3, table th) > [data-person]:first-child { margin-left: -0.12em; }
 /* Every name opens that manager's page, so every name carries the same chalk line, scaled to its size, at 3:1 on the turf so it reads as a link;
    it firms up under a pointer or focus, and the paint replaces it once the name is marked. */
 a[data-person] {
@@ -316,6 +316,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .next-rank { font-weight: 800; color: var(--paint); }
 .next-value { font-weight: 800; white-space: nowrap; text-align: right; color: var(--paint); }
 .next-who:has(a + a) { line-height: 44px; }
+.winners:has(a + a) { line-height: 44px; }
 /* Dates hold together with no-break spaces, so a season's longer line can still wrap. */
 .next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .next-who:has(a + a) + .next-when { margin-top: -8px; }

@@ -45,13 +45,13 @@ test('published career points use official exact decimal sums consistently in ra
       ['Record manager 03', 100.12001, 1, '10012001/100000'], ['Record manager 04', 100.12, 2, '2503/25'],
       ['Record manager 01', 0.3, 3, '3/10'], ['Record manager 02', 0.3, 3, '3/10'],
     ]);
-    assert.equal((await readManager(points!.rows[2].personId, { storePath }))?.facts.points, 0.3);
+    assert.equal((await readManager(points!.rows[2].personId!, { storePath }))?.facts.points, 0.3);
     assert.equal((await readSeason('2021', { storePath }))?.rows.find(row => row.personName === 'Record manager 01')?.points, 0.3);
     const first = source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[];
     first[0].custom_points = 0.4; // Official override changes the category and supporting views together.
     await publish(storePath, source);
     assert.equal((await readCategory('career-points', { storePath }))?.rows.find(row => row.name === 'Record manager 01')?.value, 0.6);
-    assert.equal((await readManager(points!.rows[2].personId, { storePath }))?.facts.points, 0.6);
+    assert.equal((await readManager(points!.rows[2].personId!, { storePath }))?.facts.points, 0.6);
     assert.equal((await readSeason('2021', { storePath }))?.rows.find(row => row.personName === 'Record manager 01')?.points, 0.6);
     delete source.responses[`league/${source.seedLeagueId}/matchups/1`];
     await assert.rejects(publish(storePath, source), /Missing controlled response/);

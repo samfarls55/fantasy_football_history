@@ -1,0 +1,6 @@
+---
+// The champions who drafted from a slot, newest first, each with their title's season.
+import Manager from './Manager.astro';
+interface Props { winners: { manager: string; year: string }[] }
+---
+<span class="winners">{Astro.props.winners.map(({ manager, year }, index) => <>{index > 0 && ', '}<Manager name={manager} />{`\u00a0${year}`}</>)}</span>

@@ -41,7 +41,7 @@ test('published tabs leave out the half of Excuses with no stat, and gain a tab 
       candidates: () => [{ id: 'later', personId: 'person-960000000000000002', name: 'Later player', avatar: null, metric: Exact.from(7), sample: null, period: null, href: '' }] });
     try {
       const draft = (await readTabs({ storePath }))!.at(-1)!;
-      assert.deepEqual([draft.key, draft.name, draft.anchors], ['draft', 'Draft', ['later-record']]);
+      assert.deepEqual([draft.key, draft.name, draft.anchors], ['draft', 'Draft', ['best-steal', 'worst-bust', 'titles-by-slot', 'later-record']]);
     } finally { recordCategories.pop(); }
   });
 });

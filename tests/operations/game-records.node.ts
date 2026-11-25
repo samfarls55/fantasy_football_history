@@ -114,15 +114,15 @@ test('a published streak destination retains the selected interval and links eve
     const params = new URL(row.href, 'https://museum.example').searchParams;
     const { readStreakHistory } = await import('../../src/history/game-records.ts');
     const selection = { storePath, scope: 'regular' as const, streak: params.get('streak'), from: params.get('from'), through: params.get('through') };
-    const history = await readStreakHistory(row.personId, selection);
+    const history = await readStreakHistory(row.personId!, selection);
     assert.equal(history?.interval, 'Week 1 · 2020 – Week 1 · 2021');
     assert.deepEqual(history?.games.map(game => [game.year, game.weeks, game.result, game.opponentName]), [
       ['2020', [1], 'W', 'Record manager 02'], ['2020', [2], 'W', 'Record manager 02'], ['2021', [1], 'W', 'Record manager 02'],
     ]);
     assert.match(history!.games[2].href, /\/seasons\/2021\/matchups\/.+scope=regular&week=1/);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, scope: 'combined' }), null);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, season: '2021' }), null);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, from: 'missing' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, scope: 'combined' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, season: '2021' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, from: 'missing' }), null);
   });
 });
 
