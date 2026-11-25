@@ -120,14 +120,14 @@ test('published most points in a loss and fewest in a win name both managers, an
     ]);
     games(source, 4)[1].custom_points = 91;
     await publish(storePath, source);
-    const held = async (key: string) => (await readCategory(key, { storePath }))!.rows.filter(row => row.rank <= 2).map(row => [row.manager, row.lost ? 'lost to' : 'beat', row.opponent, row.value, row.period!.week, row.rank]);
+    const held = async (key: string) => (await readCategory(key, { storePath }))!.rows.filter(row => row.rank <= 2).map(row => [row.manager, row.result, row.opponent, row.value, row.period!.week, row.rank]);
     assert.deepEqual(await held('points-in-loss'), [
-      ['Record manager 02', 'lost to', 'Record manager 01', 130, 2, 1],
-      ['Record manager 01', 'lost to', 'Record manager 02', 120, 3, 2],
+      ['Record manager 02', 'lost', 'Record manager 01', 130, 2, 1],
+      ['Record manager 01', 'lost', 'Record manager 02', 120, 3, 2],
     ]);
     assert.deepEqual(await held('points-in-win'), [
-      ['Record manager 03', 'beat', 'Record manager 04', 60, 2, 1],
-      ['Record manager 03', 'beat', 'Record manager 04', 61, 3, 2],
+      ['Record manager 03', 'won', 'Record manager 04', 60, 2, 1],
+      ['Record manager 03', 'won', 'Record manager 04', 61, 3, 2],
     ]);
     // A record in a loss belongs to the manager who lost alone.
     const heldBy = async (id: number) => (await readRecordsHeld(`person-96000000000000000${id}`, { storePath }))!.map(view => view.category.key);

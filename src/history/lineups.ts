@@ -1,9 +1,10 @@
 import { Exact, exactSum } from './decimal.ts';
 import { recordedStarts } from './contributions.ts';
 import { identity } from './game-records.ts';
+import { legResult, managedWeeks, opponentOf } from './performances.ts';
 import { perArchive } from './per-archive.ts';
 import type { ManagerStat, StatValue } from './manager-stats.ts';
-import type { CategoryDefinition } from './records.ts';
+import type { CategoryDefinition, RecordSelection } from './records.ts';
 import type { Archive, LineupPlayer, Performance } from './types.ts';
 
 /** The slots a starter fills, in lineup order. */
@@ -36,20 +37,13 @@ function bestLineup(players: LineupPlayer[], slots: string[], fits: Map<string, 
   return exactSum(filled.map(player => player?.points ?? 0));
 }
 
-/** The other side of a weekly leg. */
-function opponents(archive: Archive) {
-  const legs = Map.groupBy(archive.performances, row => `${row.contestId}/${row.week}`);
-  return (own: Performance) => legs.get(`${own.contestId}/${own.week}`)!.find(other => other !== own)!;
-}
-
 interface Lineup { own: Performance; opponent: Performance; started: Exact; best: Exact; gap: Exact }
 /** Every regular-season lineup beside its week's best one. A week with a slot or score nobody can know is left out. */
 const lineups = perArchive((archive): Lineup[] => {
   const fits = new Map(archive.players.map(player => [player.id, new Set([...slotPositions].filter(([, positions]) => positions.includes(player.position!)).map(([slot]) => slot))]));
   for (const own of archive.performances) for (const { playerId, slot } of own.starters) if (slot) fits.get(playerId)!.add(slot);
-  const opponent = opponents(archive);
   const slotsOf = new Map(archive.seasons.map(season => [season.id, startingSlots(season.rosterPositions)]));
-  return archive.performances.filter(own => own.competition === 'regular').flatMap(own => {
+  return managedWeeks(archive).filter(own => own.competition === 'regular').flatMap(own => {
     const slots = slotsOf.get(own.seasonId)!;
     const players = [...own.starters, ...own.bench];
     if (!players.length || players.some(player => player.points === null) || own.starters.some(player => player.slot === null) || slots.some(slot => !slotPositions.has(slot))) return [];
@@ -57,7 +51,7 @@ const lineups = perArchive((archive): Lineup[] => {
     const filled = bestLineup(players, slots, fits);
     // Filling a slot the manager left empty can cost points, so what they started is the floor.
     const best = filled.compare(started) < 0 ? started : filled;
-    return [{ own, opponent: opponent(own), started, best, gap: best.subtract(started) }];
+    return [{ own, opponent: opponentOf(archive, own), started, best, gap: best.subtract(started) }];
   });
 });
 
@@ -69,23 +63,26 @@ const perManager = (value: (weeks: Lineup[]) => StatValue | null): ManagerStat['
     return result ? [[personId, result]] : [];
   }));
 
-export const worstManagedCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) => {
-  const names = new Map(archive.people.map(person => [person.id, person.name]));
-  return lineups(archive).filter(({ own, gap }) => (!selection.season || own.year === selection.season) && gap.compare(0) > 0).map(({ own, opponent, gap }) => ({
-    ...identity(archive, own.personId, own.year), id: own.id, metric: gap, sample: null,
-    detail: own.teamName, leaderContext: `Week ${own.week} · ${own.year} · vs ${names.get(opponent.personId)}`,
+export const worstManagedCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+  lineups(archive).filter(({ own, gap }) => (!selection.season || own.year === selection.season) && gap.compare(0) > 0).map(({ own, opponent, gap }) => ({
+    ...identity(archive, own.personId, own.year), id: own.id, metric: gap, sample: null, opponentId: opponent.personId, result: legResult(own, opponent),
+    detail: own.teamName, leaderContext: `Week ${own.week} · ${own.year}`,
     period: { year: own.year, week: own.week, playedAt: own.playedAt },
     href: `/seasons/${own.year}/matchups/${own.contestId}/?scope=regular&week=${own.week}&team=${own.rosterId}`, historyLabel: 'Open matchup',
   }));
-};
+
+/** Starts in lineups their managers set. */
+function managedStarts(archive: Archive, selection: RecordSelection = {}) {
+  const managed = new Set(managedWeeks(archive));
+  return recordedStarts(archive, {}, selection).filter(start => managed.has(start.performance));
+}
 
 export const lowestStarterCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) => {
-  const opponent = opponents(archive);
   const people = new Map(archive.people.map(person => [person.id, person.name]));
   const players = new Map(archive.players.map(player => [player.id, player.name]));
-  return recordedStarts(archive, {}, selection).map(({ performance: own, playerId, points }) => ({
-    id: `${own.id}-${playerId}`, personId: own.personId, name: players.get(playerId)!, avatar: null, metric: Exact.from(points), sample: null,
-    leaderContext: `${people.get(own.personId)} · Week ${own.week} · ${own.year} · vs ${people.get(opponent(own).personId)}`,
+  return managedStarts(archive, selection).map(({ performance: own, playerId, points }) => ({
+    id: `${own.id}-${playerId}`, personId: own.personId, name: players.get(playerId)!, avatar: null, metric: Exact.from(points), sample: null, opponentId: opponentOf(archive, own).personId,
+    leaderContext: `${people.get(own.personId)} · Week ${own.week} · ${own.year}`,
     period: { year: own.year, week: own.week, playedAt: own.playedAt },
     href: `/seasons/${own.year}/matchups/${own.contestId}/?scope=${selection.scope ?? 'regular'}&week=${own.week}&player=${playerId}&team=${own.rosterId}#player-${own.rosterId}-${playerId}`, historyLabel: 'Open matchup',
   }));
@@ -112,7 +109,7 @@ export const lineupStats: ManagerStat[] = [
     values: perManager(weeks => ({ value: Exact.from(weeks.filter(week => !week.gap.compare(0)).length), sample: chances(weeks.length, 'week') })),
     rule: `Regular-season weeks when no legal lineup from the roster scored more. ${currentPositions}` },
   { key: 'zero-starters', place: 'lineups', label: 'Starters who scored 0', unit: 'starters', displayPrecision: 0, better: 'lower',
-    values: archive => new Map([...Map.groupBy(recordedStarts(archive), start => start.performance.personId)].map(([personId, starts]) =>
+    values: archive => new Map([...Map.groupBy(managedStarts(archive), start => start.performance.personId)].map(([personId, starts]) =>
       [personId, { value: Exact.from(starts.filter(start => start.points === 0).length), sample: `of ${chances(starts.length, 'start')}` }])),
     rule: 'Regular-season starters with a recorded score of exactly 0. An empty slot doesn’t count.' },
 ];

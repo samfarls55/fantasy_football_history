@@ -24,7 +24,7 @@ function statCard(archive: Archive, stat: ManagerStat): CardView | null {
   // Equal ranks can read differently: a 5–2 and a 5–3 tie on wins.
   const mixed = first.some(row => row.figure !== first[0].figure);
   const leaders = first.map(({ personId, name: manager, names, figure, value, sample = null }) => ({ id: personId, rank: 1, personId, manager,
-    name: names?.join(', ') ?? manager, shown: figure, value, sample: mixed ? figure : sample, ...names && { leaderContext: [manager, sample].filter(Boolean).join(' · ') } }));
+    name: manager, names, shown: figure, value, sample: mixed ? figure : sample, ...names && { leaderContext: [manager, sample].filter(Boolean).join(' · ') } }));
   // A stat every manager ties on leads nothing.
   return leaders.length < rows.length ? { category: { ...category, name: label, unit: first[0].unit, ...words }, rows: leaders, leaders } : null;
 }

@@ -65,7 +65,7 @@ export function resultCandidates(result: 'lost' | 'won'): NonNullable<CategoryDe
     const opponent = game.sides.find(other => other !== side)!;
     const when = `Week ${game.weeks[0]} · ${game.year}`;
     return { ...identity(archive, side.personId, game.year), id: game.id, metric: Exact.from(side.points), sample: null,
-      opponentId: opponent.personId, lost: result === 'lost', detail: `${side.teamName} vs ${opponent.teamName}`, leaderContext: when,
+      opponentId: opponent.personId, result, detail: `${side.teamName} vs ${opponent.teamName}`, leaderContext: when,
       period: { year: game.year, week: game.weeks[0], playedAt: game.playedAt },
       href: `/seasons/${game.year}/matchups/${game.id}/?scope=regular&week=${game.weeks[0]}&team=${side.rosterId}`, historyLabel: 'Open matchup' };
   });

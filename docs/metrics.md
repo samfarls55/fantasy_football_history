@@ -36,7 +36,7 @@ Completed current-season games count in career/game/player totals. Completed-sea
 
 Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the ranks included when distinct values there would otherwise share a label.
 
-Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a link to all tied results. Summary compaction never removes qualifying ranking rows.
+Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a way to all tied results: a card, cell or badge shows five and opens the rest. Summary compaction never removes qualifying ranking rows.
 
 Career categories have one aggregate result per person. Season, game, bench and move categories rank individual qualifying performances. A person may appear repeatedly. A player-career contribution category ranks the player/person pair.
 
@@ -84,7 +84,7 @@ Win percentage = 100 × (wins + 0.5 × ties) / (wins + losses + ties). Preserve 
 
 A scoring high/low uses the official team total, not a player sum. A true completed zero qualifies for the low record; an unplayed or missing result never does.
 
-Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified. The close-game line under Luck is authorized; do not invent blowout thresholds.
+Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified; a tie belongs to both. A weekly score names the opponent too, and stays its own team's record. The close-game line under Luck is authorized; do not invent blowout thresholds.
 
 A winning or losing streak follows eligible completed contests in historical order. A tie ends either streak. Career streaks can continue between seasons within the selected scope. Season-specific streaks stop at the boundary. An excluded game is outside that selected scope, not a phantom win or loss. Byes do not extend a streak.
 
@@ -136,7 +136,7 @@ These use completed regular-season games and official scores, overrides included
 
 ## Lineups
 
-Sam authorized these counterfactual lineup claims in spec 37. `src/history/lineups.ts` owns them. They cover completed regular-season weeks and follow the person who held the roster.
+Sam authorized these counterfactual lineup claims in spec 37. `src/history/lineups.ts` owns them. They cover completed regular-season weeks and follow the person who held the roster. A best-ball season (`best_ball` 1 in its settings) is left out of every measure here and of Most points left on the bench, because Sleeper sets those lineups and no manager chose them.
 
 The best lineup is the highest total of recorded player points from that week's roster that legally fills the season's starting slots, as many of them as the roster can fill. Bench, IR and taxi slots are not starting slots, but Sleeper's weekly roster doesn't say who held one, so every rostered player is available. A player fits a slot through their current player-list position, or by having started in that slot type anywhere in this league's history, in any game scope. Every rule line says positions are current ones. It is a best assignment, because flex slots overlap: players enter best first, and those already in move to make room. Player points don't depend on the slot, so this finds the highest total.
 
@@ -163,10 +163,10 @@ One completed season shows at a time, the newest unless the `season` URL paramet
 
 Legacy's careers table (`src/history/careers.ts`) has one row per person, former managers included and marked. Current managers lead, by titles and then win percentage. Games are completed regular-season ones, the current season's included.
 
-- **Titles, finals lost:** champions and runners-up of resolved title contests. An unresolved title counts for nobody, so a league with no resolved title has neither column.
+- **Titles, finals lost:** champions and runners-up of resolved title contests. The sample is the person's seasons with a resolved title. **Playoffs:** seasons they qualified, of their seasons whose bracket is set. An unresolved title counts for nobody, so a league with no resolved title has neither column.
 - **Points per game, opponents' points per game:** career points and points against, divided by games played. No games leaves them unknown. Fewer points against ranks first.
 - **Power rating:** Elo. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
-- **Biggest one-year change in finish:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. Equal changes are all listed.
+- **Biggest one-year change in finish:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. Equal changes are all listed. The sample is the person's completed seasons with a known finish.
 
 Most finals lost without a title ranks people who lost at least one final and hold no resolved title in any season. Most dominant season is left off Legacy when every team-season that leads it also leads Home's headline, Best season without a title. Manager pages still show it.
 
@@ -183,6 +183,8 @@ A person's nemesis is the opponent with the largest losses-minus-wins value from
 ## Head to head
 
 Every current manager's all-time record against every other, regular season and championship playoffs together, from the rivalry calculation above. A pair who never met has no record, not 0–0, and the grid waits until one pair has met. A record is better when its wins exceed its losses. Rows and columns share name order, and each record leads to that pair's meetings on the row's manager page. `readHeadToHead` in `src/history/rivalries.ts` owns it.
+
+Current rivalry streaks (`readRivalryStreaks`) use the same games: the current run of each pair of current managers when it is three straight wins or more. The five longest show, and every one tied with the fifth.
 
 ## Manager pages
 

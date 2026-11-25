@@ -39,6 +39,19 @@ test('published records held share ties, list fame before shame and count a tied
   });
 });
 
+test('published records held by one side of a tied game stay with that side', async () => {
+  await withHistory(async storePath => {
+    // Manager 1's bench would have added 30 to the tie with manager 2.
+    const source = recordsSource([[90, 90, 60, 40]]);
+    Object.assign((source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[])[0], { starters: ['a'], starters_points: [0], players: ['a', 'b'], players_points: { a: 0, b: 30 } });
+    for (const id of ['a', 'b']) (source.responses['players/nfl'] as any)[id] = { full_name: `Player ${id}`, position: 'QB' };
+    await publish(storePath, source);
+    const keys = async (personId: string) => (await held(storePath, personId)).map(([key]) => key).filter(key => ['closest-game', 'worst-managed-week', 'benched-player', 'lowest-starter'].includes(key as string));
+    assert.deepEqual(await keys(manager(1)), ['closest-game', 'worst-managed-week', 'benched-player', 'lowest-starter']);
+    assert.deepEqual(await keys(manager(2)), ['closest-game']);
+  });
+});
+
 test('published records held pick up a record registered later and leave out an unsupported claim', async () => {
   await withHistory(async storePath => {
     await publish(storePath, recordsSource([[100, 90, 50, 50], [90, 100, 60, 40]]));

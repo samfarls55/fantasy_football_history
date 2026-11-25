@@ -37,8 +37,10 @@ export interface RecordCandidate {
   shown?: string;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
-  /** Matchup records: the second person, and whether the game was tied or the first person lost it, so they didn't beat them. */
-  opponentId?: string; tied?: boolean; lost?: boolean;
+  /** The person they met. Matchup records: how they fared, and whether a tie makes it the opponent's record too. */
+  opponentId?: string; result?: 'won' | 'lost' | 'tied'; shared?: boolean;
+  /** The ex: the managers who started him. */
+  startedForIds?: string[];
   /** Trades: what each side received, and what it scored for them. */
   sides?: { manager: string; received: string[]; points: number }[];
   /** Season records: the regular-season record and points per game behind the figure. */
@@ -186,8 +188,8 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   let rank = 1;
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
-    const { metric, ...rest } = row;
-    return { ...rest, manager: nameOf.get(row.personId!), opponent: nameOf.get(row.opponentId!), winners: row.winners?.map(winner => ({ manager: nameOf.get(winner.personId)!, year: winner.year })), rank, value: metric.toNumber(), exactKey: metric.key };
+    const { metric, startedForIds, ...rest } = row;
+    return { ...rest, manager: nameOf.get(row.personId!), opponent: nameOf.get(row.opponentId!), startedFor: startedForIds?.map(id => nameOf.get(id)!), winners: row.winners?.map(winner => ({ manager: nameOf.get(winner.personId)!, year: winner.year })), rank, value: metric.toNumber(), exactKey: metric.key };
   });
   const selectedResult = ranked.find(row => row.id === options.result);
   limit = Math.max(limit, selectedResult?.rank ?? 10);
@@ -240,7 +242,7 @@ export interface CardView {
   category: Omit<CategoryDefinition, 'group' | 'scope'>;
   rows: CardRow[]; leaders: CardRow[];
 }
-type CardRow = Partial<Ranking['rows'][number]> & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
+type CardRow = Partial<Ranking['rows'][number]> & { names?: string[] } & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
 /** A record's card in its place. A record nobody holds has no card, nor does one another record already tells. */
 export function recordCard(archive: Archive, category: CategoryDefinition) {
   const view = ranking(archive, category);
@@ -253,12 +255,12 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
   if (!archive) return null;
   return recordCategories.filter(category => category.place && places.includes(category.place)).flatMap(category => recordCard(archive, category) ?? []);
 }
-/** Every record a person holds or shares, fame before shame. A tied game belongs to both managers. */
+/** Every record a person holds or shares, fame before shame. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordCategories.filter(category => category.candidates).map(category => ranking(archive, category))
-    .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.tied && row.opponentId === personId))
+    .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.shared && row.opponentId === personId))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {

@@ -66,7 +66,7 @@ test('published leads fall back to the first stat on the page that somebody hold
     auction.picks[3].metadata.team = 'CHI';
     await publish(storePath, finished([auction]));
     assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03']);
-    assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].name, 'TB');
+    assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].names, ['TB']);
     // With M4's all Buccaneers too, everyone ties, so nothing leads.
     auction.picks[3].metadata.team = 'TB';
     await publish(storePath, finished([auction]));

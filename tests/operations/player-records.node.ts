@@ -84,12 +84,12 @@ test('published one-man army is a starter’s share of the official team score, 
     games(source, 2)[0].custom_points = -5;
     await publish(storePath, source);
     const army = (await readCategory('one-man-army', { storePath }))!;
-    assert.deepEqual(army.rows.map(row => [row.rank, row.manager, row.name, row.value, row.leaderContext, row.period]), [
-      [1, 'Record manager 01', 'Player A', 60, 'Record manager 01 · Week 1 · 2021 · 60.00 of 100.00 points vs Record manager 02', { year: '2021', week: 1, playedAt: null }],
-      [2, 'Record manager 02', 'Player B', 50, 'Record manager 02 · Week 1 · 2021 · 45.00 of 90.00 points vs Record manager 01', { year: '2021', week: 1, playedAt: null }],
-      [3, 'Record manager 03', 'Player C', 40, 'Record manager 03 · Week 1 · 2021 · 50.00 of 125.00 points vs Record manager 04', { year: '2021', week: 1, playedAt: null }],
-      [4, 'Record manager 02', 'Player B', 22.5, 'Record manager 02 · Week 2 · 2021 · 20.25 of 90.00 points vs Record manager 04', { year: '2021', week: 2, playedAt: null }],
-      [5, 'Record manager 02', 'Player Z', 0, 'Record manager 02 · Week 1 · 2021 · 0.00 of 90.00 points vs Record manager 01', { year: '2021', week: 1, playedAt: null }],
+    assert.deepEqual(army.rows.map(row => [row.rank, row.manager, row.name, row.value, row.leaderContext, row.opponent, row.period]), [
+      [1, 'Record manager 01', 'Player A', 60, 'Record manager 01 · Week 1 · 2021 · 60.00 of 100.00 points', 'Record manager 02', { year: '2021', week: 1, playedAt: null }],
+      [2, 'Record manager 02', 'Player B', 50, 'Record manager 02 · Week 1 · 2021 · 45.00 of 90.00 points', 'Record manager 01', { year: '2021', week: 1, playedAt: null }],
+      [3, 'Record manager 03', 'Player C', 40, 'Record manager 03 · Week 1 · 2021 · 50.00 of 125.00 points', 'Record manager 04', { year: '2021', week: 1, playedAt: null }],
+      [4, 'Record manager 02', 'Player B', 22.5, 'Record manager 02 · Week 2 · 2021 · 20.25 of 90.00 points', 'Record manager 04', { year: '2021', week: 2, playedAt: null }],
+      [5, 'Record manager 02', 'Player Z', 0, 'Record manager 02 · Week 1 · 2021 · 0.00 of 90.00 points', 'Record manager 01', { year: '2021', week: 1, playedAt: null }],
     ]);
     assert.ok((await readRecordsHeld('person-960000000000000001', { storePath }))!.some(view => view.category.key === 'one-man-army'));
   });

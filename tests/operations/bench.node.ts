@@ -33,7 +33,7 @@ test('published bench records rank exact player/team/week performances and open 
     assert.equal(selected.personId, 'person-800000000000000001');
     assert.equal(selected.exactKey, '2506172839/50000000');
     assert.equal(selected.href, '/seasons/2021/matchups/900000000000002021-w2-m1/?scope=regular&week=2&player=901&team=1#player-1-901');
-    assert.equal(selected.leaderContext, 'Manager 1 · Week 2 · 2021');
+    assert.deepEqual([selected.leaderContext, selected.opponent], ['Manager 1 · Week 2 · 2021', 'Manager 2']);
     assert.ok(selected.secondary?.some(row => row.href === '/managers/person-800000000000000001/players/901/?scope=regular&season=2021'));
     assert.equal(selected.avatar, null, 'a manager avatar must not masquerade as a player photograph');
     const game = await readMatchup('2021', '900000000000002021-w2-m1', { storePath, week: 2 });

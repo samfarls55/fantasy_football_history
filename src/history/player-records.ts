@@ -1,6 +1,7 @@
 import { recordedStarts, type RecordedStart } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
 import { chances } from './luck.ts';
+import { opponentOf } from './performances.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 import type { Archive } from './types.ts';
@@ -27,12 +28,10 @@ export function charmCandidates(end: 'best' | 'worst'): NonNullable<CategoryDefi
 
 /** Each start's share of the official team score. A score of zero or below has no shares. */
 export function armyCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
-  const contests = new Map(archive.contests.map(contest => [contest.id, contest]));
   const names = new Map([...archive.players, ...archive.people].map(({ id, name }) => [id, name]));
   return recordedStarts(archive, {}, selection).filter(start => start.performance.points > 0).map(({ performance, playerId, points }) => {
-    const opponent = contests.get(performance.contestId)!.sides.find(side => side.rosterId !== performance.rosterId)!;
-    return { id: `${performance.id}-${playerId}`, personId: performance.personId, name: names.get(playerId)!, avatar: null, metric: Exact.from(points).multiply(100).divide(performance.points), sample: null,
-      leaderContext: `${names.get(performance.personId)} · Week ${performance.week} · ${performance.year} · ${points.toFixed(2)} of ${performance.points.toFixed(2)} points vs ${names.get(opponent.personId)}`,
+    return { id: `${performance.id}-${playerId}`, personId: performance.personId, name: names.get(playerId)!, avatar: null, metric: Exact.from(points).multiply(100).divide(performance.points), sample: null, opponentId: opponentOf(archive, performance).personId,
+      leaderContext: `${names.get(performance.personId)} · Week ${performance.week} · ${performance.year} · ${points.toFixed(2)} of ${performance.points.toFixed(2)} points`,
       period: { year: performance.year, week: performance.week, playedAt: performance.playedAt },
       href: `/seasons/${performance.year}/matchups/${performance.contestId}/?scope=regular&week=${performance.week}&player=${playerId}&team=${performance.rosterId}#player-${performance.rosterId}-${playerId}` };
   });
@@ -51,11 +50,9 @@ export function journeymanCandidates(archive: Archive, selection: RecordSelectio
 /** The player each person's lineups, or their opponents', got the most from, every tie named. */
 function topPlayer(side: 'own' | 'opponent', total: (starts: RecordedStart[]) => Exact): ManagerStat['values'] {
   return archive => {
-    const contests = new Map(archive.contests.map(contest => [contest.id, contest]));
     const names = new Map(archive.players.map(player => [player.id, player.name]));
     const weeks = Map.groupBy(archive.performances.filter(row => row.competition === 'regular'), row => row.personId);
-    const starts = Map.groupBy(recordedStarts(archive), ({ performance }) => side === 'own' ? performance.personId
-      : contests.get(performance.contestId)!.sides.find(other => other.rosterId !== performance.rosterId)!.personId);
+    const starts = Map.groupBy(recordedStarts(archive), ({ performance }) => (side === 'own' ? performance : opponentOf(archive, performance)).personId);
     return new Map([...starts].map(([personId, starts]) => {
       const players = [...Map.groupBy(starts, start => start.playerId)].map(([id, starts]) => ({ name: names.get(id)!, total: total(starts) })).sort((a, b) => b.total.compare(a.total) || a.name.localeCompare(b.name));
       const value = players[0].total;
