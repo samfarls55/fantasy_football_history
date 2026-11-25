@@ -57,7 +57,7 @@ export const managerStats: ManagerStat[] = [
   ...moveHabitStats,
 ];
 
-function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {
+export function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {
   const blocked = archive.coverage.some(issue => issue.blocks.includes(stat.key));
   const known = blocked ? [] : [...values(archive)].map(([personId, { value, ...rest }]) => {
     const { name, current } = archive.people.find(person => person.id === personId)!;
