@@ -10,7 +10,7 @@ export function pickupsSource(base: any) {
   for (let week = 4; week <= 7; week++) source.responses[`league/${id}/matchups/${week}`] = structuredClone(source.responses[`league/${id}/matchups/3`]);
   for (let week = 0; week <= 18; week++) source.responses[`league/${id}/transactions/${week}`] = [];
   function event(id: string, week: number, type: string, adds: any, drops: any, status = 'complete') {
-    const row = { transaction_id: id, leg: week, status, type, status_updated: 1000 + Number(id.slice(-2)), created: 900, adds, drops, draft_picks: [], waiver_budget: [], metadata: null };
+    const row = { transaction_id: id, leg: week, status, type, status_updated: 1000 + Number(id.slice(-2)), created: 900, adds, drops, roster_ids: [...new Set([...Object.values(adds ?? {}), ...Object.values(drops ?? {})])], draft_picks: [], waiver_budget: [], metadata: null };
     source.responses[`league/${source.seedLeagueId}/transactions/${week}`].push(row);
     return row;
   }

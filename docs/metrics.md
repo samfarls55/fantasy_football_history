@@ -153,6 +153,12 @@ The original exact-timing audit remains historical evidence in [coverage.md](cov
 
 Keeper flags remain nullable where unknown. Preserve source picks and transaction assets internally so ownership can be reproduced. Unsuccessful or unknown-status events never become completed moves.
 
+## Trades
+
+A trade is a completed source event of type `trade`, in any recorded week of any season, whatever it exchanged: players, draft picks or waiver budget. Failed, pending and unknown-status events are not trades. The people in it are whoever managed the source's `roster_ids` that season; a completed trade whose `roster_ids` are missing or name an unknown roster rejects the candidate before publication. `completedTrades` in `src/history/trades.ts` is the one read of them.
+
+Each trade counts once for each person in it. The trade map counts the trades each pair of people has shared, so a three-team trade counts once for each of its three pairs. The map holds everyone who has traded, former managers included, and its list holds the same pairs and counts.
+
 ## Recent Home results
 
 Label the list Recent top-ten results. Select performances currently in a category's first ten ranks, including ties, with a supported historical period. Order by historical event date, not import time, then category key and result ID for stable ties. Deduplicate the same category/result identity. Select the newest result from each distinct category until six places are filled, then fill any spare places from the remaining candidates. Present the selected results in their original historical order. A category entry links to its ranking with that result retained. This selection does not establish that a record was newly broken.
