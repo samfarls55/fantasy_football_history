@@ -3,7 +3,10 @@ import { contextualDrops, selectedDrop } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
 import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
+import { opponentOf } from './performances.ts';
+import { perArchive } from './per-archive.ts';
 import { inScope } from './scope.ts';
+import { plural } from './wording.ts';
 import type { Archive, Performance, Scope } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
@@ -13,14 +16,19 @@ export type ContributionView = typeof contributionViews[number];
 export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope; pickup?: string; view?: ContributionView; event?: string }
 export interface RecordedStart { performance: Performance; playerId: string; points: number }
 
+const startsIn = (performance: Performance): RecordedStart[] => performance.starters.filter(player => player.playerId !== '0' && player.points !== null)
+  .map(player => ({ performance, playerId: player.playerId, points: player.points! }));
 /** Completed paired weekly legs are the shared actual-start boundary, including unresolved multiweek contests. */
 export function recordedStarts(archive: Archive, identity: ContributionIdentity = {}, selection: ContributionSelection = {}): RecordedStart[] {
   return archive.performances.filter(row => (!identity.personId || row.personId === identity.personId)
     && (!identity.franchiseId || row.franchiseId === identity.franchiseId)
     && (!selection.season || row.year === selection.season)
-    && inScope(row.competition, selection.scope ?? 'regular')).flatMap(performance => performance.starters
-    .filter(player => player.playerId !== '0' && player.points !== null)
-    .map(player => ({ performance, playerId: player.playerId, points: player.points! })));
+    && inScope(row.competition, selection.scope ?? 'regular')).flatMap(startsIn);
+}
+const startsByPlayer = perArchive(archive => Map.groupBy(archive.performances.flatMap(startsIn), start => `${start.performance.seasonId}/${start.playerId}`));
+/** One player's starts in a season, for anyone. */
+export function playerStarts(archive: Archive, seasonId: string, playerId: string, scope: Scope = 'regular'): RecordedStart[] {
+  return (startsByPlayer(archive).get(`${seasonId}/${playerId}`) ?? []).filter(({ performance }) => inScope(performance.competition, scope));
 }
 
 function context(archive: Archive, identity: ContributionIdentity) {
@@ -41,7 +49,7 @@ export function playerContributionHref(identity: ContributionIdentity, playerId:
 export function startGame(archive: Archive, start: RecordedStart, scope: Scope) {
   const performance = start.performance;
   const contest = archive.contests.find(contest => contest.id === performance.contestId)!;
-  const opponentPerformance = archive.performances.find(other => other.contestId === contest.id && other.week === performance.week && other.rosterId !== performance.rosterId)!;
+  const opponentPerformance = opponentOf(archive, performance);
   const owner = archive.people.find(person => person.id === performance.personId)!;
   const opponent = archive.people.find(person => person.id === opponentPerformance.personId)!;
   return { year: performance.year, week: performance.week, points: start.points, owner, opponent, teamPoints: performance.points, opponentPoints: opponentPerformance.points,
@@ -120,7 +128,7 @@ export function contributionCandidates(archive: Archive, selection: RecordSelect
   return contributors(archive, {}, selection).map(row => {
     const latest = [...row.performances].sort((a, b) => b.performance.year.localeCompare(a.performance.year) || b.performance.week - a.performance.week)[0].performance;
     return { id: row.id, personId: row.owner.id, name: row.name, avatar: null, metric: row.metric,
-      sample: `${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, leaderContext: `${row.owner.name} · ${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
+      sample: plural(row.starts, 'start'), leaderContext: `${row.owner.name} · ${plural(row.starts, 'start')}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
       secondary: [{ name: row.owner.name, href: `/managers/${row.owner.id}/?tab=players&${query(selection.scope ?? 'regular', selection.season)}` }] };
   });
 }

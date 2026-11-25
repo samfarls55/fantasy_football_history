@@ -34,13 +34,13 @@ Completed current-season games count in career/game/player totals. Completed-sea
 
 ## Ranking and tie policy
 
-Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the selected ranking when distinct values would otherwise share a label.
+Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the ranks included when distinct values there would otherwise share a label.
 
-Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a link to all tied results. Summary compaction never removes qualifying ranking rows.
+Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a way to all tied results: a card, cell or badge shows five and opens the rest. Summary compaction never removes qualifying ranking rows.
 
 Career categories have one aggregate result per person. Season, game, bench and move categories rank individual qualifying performances. A person may appear repeatedly. A player-career contribution category ranks the player/person pair.
 
-Rates require at least one eligible game. Show games or W-L-T next to a rate. A zero-game rate is unknown, not 0%. No additional minimum-game rule is authorized.
+Rates require at least one eligible game. Show games or W-L-T next to a rate. A zero-game rate is unknown, not 0%. Charms and curses have the one authorized minimum; no other minimum-game rule is.
 
 ## Category catalog
 
@@ -58,14 +58,21 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | luckiest-season | Seasons: Luckiest season | Actual wins minus expected wins, descending | Completed season/all; regular only | Manager-season history |
 | unluckiest-season | Seasons: Unluckiest season | Expected wins minus actual wins, descending | Completed season/all; regular only | Manager-season history |
 | dominant-season | Seasons: Most dominant season | Completed team-season dominance, descending | Completed season/all; regular only | Manager-season history |
-| highest-score | Matchups: Highest team score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
-| lowest-score | Matchups: Lowest team score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
+| highest-score | Matchups: Highest score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
+| lowest-score | Matchups: Lowest score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
+| belt-run | Matchups: Longest belt run | Defenses in one reign, descending | Season the reign began/all; no game-scope selector | Career profile |
+| bridesmaid | Careers: Most finals lost without a title | Person's lost title contests, descending, among people with no title | Season/all; no game-scope selector | Career profile |
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
-| benched-player | Players: Highest-scoring benched player | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
-| productive-pickup | Players: Pickups by starting points | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
-| productive-drop | Players: Dropped players' starting points elsewhere | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
-| player-contributions | Players: Most starting points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
+| points-in-win | Matchups: Fewest points in a win | Winner's official score in one decided contest, ascending | Season/all; regular only | Matchup, selected week/team |
+| points-in-loss | Matchups: Most points in a loss | Loser's official score in one decided contest, descending | Season/all; regular only | Matchup, selected week/team |
+| worst-managed-week | Matchups: Worst-managed week | Best-lineup gap of one known lineup, descending | Season/all; regular only | Matchup, selected week/team |
+| benched-player | Players: Best benched player | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
+| lowest-starter | Players: Lowest starter score | Recorded player/team/week starting score, ascending | Season/all; game scope | Matchup with selected starter row |
+| productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
+| productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
+| cant-quit-you | Players: Can't quit you | One person's completed pickups of one player, at least two, descending | Season/all; no game-scope selector | Person-scoped player history |
+| player-contributions | Players: Top scorer for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
 
 Championship totals are title outcomes, not regular-season game statistics. Completed-season filters omit unfinished years from those award candidates. Underlying season pages can still show partial comparisons from completed eligible weeks.
 
@@ -77,7 +84,7 @@ Win percentage = 100 × (wins + 0.5 × ties) / (wins + losses + ties). Preserve 
 
 A scoring high/low uses the official team total, not a player sum. A true completed zero qualifies for the low record; an unplayed or missing result never does.
 
-Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified. Do not invent close-game or blowout thresholds.
+Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified; a tie belongs to both. A weekly score names the opponent too, and stays its own team's record. The close-game line under Luck is authorized; do not invent blowout thresholds.
 
 A winning or losing streak follows eligible completed contests in historical order. A tie ends either streak. Career streaks can continue between seasons within the selected scope. Season-specific streaks stop at the boundary. An excluded game is outside that selected scope, not a phantom win or loss. Byes do not extend a streak.
 
@@ -101,6 +108,68 @@ Comparisons use played regular-season team-weeks; source-confirmed unpaired byes
 
 Season award history uses the completed season's latest completed week and its supported year, including supported postseason completion, with no invented calendar date. The award's recognition period is separate from its regular-only calculation inputs. Public season awards identify the measured season and eligible-week sample, rather than presenting the recognition week as the accomplishment. Category links open the manager-season history. Standings comparisons display at one decimal; category percentages follow the ranking precision rule above. Standings expose `sort=scoring` and `sort=wins-expected`, descending with unknown values last, while retaining official standings as the default. Displayed Wins vs expected is actual minus expected, the exact negative of the Unluckiest season measure. Explain both directions where those values appear, along with scoring versus the season's league average and expected wins from weekly all-play results.
 
+## Manager stats
+
+A manager stat gives each person one value. `src/history/manager-stats.ts` registers them. An entry owns its key, place, plain label, unit, one-line rule, display precision, better end and calculation, and `readManagerStats` returns every known value with its sample and rank. Tables and manager pages show what it returns and calculate nothing.
+
+Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". Last place, tied or not, reads from the other end: "Tied lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value, when every value is zero or when a coverage issue blocks its key. A zero beside someone else's value is a value.
+
+A stat whose value is a name carries a number and unit, and ties list every name, with the unit then said of each. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
+
+## Week by week
+
+These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. An unpaired bye supplies no score, and a true zero is a score. The most of each ranks first, except that the fewest bottom scores do. `src/history/weekly.ts` calculates them.
+
+- **Top and bottom scores of the week:** every team tied for the week's best or worst score gets one. The sample is the person's scored weeks.
+- **Big-score games**, labelled with the league's line as "150+ points": games with a score at or above the league's line, which is its 80th-percentile score rounded to the nearest 10, half up. The percentile is the lowest score that at least 80% of the league's scores equal or fall below, over the whole archive, so the line can move with each import. The label names it. The sample is the person's scored weeks. Sam authorized this threshold in spec 37; the reference league's line is 147.74, rounded to 150.
+- **Boom or bust:** population standard deviation of the person's scores, each divided by that week's league average. It needs a square root, so it ranks by its displayed one-decimal percentage. A week whose average isn't above zero is left out. One score has no spread, so fewer than two weeks leave it unknown.
+- **Early win %, Late win %:** win percentage in weeks 1 to 5, and from week 9 to the end of the regular season, a tie counting half. The sample is the record. No game in those weeks leaves the rate unknown.
+
+## Luck
+
+These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. The strongest claim to luck, good or bad, ranks first.
+
+- **Robbed:** a loss with the week's competition rank 2 from the top. **Got away with it:** a win with competition rank 2 from the bottom. Teams tied for the place all count. A tied contest is neither. A week with fewer than four scored teams doesn't count. The sample is the person's counted weeks.
+- **Close games:** the win–loss record in contests with an exact margin above 0 and under 5 points. Sam authorized this threshold in spec 37. Ranked by the share won; no such game leaves it unknown.
+- **Opponents’ season highs:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time.
+- **Most points in a loss, fewest points in a win:** the loser's and winner's official score in a decided contest. A tie is neither.
+
+## Lineups
+
+Sam authorized these counterfactual lineup claims in spec 37. `src/history/lineups.ts` owns them. They cover completed regular-season weeks and follow the person who held the roster. A best-ball season (`best_ball` 1 in its settings) is left out of every measure here and of Best benched player, because Sleeper sets those lineups and no manager chose them.
+
+The best lineup is the highest total of recorded player points from that week's roster that legally fills the season's starting slots, as many of them as the roster can fill. Bench, IR and taxi slots are not starting slots, but Sleeper's weekly roster doesn't say who held one, so every rostered player is available. A player fits a slot through their current player-list position, or by having started in that slot type anywhere in this league's history, in any game scope. Every rule line says positions are current ones. It is a best assignment, because flex slots overlap: players enter best first, and those already in move to make room. Player points don't depend on the slot, so this finds the highest total.
+
+What the manager started is the floor, so filling a slot they left empty never lowers it. The gap is the best lineup less the starters' points. Both are player points, so a commissioner override never changes the gap.
+
+A week is left out, never zero, when the season has an unrecognized starting slot, a starter has no slot, any rostered player's score is unknown, or no roster was recorded. Recognized slots are QB, RB, WR, TE, K, DEF, FLEX (RB, WR, TE), WRRB_FLEX (RB, WR), REC_FLEX (WR, TE), SUPER_FLEX (QB, RB, WR, TE), DL, LB, DB and IDP_FLEX. A fullback counts as an RB, and specific defensive positions count as their DL, LB or DB group.
+
+- **Lineup efficiency:** 100 × starters' points / best-lineup points, summed over the person's counted weeks. A best total that isn't above zero leaves it unknown.
+- **Winnable losses:** lost contests whose official score plus the gap is above the opponent's official score. The sample is the count of the person's losses in counted weeks.
+- **Perfect lineups:** counted weeks with no gap. **Worst-managed week:** the largest gap above zero.
+- **Starters who scored 0:** starts with a recorded score of exactly 0. **Lowest starter score:** the lowest recorded score of one start. An empty slot or unknown score is neither, and neither needs a known best lineup.
+
+The share and the perfect lineups rank from the most, and the two mistakes, winnable losses and starters who scored 0, from the fewest.
+
+The archive's best lineups are solved once per archive object and kept beside it.
+
+## Schedule swap
+
+A manager's record with the schedule of another manager compares the first one's official score, each regular-season week, with the score of the second one's opponent that week. When that opponent is the first manager, use the second one's score instead. The diagonal is the actual record. Equal scores are a tie. A week in which either manager had an unpaired bye holds no game, and a pair with no such week has no record, not 0–0.
+
+One completed season shows at a time, the newest unless the `season` URL parameter names another completed season. Rows and columns share the regular-season standings order and hold the people who earned that season's results. A record is better when its win percentage, a tie counting half, is above the actual one. `src/history/schedule-swap.ts` owns the calculation and the seasons that have one; `src/components/RecordGrid.astro` draws it.
+
+## Careers
+
+Legacy's careers table (`src/history/careers.ts`) has one row per person, former managers included and marked. Current managers lead, by titles and then win percentage. Games are completed regular-season ones, the current season's included.
+
+- **Titles, finals lost:** champions and runners-up of resolved title contests. **Playoffs:** seasons they qualified. An unresolved title counts for nobody, so a league with no resolved title has neither column.
+- **PPG, PPG against:** career points and points against, divided by games played. No games leaves them unknown. Fewer points against ranks first.
+- **Power rating:** Elo, in rating points. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
+- **Biggest swing:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. The seasons it happened in are its sample, as "1st to 10th in 2020"; of equal changes the latest shows, with how many more there were.
+
+Most finals lost without a title ranks people who lost at least one final and hold no resolved title in any season. Most dominant season is left off Legacy when every team-season that leads it also leads Home's headline, Best season without a title. A manager's page leaves it out the same way, when each of their team-seasons that leads it also leads Best season without a title.
+
 ## Rivalries and nemesis
 
 Each selected pair uses completed contests in the selected season/game scope. Show W-L-T, meetings, average official margin from the first person's perspective, and the current streak. Changing the pair order reverses score-margin signs and W/L perspective.
@@ -111,19 +180,60 @@ Average margin = sum of first person's final scores minus opponent's final score
 
 A person's nemesis is the opponent with the largest losses-minus-wins value from that person's perspective. Require a positive value. Ties share the result. Include the underlying record/meetings and link to the selected rivalry. If no opponent has a winning record against the person, assign no nemesis.
 
+## Head to head
+
+Every current manager's all-time record against every other, regular season and championship playoffs together, from the rivalry calculation above. A pair who never met has no record, not 0–0, and the grid waits until one pair has met. A record is better when its wins exceed its losses. Rows and columns share name order, and each record leads to that pair's meetings on the row's manager page. `readHeadToHead` in `src/history/rivalries.ts` owns it.
+
+Current rivalry streaks (`readRivalryStreaks`) use the same games: the current run of each pair of current managers when it is three straight wins or more. The five longest show, and every one tied with the fifth.
+
+## Manager pages
+
+Each current and former person has one page, holding only results they earned. Finishes list their completed seasons with the season's team count; a finish the bracket doesn't establish stays unknown. Their record against everyone, and the list of meetings, use the combined scope and mark championship-playoff contests.
+
+A person holds a record category when they share its first rank in the default selection, all seasons and regular scope. A tied closest game belongs to both managers. A descending category led by zero is held by nobody, so its tab leaves the card out, and a blocked category has no holder. `readRecordsHeld` in `src/history/records.ts` reads every registered category, fame before shame, less one whose `unless` category already leads with the same result, so a category's name, unit, precision, one-line rule and shame flag live in the registry.
+
+`src/history/manager-names.ts` resolves a name from a link in any letter case, or offers the nearest one: a name it starts (three letters or more), or one within one edit per four letters, at least one.
+
+## Badges
+
+Each current manager has at most one badge, shown on Home and their page with the stat behind it. `src/history/badges.ts` lists the badges in order, each one manager stat and the end of it that earns the badge: Juggernaut (`top-scores`), Tinkerer (`pickups`), Bridesmaid (`finals-lost`), Night Owl (`late-night`), Wild Card (`boom-or-bust`, highest), Metronome (`boom-or-bust`, lowest), Own Worst Enemy (`losses-better-lineup`), Heartbroken (close-game losses), Cellar Dweller (`bottom-scores`), Rollercoaster (`one-year-change`), Ride or Die (`most-started`), Denied (`failed-claims`), Dealmaker (`trades`), Robbed (`robbed`), Bandit (`got-away`) and Closer (`late-wins`). All but Metronome go to the highest.
+
+A pair is a badge and a current manager whose value is above zero. Its rank is that manager's competition rank among current managers from the badge's end, so a zero still holds its place in the ranking and former managers hold none. Pairs go out lowest rank first, then in list order, then by person ID, each one only if its badge and manager are both free. A stat that is left out, or a manager without a value, makes no pair. Managers left over have no badge.
+
+Close-game losses (Close losses) are the losses in the `close-games` records, from the same contests, with the person's close games as the sample. That column ranks by the share won, so `closeLosses` in `src/history/luck.ts` ranks the count for the badge alone. It shares the column's key, coverage blocks and link, and is neither a column nor a rank of its own. A badge shows its stat's label, or the stat's unit with a capital when the label is the badge's own name: Robbed shows "Losses with 2nd-best score". Wild Card and Metronome, the two ends of Boom or bust, both show "Weekly swing".
+
+## The belt
+
+The belt starts with the first resolved champion in the archive, at that title contest, and moves in contests from the following season. It follows completed regular-season and championship-playoff contests in order of the week each resolves, so a multiweek contest counts once, when it resolves. The holder loses it to whoever beats them, and a tie keeps it. A defense is a decided or tied contest the holder did not lose.
+
+A season in the archive whose teams don't include the holder passes the belt as it opens, with no contest played: to the latest champion who has a team in it, or to nobody. A vacant belt goes to the next resolved champion, and a champion's return doesn't claim it. A vacancy is not a reign and holds no record. A league with no resolved title has no belt.
+
+`src/history/belt.ts` supplies the reigns to Home, Legacy, manager pages and `belt-run`, which ranks individual reigns with at least one defense, the current one included. The card says when the belt was taken, and the season filter selects the reigns that began then. A passed belt's start is the season alone.
+
 ## Player contributions and bench records
 
 A contribution is a player appearing in the actual starting lineup with a usable recorded player score for that week. Sum only those scores, within the selected person or franchise scope and game scope. Starts count actual starts. Team overrides do not change player totals without player-level source support.
 
 A person scope stops when that person's ownership stops. A franchise scope includes successive owners while retaining attribution. Season totals and linked contributing games must sum consistently.
 
-A bench performance is a player present on the weekly roster and absent from its actual starters, with a usable recorded score. The bench record does not assert that a replacement was legal, avoidable, or would have won the game. The full platform makes no counterfactual substitution claim.
+A bench performance is a player present on the weekly roster and absent from its actual starters, with a usable recorded score. The bench record does not assert that a replacement was legal, avoidable, or would have won the game. Only the measures under Lineups make a counterfactual substitution claim.
 
 `src/history/bench.ts` ranks individual completed weekly player/team performances with the shared `Exact` comparison and category registry. Repeated people and players remain separate results; ties retain all cutoff places. Links select the actual contest, weekly leg, roster and bench player. Scoped player history still includes actual starts only. No supported historical player portrait is supplied, so these player identities use the shared initials frame rather than a manager avatar.
 
 Missing bench points remain `null` with an internal `player-points` coverage issue blocking `benched-player`. Category reads honor that block for all seasons or the affected selected season, suppressing both rankings and leading holders; a genuine empty selection remains distinct. The block conservatively applies to every game scope within that season. An initial archive can retain unknown lineup rows while the affected record claim stays unavailable. Once a complete bench publication exists, a later missing score rejects the candidate before publication with endpoint/roster/player diagnostics and retains the previous complete history. Numeric zero remains eligible, and empty slots and byes create no bench record.
 
-Current position metadata is not proof of historical lineup eligibility. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
+Current position metadata is not proof of historical lineup eligibility; Lineups uses it and says so. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
+
+## Charms, journeymen and armies
+
+These use completed regular-season weeks and recorded starts. An actual zero is a start; an empty slot isn't. `src/history/player-records.ts` calculates them all.
+
+- **Lucky charms, curses** (`lucky-charms`, `curses`): the win percentage of the decided contests in which the player started, for any manager. A tied contest is neither a result nor a start here. Sam authorized a minimum in spec 37: 5 such starts times the number of seasons in the archive, 40 in the reference league. Among the players who reach it, a charm has fewer than three players with a better rate and more with a worse one; a curse is the reverse. So the three best and three worst show, or fewer when fewer qualify. Ties stand together, a player level with the middle is neither, and nobody is both.
+- **One-man army** (`one-man-army`): one start's points as a share of the official team score, overrides included. A team score of zero or below has no shares.
+- **Journeyman** (`journeyman`): distinct people who had the player, starting or benched, in a completed week. Team defenses are excluded, and so is a player only one person has had.
+- **Most-started player, Top scorer against** (`most-started`, `scored-most-against`): for each person, the player they started most, and the player whose starts against them add up to the most points. Every tied answer shows. The sample is the person's own weeks.
+
+A player holds a charm, curse or journeyman record rather than a person, so it has no holder on a manager page and no place in Recent top-ten results.
 
 ## Acquisition and drop attribution
 
@@ -137,13 +247,64 @@ Productive drop = actual starting points for other league people in weeks strict
 
 A drop detail retains the dropping person/year at the top and lists actual receiving-person contributions with game links. It can link to each receiving person's scoped player history. Do not put those later points into the dropping person's career contribution total.
 
-Rank observed contributions, with no invented significance cutoff. Keep zero-start acquisitions and drops as zero-value history with no invented contribution period. Neutral public headings describe starting points rather than claiming every move was productive. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
+Rank observed contributions, with no invented significance cutoff. Keep zero-start acquisitions and drops as zero-value history with no invented contribution period. Neutral public headings describe starting points rather than claiming every move was productive. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, a draft-value formula, or any trade comparison beyond the lopsided-trade rule below.
 
 Order completed ownership events by source week and recorded `status_updated` chronology within that week. Validate missing or tied same-player/week recorded timestamps at import rather than inventing a tie-break. This order resolves recorded ownership changes only. Weekly snapshots establish initial observed ownership; they never create a synthetic pickup. Draft picks identify the receiving roster using `roster_id`, independently of `picked_by` or original draft-pick ownership. Completed events of unfamiliar types preserve their ownership assets. Failed, pending and unknown-status events never change a spell.
 
 The original exact-timing audit remains historical evidence in [coverage.md](coverage.md). Timestamp-shaped transaction fields do not prove event-before-NFL-start order. The revised full-week policy does not need that unsupported precision and credits no excluded move week.
 
 Keeper flags remain nullable where unknown. Preserve source picks and transaction assets internally so ownership can be reproduced. Unsuccessful or unknown-status events never become completed moves.
+
+## Draft results
+
+Best steal, Worst bust and Titles by draft slot read one draft per completed season: its largest finished snake or linear draft, by picks, whose rounds cover every lineup and bench spot in that draft's own `slots_*` settings. The season's later roster positions don't decide this, because a league can add spots after drafting. An auction has no comparable rounds. A rookie draft (`player_type` 1, or fewer rounds than spots) covers part of a roster. A season without such a draft supplies no result, and a league without one shows no card.
+
+A steal is a pick from the second half of the rounds (round × 2 > rounds, so the middle of an odd number of rounds counts), ranked by most points. A bust is a pick from round 1, ranked by fewest. Both sum the player's actual regular-season starting points that season for the drafter, the person whose roster made the pick (`roster_id`), whoever's slot it came from. Starts for another manager after a trade or drop don't count, and no starts is a real zero. A pick flagged as a keeper is excluded. An unknown flag excludes nothing. These rank recorded starting points and never a draft value formula.
+
+Titles by draft slot counts the resolved champions who drafted from each slot, with competition ranks and every slot shown, including those with none. The champion's slot is the draft order's slot for their account. A champion the order doesn't name took the roster over, and has the slot most of that roster's picks came from. A traded pick never moves a manager's slot. A slot holds this record rather than a person, so it has no holder on a manager page and no place in Recent top-ten results.
+
+The import checks the draft and pick fields these read. A draft without usable settings, or with a pick missing its round, number or slot, is not measured, and its league still imports. `src/history/drafts.ts` selects the draft and calculates all three. Pick results are dated by their season's completion.
+
+## Scouting reports
+
+Most-drafted player, Most-drafted team, Most-drafted college and Average player age count every pick of every finished draft: snake, linear, auction or rookie, the current season's included, and a season's second draft as well. A keeper is a pick like any other. A pick belongs to the person whose roster made it that season (`roster_id`), so a replaced manager keeps their own. An unfinished draft counts for nobody.
+
+- **Team** is the NFL team recorded with the pick at the draft, and a pick recorded without one is left out. Team defenses count.
+- **College** and **age** come from the player list and leave out team defenses and unknown values. The import reads "No College", "None" and "null" in any letter case as an unknown college; other spellings stay as listed.
+- **Age** is the days from the birth date to the date the draft started in America/New_York, over 365.25. A draft without a start time supplies no age. The average covers the picks with a known age, and the youngest average ranks first.
+- A named answer needs at least two picks, since answers picked once each are no tendency and would list a young league's whole roster. Ties list every answer. None of the four carries a sample.
+
+`src/history/drafts.ts` calculates all four. They open the Draft tab alone in a league whose drafts supply no draft result.
+
+## The ex and lopsided trades
+
+Spec 37 authorizes both measures. Both use recorded starting points in weeks strictly after the move week, within its season and the selected game scope, and exact same-week attribution stays forbidden.
+
+The ex (`the-ex`, `src/history/ex.ts`) ranks each completed drop or trade departure by the player's later starts against the person who made it, with `departureWeek < startWeek < nextArrivalWeek`, where the arrival is that person's next one for the player. Starts for every other person count when the opponent is that person. Each departure is a separate candidate held by the person who let the player go, and one with no such start is not a candidate. An implicit closure outside a trade is not a departure here.
+
+Most lopsided trade (`lopsided-trade`, `src/history/lopsided-trades.ts`) ranks the gap between what the two sides received. Each received player counts starting points for the receiver with `tradeWeek < startWeek < departureWeek`, the productive-pickup window. Only a completed trade between exactly two people qualifies. One with any draft pick or waiver budget is left out, because no rule may value either. A side that received no player scores zero, and an equal trade is never a candidate. The row names both people, the players each received and each side's total.
+
+## Trades
+
+A trade is a completed source event of type `trade`, in any recorded week of any season, whatever it exchanged: players, draft picks or waiver budget. Failed, pending and unknown-status events are not trades. The people in it are whoever managed the source's `roster_ids` that season; a completed trade whose `roster_ids` are missing or name an unknown roster rejects the candidate before publication. `completedTrades` in `src/history/trades.ts` is the one read of them.
+
+Each trade counts once for each person in it. The trade map counts the trades each pair of people has shared, so a three-team trade counts once for each of its three pairs. The map holds everyone who has traded, former managers included, and its list holds the same pairs and counts.
+
+## Move habits
+
+These count recorded events in any week of any season, for whoever held the roster that season. `src/history/move-habits.ts` owns them. Every person has a value, zero included. Each carries the chances behind it.
+
+- **Pickups:** completed waiver and free-agent events that add a player, one per event. Failed, pending, commissioner and trade events are never pickups. The sample is the person's seasons.
+- **Failed claims:** failed waiver events, whatever the cause. The sample is the count of their waiver claims, completed and failed; a pending one is neither.
+- **Midnight–5am, Sunday 11am–1pm:** completed free-agent events that add a player, by recorded completion time in America/New_York (Eastern time), daylight saving included. Each window holds its first instant and not its last. A waiver claim completes when Sleeper runs it, so it's neither. Both say nothing about kickoffs or lineup locks, and exact same-week attribution stays forbidden. A completed event without a completion time rejects the candidate at import. The sample is the count of the person's free-agent pickups.
+- **Trades:** the Trades rule above, once for each person in the trade. The sample is the person's seasons.
+- **Can't quit you** (`cant-quit-you`): repeated completed pickups of one player by one person. A player picked up once is not a candidate. The row gives how many seasons it happened in.
+
+## Home leads
+
+Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses, whose worst end leads), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads, and neither does a manager stat every manager ties on. A tab with no such record or manager stat has no lead.
+
+`src/history/leads.ts` ranks the same registry entry the tab does. Every tie for first is named; managers who tie with different win–loss records each keep their own. The lead may word a column's label for a card, but its figure, unit and rule are the entry's.
 
 ## Recent Home results
 
@@ -167,7 +328,7 @@ Tests through the import-to-public application boundary must cover ties, source 
 
 `src/history/metrics.ts` supplies career facts to manager/franchise profiles, season standings and career rankings. `src/history/decimal.ts` retains reduced BigInt rationals for sums, differences, products, quotients and comparisons. Category comparisons use `Exact.compare`; reduced `Exact.key` values establish canonical equality. Public numeric facts retain their existing shape; convert only after ranking or for display. Never feed a rounded display value back into a calculation.
 
-`src/history/records.ts` registers the four-group category catalog and category candidate calculators. Later category slices supply a calculator on their existing definition and return exact metrics with stable result IDs, relevant historical links, optional secondary identities and a supported historical period. The same persisted visitor reads, ranks, cutoff expansion, sorting and category page apply to all registered calculators. Unregistered categories have no fabricated holder or ranking.
+`src/history/records.ts` registers the four-group category catalog and category candidate calculators. Later category slices supply a calculator on their existing definition and return exact metrics with stable result IDs, relevant historical links, optional secondary identities and a supported historical period. The same persisted visitor reads, ranks, cutoff expansion, sorting and category page apply to all registered calculators. A category's `place` names the tab its card shows on, or the half of Excuses; `src/history/tabs.ts` derives the league's tabs from the places with a stat.
 
 URL parameters are `season`, eligible `scope`, `sort`, `limit` (a rank boundary, initially 10), and optional `result` (stable selected result identity). Sorting rearranges the included canonical places; it does not change them. Show more increases the rank boundary and retains all equal-value rows. Championship links omit game scope.
 

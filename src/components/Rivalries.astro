@@ -1,0 +1,27 @@
+---
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+import type { readRivalryStreaks } from '../history/rivalries.ts';
+
+interface Props { streaks: NonNullable<Awaited<ReturnType<typeof readRivalryStreaks>>> }
+const [longest, ...rest] = Astro.props.streaks;
+---
+{longest && (
+  <Section id="rivalries" title="Active streaks" heading="h3">
+    <div class="streak-top">
+      <p class="streak-run"><span class="streak-big">{longest.count}</span><span class="painted">straight wins</span></p>
+      <p class="streak-who"><Manager name={longest.winner.name} /> over <Manager name={longest.loser.name} /></p>
+      <p class="streak-record">{longest.record} all time</p>
+    </div>
+    {rest.length > 0 && (
+      <ul class="streaks">
+        {rest.map(streak => (
+          <li>
+            <span class="streak-count">{streak.count}<span>straight wins</span></span>
+            <p><Manager name={streak.winner.name} /> over <Manager name={streak.loser.name} /></p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </Section>
+)}

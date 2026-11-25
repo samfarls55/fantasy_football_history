@@ -1,0 +1,8 @@
+---
+// Every manager name in a league is this one link: it opens their page, and white paint, or a word read aloud, marks the visitor's own.
+import { isViewer, managerHref } from '../league-page.ts';
+interface Props { name: string }
+const { name } = Astro.props;
+const href = managerHref(Astro, name);
+---
+<a href={href} data-person class:list={[{ me: isViewer(Astro, name) }]} aria-current={Astro.params.manager?.toLowerCase() === name.toLowerCase() ? 'page' : undefined}>{name}{isViewer(Astro, name) && <span class="unseen"> (you)</span>}</a>

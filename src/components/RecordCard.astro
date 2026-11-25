@@ -1,0 +1,59 @@
+---
+import RecordContext from './RecordContext.astro';
+import RecordWho from './RecordWho.astro';
+import ShareLink from './ShareLink.astro';
+import { fixed, isViewer, tabHref } from '../league-page.ts';
+import { recordUnit, type CardView } from '../history/records.ts';
+import type { TabKey } from '../history/tabs.ts';
+
+interface Props {
+  view: CardView;
+  heading: 'h2' | 'h3';
+  /** The card's place in its run, for the stagger. */
+  index: number;
+  headline?: boolean; wide?: boolean; across?: boolean;
+  /** The tab the card leads to from Home. The stat's anchor and share link stay there. */
+  tab?: { key: TabKey; name: string };
+}
+const { view: { category, rows, leaders }, heading: Title, index, headline, wide, across, tab } = Astro.props;
+type Row = typeof rows[number];
+// A large tie shows five, and the rest wait with the places below. Ties share a rank, so every row ranked third or better is there; none drops silently.
+const first = leaders.slice(0, 5);
+const tied = leaders.slice(5);
+const others = [...tied, ...rows.filter(row => row.rank > 1 && (row.rank <= 3 || category.rest))];
+const below = category.rest ?? (tied.length ? `${tied.length} more tied` : `${others.length} ${others.length > 1 ? 'runners-up' : 'runner-up'}`);
+// One fixed precision per record so a figure and its runners-up line up; a percentage keeps the precision its category chose so distinct ranked values never share a label (docs/metrics.md).
+const value = (row: Row) => row.shown ?? `${category.signed && row.value > 0 ? '+' : ''}${fixed(row.value, category.displayPrecision)}${category.percent ? '%' : ''}`;
+const unit = (row: Row) => category.displayPrecision === 0 && !row.shown ? recordUnit(category.unit, row.value) : category.unit;
+// The visitor's own place, and on a manager's page theirs, shows without opening anything.
+const named = (name?: string) => name !== undefined && (isViewer(Astro, name) || name.toLowerCase() === Astro.params.manager?.toLowerCase());
+const involves = (row: Row) => [row.manager, row.opponent, ...(row.winners ?? []).map(winner => winner.manager)].some(named);
+// Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
+const hash = [...category.key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+const landing =`--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
+---
+<li id={tab ? undefined : category.key} class:list={['play', { shame: category.shame, headline, wide, across }]} style={`--i: ${index}; ${landing}`}>
+  {category.shame && (
+    <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
+      <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
+      <path class="flag-fold" d="M30 7c-2 9-1 19 1 29" />
+      <circle class="flag-knot" cx="11" cy="11" r="7" />
+    </svg>
+  )}
+  <Title class="play-title">{tab ? <a class="play-lead" href={`${tabHref(Astro, tab.key)}#${category.key}`}><span class="painted">{tab.name}</span> <span class="unseen">{category.shame && 'Shame: '}</span><span class="play-name">{category.name}</span></a>
+    : <><span class="unseen">{category.shame ? 'Shame: ' : 'Fame: '}</span>{category.name}<ShareLink label={`Share ${category.name}`} hash={`#${category.key}`} /></>}</Title>
+  <div class="play-figure"><span class="play-value">{value(leaders[0])}</span><details class="play-how"><summary class="play-unit">{unit(leaders[0])}</summary><p>{category.rule}</p></details></div>
+  <div class="play-who">
+    {first.map(row => (
+      <div class="play-holder"><strong><RecordWho row={row} verb={category.verb} /></strong><RecordContext class="play-context" row={row} verb={category.verb} precision={category.displayPrecision} /></div>
+    ))}
+    {others.length > 0 && (
+      <details class="play-next" open={category.open || others.some(involves)}>
+        <summary>{below}</summary>
+        <ol>
+          {others.map(row => <li><span class="next-rank">{row.rank}</span><span class="next-value">{value(row)} <span class="next-unit">{unit(row)}</span></span><span class="next-who"><RecordWho row={row} verb={category.verb} /></span><RecordContext class="next-when" row={row} verb={category.verb} precision={category.displayPrecision} /></li>)}
+        </ol>
+      </details>
+    )}
+  </div>
+</li>

@@ -1,0 +1,20 @@
+---
+import Tab from '../../../layouts/Tab.astro';
+import Extremes from '../../../components/Extremes.astro';
+import Records from '../../../components/Records.astro';
+import Section from '../../../components/Section.astro';
+import Stats from '../../../components/Stats.astro';
+import { openTab } from '../../../league-page.ts';
+
+const { redirect, frame, view } = await openTab(Astro, 'games');
+if (redirect) return redirect;
+// The week's top and bottom scores are drawn against each other; the rest stay columns.
+const [top, bottom] = ['top-scores', 'bottom-scores'].map(key => view?.stats.find(stat => stat.key === key));
+const drawn = top && bottom ? [top, bottom] : [];
+const columns = view?.stats.filter(stat => !drawn.includes(stat)) ?? [];
+---
+<Tab {...frame}>
+  {view && <Records views={view.records} heading="h2" />}
+  {top && bottom && <Extremes top={top} bottom={bottom} />}
+  {columns.length > 0 && <Section id="weekly" title="Week by week"><Stats labelledby="weekly-name" stats={columns} /></Section>}
+</Tab>

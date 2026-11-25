@@ -1,4 +1,5 @@
 import type { Archive, Season } from './types.ts';
+import { playerBackground } from './players.ts';
 
 type Row = Record<string, unknown>;
 function object(value: unknown, label: string): Row {
@@ -8,6 +9,13 @@ function object(value: unknown, label: string): Row {
 function list(value: unknown, label: string): unknown[] { if (!Array.isArray(value)) throw new Error(`${label}: expected a complete source array`); return value; }
 function id(value: unknown, label: string): string { if (typeof value !== 'string' || !value.trim()) throw new Error(`${label}: expected a string ID`); return value; }
 function integer(value: unknown, label: string): number { if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) throw new Error(`${label}: expected a safe nonnegative integer`); return value; }
+
+// What a stat reads of a draft or a trade is checked here, once. A league whose drafts lack it still imports.
+const text = (value: unknown) => typeof value === 'string' ? value : null;
+const count = (value: unknown) => Number.isSafeInteger(value) ? value as number : null;
+const fields = (value: unknown): Row => value && typeof value === 'object' ? value as Row : {};
+const counts = (value: unknown) => Object.fromEntries(Object.entries(fields(value)).filter((entry): entry is [string, number] => count(entry[1]) !== null));
+const items = (value: unknown) => Array.isArray(value) ? value : [];
 
 /** Validate and retain ownership inputs once, at the provider boundary. Raw assets stay internal. */
 export async function importOwnershipInputs(archive: Archive, season: Season, get: (path: string) => Promise<unknown>, playerSource: Row) {
@@ -22,7 +30,7 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
     const source = object(playerSource[value], `players/nfl ${value}`);
     const name = typeof source.full_name === 'string' ? source.full_name : `${source.first_name ?? ''} ${source.last_name ?? ''}`.trim();
     if (!name) throw new Error(`players/nfl ${value}: missing player identity`);
-    archive.players.push({ id: value, name, position: typeof source.position === 'string' ? source.position : null });
+    archive.players.push({ id: value, name, position: typeof source.position === 'string' ? source.position : null, ...playerBackground(source) });
   };
   const assets = (value: unknown, label: string) => value == null ? {} : Object.fromEntries(Object.entries(object(value, label)).map(([key, value]) => { player(key); return [key, roster(value, label)]; }));
   const drafts = list(await get(`${path}/drafts`), `${path}/drafts`);
@@ -33,9 +41,11 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
       const pick = object(value, `draft/${draftId}/picks`);
       const playerId = id(pick.player_id, `draft/${draftId}/picks player_id`); player(playerId);
       if (pick.is_keeper != null && typeof pick.is_keeper !== 'boolean') throw new Error(`draft/${draftId}/picks: invalid keeper flag`);
-      return { playerId, rosterId: pick.roster_id == null ? null : roster(pick.roster_id, `draft/${draftId}/picks roster_id`), keeper: pick.is_keeper == null ? null : pick.is_keeper, source: pick };
+      return { playerId, rosterId: pick.roster_id == null ? null : roster(pick.roster_id, `draft/${draftId}/picks roster_id`), keeper: pick.is_keeper == null ? null : pick.is_keeper,
+        source: { ...pick, round: count(pick.round), pick_no: count(pick.pick_no), draft_slot: count(pick.draft_slot), metadata: { ...fields(pick.metadata), team: text(fields(pick.metadata).team) } } };
     });
-    archive.drafts.push({ id: draftId, seasonId: season.id, source, picks });
+    archive.drafts.push({ id: draftId, seasonId: season.id, picks,
+      source: { ...source, status: text(source.status), type: text(source.type), start_time: count(source.start_time), draft_order: counts(source.draft_order), settings: counts(source.settings) } });
   }
   const seen = new Map<string, string>();
   const chronology = new Map<string, string>();
@@ -52,13 +62,15 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
       const week = integer(source.leg, `${endpoint} leg`);
       const adds = assets(source.adds, `${endpoint} adds`);
       const drops = assets(source.drops, `${endpoint} drops`);
+      const type = id(source.type, `${endpoint} type`);
+      if (status === 'complete' && type === 'trade') for (const value of list(source.roster_ids, `${endpoint} roster_ids`)) roster(value, `${endpoint} roster_ids`);
       if (status === 'complete') for (const playerId of new Set([...Object.keys(adds), ...Object.keys(drops)])) {
         const key = `${playerId}:${week}:${completedAt}`;
         if (chronology.has(key)) throw new Error(`${endpoint}: ambiguous recorded chronology for player ${playerId}, week ${week}`);
         chronology.set(key, transactionId);
       }
       archive.transactions.push({ id: transactionId, seasonId: season.id, year: season.year, week,
-        type: id(source.type, `${endpoint} type`), status, completedAt, adds, drops, source, orderingSupported: false });
+        type, status, completedAt, adds, drops, source: { ...source, roster_ids: items(source.roster_ids), draft_picks: items(source.draft_picks), waiver_budget: items(source.waiver_budget) }, orderingSupported: false });
     }
   }
 }

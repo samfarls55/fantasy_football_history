@@ -1,0 +1,21 @@
+---
+// Every current manager's record against every other, with the rivalry streaks those same games make.
+import RecordGrid from './RecordGrid.astro';
+import Rivalries from './Rivalries.astro';
+import Section from './Section.astro';
+import { managerHref } from '../league-page.ts';
+import type { readHeadToHead, readRivalryStreaks } from '../history/rivalries.ts';
+
+interface Props { rows: Awaited<ReturnType<typeof readHeadToHead>>; streaks: NonNullable<Awaited<ReturnType<typeof readRivalryStreaks>>> }
+const { rows, streaks } = Astro.props;
+const linked = rows?.map(row => ({ ...row, cells: row.cells.map((cell, index) => cell && {
+  ...cell, link: { href: `${managerHref(Astro, row.name, { vs: rows[index].name })}#vs`, label: `${row.name} ${cell.record} against ${rows[index].name}, every meeting` },
+}) }));
+---
+{linked && (
+  <Section id="head-to-head" title="Head to head">
+    <details class="play-how"><summary class="play-unit">{linked.some(row => row.cells.some(cell => cell?.ties)) ? 'W–L–T' : 'W–L'}</summary><p>Regular-season and championship-playoff games between current managers. Streaks count the same games. Bold is a winning record.</p></details>
+    <RecordGrid labelledby="head-to-head-name" rowLabel="Record of" columnLabel="against" rows={linked} />
+    <Rivalries streaks={streaks} />
+  </Section>
+)}

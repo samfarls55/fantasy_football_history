@@ -1,0 +1,72 @@
+import { playerContributionHref } from './contributions.ts';
+import { Exact } from './decimal.ts';
+import { rosterPerson } from './rosters.ts';
+import { completedTrades } from './trades.ts';
+import { plural } from './wording.ts';
+import type { ManagerStat } from './manager-stats.ts';
+import type { RecordCandidate, RecordSelection } from './records.ts';
+import type { Archive, Transaction } from './types.ts';
+
+/** Each move with the people who held the rosters it adds a player to that season. */
+function adds(archive: Archive, moves: Transaction[]) {
+  return moves.flatMap(move => [...new Set(Object.values(move.adds))].map(rosterId => ({ move, personId: rosterPerson(archive, move.seasonId, rosterId)! })));
+}
+const pickups = (archive: Archive) => adds(archive, archive.transactions.filter(move => move.status === 'complete' && (move.type === 'waiver' || move.type === 'free_agent')));
+
+/** Everyone's count, zero included, beside their chances: how many times they did what could have counted, or else their seasons. */
+function counts(archive: Archive, counted: { personId: string }[], tries?: { personId: string }[]): ReturnType<ManagerStat['values']> {
+  return new Map(archive.people.map(({ id }) => [id, {
+    value: Exact.from(counted.filter(row => row.personId === id).length),
+    sample: tries ? `of ${tries.filter(row => row.personId === id).length}`
+      : plural(archive.seasons.filter(season => season.teams.some(team => team.personId === id)).length, 'season'),
+  }]));
+}
+
+const newYork = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', hourCycle: 'h23' });
+/** Free-agent pickups completed while New York's clocks showed an hour that counts. A waiver claim completes when Sleeper runs it, so its time says nothing about its maker. */
+function timedPickups(inWindow: (weekday: string, hour: number) => boolean): ManagerStat['values'] {
+  return archive => {
+    const tries = pickups(archive).filter(({ move }) => move.type === 'free_agent');
+    const counted = tries.filter(({ move }) => {
+      const { weekday, hour } = Object.fromEntries(newYork.formatToParts(move.completedAt!).map(part => [part.type, part.value]));
+      return inWindow(weekday, Number(hour));
+    });
+    return counts(archive, counted, tries);
+  };
+}
+
+/** Every player one person has picked up more than once. */
+export function repeatPickupCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
+  const added = pickups(archive).filter(({ move }) => !selection.season || move.year === selection.season)
+    .flatMap(({ move, personId }) => Object.keys(move.adds).map(playerId => ({ move, personId, playerId })));
+  return [...Map.groupBy(added, row => `${row.personId}/${row.playerId}`)].filter(([, rows]) => rows.length > 1).map(([id, rows]) => {
+    const [{ personId, playerId }] = rows;
+    const last = rows.reduce((latest, { move }) => move.completedAt! > latest.completedAt! ? move : latest, rows[0].move);
+    const years = new Set(rows.map(({ move }) => move.year)).size;
+    return { id, personId, name: archive.players.find(player => player.id === playerId)!.name, avatar: null, metric: Exact.from(rows.length), sample: null,
+      leaderContext: `${archive.people.find(person => person.id === personId)!.name} · in ${plural(years, 'season')}`,
+      period: { year: last.year, week: last.week, playedAt: null }, href: playerContributionHref({ personId }, playerId, { season: selection.season }) };
+  });
+}
+
+/** Moves' table: the busiest ranks first. */
+export const moveHabitStats: ManagerStat[] = [
+  { key: 'pickups', place: 'moves', label: 'Pickups', unit: 'pickups', displayPrecision: 0, better: 'higher',
+    values: archive => counts(archive, pickups(archive)),
+    rule: 'Players added through completed waiver claims and free-agent moves, in any week.' },
+  { key: 'failed-claims', place: 'moves', label: 'Failed claims', unit: 'claims', displayPrecision: 0, better: 'higher',
+    values: archive => {
+      const failed = adds(archive, archive.transactions.filter(move => move.status === 'failed' && move.type === 'waiver'));
+      return counts(archive, failed, [...failed, ...pickups(archive).filter(({ move }) => move.type === 'waiver')]);
+    },
+    rule: 'Waiver claims that failed, whatever the reason.' },
+  { key: 'late-night', place: 'moves', label: 'Midnight–5am', unit: 'free-agent pickups', displayPrecision: 0, better: 'higher',
+    values: timedPickups((_, hour) => hour < 5),
+    rule: 'Free-agent pickups completed from midnight up to 5am Eastern time. Waiver claims don’t count.' },
+  { key: 'sunday', place: 'moves', label: 'Sunday 11am–1pm', unit: 'free-agent pickups', displayPrecision: 0, better: 'higher',
+    values: timedPickups((weekday, hour) => weekday === 'Sun' && hour >= 11 && hour < 13),
+    rule: 'Free-agent pickups completed on a Sunday from 11am up to 1pm Eastern time. Waiver claims don’t count.' },
+  { key: 'trades', place: 'moves', label: 'Trades', unit: 'trades', displayPrecision: 0, better: 'higher',
+    values: archive => counts(archive, completedTrades(archive).flatMap(({ personIds }) => personIds.map(personId => ({ personId })))),
+    rule: 'Every completed trade, whether for players, picks or waiver budget. A three-team trade counts once for each manager in it.' },
+];

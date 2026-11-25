@@ -2,13 +2,15 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
+import { stores } from '../support/stores.ts';
 
 const project = resolve(import.meta.dirname, '../..');
 
 function publication(args: string[], storePath: string) {
-  const result = spawnSync(process.execPath, ['scripts/history-publication.ts', ...args], {
+  const result = spawnSync(process.execPath, ['--import', pathToFileURL(resolve(project, 'tests/support/stores.ts')).href, 'scripts/history-publication.ts', ...args], {
     cwd: project,
     env: { ...process.env, MUSEUM_STORE_PATH: storePath },
     encoding: 'utf8',
@@ -20,7 +22,7 @@ function publication(args: string[], storePath: string) {
 // import and calculation slices add their own fixtures to the confirmed seam.
 function candidate(name = 'Autumn league') {
   return {
-    version: 1, leagueId: '9007199254740993123', importedAt: '2026-11-03T12:00:00.000Z',
+    version: 2, leagueId: '9007199254740993123', importedAt: '2026-11-03T12:00:00.000Z',
     seasons: [{
       id: '9007199254740993123', year: '2026', name, previousLeagueId: null,
       complete: false, completedWeeks: [1], regularWeeks: [1], teams: [],
@@ -28,14 +30,13 @@ function candidate(name = 'Autumn league') {
       runnerUpId: null, playoffPersonIds: [], bracket: [],
     }],
     people: [], franchises: [], contests: [], performances: [], players: [],
-    transactions: [], drafts: [], coverage: [], source: {},
+    transactions: [], drafts: [], coverage: [],
   };
 }
 
-test('published history survives a new process and a correction replaces the visible season', async () => {
+for (const withHistory of stores) test(`published history survives a new process and a correction replaces the visible season (${withHistory.name})`, () => withHistory(async storePath => {
   const directory = await mkdtemp(join(tmpdir(), 'museum-publication-'));
   try {
-    const storePath = join(directory, 'durable', 'history.json');
     const inputPath = join(directory, 'candidate.json');
     await writeFile(inputPath, JSON.stringify(candidate()));
     const published = publication(['publish', inputPath], storePath);
@@ -53,12 +54,11 @@ test('published history survives a new process and a correction replaces the vis
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}));
 
-test('an incomplete or corrupt candidate fails without replacing published history', async () => {
+for (const withHistory of stores) test(`an incomplete or corrupt candidate fails without replacing published history (${withHistory.name})`, () => withHistory(async storePath => {
   const directory = await mkdtemp(join(tmpdir(), 'museum-recovery-'));
   try {
-    const storePath = join(directory, 'history.json');
     const inputPath = join(directory, 'candidate.json');
     await writeFile(inputPath, JSON.stringify(candidate()));
     assert.equal(publication(['publish', inputPath], storePath).status, 0);
@@ -76,4 +76,4 @@ test('an incomplete or corrupt candidate fails without replacing published histo
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}));

@@ -1,0 +1,26 @@
+---
+// Titles by draft slot: every slot along a rafter, with a banner hung under it for each title won from there, the newest on top.
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+import { isViewer } from '../league-page.ts';
+import type { CardView } from '../history/records.ts';
+
+interface Props { category: CardView['category']; rows: CardView['rows'] }
+const { category, rows } = Astro.props;
+const slots = rows.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+---
+<Section id={category.key} title={category.name}>
+  <details class="play-how"><summary class="play-unit">titles</summary><p>{category.rule}</p></details>
+  <div class="table-wrap slots-wrap">
+    <ol class="slots" style={`--n: ${slots.length}`}>
+      {slots.map(slot => (
+        <li>
+          <span class="slot-number"><span class="unseen">Slot </span>{slot.name.replace(/\D+/g, '')}</span>
+          <ul class="banners">
+            {slot.winners?.map(winner => <li class:list={{ mine: isViewer(Astro, winner.manager) }}><span class="banner-year">{winner.year}</span><Manager name={winner.manager} /></li>)}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>

@@ -1,0 +1,45 @@
+---
+// The same managers down the side and across the top, with one's record beside the other in each cell. The axis labels say which way it reads.
+import Manager from './Manager.astro';
+
+interface Props {
+  /** The ID of the heading that names the grid. */
+  labelledby: string;
+  rowLabel: string;
+  columnLabel: string;
+  /** One per manager, each with a cell per manager in this same order. A pair without a record has none. */
+  rows: { id: string; name: string; cells: (GridCell | null)[] }[];
+}
+interface GridCell {
+  record: string;
+  /** Set apart in a darker, bolder patch. */
+  better?: boolean;
+  /** Boxed: the manager's own record. */
+  actual?: boolean;
+  /** Where the record leads, and what it says there. */
+  link?: { href: string; label: string };
+}
+const { labelledby, rowLabel, columnLabel, rows } = Astro.props;
+---
+<div class="table-wrap">
+  <table class="grid" aria-labelledby={labelledby} style={`--n: ${rows.length}`}>
+    <colgroup></colgroup><colgroup span={rows.length}></colgroup>
+    <thead>
+      <tr><td></td><th scope="colgroup" colspan={rows.length}><span class="grid-axis">{columnLabel}</span></th></tr>
+      <tr><th scope="col">{rowLabel}</th>{rows.map(row => <th scope="col"><span class="grid-top"><Manager name={row.name} /></span></th>)}</tr>
+    </thead>
+    <tbody>
+      {rows.map(row => (
+        <tr>
+          <th scope="row"><Manager name={row.name} /></th>
+          {row.cells.map(cell => cell ? (
+            <td class:list={[{ better: cell.better, actual: cell.actual }]}>
+              {cell.link ? <a href={cell.link.href} aria-label={cell.link.label}>{cell.record}</a> : cell.record}
+              {cell.actual && <span class="unseen"> actual record</span>}
+            </td>
+          ) : <td><span aria-hidden="true">—</span><span class="unseen">No games</span></td>)}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

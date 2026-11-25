@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
+import { stored, stores } from '../support/stores.ts';
 import { refresh } from '../../src/history/refresh.ts';
 import { sleeperImportProvider } from '../../src/history/sleeper.ts';
 import type { Provider } from '../../src/history/types.ts';
@@ -17,9 +17,9 @@ function countingProvider(calls: string[]): Provider {
   } };
 }
 
-test('the import provider publishes the same history as sequential reads and fetches the player list once a day', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'sleeper-provider-'));
-  try {
+for (const withHistory of stores) test(`the import provider publishes the same history as sequential reads and fetches the player list once a day (${withHistory.name})`, async () => {
+  await withHistory(async storePath => {
+    const directory = dirname(storePath);
     const options = { leagueId: fixture.seedLeagueId, now: new Date(fixture.now) };
     const direct = await refresh({ ...options, storePath: join(directory, 'direct.json'), provider: countingProvider([]) });
     const playerCache = join(directory, 'players-nfl.json');
@@ -32,14 +32,12 @@ test('the import provider publishes the same history as sequential reads and fet
     const second: string[] = [];
     await refresh({ ...options, storePath: join(directory, 'again.json'), provider: sleeperImportProvider(playerCache, countingProvider(second)) });
     assert.equal(second.includes('players/nfl'), false);
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
+  });
 });
 
-test('two leagues importing at once share one player-list download and cache write', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'sleeper-provider-'));
-  try {
+for (const withHistory of stores) test(`two leagues importing at once share one player-list download and cache write (${withHistory.name})`, async () => {
+  await withHistory(async storePath => {
+    const directory = dirname(storePath);
     // Each league import builds its own provider over the one cache file, so two first visits at once both find it missing.
     // They must share one download (Sleeper asks for the list once a day) and so never race two writes to the same file.
     const playerCache = join(directory, 'players-nfl.json');
@@ -49,8 +47,6 @@ test('two leagues importing at once share one player-list download and cache wri
     assert.equal(calls.filter(path => path === 'players/nfl').length, 1);
     assert.deepEqual(first, fixture.responses['players/nfl']);
     assert.deepEqual(second, fixture.responses['players/nfl']);
-    assert.deepEqual(JSON.parse(await readFile(playerCache, 'utf8')), fixture.responses['players/nfl']);
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
+    assert.deepEqual(JSON.parse(await stored(playerCache)), fixture.responses['players/nfl']);
+  });
 });

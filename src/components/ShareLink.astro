@@ -1,0 +1,7 @@
+---
+// Shares this page at one spot, without the sharer's ?u=. Without JS it opens that clean link; with it, phones get the share sheet and desktops copy it (the League layout's script).
+interface Props { label: string; hash?: string; query?: Record<string, string> }
+const { label, hash = '', query = {} } = Astro.props;
+const search = new URLSearchParams(query).toString();
+---
+<a class="share" href={`${Astro.url.pathname}${search && `?${search}`}${hash}`} aria-label={label} title={label}></a>

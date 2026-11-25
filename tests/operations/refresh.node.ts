@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
+import { stores } from '../support/stores.ts';
 import { readSeasons, readSeason } from '../../src/history/read.ts';
 import { readManager } from '../../src/history/managers.ts';
 import { readFranchise } from '../../src/history/franchises.ts';
@@ -16,10 +15,6 @@ const tim = 'person-608473907007143936';
 const sebastian = 'person-740265931783245824';
 const alec = 'person-473910025325113344';
 async function fixture() { return dropsSource(JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'))); }
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'refresh-acceptance-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 test('unpublished seasons remain unavailable rather than becoming known empty history', async () => {
   await withHistory(async storePath => {
@@ -29,17 +24,17 @@ test('unpublished seasons remain unavailable rather than becoming known empty hi
   });
 });
 
-test('a composite visitor read keeps its published snapshot while another refresh publishes a correction', async () => {
+for (const withHistory of stores) test(`a composite visitor read keeps its published snapshot while another refresh publishes a correction (${withHistory.name})`, async () => {
   await withHistory(async storePath => {
     const source = await fixture();
     await publish(storePath, source);
-    const { withHistorySnapshot } = await import('../../src/history/store.ts');
+    const { loadArchive, withHistorySnapshot } = await import('../../src/history/store.ts');
     const { readFranchiseSeason } = await import('../../src/history/franchises.ts');
-    await withHistorySnapshot(async () => {
+    await withHistorySnapshot(await loadArchive(storePath), async () => {
       assert.equal((await readSeason('2020', { storePath }))?.rows.find(row => row.personId === tim)?.points, 25.5);
       source.responses['league/900000000000002020/matchups/1'][0].custom_points = 23.5;
       await publish(storePath, source);
-      const nextRequest = await withHistorySnapshot(() => readManager(tim, { storePath, season: '2020' }), storePath);
+      const nextRequest = await withHistorySnapshot(await loadArchive(storePath), () => readManager(tim, { storePath, season: '2020' }), storePath);
       assert.equal(nextRequest?.facts.points, 23.5, 'a new request sees the correction while the earlier request remains pinned');
       assert.equal((await readManager(tim, { storePath, season: '2020' }))?.facts.points, 25.5);
       const franchise = await readFranchiseSeason('franchise-7', '2020', { storePath });

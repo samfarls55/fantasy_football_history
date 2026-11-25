@@ -1,0 +1,19 @@
+---
+// Record cards two to a row in the order given, so opposites face each other across the field; an odd last one spans it.
+import RecordCard from './RecordCard.astro';
+import type { CardView } from '../history/records.ts';
+import type { TabKey } from '../history/tabs.ts';
+
+interface Props {
+  views: CardView[];
+  heading: 'h2' | 'h3';
+  /** The tab each card leads to from Home. */
+  tabs?: { key: TabKey; name: string }[];
+}
+const { views, heading, tabs = [] } = Astro.props;
+---
+{views.length > 0 && (
+  <ul class="plays">
+    {views.map((view, index) => <RecordCard view={view} heading={heading} tab={tabs[index]} index={Math.floor(index / 2)} across={index % 2 > 0} wide={index % 2 === 0 && index === views.length - 1} />)}
+  </ul>
+)}

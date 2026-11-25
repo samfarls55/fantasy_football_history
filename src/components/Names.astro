@@ -1,0 +1,8 @@
+---
+// Every answer in a cell, each whole. Past five, the rest wait behind their count.
+interface Props { names: string[] }
+const { names } = Astro.props;
+const [first, rest] = [names.slice(0, 5), names.slice(5)];
+---
+<span class="names">{first.map((name, index) => <><span class="one">{name}{index < first.length - 1 && ','}</span>{' '}</>)}</span>
+{rest.length > 0 && <details class="play-next names-rest"><summary>and {rest.length} more</summary><span class="names">{rest.map((name, index) => <><span class="one">{name}{index < rest.length - 1 && ','}</span>{' '}</>)}</span></details>}

@@ -1,18 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory as published } from '../support/history.ts';
 import { readCategory, readRecordCollection } from '../../src/history/records.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 
-async function published(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-game-records-'));
-  try { await run(join(directory, 'history.json')); }
-  finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 test('published final margins preserve decimal equality, zero ties, unique contests and both people', async () => {
   await published(async storePath => {
@@ -27,8 +20,11 @@ test('published final margins preserve decimal equality, zero ties, unique conte
     assert.equal(closest!.rows[2].secondary?.[0].name, 'Record manager 02');
     assert.match(closest!.rows[2].secondary![0].href, /\/managers\/.+\/seasons\/2021\/\?scope=regular/);
     // A margin record belongs to the game's winner, whichever side the contest stored first (99.9 lost to 100 here); a tied game says so.
-    assert.deepEqual([closest!.rows[1].name, closest!.rows[1].secondary?.[0].name, closest!.rows[1].tied], ['Record manager 02', 'Record manager 01', false]);
-    assert.equal(closest!.rows[0].tied, true);
+    assert.deepEqual([closest!.rows[1].name, closest!.rows[1].secondary?.[0].name, closest!.rows[1].result], ['Record manager 02', 'Record manager 01', 'won']);
+    assert.equal(closest!.rows[0].result, 'tied');
+    const met = async (key: string) => (await readCategory(key, { storePath }))!.rows.slice(0, 2).map(row => [row.name, row.value, row.result, row.opponent].map(text => String(text).replace('Record manager ', 'M')));
+    assert.deepEqual(await met('highest-score'), [['M01', '100.12', 'won', 'M02'], ['M02', '100', 'lost', 'M01']]);
+    assert.deepEqual(await met('lowest-score'), [['M05', '0', 'tied', 'M06'], ['M06', '0', 'tied', 'M05']]);
     assert.deepEqual((await readCategory('biggest-blowout', { storePath }))?.leaders.map(row => [row.value, row.rank]), [[4, 1]]);
     assert.equal((await readRecordCollection({ storePath }))?.find(group => group.name === 'Matchups')?.categories.find(category => category.key === 'closest-game')?.leaders[0].value, 0);
     (source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[])[0].custom_points = 100.25;
@@ -114,15 +110,15 @@ test('a published streak destination retains the selected interval and links eve
     const params = new URL(row.href, 'https://museum.example').searchParams;
     const { readStreakHistory } = await import('../../src/history/game-records.ts');
     const selection = { storePath, scope: 'regular' as const, streak: params.get('streak'), from: params.get('from'), through: params.get('through') };
-    const history = await readStreakHistory(row.personId, selection);
+    const history = await readStreakHistory(row.personId!, selection);
     assert.equal(history?.interval, 'Week 1 · 2020 – Week 1 · 2021');
     assert.deepEqual(history?.games.map(game => [game.year, game.weeks, game.result, game.opponentName]), [
       ['2020', [1], 'W', 'Record manager 02'], ['2020', [2], 'W', 'Record manager 02'], ['2021', [1], 'W', 'Record manager 02'],
     ]);
     assert.match(history!.games[2].href, /\/seasons\/2021\/matchups\/.+scope=regular&week=1/);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, scope: 'combined' }), null);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, season: '2021' }), null);
-    assert.equal(await readStreakHistory(row.personId, { ...selection, from: 'missing' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, scope: 'combined' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, season: '2021' }), null);
+    assert.equal(await readStreakHistory(row.personId!, { ...selection, from: 'missing' }), null);
   });
 });
 

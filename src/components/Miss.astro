@@ -1,0 +1,10 @@
+---
+// A mistyped manager in the URL says so and offers the nearest name, rather than quietly showing no one.
+import { isViewer } from '../league-page.ts';
+interface Props { name: string; suggestion: string | null; href: (name: string) => string; clear: string }
+const { name, suggestion, href, clear } = Astro.props;
+---
+<p class="miss">
+  <span>No manager named <strong>{name}</strong> in this league.{suggestion && <> Did you mean <a href={href(suggestion)} data-person class:list={[{ me: isViewer(Astro, suggestion) }]}>{suggestion}</a>?</>}</span>
+  <a href={clear}>Clear</a>
+</p>

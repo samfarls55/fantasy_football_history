@@ -1,0 +1,26 @@
+---
+import Tab from '../../../layouts/Tab.astro';
+import Records from '../../../components/Records.astro';
+import Section from '../../../components/Section.astro';
+import SlotTitles from '../../../components/SlotTitles.astro';
+import Stats from '../../../components/Stats.astro';
+import { openTab } from '../../../league-page.ts';
+import { readCategory } from '../../../history/records.ts';
+
+// The chart shows every slot, titled or not, so it reads the whole ranking, not the ten places a card shows.
+const { redirect, frame, view } = await openTab(Astro, 'draft', async storePath => ({
+  slotRows: (await readCategory('titles-by-slot', { storePath, limit: 1000 }))!.rows,
+}));
+if (redirect) return redirect;
+// Titles by slot is drawn, so it leaves the cards.
+const slots = view?.records.find(record => record.category.key === 'titles-by-slot');
+---
+<Tab {...frame}>
+  {view && (
+    <>
+      <Records views={view.records.filter(record => record !== slots)} heading="h2" />
+      {slots && <SlotTitles category={slots.category} rows={view.slotRows} />}
+      {view.stats.length > 0 && <Section id="scouting" title="Scouting reports"><Stats labelledby="scouting-name" stats={view.stats} /></Section>}
+    </>
+  )}
+</Tab>

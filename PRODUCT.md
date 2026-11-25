@@ -1,6 +1,6 @@
 # Fantasy football history
 
-Every Sleeper league's history on one page.
+Every Sleeper league's history, and every manager's.
 
 ## Who it's for
 
@@ -10,19 +10,30 @@ People in a Sleeper fantasy football league who want to settle arguments and rel
 
 1. Enter a Sleeper username.
 2. Pick one of that user's leagues. A user with one league goes straight to it.
-3. See the league's history: champions, records, careers and head-to-head streaks.
+3. Browse the league's tabs, each answering one question:
+   - Home: who are the champions, and what's the headline on every other tab?
+   - Legacy: who's the greatest?
+   - Games: what were the wildest weeks?
+   - Excuses: bad luck or bad managing?
+   - Players: which players made or ruined us?
+   - Draft: who can draft?
+   - Moves: who works the wire?
+4. Open any manager's name for their page: badge, career, finishes, records held, rank in every table and every head-to-head.
+
+A tab shows once the league has a stat for it. Every stat is a record card, a column of a sortable table or a chart. Each names its unit and opens one line on how it's counted.
 
 History follows each league's links to previous seasons back to its first Sleeper season.
 
 ## Now
 
 - Any Sleeper league, imported on first visit and refreshed when more than 12 hours old.
-- Managers appear by Sleeper username.
+- Managers appear by Sleeper username, and every current and former manager has a page.
+- A link to any tab or stat opens on it, and links shared from the one-page league still land.
 - Hosted on Vercel at https://rafters-ff.vercel.app.
 
 ## Not now
 
-ESPN or Yahoo leagues, accounts, per-manager and per-season pages, and live scoring.
+ESPN or Yahoo leagues, accounts, per-season pages, and live scoring.
 
 ## Principles
 

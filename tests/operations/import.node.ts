@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { stores } from '../support/stores.ts';
 
 const fixture = JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
 
@@ -49,12 +50,11 @@ test('a linked import exposes every year and official regular-season standings w
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
 
-test('repeat imports, score corrections and failed refreshes preserve one coherent public history', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-refresh-'));
-  try {
+for (const withHistory of stores) test(`repeat imports, score corrections and failed refreshes preserve one coherent public history (${withHistory.name})`, async () => {
+  await withHistory(async storePath => {
     const { refresh } = await import('../../src/history/refresh.ts');
     const { readSeason } = await import('../../src/history/read.ts');
-    const options = { storePath: join(directory, 'history.json'), leagueId: fixture.seedLeagueId, now: new Date(fixture.now) };
+    const options = { storePath, leagueId: fixture.seedLeagueId, now: new Date(fixture.now) };
     await refresh({ ...options, provider: controlledProvider() });
     const repeated = await refresh({ ...options, provider: controlledProvider() });
     assert.equal(repeated.changed, false);
@@ -67,7 +67,7 @@ test('repeat imports, score corrections and failed refreshes preserve one cohere
       await assert.rejects(refresh({ ...options, provider: controlledProvider(variant) }), /league\/900000000000002020\/matchups\/1/);
       assert.deepEqual(await readSeason('2020', options), corrected);
     }
-  } finally { await rm(directory, { recursive: true, force: true }); }
+  });
 });
 
 test('standings preserve decimal score precision across completed weeks', async () => {

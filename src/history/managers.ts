@@ -23,12 +23,12 @@ export function extendTenure(tenure: Tenure, year: string, team: SeasonTeam, pre
   if (team.nameSource === 'historical-roster' && team.name !== previousTeam.name) tenure.events.push({ year, kind: 'name', label: `Played as ${team.name}`, predecessor: null });
 }
 
-function personSeasons(archive: Archive, personId: string): TeamSeason[] {
+export function personSeasons(archive: Archive, personId: string): TeamSeason[] {
   return archive.seasons.flatMap(season => season.teams.filter(team => team.personId === personId).map(team => ({ season, team }))).sort((a, b) => a.season.year.localeCompare(b.season.year));
 }
 
 /** Year precision comes from season rosters; account metadata never establishes historical names. */
-function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
+export function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
   const tenures: Tenure[] = [];
   for (const [index, { season, team }] of entries.entries()) {
     const previous = entries[index - 1];
@@ -52,7 +52,7 @@ function profile(archive: Archive, person: Person, options: HistorySelection) {
   const entries = personSeasons(archive, person.id);
   const tenures = personTenures(archive, entries);
   const latest = entries.at(-1)!;
-  const seasons = entries.filter(({ season }) => !options.season || season.year === options.season).reverse().map(({ season, team }) => ({ ...team, year: season.year, complete: season.complete, facts: careerFacts(archive, { personId: person.id }, { ...options, season: season.year }), championship: season.championId === person.id, runnerUp: season.runnerUpId === person.id, playoffAppearance: season.playoffPersonIds.includes(person.id) }));
+  const seasons = entries.filter(({ season }) => !options.season || season.year === options.season).reverse().map(({ season, team }) => ({ ...team, year: season.year, teams: season.teams.length, complete: season.complete, facts: careerFacts(archive, { personId: person.id }, { ...options, season: season.year }), championship: season.championId === person.id, runnerUp: season.runnerUpId === person.id, playoffAppearance: season.playoffPersonIds.includes(person.id) }));
   return { ...person, avatar: latest.team.avatar, teamName: latest.team.name, franchiseId: latest.team.franchiseId, range: tenures.map(tenure => tenure.range).join(', '), tenures, seasons, years: entries.map(({ season }) => season.year).reverse(), facts: careerFacts(archive, { personId: person.id }, options), scope: options.scope ?? 'regular', selectedSeason: options.season ?? null };
 }
 

@@ -1,0 +1,33 @@
+---
+// Every manager, each current one beside the badge they wear and the stat that earned it.
+import Manager from './Manager.astro';
+import Names from './Names.astro';
+import Section from './Section.astro';
+import { saysUnit, statHref, type openLeague } from '../league-page.ts';
+import type { readBadges } from '../history/badges.ts';
+
+interface Props {
+  managers: { id: string; name: string; current: boolean }[];
+  badges: NonNullable<Awaited<ReturnType<typeof readBadges>>>;
+  tabs: Awaited<ReturnType<typeof openLeague>>['tabs'];
+}
+const { managers, badges, tabs } = Astro.props;
+const rows = managers.map(manager => ({ ...manager, badge: badges.find(badge => badge.personId === manager.id) }));
+---
+<Section id="managers" title="Managers">
+  <ul class="managers">
+    {rows.map(({ name, current, badge }) => (
+      <li>
+        <Manager name={name} />
+        {!current && <span class="stat-sample">Former</span>}
+        {badge && (
+          <>
+            <strong class="badge">{badge.badge}</strong>
+            <a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>
+            <div class="badge-value">{badge.names && <span class="stat-text"><Names names={badge.names} /></span>} <span class="stat-figure">{badge.figure}</span>{!saysUnit(badge.label, badge.unit) && ` ${badge.unit}`}</div>
+          </>
+        )}
+      </li>
+    ))}
+  </ul>
+</Section>

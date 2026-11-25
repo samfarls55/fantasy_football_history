@@ -1,0 +1,17 @@
+---
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+import { tabHref } from '../league-page.ts';
+import { beltRule, reignStart, type readBelt } from '../history/belt.ts';
+import { recordUnit } from '../history/records.ts';
+
+interface Props { belt: NonNullable<Awaited<ReturnType<typeof readBelt>>> }
+const reign = Astro.props.belt.reigns.at(-1);
+---
+{reign?.person && (
+  <Section id="belt-holder" title="Holds the belt">
+    <p class="belt-holder"><Manager name={reign.person.name} /></p>
+    <details class="play-how"><summary class="play-unit">{reign.defenses} {recordUnit('defenses', reign.defenses)} since {reignStart(reign.from)}</summary><p>{beltRule}</p></details>
+    <a class="belt-all" href={`${tabHref(Astro, 'legacy')}#belt`}>Every reign</a>
+  </Section>
+)}

@@ -2,6 +2,7 @@ import { readArchive } from './store.ts';
 import { Exact, exactSum } from './decimal.ts';
 import { completedContests } from './scope.ts';
 import { comparePeriods } from './records.ts';
+import { plural, winLoss } from './wording.ts';
 import type { HistorySelection } from './managers.ts';
 import type { Archive, Person } from './types.ts';
 
@@ -31,7 +32,7 @@ function rivalry(archive: Archive, a: Person, b: Person, options: HistorySelecti
   const latest = games[0]?.result;
   const streak = latest && latest !== 'T' ? { result: latest, count: games.findIndex(game => game.result !== latest) < 0 ? games.length : games.findIndex(game => game.result !== latest), person: latest === 'W' ? a : b } : null;
   const averageMargin = games.length ? exactSum(games.map(game => Exact.from(game.side.points).subtract(game.opponent.points))).divide(games.length).toNumber() : null;
-  return { a, b, scope: options.scope ?? 'regular', wins, losses, ties, meetings: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, averageMargin, streak, games, href: rivalryHref(a.id, b.id, options) };
+  return { a, b, scope: options.scope ?? 'regular', wins, losses, ties, meetings: games.length, record: winLoss(wins, losses, ties), averageMargin, streak, games, href: rivalryHref(a.id, b.id, options) };
 }
 
 /** Every public comparison reads the last durable publication. An absent history is not zero meetings. */
@@ -53,6 +54,33 @@ export async function readManagerRivalries(personId: string, options: HistorySel
   const rows = opponents(archive, person, options);
   const deficit = Math.max(0, ...rows.map(row => row.losses - row.wins));
   return { person, rows, nemeses: deficit ? rows.filter(row => row.losses - row.wins === deficit) : [] };
+}
+
+/** The five longest runs of three straight wins or more between two current managers, and every one tied with the fifth. */
+export async function readRivalryStreaks(options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  const current = archive.people.filter(person => person.current);
+  const runs = current.flatMap((a, index) => current.slice(index + 1).flatMap(b => {
+    const { streak, wins, losses, ties } = rivalry(archive, a, b, { scope: 'combined' });
+    if (!streak || streak.count < 3) return [];
+    const won = streak.person === a;
+    return [{ winner: streak.person, loser: won ? b : a, count: streak.count, record: won ? winLoss(wins, losses, ties) : winLoss(losses, wins, ties) }];
+  })).sort((a, b) => b.count - a.count || a.winner.name.localeCompare(b.winner.name));
+  return runs.filter(run => run.count >= (runs[4]?.count ?? 0));
+}
+
+/** Every current manager by name, each with their record against every other in that same order. Nobody has one against themself or anyone they never met. */
+export async function readHeadToHead(options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  const current = archive.people.filter(person => person.current).sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  const rows = current.map(a => ({ id: a.id, name: a.name, cells: current.map(b => {
+    if (a === b) return null;
+    const { meetings, record, wins, losses, ties } = rivalry(archive, a, b, { scope: 'combined' });
+    return meetings ? { record, ties, better: wins > losses } : null;
+  }) }));
+  return rows.some(row => row.cells.some(cell => cell)) ? rows : null;
 }
 
 export async function readFranchiseRivalries(franchiseId: string, options: HistorySelection = {}) {
@@ -96,5 +124,5 @@ export async function readRivalriesPage(options: HistorySelection & { a?: string
 }
 
 export function streakLabel(row: { meetings: number; streak: { person: Person; count: number } | null }): string {
-  return row.streak ? `${row.streak.person.name}, ${row.streak.count} ${row.streak.count === 1 ? 'win' : 'wins'}` : row.meetings ? 'Last meeting tied' : '—';
+  return row.streak ? `${row.streak.person.name}, ${plural(row.streak.count, 'win')}` : row.meetings ? 'Last meeting tied' : '—';
 }

@@ -1,19 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readRecordCollection } from '../../src/history/records.ts';
 import { readMatchup } from '../../src/history/read.ts';
 import { readPlayerContributions } from '../../src/history/contributions.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-bench-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 async function fixture() { return JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8')); }
 
 test('published bench records rank exact player/team/week performances and open the actual bench without adding starts', async () => {
@@ -33,7 +27,7 @@ test('published bench records rank exact player/team/week performances and open 
     assert.equal(selected.personId, 'person-800000000000000001');
     assert.equal(selected.exactKey, '2506172839/50000000');
     assert.equal(selected.href, '/seasons/2021/matchups/900000000000002021-w2-m1/?scope=regular&week=2&player=901&team=1#player-1-901');
-    assert.equal(selected.leaderContext, 'Manager 1 · Week 2 · 2021');
+    assert.deepEqual([selected.leaderContext, selected.opponent], ['Manager 1 · Week 2 · 2021', 'Manager 2']);
     assert.ok(selected.secondary?.some(row => row.href === '/managers/person-800000000000000001/players/901/?scope=regular&season=2021'));
     assert.equal(selected.avatar, null, 'a manager avatar must not masquerade as a player photograph');
     const game = await readMatchup('2021', '900000000000002021-w2-m1', { storePath, week: 2 });

@@ -1,34 +1,36 @@
 import { Exact } from './decimal.ts';
+import { legResult, opponentOf } from './performances.ts';
 import { completedContests, inScope } from './scope.ts';
 import { readArchive } from './store.ts';
 import type { Archive, Contest } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 
-function identity(archive: Archive, personId: string, year: string) {
+export function identity(archive: Archive, personId: string, year: string) {
   const person = archive.people.find(person => person.id === personId)!;
   const team = archive.seasons.find(season => season.year === year)!.teams.find(team => team.personId === personId)!;
   return { personId, name: person.name, avatar: team.avatar };
 }
 
 /** Performances are completed weekly legs, including legs of an unresolved contest. */
-export const scoreCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
-  archive.performances.filter(row => (!selection.season || row.year === selection.season) && inScope(row.competition, selection.scope ?? 'regular')).map(row => ({
-    ...identity(archive, row.personId, row.year), id: row.id, metric: Exact.from(row.points), sample: null,
-    period: { year: row.year, week: row.week, playedAt: row.playedAt },
-    leaderContext: `Week ${row.week} · ${row.year}`,
-    href: `/seasons/${row.year}/matchups/${row.contestId}/?scope=${selection.scope ?? 'regular'}&week=${row.week}&team=${row.rosterId}`,
-    detail: row.teamName, historyLabel: 'Open matchup',
-  }));
+export const scoreCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
+  archive.performances.filter(row => (!selection.season || row.year === selection.season) && inScope(row.competition, selection.scope ?? 'regular')).map(row => {
+    const opponent = opponentOf(archive, row);
+    return { ...identity(archive, row.personId, row.year), id: row.id, metric: Exact.from(row.points), sample: null, opponentId: opponent.personId, result: legResult(row, opponent),
+      period: { year: row.year, week: row.week, playedAt: row.playedAt },
+      leaderContext: `Week ${row.week} · ${row.year}`,
+      href: `/seasons/${row.year}/matchups/${row.contestId}/?scope=${selection.scope ?? 'regular'}&week=${row.week}&team=${row.rosterId}`,
+      detail: row.teamName, historyLabel: 'Open matchup' };
+  });
 
 /** One final contest, with the two people retained; a tied final has a zero margin. */
-export const marginCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+export const marginCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   completedContests(archive, selection).filter(game => !selection.season || game.year === selection.season).map(game => {
     // The record belongs to the winner, so they lead whichever side the contest stored first; a tie keeps the stored order and says so.
     const [side, opponent] = game.winnerId === game.sides[1].personId ? [game.sides[1], game.sides[0]] : game.sides;
     const scope = selection.scope ?? 'regular';
     const owner = identity(archive, side.personId, game.year);
     const other = identity(archive, opponent.personId, game.year);
-    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`, tied: game.tie,
+    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`, opponentId: opponent.personId, result: game.tie ? 'tied' : 'won', shared: game.tie,
       metric: Exact.from(side.points).subtract(opponent.points).abs(), sample: null,
       period: { year: game.year, week: Math.max(...game.weeks), playedAt: game.playedAt },
       leaderContext: `Week ${Math.max(...game.weeks)} · ${game.year}`,
@@ -59,12 +61,13 @@ function longestStreak(archive: Archive, personId: string, kind: StreakKind, sel
   }
   return longest;
 }
-function interval(games: Contest[]) {
+export function interval(games: Contest[]) {
   const first = games[0], last = games.at(-1)!;
-  return `Week ${Math.min(...first.weeks)} · ${first.year} – Week ${Math.max(...last.weeks)} · ${last.year}`;
+  const from = `Week ${Math.min(...first.weeks)} · ${first.year}`, through = `Week ${Math.max(...last.weeks)} · ${last.year}`;
+  return from === through ? from : `${from} – ${through}`;
 }
 
-export function streakCandidates(kind: StreakKind): NonNullable<CategoryDefinition['candidates']> {
+export function streakCandidates(kind: StreakKind): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.people.flatMap(person => {
     const games = longestStreak(archive, person.id, kind, selection);
     if (!games.length) return [];

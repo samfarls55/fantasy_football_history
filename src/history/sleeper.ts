@@ -1,6 +1,4 @@
-import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { publish, readPublished } from './files.ts';
 import { sleeperProvider } from './refresh.ts';
 import type { Provider } from './types.ts';
 
@@ -14,8 +12,8 @@ const playerLists = new Map<string, Promise<unknown>>();
  * A Sleeper provider for on-demand imports. Refresh asks for paths one at a time; this
  * starts every predictable path of each linked season as soon as its league loads, ten at a
  * time to respect Sleeper's rate limit, so refresh mostly reads finished responses. A path it
- * did not predict is fetched on request. The 14 MB player list is cached on disk for a day,
- * as Sleeper asks.
+ * did not predict is fetched on request. The 14 MB player list is kept beside the archives
+ * for a day, as Sleeper asks.
  */
 export function sleeperImportProvider(playerCachePath: string, source: Provider = sleeperProvider): Provider {
   const responses = new Map<string, Promise<unknown>>();
@@ -48,14 +46,10 @@ export function sleeperImportProvider(playerCachePath: string, source: Provider 
     if (league.previous_league_id) void prefetchLeague(league.previous_league_id);
   }
   async function loadPlayers() {
-    const cached = await stat(playerCachePath).catch(() => null);
-    if (cached && Date.now() - cached.mtimeMs < playerCacheAge) return JSON.parse(await readFile(playerCachePath, 'utf8'));
+    const cached = await readPublished(playerCachePath, playerCacheAge);
+    if (cached !== null) return JSON.parse(cached);
     const value = await source.get('players/nfl');
-    await mkdir(dirname(playerCachePath), { recursive: true });
-    // A writer of its own, so another process refreshing the same cache (the refresh command) can't rename this one away.
-    const temporary = `${playerCachePath}.tmp-${process.pid}-${randomUUID()}`;
-    await writeFile(temporary, JSON.stringify(value));
-    await rename(temporary, playerCachePath);
+    await publish(playerCachePath, JSON.stringify(value));
     return value;
   }
   function players() {
