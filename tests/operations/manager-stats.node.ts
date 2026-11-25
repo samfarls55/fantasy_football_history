@@ -37,6 +37,9 @@ test('published manager stats share competition ranks, start from the better end
   assert.deepEqual(await standings('higher'), ['Tied highest', 'Tied highest', '3rd highest']);
   assert.deepEqual(await standings('lower'), ['Lowest', 'Tied 2nd lowest', 'Tied 2nd lowest']);
   assert.equal(await read({}, {}), undefined, 'a stat nobody has a value for is left out');
+  const zeros = { 1: { value: Exact.from(0) }, 2: { value: 0 } };
+  assert.equal(await read({}, zeros), undefined, 'and so is one where every value is zero');
+  assert.equal(await read({}, { ...zeros, 3: { value: 0.4 } }), undefined, 'shown as 0');
 });
 
 test('published manager stats rank exact values exactly and inexact ones as displayed', async () => {

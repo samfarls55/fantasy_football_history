@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
-import { managerStats } from '../../src/history/manager-stats.ts';
+import { managerStats, readManagerStats } from '../../src/history/manager-stats.ts';
 import { readPlaceRecords } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
@@ -61,10 +61,16 @@ test('published leads fall back to the first stat on the page that somebody hold
     ]);
   });
   await withHistory(async storePath => {
-    // An auction draft has no steal, bust or slot, so Draft leads from its table: every pick was a Buccaneer.
-    await publish(storePath, finished([draftOf({ id: '20', source: { type: 'auction' } })]));
-    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03', 'M04']);
+    // An auction draft has no steal, bust or slot, so Draft leads from its table: every pick of M1's, M2's and M3's was a Buccaneer.
+    const auction = draftOf({ id: '20', source: { type: 'auction' } });
+    auction.picks[3].metadata.team = 'CHI';
+    await publish(storePath, finished([auction]));
+    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03']);
     assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].name, 'TB');
+    // With M4's all Buccaneers too, everyone ties, so nothing leads.
+    auction.picks[3].metadata.team = 'TB';
+    await publish(storePath, finished([auction]));
+    assert.deepEqual((await leads(storePath))[5], null);
   });
   await withHistory(async storePath => {
     // Without the bench, no better lineup wins anything. Manager 3's 2–0 beat the 2⁄3 of a win that outscoring one of three others twice earned.
@@ -72,6 +78,17 @@ test('published leads fall back to the first stat on the page that somebody hold
     Object.assign(source.responses[`league/${source.seedLeagueId}/matchups/1`][1], { players: ['32'], players_points: { 32: 25 } });
     await publish(storePath, source);
     assert.deepEqual((await leads(storePath))[3], ['excuses', 'luckiest-season', 'Luckiest season', 4 / 3, 'more wins than their scores earned', 'M03']);
+  });
+});
+
+test('published leads are never a stat every manager ties on', async () => {
+  await withHistory(async storePath => {
+    // Nobody has played a game yet, so all Legacy knows is that everyone is in their first season.
+    const source = recordsSource([[0, 0, 0, 0]]);
+    Object.assign((source.responses[`league/${source.seedLeagueId}`] as any).settings, { last_scored_leg: 0 });
+    await publish(storePath, source);
+    assert.deepEqual(await leads(storePath), [null, null]);
+    assert.deepEqual((await readManagerStats({ storePath }))!.map(stat => stat.key), ['seasons']);
   });
 });
 

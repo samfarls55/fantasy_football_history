@@ -67,14 +67,12 @@ test('published pickups count completed waiver and free-agent adds, and failed c
   });
 });
 
-test('published habits are left out when the league never had one to count, and zero when it did', async () => {
+test('published habits are left out until someone has one, and zero for everyone else from then on', async () => {
   await withHistory(async storePath => {
     await publish(storePath, league([{ drops: { a: 1 } }, { type: 'waiver', status: 'pending', adds: { b: 1 } }]));
     assert.deepEqual(await readManagerStats({ storePath, places: ['moves'] }), []);
     await publish(storePath, league([{ type: 'waiver', adds: { b: 1 } }]));
-    assert.deepEqual((await readManagerStats({ storePath, places: ['moves'] }))!.map(stat => [stat.key, stat.rows.map(row => row.figure)]), [
-      ['pickups', ['1', '0', '0', '0']], ['failed-claims', ['0', '0', '0', '0']],
-    ]);
+    assert.deepEqual((await readManagerStats({ storePath, places: ['moves'] }))!.map(stat => [stat.key, stat.rows.map(row => row.figure)]), [['pickups', ['1', '0', '0', '0']]]);
   });
 });
 

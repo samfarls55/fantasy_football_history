@@ -103,8 +103,8 @@ test('published Heartbroken counts the losses in the close-game record, and adds
     // M3 and M4 play two 1-point games that M4 loses and a 2-point one that M3 loses. M1 is always top and M2 always bottom.
     await publish(storePath, recordsSource([[130, 60, 90, 89], [130, 60, 90, 89], [130, 60, 88, 90]]));
     const luck = (await readManagerStats({ storePath, places: ['luck'] }))!;
-    assert.deepEqual(luck.map(stat => stat.key), ['robbed', 'got-away', 'close-games']);
-    assert.deepEqual(luck[2].rows.map(row => [row.name.slice(-2), row.figure]), [['03', '2–1'], ['04', '1–2']]);
+    assert.deepEqual(luck.map(stat => stat.key), ['close-games']);
+    assert.deepEqual(luck[0].rows.map(row => [row.name.slice(-2), row.figure]), [['03', '2–1'], ['04', '1–2']]);
     const heartbroken = (await readBadges({ storePath }))!.find(row => row.badge === 'Heartbroken')!;
     assert.deepEqual([heartbroken.manager, heartbroken.figure, heartbroken.unit, heartbroken.sample, heartbroken.label, heartbroken.key],
       ['Record manager 04', '2', 'losses', 'of 3 games', 'Losses in games decided by under 5', 'close-games']);

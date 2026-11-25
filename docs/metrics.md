@@ -112,7 +112,7 @@ Season award history uses the completed season's latest completed week and its s
 
 A manager stat gives each person one value. `src/history/manager-stats.ts` registers them. An entry owns its key, place, plain label, unit, one-line rule, display precision, better end and calculation, and `readManagerStats` returns every known value with its sample and rank. Tables and manager pages show what it returns and calculate nothing.
 
-Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value or a coverage issue blocks its key. A zero is a value.
+Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value, when every value is zero or when a coverage issue blocks its key. A zero beside someone else's value is a value.
 
 A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
 
@@ -163,7 +163,7 @@ One completed season shows at a time, the newest unless the `season` URL paramet
 
 Legacy's careers table (`src/history/careers.ts`) has one row per person, former managers included and marked. Current managers lead, by titles and then win percentage. Games are completed regular-season ones, the current season's included.
 
-- **Titles, finals lost:** champions and runners-up of resolved title contests. An unresolved title counts for nobody, and a league with no resolved title has no finals-lost column.
+- **Titles, finals lost:** champions and runners-up of resolved title contests. An unresolved title counts for nobody, so a league with no resolved title has neither column.
 - **Points per game, opponents' points per game:** career points and points against, divided by games played. No games leaves them unknown. Fewer points against ranks first.
 - **Power rating:** Elo. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
 - **Biggest one-year change in finish:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. Equal changes are all listed.
@@ -188,7 +188,7 @@ Every current manager's all-time record against every other, regular season and 
 
 Each current and former person has one page, holding only results they earned. Finishes list their completed seasons with the season's team count; a finish the bracket doesn't establish stays unknown. Their record against everyone, and the list of meetings, use the combined scope and mark championship-playoff contests.
 
-A person holds a record category when they share its first rank in the default selection, all seasons and regular scope. A tied closest game belongs to both managers. A descending category led by zero is held by nobody, and a blocked category has no holder. `readRecordsHeld` in `src/history/records.ts` reads every registered category, fame before shame, so a category's name, unit, precision, one-line rule and shame flag live in the registry.
+A person holds a record category when they share its first rank in the default selection, all seasons and regular scope. A tied closest game belongs to both managers. A descending category led by zero is held by nobody, so its tab leaves the card out, and a blocked category has no holder. `readRecordsHeld` in `src/history/records.ts` reads every registered category, fame before shame, so a category's name, unit, precision, one-line rule and shame flag live in the registry.
 
 `src/history/manager-names.ts` resolves a name from a link in any letter case, or offers the nearest one: a name it starts (three letters or more), or one within one edit per four letters, at least one.
 
@@ -290,7 +290,7 @@ Each trade counts once for each person in it. The trade map counts the trades ea
 
 ## Move habits
 
-These count recorded events in any week of any season, for whoever held the roster that season. `src/history/move-habits.ts` owns them. Every person has a value, zero included, except in a league with nothing of the kind to count, which has no such column. Each carries the chances behind it.
+These count recorded events in any week of any season, for whoever held the roster that season. `src/history/move-habits.ts` owns them. Every person has a value, zero included. Each carries the chances behind it.
 
 - **Pickups:** completed waiver and free-agent events that add a player, one per event. Failed, pending, commissioner and trade events are never pickups. The sample is the person's seasons.
 - **Failed claims:** failed waiver events, whatever the cause. The sample is their waiver claims, completed and failed; a pending one is neither.
@@ -300,7 +300,7 @@ These count recorded events in any week of any season, for whoever held the rost
 
 ## Home leads
 
-Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses, whose worst end leads), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads. Although a zero is a value, a count of zero holds nothing, so it leads only where the lowest wins. A tab with no such record or manager stat has no lead.
+Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses, whose worst end leads), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads, and neither does a manager stat every manager ties on. A tab with no such record or manager stat has no lead.
 
 `src/history/leads.ts` ranks the same registry entry the tab does. Every tie for first is named; managers who tie with different win–loss records each keep their own. The lead may word a column's label for a card, but its figure, unit and rule are the entry's.
 

@@ -47,7 +47,7 @@ test('published best lineups are a true best assignment where either greedy orde
     assert.deepEqual(await worst(storePath), [['M01', 8, 'Week 1 · 2021 · vs Record manager 02'], ['M02', 8, 'Week 1 · 2021 · vs Record manager 01']]);
     // 22 of 30 is 73.33%.
     assert.deepEqual(await rows(storePath, 'lineup-share'), [['M01', '73.3%', '1 week'], ['M02', '73.3%', '1 week']]);
-    assert.deepEqual(await rows(storePath, 'perfect-lineups'), [['M01', '0', '1 week'], ['M02', '0', '1 week']]);
+    assert.equal(await rows(storePath, 'perfect-lineups'), undefined, 'nobody has had one');
   });
 });
 

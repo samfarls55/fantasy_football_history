@@ -16,9 +16,8 @@ function adds(archive: Archive, moves: Transaction[]) {
 const pickups = (archive: Archive) => adds(archive, archive.transactions.filter(move => move.status === 'complete' && (move.type === 'waiver' || move.type === 'free_agent')));
 const failedClaims = (archive: Archive) => adds(archive, archive.transactions.filter(move => move.status === 'failed' && move.type === 'waiver'));
 
-/** Everyone's count, zero included, beside their chances: what they did that could have counted, or else their seasons. A league without a chance has no count. */
+/** Everyone's count, zero included, beside their chances: what they did that could have counted, or else their seasons. */
 function counts(archive: Archive, counted: { personId: string }[], of?: { word: string; tries: { personId: string }[] }): ReturnType<ManagerStat['values']> {
-  if (!(of?.tries ?? counted).length) return new Map();
   return new Map(archive.people.map(({ id }) => [id, {
     value: Exact.from(counted.filter(row => row.personId === id).length),
     sample: of ? `of ${chances(of.tries.filter(row => row.personId === id).length, of.word)}`

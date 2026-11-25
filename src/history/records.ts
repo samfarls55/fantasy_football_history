@@ -222,9 +222,11 @@ function ranking(archive: Archive, category: CategoryDefinition): Ranking {
   known.set(category, view);
   return view;
 }
+/** Nobody holds a count or total of zero, unless the lowest wins. */
+const isHeld = ({ leaders, category }: Ranking) => leaders.length > 0 && (leaders[0].value !== 0 || category.order === 'ascending');
 /** Whether anyone holds the record in this league. */
 export function hasRecord(archive: Archive, category: CategoryDefinition): boolean {
-  return ranking(archive, category).leaders.length > 0;
+  return isHeld(ranking(archive, category));
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
 export async function readCategory(key: string, options: RecordSelection = {}) {
@@ -243,7 +245,7 @@ type CardRow = Partial<Ranking['rows'][number]> & Pick<Ranking['rows'][number], 
 export function recordCard(archive: Archive, category: CategoryDefinition) {
   const view = ranking(archive, category);
   const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => ranking(archive, other).leaders);
-  return view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
+  return isHeld(view) && view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
 }
 /** The record cards of these places, in registry order. */
 export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
@@ -251,12 +253,12 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
   if (!archive) return null;
   return recordCategories.filter(category => category.place && places.includes(category.place)).flatMap(category => recordCard(archive, category) ?? []);
 }
-/** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
+/** Every record a person holds or shares, fame before shame. A tied game belongs to both managers. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordCategories.filter(category => category.candidates).map(category => ranking(archive, category))
-    .filter(view => view.leaders.some(row => (row.personId === personId || row.tied && row.opponentId === personId) && (row.value !== 0 || view.category.order === 'ascending')))
+    .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.tied && row.opponentId === personId))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {

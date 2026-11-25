@@ -65,10 +65,12 @@ export function standing(rank: number, tied: boolean, end: 'highest' | 'lowest')
 }
 function rank(archive: Archive, { values, ...stat }: ManagerStat) {
   const blocked = archive.coverage.some(issue => issue.blocks.includes(stat.key));
-  const known = blocked ? [] : [...values(archive)].map(([personId, { value, ...rest }]) => {
+  const valued = blocked ? [] : [...values(archive)].map(([personId, { value, ...rest }]) => {
     const { name, current } = archive.people.find(person => person.id === personId)!;
     return { personId, name, current, metric: typeof value === 'number' ? Exact.from(value.toFixed(stat.displayPrecision)) : value, ...rest };
   });
+  // Where everyone has zero, nothing has happened yet.
+  const known = valued.some(entry => entry.metric.compare(0)) ? valued : [];
   const order = (a: typeof known[number], b: typeof known[number]) => stat.better === 'higher' ? b.metric.compare(a.metric) : a.metric.compare(b.metric);
   known.sort((a, b) => order(a, b) || a.name.localeCompare(b.name) || a.personId.localeCompare(b.personId));
   const resolve = (text: Text) => typeof text === 'string' ? text : known.length ? text(archive) : '';
@@ -93,11 +95,11 @@ export function rankStat(archive: Archive, stat: ManagerStat): StatView {
   return view;
 }
 
-/** Whether anyone has a value for the stat in this league. */
+/** Whether the stat shows in this league. */
 export function hasStat(archive: Archive, stat: ManagerStat): boolean {
   return rankStat(archive, stat).rows.length > 0;
 }
-/** Every manager's value, sample and rank in each stat of these places, or of all of them, best first. A stat nobody has a value for is left out. */
+/** Every manager's value, sample and rank in each stat of these places, or of all of them, best first. A stat nobody has a value above or below zero for is left out. */
 export async function readManagerStats(options: { storePath?: string; places?: readonly Place[] } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;

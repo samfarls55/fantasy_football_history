@@ -45,9 +45,9 @@ test('published tabs leave out the half of Excuses with no stat, and gain a tab 
       assert.deepEqual([draft.key, draft.name, draft.anchors], ['draft', 'Draft', ['best-steal', 'worst-bust', 'titles-by-slot', 'later-record']]);
     } finally { recordCategories.pop(); }
     managerStats.push({ key: 'later-stat', place: 'moves', label: 'Later stat', unit: 'moves', displayPrecision: 0, rule: 'Added after the tabs.', better: 'higher',
-      values: () => new Map([['person-960000000000000002', { value: Exact.from(0) }]]) });
+      values: () => new Map([['person-960000000000000002', { value: Exact.from(2) }]]) });
     try {
-      assert.deepEqual((await shown(storePath)).at(-1), ['Moves', 'moves'], 'a stat alone is enough, and a zero is a value');
+      assert.deepEqual((await shown(storePath)).at(-1), ['Moves', 'moves'], 'a stat alone is enough');
     } finally { managerStats.pop(); }
   });
 });
@@ -85,5 +85,13 @@ test('published place records come in registry order without the ones nobody hol
     assert.deepEqual(await held('games'), [['highest-score', 100], ['lowest-score', 40], ['biggest-blowout', 20], ['closest-game', 0], ['winning-streak', 1], ['losing-streak', 1]]);
     assert.deepEqual(await held('luck'), [['points-in-win', 60], ['points-in-loss', 90]]);
     assert.deepEqual(await held('lineups', 'moves'), []);
+    // A pickup and a drop who never started lead at zero, which is no record. A lowest score of zero is one.
+    const source = recordsSource([[100, 90, 50, 0], [90, 100, 60, 40]]);
+    (source.responses['players/nfl'] as any)['7'] = { full_name: 'Player 7', position: 'RB' };
+    (source.responses[`league/${source.seedLeagueId}/transactions/1`] as any[]).push({ transaction_id: '970000000000000001', leg: 1, type: 'free_agent', status: 'complete', status_updated: 1600000000000, adds: { 7: 1 }, drops: null });
+    await publish(storePath, source);
+    assert.deepEqual(await held('moves'), []);
+    assert.deepEqual((await held('games'))[1], ['lowest-score', 0]);
+    assert.deepEqual((await readTabs({ storePath }))!.find(tab => tab.key === 'moves')!.lead!.category.name, 'Most pickups');
   });
 });

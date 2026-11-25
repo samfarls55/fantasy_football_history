@@ -116,8 +116,8 @@ test('published finals lost count resolved finals alone, and the most without a 
     assert.deepEqual([row.leaderContext, row.period], ['2022, 2023', { year: '2023', week: 2, playedAt: null }]);
   });
   await published(seasonsSource(placed([1, 2, 3, 4], { unresolved: true })), async storePath => {
-    assert.deepEqual(await column(storePath, 'titles'), [['M1', '0'], ['M2', '0'], ['M3', '0'], ['M4', '0']]);
-    assert.equal(await column(storePath, 'finals-lost'), undefined, 'a league with no resolved title has no finals to have lost');
+    assert.equal(await column(storePath, 'titles'), undefined, 'a league with no resolved title has none to count');
+    assert.equal(await column(storePath, 'finals-lost'), undefined, 'and no finals to have lost');
     assert.deepEqual(await bridesmaids(storePath), []);
   });
 });

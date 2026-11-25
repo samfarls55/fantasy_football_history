@@ -25,20 +25,21 @@ function statCard(archive: Archive, stat: ManagerStat): CardView | null {
   const mixed = first.some(row => row.figure !== first[0].figure);
   const leaders = first.map(({ personId, name: manager, names, figure, value, sample = null }) => ({ id: personId, rank: 1, personId, manager,
     name: names?.join(', ') ?? manager, shown: figure, value, sample: mixed ? figure : sample, ...names && { leaderContext: [manager, sample].filter(Boolean).join(' · ') } }));
-  return leaders.length ? { category: { ...category, name: label, unit: first[0].unit, ...words }, rows: leaders, leaders } : null;
+  // A stat every manager ties on leads nothing.
+  return leaders.length < rows.length ? { category: { ...category, name: label, unit: first[0].unit, ...words }, rows: leaders, leaders } : null;
 }
 
-/** The card of the stat a tab leads with: the chosen one or, when nobody holds that, the first on its page that somebody does. A count of zero holds nothing, unless the lowest wins. */
+/** The card of the stat a tab leads with: the chosen one or, when nobody holds that, the first on its page that somebody does. */
 export function tabLead(archive: Archive, chosen: string, places: readonly Place[]): CardView | null {
   const cards = places.flatMap(place => {
-    const records = recordCategories.filter(category => category.place === place).map(category => ({ key: category.key, lowest: category.order === 'ascending', read: () => recordCard(archive, category) as CardView | null }));
-    const stats = managerStats.filter(stat => stat.place === place).map(stat => ({ key: stat.key, lowest: stat.better === 'lower' && !wording[stat.key]?.worst, read: () => statCard(archive, stat) }));
+    const records = recordCategories.filter(category => category.place === place).map(category => ({ key: category.key, read: () => recordCard(archive, category) as CardView | null }));
+    const stats = managerStats.filter(stat => stat.place === place).map(stat => ({ key: stat.key, read: () => statCard(archive, stat) }));
     // Legacy opens with its table; every other page opens with its cards.
     return place === 'legacy' ? [...stats, ...records] : [...records, ...stats];
   });
-  for (const { lowest, read } of cards.toSorted((a, b) => Number(b.key === chosen) - Number(a.key === chosen))) {
+  for (const { read } of cards.toSorted((a, b) => Number(b.key === chosen) - Number(a.key === chosen))) {
     const card = read();
-    if (card && (lowest || card.leaders[0].value !== 0)) return { ...card, rows: card.leaders };
+    if (card) return { ...card, rows: card.leaders };
   }
   return null;
 }
