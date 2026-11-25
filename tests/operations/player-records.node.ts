@@ -143,10 +143,10 @@ test('published most-started players list every tie, count an actual zero and ke
       week('12 34', { 1: { A: 10 } }), week('13 24', { 1: { A: 10 } }), week('14 23', { 1: { A: 10 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'most-started'), [
-      ['05', ['Player A'], '3 starts', '3 weeks', 1],
-      ['01', ['Player B'], '2 starts', '3 weeks', 2],
-      ['02', ['Player C', 'Player D'], '2 starts', '6 weeks', 2],
-      ['03', ['Player C'], '1 start', '6 weeks', 4],
+      ['05', ['Player A'], '3 starts', 'of 3 weeks', 1],
+      ['01', ['Player B'], '2 starts', 'of 3 weeks', 2],
+      ['02', ['Player C', 'Player D'], '2 starts each', 'of 6 weeks', 2],
+      ['03', ['Player C'], '1 start', 'of 6 weeks', 4],
     ]);
   });
 });
@@ -162,10 +162,10 @@ test('published scored-most-against adds up an opponent’s starters exactly, ti
       week('12 34', { 2: { A: 30.25 } }), week('12 34', { 2: { A: 30.25 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'scored-most-against'), [
-      ['05', ['Player A'], '60.50 points', '2 weeks', 1],
-      ['04', ['Player B'], '12.50 points', '4 weeks', 2],
-      ['01', ['Player A', 'Player C'], '0.30 points', '2 weeks', 3],
-      ['02', ['Player E'], '0.00 points', '4 weeks', 4],
+      ['05', ['Player A'], '60.50 points', 'in 2 weeks', 1],
+      ['04', ['Player B'], '12.50 points', 'in 4 weeks', 2],
+      ['01', ['Player A', 'Player C'], '0.30 points each', 'in 2 weeks', 3],
+      ['02', ['Player E'], '0.00 points', 'in 4 weeks', 4],
     ]);
     const stats = (await readManagerStats({ storePath, places: ['players'] }))!;
     assert.deepEqual(stats.map(stat => [stat.label, stat.unit]), [['Most-started player', 'starts'], ['Scored most against them', 'points']]);

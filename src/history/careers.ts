@@ -63,7 +63,7 @@ const yearChanges: ManagerStat['values'] = archive => new Map(archive.people.fla
   if (!changes.length) return [];
   const size = Math.max(...changes.map(change => change.size));
   return [[person.id, { value: Exact.from(size), names: changes.filter(change => change.size === size).map(change => change.name),
-    sample: plural(seasons.filter(({ season, team }) => season.complete && team.finish).length, 'season') }]];
+    sample: `over ${plural(seasons.filter(({ season, team }) => season.complete && team.finish).length, 'season')}` }]];
 }));
 
 /** Legacy's careers table. The numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */
@@ -72,7 +72,7 @@ export const careerStats: ManagerStat[] = [
     rule: 'Championship games won.' },
   { key: 'finals-lost', place: 'legacy', label: 'Finals lost', unit: 'finals', displayPrecision: 0, better: 'higher', values: ofSeasons(season => season.runnerUpId !== null, (season, personId) => season.runnerUpId === personId),
     rule: 'Championship games lost.' },
-  { key: 'record', place: 'legacy', label: 'Record', unit: archive => completedContests(archive).some(game => game.tie) ? 'wins–losses–ties' : 'wins–losses', displayPrecision: 0, better: 'higher',
+  { key: 'record', place: 'legacy', label: 'Record', unit: archive => `${completedContests(archive).some(game => game.tie) ? 'wins–losses–ties' : 'wins–losses'}, regular season`, displayPrecision: 0, better: 'higher',
     values: fromCareer(({ facts }) => ({ value: Exact.from(facts.wins), shown: facts.record })),
     rule: 'Regular-season games, sorted by wins.' },
   { key: 'win-rate', place: 'legacy', label: 'Win %', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: fromCareer(({ winPercentage }) => winPercentage && { value: winPercentage }),

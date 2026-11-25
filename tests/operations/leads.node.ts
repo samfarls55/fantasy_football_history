@@ -33,7 +33,7 @@ test('published leads are one chosen stat from each tab, with the values its tab
       ['games', 'highest-score', 'Highest score', 120.5, 'points', 'M01'],
       ['excuses', 'losses-better-lineup', 'Most losses a better lineup wins', '1', 'loss', 'M02'],
       ['players', 'most-started', 'Most starts by one player for one manager', '2', 'starts', 'M01'],
-      ['draft', 'best-steal', 'Best steal', 30.75, 'points as a starter', 'M01'],
+      ['draft', 'best-steal', 'Best steal: most points from a late-round pick', 30.75, 'points as a starter', 'M01'],
       ['moves', 'pickups', 'Most pickups', '2', 'pickups', 'M03'],
     ]);
   });
@@ -46,7 +46,7 @@ test('published leads fall back to the first stat on the page that somebody hold
     const [home, legacy, ...rest] = await leads(storePath);
     assert.equal(home, null);
     // Titles lead Legacy's table, but nobody holds a count of zero.
-    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'wins–losses–ties', 'M01', 'M02', 'M03']);
+    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'wins–losses–ties, regular season', 'M01', 'M02', 'M03']);
     assert.deepEqual((await readTabs({ storePath }))![1].lead!.leaders.map(row => row.sample), ['1–1', '1–1', '1–0–1'], 'equal wins with unequal records each keep their own');
     assert.deepEqual(rest, [
       ['games', 'highest-score', 'Highest score', 100, 'points', 'M01', 'M02'],

@@ -94,7 +94,7 @@ test('published late-night pickups run midnight to 5am in New York across both d
       { at: '2021-11-06T07:00:00Z', drops: { w: 2 } }, // A drop alone.
       { at: '2021-11-06T16:00:00Z', adds: { x: 3 } },
     ]));
-    assert.deepEqual(await rows(storePath, 'late-night'), [['M01', '8', 'of 14 free agents', 1], ['M02', '0', 'of 0 free agents', 2], ['M03', '0', 'of 1 free agent', 2], ['M04', '0', 'of 0 free agents', 2]]);
+    assert.deepEqual(await rows(storePath, 'late-night'), [['M01', '8', 'of 14 free-agent adds', 1], ['M02', '0', 'of 0 free-agent adds', 2], ['M03', '0', 'of 1 free-agent add', 2], ['M04', '0', 'of 0 free-agent adds', 2]]);
   });
 });
 
@@ -116,8 +116,8 @@ test('published Sunday-morning pickups run 11am to 1pm on a New York Sunday acro
         '2022-03-13T17:00:00Z'), // 1pm EDT: out.
       { type: 'waiver', at: '2021-11-07T17:00:00Z', adds: { w: 2 } },
     ]));
-    assert.deepEqual((await rows(storePath, 'sunday'))![0], ['M01', '5', 'of 13 free agents', 1]);
-    assert.deepEqual((await rows(storePath, 'sunday'))![1], ['M02', '0', 'of 0 free agents', 2]);
+    assert.deepEqual((await rows(storePath, 'sunday'))![0], ['M01', '5', 'of 13 free-agent adds', 1]);
+    assert.deepEqual((await rows(storePath, 'sunday'))![1], ['M02', '0', 'of 0 free-agent adds', 2]);
     // A league whose pickups were all waiver claims has nothing to time.
     await publish(storePath, league([{ type: 'waiver', adds: { w: 2 } }]));
     assert.equal(await rows(storePath, 'late-night'), undefined);
@@ -133,7 +133,7 @@ test('a completed pickup without a completion time keeps the last published coun
     (broken.responses[`league/${broken.seedLeagueId}/transactions/1`] as any[])[1].status_updated = null;
     await assert.rejects(publish(storePath, broken), /status_updated recorded chronology/);
     assert.deepEqual((await rows(storePath, 'pickups'))![0], ['M01', '1', '1 season', 1]);
-    assert.deepEqual((await rows(storePath, 'late-night'))![0], ['M01', '1', 'of 1 free agent', 1]);
+    assert.deepEqual((await rows(storePath, 'late-night'))![0], ['M01', '1', 'of 1 free-agent add', 1]);
   });
 });
 
@@ -160,8 +160,8 @@ test('published habits stay with whoever held the roster that season, former man
     ));
     assert.deepEqual(await rows(storePath, 'pickups'), [['M05', '2', '1 season', 1], ['M01', '1', '1 season', 2], ['M02', '1', '2 seasons', 2], ['M03', '0', '2 seasons', 4], ['M04', '0', '2 seasons', 4]]);
     assert.deepEqual((await rows(storePath, 'failed-claims'))!.slice(0, 2), [['M05', '1', 'of 1 claim', 1], ['M01', '0', 'of 0 claims', 2]]);
-    assert.deepEqual((await rows(storePath, 'late-night'))!.slice(0, 2), [['M05', '1', 'of 2 free agents', 1], ['M01', '0', 'of 1 free agent', 2]]);
-    assert.deepEqual((await rows(storePath, 'sunday'))![0], ['M05', '1', 'of 2 free agents', 1]);
+    assert.deepEqual((await rows(storePath, 'late-night'))!.slice(0, 2), [['M05', '1', 'of 2 free-agent adds', 1], ['M01', '0', 'of 1 free-agent add', 2]]);
+    assert.deepEqual((await rows(storePath, 'sunday'))![0], ['M05', '1', 'of 2 free-agent adds', 1]);
     assert.deepEqual((await rows(storePath, 'trades'))!.slice(0, 3), [['M02', '2', '2 seasons', 1], ['M01', '1', '1 season', 2], ['M05', '1', '1 season', 2]]);
     assert.deepEqual((await readManagerStats({ storePath, places: ['moves'] }))!.map(stat => stat.rows.filter(row => !row.current).map(row => row.name)), Array(5).fill(['Record manager 05']));
   });

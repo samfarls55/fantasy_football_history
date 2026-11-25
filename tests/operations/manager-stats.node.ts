@@ -51,7 +51,7 @@ test('published manager stats rank exact values exactly and inexact ones as disp
 
 test('published manager stats keep every tied name, a record shown for its rate and a label set by the league', async () => {
   const named = await read({ unit: 'starts' }, { 1: { value: Exact.from(44), names: ['Player A', 'Player B'], sample: '96 weeks' }, 2: { value: Exact.from(1), names: ['Player C'] } });
-  assert.deepEqual(named.rows.map(row => [row.names, row.figure, row.unit, row.sample]), [[['Player A', 'Player B'], '44', 'starts', '96 weeks'], [['Player C'], '1', 'start', undefined]]);
+  assert.deepEqual(named.rows.map(row => [row.names, row.figure, row.unit, row.sample]), [[['Player A', 'Player B'], '44', 'starts each', '96 weeks'], [['Player C'], '1', 'start', undefined]]);
   const record = await read({ unit: 'wins–losses', displayPrecision: 1 }, { 1: { value: Exact.from(50), shown: '7–7' }, 2: { value: Exact.from(100), shown: '1–0' } });
   assert.deepEqual(ranks(record), [['02', '1–0', 'wins–losses', 1, false], ['01', '7–7', 'wins–losses', 2, false]]);
   const derived = await read({ label: archive => `${Math.max(...archive.performances.map(row => row.points))}+ point games`, unit: archive => `games of ${archive.performances.length}` }, { 1: { value: Exact.from(2) } });

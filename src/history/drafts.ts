@@ -72,7 +72,7 @@ function mostDrafted(answer: (row: PersonPick) => string | null | undefined, sam
     return most > 1 ? [[personId, { value: Exact.from(most), names: answers.filter(rows => rows.length === most).map(([row]) => name(row)!).sort((a, b) => a.localeCompare(b)), sample: sample(known) }]] : [];
   }));
 }
-const picksMade = (rows: PersonPick[]) => plural(rows.length, 'pick');
+const picksMade = (rows: PersonPick[]) => `in ${plural(rows.length, 'pick')}`;
 
 const easternDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' });
 const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
@@ -85,7 +85,7 @@ const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archi
 
 /** Draft's Scouting reports table. */
 export const draftStats: ManagerStat[] = [
-  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, rows => plural(new Set(rows.map(row => row.draft)).size, 'draft'), row => row.player.name),
+  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, rows => `in ${plural(new Set(rows.map(row => row.draft)).size, 'draft')}`, row => row.player.name),
     rule: 'The player they picked most, at least twice. Every finished draft of any type, keepers included.' },
   { key: 'drafted-team', place: 'draft', label: 'Most-drafted NFL team', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.pick.source.metadata.team, picksMade),
     rule: 'The NFL team they picked from most, at least twice, going by each player’s team at the draft. Every finished draft of any type, keepers included.' },

@@ -31,7 +31,7 @@ function timedPickups(inWindow: (weekday: string, hour: number) => boolean): Man
       const { weekday, hour } = Object.fromEntries(newYork.formatToParts(move.completedAt!).map(part => [part.type, part.value]));
       return inWindow(weekday, Number(hour));
     });
-    return counts(archive, counted, { word: 'free agent', tries });
+    return counts(archive, counted, { word: 'free-agent add', tries });
   };
 }
 

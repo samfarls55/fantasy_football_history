@@ -25,7 +25,7 @@ test('published careers give every person, current or replaced, one row of the r
   await published(await base(), async storePath => {
     const table = await careers(storePath);
     assert.deepEqual([...table.values()].map(stat => [stat.key, stat.label, stat.unit]).filter(([key]) => !['power-rating', 'one-year-change'].includes(key)), [
-      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'wins–losses–ties'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
+      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'wins–losses–ties, regular season'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
       ['points', 'Points per game', 'points'], ['points-against', 'Opponents’ points per game', 'points'], ['seasons', 'Seasons', 'years'],
     ]);
     const row = (name: string) => ['titles', 'finals-lost', 'record', 'win-rate', 'playoffs', 'points', 'points-against', 'seasons'].map(key => table.get(key)!.rows.find(row => row.name === name)!.figure);
@@ -92,7 +92,7 @@ test('published one-year changes compare a person’s consecutive finished seaso
       // 3rd in 2021 and 1st in 2023 with 2022 away is no one-year change.
       ['M3', '2', 'places', '1st to 3rd in 2024', 2],
       // Two equal moves, and the unresolved 2024 final leaves a third unknown.
-      ['M1', '1', 'place', '1st to 2nd in 2022, 2nd to 3rd in 2023', 4],
+      ['M1', '1', 'place each', '1st to 2nd in 2022, 2nd to 3rd in 2023', 4],
     ]);
   });
   // One finished season is no change, so M5 above is unknown, and in a first season so is everyone.
@@ -109,7 +109,7 @@ test('published counts of titles, finals and playoffs show the seasons they come
     // The 2025 bracket is set, with its final still to come.
     assert.deepEqual(await samples(storePath, 'playoffs'), [['M1', '5 seasons'], ['M2', '5 seasons'], ['M3', '4 seasons'], ['M4', '5 seasons'], ['M5', '1 season']]);
     // A finish the bracket doesn't establish can't have changed.
-    assert.deepEqual(await samples(storePath, 'one-year-change'), [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '3 seasons'], ['M4', '4 seasons']]);
+    assert.deepEqual(await samples(storePath, 'one-year-change'), [['M1', 'over 3 seasons'], ['M2', 'over 3 seasons'], ['M3', 'over 3 seasons'], ['M4', 'over 4 seasons']]);
   });
 });
 

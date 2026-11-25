@@ -67,7 +67,7 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | points-in-win | Matchups: Fewest points in a win | Winner's official score in one decided contest, ascending | Season/all; regular only | Matchup, selected week/team |
 | points-in-loss | Matchups: Most points in a loss | Loser's official score in one decided contest, descending | Season/all; regular only | Matchup, selected week/team |
 | worst-managed-week | Matchups: Worst-managed week | Best-lineup gap of one known lineup, descending | Season/all; regular only | Matchup, selected week/team |
-| benched-player | Players: Most points left on the bench | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
+| benched-player | Players: Most points left on the bench by one player | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
 | lowest-starter | Players: Lowest starter score | Recorded player/team/week starting score, ascending | Season/all; game scope | Matchup with selected starter row |
 | productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
 | productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
@@ -114,7 +114,7 @@ A manager stat gives each person one value. `src/history/manager-stats.ts` regis
 
 Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value, when every value is zero or when a coverage issue blocks its key. A zero beside someone else's value is a value.
 
-A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
+A stat whose value is a name carries a number and unit, and ties list every name, with the unit then said of each. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
 
 ## Week by week
 
