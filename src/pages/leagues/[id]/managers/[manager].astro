@@ -84,9 +84,7 @@ const career = facts && [
       {badge && (
       <Section id="badge" title={badge.badge}>
         <ul class="ranks">
-          <Rank {...badge} href={`${tabHref(Astro, tabs.find(tab => tab.places.includes(badge.place))!.key)}#${badge.key}`} first={badge.rank === 1}>
-            {badge.tied && 'Tied '}<strong>{badge.rank > 1 && `${ordinal(badge.rank)} `}{badge.end}</strong> of {badge.of} current managers
-          </Rank>
+          <Rank {...badge} href={`${tabHref(Astro, tabs.find(tab => tab.places.includes(badge.place))!.key)}#${badge.key}`} of={`${badge.of} current managers`} />
         </ul>
       </Section>
       )}
@@ -129,7 +127,7 @@ const career = facts && [
             <h3>{tab.name}</h3>
             <ul class="ranks">
               {ranks.map(({ key, label, rule, row, of }) => (
-                <Rank {...row} href={`${tabHref(Astro, tab.key)}#${key}`} label={label} rule={rule} first={row.rank === 1}>{row.tied && 'Tied '}<strong>{ordinal(row.rank)}</strong> of {of}</Rank>
+                <Rank {...row} href={`${tabHref(Astro, tab.key)}#${key}`} label={label} rule={rule} of={String(of)} />
               ))}
             </ul>
           </>

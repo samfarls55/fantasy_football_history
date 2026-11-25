@@ -1,6 +1,6 @@
 import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
-import { careerStats } from './careers.ts';
+import { careerStats, ordinal } from './careers.ts';
 import { draftStats } from './drafts.ts';
 import { lineupStats } from './lineups.ts';
 import { luckStats } from './luck.ts';
@@ -58,6 +58,11 @@ export const managerStats: ManagerStat[] = [
   ...moveHabitStats,
 ];
 
+/** How a rank reads from its end: "Highest", "Tied 2nd lowest". */
+export function standing(rank: number, tied: boolean, end: 'highest' | 'lowest'): string {
+  const text = `${tied ? 'tied ' : ''}${rank > 1 ? `${ordinal(rank)} ` : ''}${end}`;
+  return text[0].toUpperCase() + text.slice(1);
+}
 function rank(archive: Archive, { values, ...stat }: ManagerStat) {
   const blocked = archive.coverage.some(issue => issue.blocks.includes(stat.key));
   const known = blocked ? [] : [...values(archive)].map(([personId, { value, ...rest }]) => {
@@ -72,8 +77,10 @@ function rank(archive: Archive, { values, ...stat }: ManagerStat) {
     const { metric, shown, ...row } = entry;
     const value = metric.toNumber();
     const figure = shown ?? `${value.toLocaleString('en-US', { minimumFractionDigits: stat.displayPrecision, maximumFractionDigits: stat.displayPrecision })}${stat.percent ? '%' : ''}`;
+    const rank = 1 + known.filter(other => order(other, entry) < 0).length;
+    const tied = known.filter(other => order(other, entry) === 0).length > 1;
     return { ...row, value, exactKey: metric.key, figure, unit: shown || stat.displayPrecision ? unit : recordUnit(unit, value),
-      rank: 1 + known.filter(other => order(other, entry) < 0).length, tied: known.filter(other => order(other, entry) === 0).length > 1 };
+      rank, tied, standing: standing(rank, tied, stat.better === 'higher' ? 'highest' : 'lowest') };
   }) };
 }
 export type StatView = ReturnType<typeof rank>;

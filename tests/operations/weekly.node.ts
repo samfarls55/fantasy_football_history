@@ -30,7 +30,7 @@ test('published top and bottom scores give every team tied for a week one, and c
     for (const row of games(source, 4).slice(2)) row.matchup_id = null;
     await publish(storePath, source);
     assert.deepEqual(await rows(storePath, 'top-scores'), [['M01', '3', '4 weeks', 1], ['M02', '2', '4 weeks', 2], ['M03', '0', '3 weeks', 3], ['M04', '0', '3 weeks', 3]]);
-    assert.deepEqual(await rows(storePath, 'bottom-scores'), [['M04', '3', '3 weeks', 1], ['M02', '2', '4 weeks', 2], ['M03', '1', '3 weeks', 3], ['M01', '0', '4 weeks', 4]]);
+    assert.deepEqual(await rows(storePath, 'bottom-scores'), [['M01', '0', '4 weeks', 1], ['M03', '1', '3 weeks', 2], ['M02', '2', '4 weeks', 3], ['M04', '3', '3 weeks', 4]]);
   });
 });
 
@@ -98,7 +98,7 @@ test('published weekly stats keep each person’s own seasons, and a rate nobody
     (source.responses[`league/${oldId}/rosters`] as any[])[1].owner_id = '960000000000009999';
     await publish(storePath, source);
     assert.deepEqual(await rows(storePath, 'top-scores'), [['M99', '9', '9 weeks', 1], ['M01', '8', '17 weeks', 2], ['M02', '0', '8 weeks', 3], ['M03', '0', '17 weeks', 3], ['M04', '0', '17 weeks', 3]]);
-    assert.deepEqual((await rows(storePath, 'bottom-scores'))![0], ['M04', '17', '17 weeks', 1]);
+    assert.deepEqual((await rows(storePath, 'bottom-scores'))!.at(-1), ['M04', '17', '17 weeks', 5]);
     // M2 never reached a week 9, which is unknown rather than 0%.
     assert.deepEqual(await rows(storePath, 'late-wins'), [['M03', '100.0%', '1–0', 1], ['M99', '100.0%', '1–0', 1], ['M01', '0.0%', '0–1', 3], ['M04', '0.0%', '0–1', 3]]);
     assert.deepEqual(await rows(storePath, 'early-wins'), [['M03', '100.0%', '10–0', 1], ['M99', '100.0%', '5–0', 1], ['M01', '50.0%', '5–5', 3], ['M02', '0.0%', '0–5', 4], ['M04', '0.0%', '0–10', 4]]);

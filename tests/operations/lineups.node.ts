@@ -109,11 +109,11 @@ test('published losses a better lineup wins add the gap to the official score, w
     lineup(source, 6, 1, [['RB-1', 10]], [['RB-2', null]]); // Nobody knows about this loss.
     const other = lineup(source, 5, 2, [['RB-3', 10]]);
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '2', 'of 3 losses'], ['M02', '0', 'of 1 loss']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M02', '0', 'of 1 loss'], ['M01', '2', 'of 3 losses']]);
     // M2's override to 110 turns week 5 into a loss that the 30 M1 left on the bench would have won.
     other.custom_points = 110;
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '3', 'of 4 losses'], ['M02', '0', 'of 0 losses']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M02', '0', 'of 0 losses'], ['M01', '3', 'of 4 losses']]);
     assert.deepEqual((await worst(storePath)).map(([, gap]) => gap), [50, 30, 15, 5.01, 5], 'no override changed a gap');
   });
 });
@@ -130,7 +130,7 @@ test('published zero-point starters and lowest starter scores count recorded sco
     for (const row of games) row.matchup_id = null;
     lineup(source, 3, 1, [['RB-1', 0], ['WR-1', -20], ['TE-1', null]]);
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M01', '2', 'of 5 starts'], ['M02', '0', 'of 4 starts']]);
+    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M02', '0', 'of 4 starts'], ['M01', '2', 'of 5 starts']]);
     assert.deepEqual((await readCategory('lowest-starter', { storePath }))!.rows.slice(0, 4).map(row => [row.rank, row.value, row.name, row.leaderContext]), [
       [1, -0.5, 'Player WR-1', 'Record manager 01 · Week 2 · 2021 · vs Record manager 02'],
       [1, -0.5, 'Player WR-2', 'Record manager 02 · Week 2 · 2021 · vs Record manager 01'],
@@ -154,8 +154,8 @@ test('published lineup stats stay with the person who held the roster', async ()
     (source.responses[`league/${oldId}/rosters`] as any[])[0].owner_id = '960000000000009999';
     await publish(storePath, source);
     assert.deepEqual(await rows(storePath, 'lineup-share'), [['M01', '100.0%', '1 week'], ['M99', '0.0%', '1 week']]);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M99', '1', 'of 1 loss'], ['M01', '0', 'of 1 loss']]);
-    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M99', '1', 'of 1 start'], ['M01', '0', 'of 1 start']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '0', 'of 1 loss'], ['M99', '1', 'of 1 loss']]);
+    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M01', '0', 'of 1 start'], ['M99', '1', 'of 1 start']]);
     assert.deepEqual(await worst(storePath), [['M99', 30, 'Week 1 · 2020 · vs Record manager 02']]);
   });
 });

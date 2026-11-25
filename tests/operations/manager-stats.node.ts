@@ -33,6 +33,9 @@ test('published manager stats share competition ranks, start from the better end
   const values = { 1: { value: Exact.from(3) }, 2: { value: Exact.from(1) }, 4: { value: Exact.from(3) } };
   assert.deepEqual(ranks(await read({}, values)), [['01', '3', 'points', 1, true], ['04', '3', 'points', 1, true], ['02', '1', 'point', 3, false]]);
   assert.deepEqual(ranks(await read({ better: 'lower' }, values)), [['02', '1', 'point', 1, false], ['01', '3', 'points', 2, true], ['04', '3', 'points', 2, true]]);
+  const standings = async (better: ManagerStat['better']) => (await read({ better }, values)).rows.map(row => row.standing);
+  assert.deepEqual(await standings('higher'), ['Tied highest', 'Tied highest', '3rd highest']);
+  assert.deepEqual(await standings('lower'), ['Lowest', 'Tied 2nd lowest', 'Tied 2nd lowest']);
   assert.equal(await read({}, {}), undefined, 'a stat nobody has a value for is left out');
 });
 

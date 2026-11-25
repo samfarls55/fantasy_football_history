@@ -51,7 +51,7 @@ function winRate(from: number, through = Infinity): ManagerStat['values'] {
 export const weeklyStats: ManagerStat[] = [
   { key: 'top-scores', place: 'games', label: 'Week’s top score', unit: 'times', displayPrecision: 0, better: 'higher', values: extremes('top'),
     rule: 'Regular-season weeks they had the league’s best score. Everyone tied for it gets one.' },
-  { key: 'bottom-scores', place: 'games', label: 'Week’s bottom score', unit: 'times', displayPrecision: 0, better: 'higher', values: extremes('bottom'),
+  { key: 'bottom-scores', place: 'games', label: 'Week’s bottom score', unit: 'times', displayPrecision: 0, better: 'lower', values: extremes('bottom'),
     rule: 'Regular-season weeks they had the league’s worst score. Everyone tied for it gets one.' },
   { key: 'big-scores', place: 'games', label: archive => `${bigScoreLine(archive)}+ point games`, unit: 'games', displayPrecision: 0, better: 'higher', values: bigScores,
     rule: 'Regular-season scores at or above the league’s line: its 80th-percentile score, to the nearest 10.' },

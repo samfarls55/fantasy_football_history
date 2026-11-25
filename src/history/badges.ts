@@ -1,6 +1,6 @@
 import { readArchive } from './store.ts';
 import { closeLosses } from './luck.ts';
-import { managerStats, rankStat, type ManagerStat } from './manager-stats.ts';
+import { managerStats, rankStat, standing, type ManagerStat } from './manager-stats.ts';
 
 const stat = (key: string) => managerStats.find(stat => stat.key === key)!;
 /** Earlier badges go first. Each belongs to whoever has the most of its stat, or the least. */
@@ -33,8 +33,12 @@ export async function readBadges(options: { storePath?: string } = {}) {
     // A stat's ranks count from its better end, so the other end counts back.
     const direction = (better === 'higher') === (end === 'highest') ? 1 : -1;
     // The badge is the nickname, so a label led by its own drops it.
-    return current.filter(row => row.value > 0).map(({ name: manager, ...row }) => ({ ...row, manager, badge, order, end, key, place, rule, label: label.replace(/^.+: ./, start => start.at(-1)!.toUpperCase()),
-      rank: 1 + current.filter(other => direction * (other.rank - row.rank) < 0).length, tied: current.filter(other => other.rank === row.rank).length > 1, of: current.length }));
+    return current.filter(row => row.value > 0).map(({ name: manager, ...row }) => {
+      const rank = 1 + current.filter(other => direction * (other.rank - row.rank) < 0).length;
+      const tied = current.filter(other => other.rank === row.rank).length > 1;
+      return { ...row, manager, badge, order, key, place, rule, label: label.replace(/^.+: ./, start => start.at(-1)!.toUpperCase()),
+        rank, tied, standing: standing(rank, tied, end), of: current.length };
+    });
   }).sort((a, b) => a.rank - b.rank || a.order - b.order || a.personId.localeCompare(b.personId));
   const worn: typeof pairs = [];
   for (const pair of pairs) if (!worn.some(other => other.badge === pair.badge || other.personId === pair.personId)) worn.push(pair);

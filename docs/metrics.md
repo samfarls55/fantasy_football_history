@@ -112,13 +112,13 @@ Season award history uses the completed season's latest completed week and its s
 
 A manager stat gives each person one value. `src/history/manager-stats.ts` registers them. An entry owns its key, place, plain label, unit, one-line rule, display precision, better end and calculation, and `readManagerStats` returns every known value with its sample and rank. Tables and manager pages show what it returns and calculate nothing.
 
-Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end. A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value or a coverage issue blocks its key. A zero is a value.
+Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value or a coverage issue blocks its key. A zero is a value.
 
 A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
 
 ## Week by week
 
-These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. An unpaired bye supplies no score, and a true zero is a score. The most of each ranks first, bottom scores included. `src/history/weekly.ts` calculates them.
+These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. An unpaired bye supplies no score, and a true zero is a score. The most of each ranks first, except that the fewest bottom scores do. `src/history/weekly.ts` calculates them.
 
 - **Top and bottom scores of the week:** every team tied for the week's best or worst score gets one. The sample is the person's scored weeks.
 - **Big-score games:** scores at or above the league's line, which is its 80th-percentile score rounded to the nearest 10, half up. The percentile is the lowest score that at least 80% of the league's scores equal or fall below, over the whole archive, so the line can move with each import. The label names it. Sam authorized this threshold in spec 37; the reference league's line is 147.74, rounded to 150.
@@ -149,7 +149,7 @@ A week is left out, never zero, when the season has an unrecognized starting slo
 - **Perfect lineups:** counted weeks with no gap. **Worst-managed week:** the largest gap above zero.
 - **Starters who scored 0:** starts with a recorded score of exactly 0. **Lowest starter score:** the lowest recorded score of one start. An empty slot or unknown score is neither, and neither needs a known best lineup.
 
-The share ranks from its highest; the counts rank from the most.
+The share and the perfect lineups rank from the most, and the two mistakes, losses a better lineup wins and starters who scored 0, from the fewest.
 
 The archive's best lineups are solved once per archive object and kept beside it.
 
@@ -300,7 +300,7 @@ These count recorded events in any week of any season, for whoever held the rost
 
 ## Home leads
 
-Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads. Although a zero is a value, a count of zero holds nothing, so it leads only where the lowest wins. A tab with no such record or manager stat has no lead.
+Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses, whose worst end leads), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads. Although a zero is a value, a count of zero holds nothing, so it leads only where the lowest wins. A tab with no such record or manager stat has no lead.
 
 `src/history/leads.ts` ranks the same registry entry the tab does. Every tie for first is named; managers who tie with different win–loss records each keep their own. The lead may word a column's label for a card, but its figure, unit and rule are the entry's.
 

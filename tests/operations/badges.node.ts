@@ -51,7 +51,7 @@ test('published badges break equal ranks by the badge list, then by person ID', 
     Object.assign(team(source, 3), { display_name: 'Abe' });
     await publish(storePath, source);
     assert.deepEqual(await worn(storePath), [['Abe', 'Dealmaker', '1 trade', 1], ['M01', 'Juggernaut', '1 time', 1], ['M04', 'Cellar Dweller', '1 time', 1], ['Zed', 'Tinkerer', '2 pickups', 1]]);
-    assert.deepEqual((await readBadges({ storePath }))!.map(row => [row.badge, row.tied, row.of]), [['Juggernaut', false, 4], ['Tinkerer', true, 4], ['Cellar Dweller', false, 4], ['Dealmaker', true, 4]]);
+    assert.deepEqual((await readBadges({ storePath }))!.map(row => [row.badge, row.standing, row.of]), [['Juggernaut', 'Highest', 4], ['Tinkerer', 'Tied highest', 4], ['Cellar Dweller', 'Highest', 4], ['Dealmaker', 'Tied highest', 4]]);
   });
 });
 
@@ -93,8 +93,8 @@ test('published Wild Card and Metronome are the two ends of boom or bust, and a 
     await publish(storePath, recordsSource([[150, 90, 120, 80, 100, 60], [150, 98, 110, 66, 136, 40]]));
     // M1's swing of 0 ranks 1st from the low end but isn't above zero, so Metronome waits for M2, 2nd.
     assert.deepEqual(await worn(storePath), [['M01', 'Juggernaut', '2 times', 1], ['M02', 'Metronome', '4.0% of league average', 2], ['M05', 'Wild Card', '18.0% of league average', 1], ['M06', 'Cellar Dweller', '2 times', 1]]);
-    assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.end, row.label]), [
-      ['Wild Card', 'highest', 'Typical weekly swing, % of league average'], ['Metronome', 'lowest', 'Typical weekly swing, % of league average']]);
+    assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.standing, row.label]), [
+      ['Wild Card', 'Highest', 'Typical weekly swing, % of league average'], ['Metronome', '2nd lowest', 'Typical weekly swing, % of league average']]);
   });
 });
 

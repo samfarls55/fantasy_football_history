@@ -94,7 +94,7 @@ export const lowestStarterCandidates: NonNullable<CategoryDefinition['candidates
 /** Every rule that judges a lineup says whose positions it goes by. */
 const currentPositions = 'Positions are current ones, plus any slot the player has started in here.';
 
-/** Excuses' Lineups table: the best share of the best lineup ranks first, and the most of each count. */
+/** Excuses' Lineups table: the best share of the best lineup ranks first, then the fewest mistakes and the most perfect lineups. */
 export const lineupStats: ManagerStat[] = [
   { key: 'lineup-share', place: 'lineups', label: 'Points started, % of best lineup', unit: 'of best lineup', percent: true, displayPrecision: 1, better: 'higher',
     values: perManager(weeks => {
@@ -102,7 +102,7 @@ export const lineupStats: ManagerStat[] = [
       return best.compare(0) > 0 ? { value: exactSum(weeks.map(week => week.started)).multiply(100).divide(best), sample: chances(weeks.length, 'week') } : null;
     }),
     rule: `Regular-season starters’ points as a share of the best legal lineup from that week’s roster. ${currentPositions}` },
-  { key: 'losses-better-lineup', place: 'lineups', label: 'Losses a better lineup wins', unit: 'losses', displayPrecision: 0, better: 'higher',
+  { key: 'losses-better-lineup', place: 'lineups', label: 'Losses a better lineup wins', unit: 'losses', displayPrecision: 0, better: 'lower',
     values: perManager(weeks => {
       const lost = weeks.filter(({ own, opponent }) => own.points < opponent.points);
       return { value: Exact.from(lost.filter(({ own, opponent, gap }) => gap.add(own.points).compare(opponent.points) > 0).length), sample: `of ${chances(lost.length, 'loss', 'losses')}` };
@@ -111,7 +111,7 @@ export const lineupStats: ManagerStat[] = [
   { key: 'perfect-lineups', place: 'lineups', label: 'Perfect lineups', unit: 'lineups', displayPrecision: 0, better: 'higher',
     values: perManager(weeks => ({ value: Exact.from(weeks.filter(week => !week.gap.compare(0)).length), sample: chances(weeks.length, 'week') })),
     rule: `Regular-season weeks when no legal lineup from the roster scored more. ${currentPositions}` },
-  { key: 'zero-starters', place: 'lineups', label: 'Starters who scored 0', unit: 'starters', displayPrecision: 0, better: 'higher',
+  { key: 'zero-starters', place: 'lineups', label: 'Starters who scored 0', unit: 'starters', displayPrecision: 0, better: 'lower',
     values: archive => new Map([...Map.groupBy(recordedStarts(archive), start => start.performance.personId)].map(([personId, starts]) =>
       [personId, { value: Exact.from(starts.filter(start => start.points === 0).length), sample: `of ${chances(starts.length, 'start')}` }])),
     rule: 'Regular-season starters with a recorded score of exactly 0. An empty slot doesn’t count.' },
