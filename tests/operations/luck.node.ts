@@ -98,7 +98,7 @@ test('published luck stats leave out weeks with fewer than four scores, and stat
   await withHistory(async storePath => {
     // Two managers never have a 2nd-best loss to count; their one game was a 2-point one.
     await publish(storePath, recordsSource([[100, 98]]));
-    assert.deepEqual((await readManagerStats({ storePath }))!.map(stat => [stat.key, stat.rows.map(row => row.figure)]), [['close-games', ['1–0', '0–1']]]);
+    assert.deepEqual((await readManagerStats({ storePath, places: ['luck'] }))!.map(stat => [stat.key, stat.rows.map(row => row.figure)]), [['close-games', ['1–0', '0–1']]]);
   });
   await withHistory(async storePath => {
     // M3 and M4 have no game in week 2, so only two teams scored and M2's loss doesn't count.

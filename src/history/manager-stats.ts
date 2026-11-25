@@ -2,6 +2,7 @@ import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { luckStats } from './luck.ts';
 import { recordUnit } from './records.ts';
+import { weeklyStats } from './weekly.ts';
 import type { Place } from './tabs.ts';
 import type { Archive } from './types.ts';
 
@@ -37,6 +38,7 @@ export interface ManagerStat {
 export const managerStats: ManagerStat[] = [
   // Legacy
   // Games
+  ...weeklyStats,
   // Excuses, Luck
   ...luckStats,
   // Excuses, Lineups
