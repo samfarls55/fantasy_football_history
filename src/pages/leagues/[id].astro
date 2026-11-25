@@ -1,81 +1,43 @@
 ---
-import Base from '../../layouts/Base.astro';
-import Lookup from '../../components/Lookup.astro';
-import { ensureLeague, leagueStorePath } from '../../leagues.ts';
-import { withHistorySnapshot } from '../../history/store.ts';
+import League from '../../layouts/League.astro';
+import Manager from '../../components/Manager.astro';
+import Miss from '../../components/Miss.astro';
+import RecordCard from '../../components/RecordCard.astro';
+import { fixed, leagueHref, managerHref, openLeague } from '../../league-page.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
+import { readManagerName } from '../../history/manager-names.ts';
 import { readCategory } from '../../history/records.ts';
-import { readManagerRivalries, readRivalry } from '../../history/rivalries.ts';
+import { readRivalry } from '../../history/rivalries.ts';
 
-const { id = '' } = Astro.params;
-const username = Astro.url.searchParams.get('u')?.trim() ?? '';
+// Links shared while a manager was a highlight on this page name them in ?manager=, with any open head-to-head in ?vs=.
 const markParam = Astro.url.searchParams.get('manager');
 const vsParam = Astro.url.searchParams.get('vs');
-const { status, archive } = /^\d+$/.test(id) ? await ensureLeague(id) : { status: 'missing' as const, archive: null };
-// A league that can't be shown says why, with the username lookup right there to pick it again.
-const failure = { ready: null, missing: `Sleeper has no league with ID ${id}.`, failed: 'Sleeper didn’t send this league’s history.' }[status];
-if (failure) Astro.response.status = status === 'missing' ? 404 : 502;
-// A failed page keeps the way back to the username's leagues; without one, the lookup under the reason is the way back.
-const back = username ? { href: `/?u=${encodeURIComponent(username)}`, label: `${username}’s leagues` } : failure ? undefined : { href: '/', label: 'Find your league' };
-
-// digits: one fixed precision per record so a figure and its runners-up line up (points 2, percentages 1, counts 0).
-// how: one line on how the record is counted, behind its unit, so every record can answer "says who?" the same way.
-// Every record here reads the regular season only (readCategory's default scope), so each line says so; the rules are docs/metrics.md.
-interface Feature { key: string; name: string; unit: string; digits: number; how: string; shame?: boolean; verb?: string }
 // The headline: the best team that went home empty is the record every league argues about.
-// Its figure is signed, since it is measured against the league average.
-const headlineFeature: Feature = { key: 'best-without-title', name: 'Best season without a title', unit: 'vs league avg', digits: 1, shame: true,
-  how: 'Their regular-season points per game vs the league average, among teams that didn’t win the title.' };
-// Opposites face each other across the field: fame in white paint, shame under a flag. Pairs sit in themed groups so the run has structure.
-const groupFeatures: { name: string; pairs: Feature[][] }[] = [
-  { name: 'Scoring', pairs: [
-    [{ key: 'highest-score', name: 'Highest score', unit: 'points', digits: 2, how: 'A team’s official score for one regular-season week.' },
-      { key: 'lowest-score', name: 'Lowest score', unit: 'points', digits: 2, shame: true, how: 'A team’s official score for one regular-season week. A real zero counts; an unplayed week doesn’t.' }],
-    [{ key: 'biggest-blowout', name: 'Biggest blowout', unit: 'point margin', digits: 2, how: 'The gap between the two final scores of a regular-season game.' },
-      { key: 'closest-game', name: 'Closest game', unit: 'point margin', digits: 2, how: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' }],
-  ] },
-  { name: 'Streaks', pairs: [
-    [{ key: 'winning-streak', name: 'Longest winning streak', unit: 'wins in a row', digits: 0, how: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
-      { key: 'losing-streak', name: 'Longest losing streak', unit: 'losses in a row', digits: 0, shame: true, how: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' }],
-  ] },
-  { name: 'Roster & luck', pairs: [
-    [{ key: 'productive-pickup', name: 'Best pickup', unit: 'points as a starter', digits: 2, verb: 'picked up',
-      how: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
-      { key: 'productive-drop', name: 'Worst drop', unit: 'points for other teams', digits: 2, verb: 'dropped', shame: true,
-        how: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' }],
-    [{ key: 'luckiest-season', name: 'Luckiest season', unit: 'more wins than their scores earned', digits: 1,
-      how: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
-      { key: 'unluckiest-season', name: 'Unluckiest season', unit: 'fewer wins than their scores earned', digits: 1, shame: true,
-      how: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' }],
-    [{ key: 'benched-player', name: 'Most points left on the bench', unit: 'points', digits: 2, verb: 'benched', shame: true, how: 'A player’s score in a regular-season week spent on the bench.' }],
-  ] },
+// Below it opposites face each other across the field, fame in white paint and shame under a flag, in themed groups so the run has structure.
+const recordGroups = [
+  { name: '', pairs: [['best-without-title']] },
+  { name: 'Scoring', pairs: [['highest-score', 'lowest-score'], ['biggest-blowout', 'closest-game']] },
+  { name: 'Streaks', pairs: [['winning-streak', 'losing-streak']] },
+  { name: 'Roster & luck', pairs: [['productive-pickup', 'productive-drop'], ['luckiest-season', 'unluckiest-season'], ['benched-player']] },
 ];
 
-const storePath = leagueStorePath(id);
-const history = failure ? null : await withHistorySnapshot(archive, async () => {
+const { failure, view: history } = await openLeague(Astro, async storePath => {
   const seasons = (await readSeasons(storePath))!;
   const managers = (await readManagers({ storePath }))!;
   const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));
+  const named = markParam ? (await readManagerName(markParam, { storePath }))! : null;
   const plates = seasons.toReversed().map(season => ({
     year: season.year, complete: season.complete,
     champions: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name),
   }));
-  const load = async (feature: Feature) => {
-    const view = await readCategory(feature.key, { storePath });
-    if (!view || view.blocked || !view.rows.length) return null;
-    // A percentage record keeps the precision its category chose so distinct ranked values never share a label (docs/metrics.md).
-    return { feature, percent: view.category.unit === '%', digits: view.category.unit === '%' ? view.category.displayPrecision ?? feature.digits : feature.digits,
-      // Ties share a rank, so every row ranked third or better shows; none drops silently.
-      // A matchup row names its loser only through a link to their page, which carries their person id.
-      rows: view.rows.filter(row => row.rank <= 3).map(row => ({ ...row, manager: nameOf.get(row.personId)!,
-        opponent: row.matchupLabel && row.secondary ? nameOf.get(row.secondary[0].href.split('/')[2]) : undefined })) };
+  const load = async (key: string) => {
+    const view = (await readCategory(key, { storePath }))!;
+    return view.leaders.length ? view : null;
   };
-  const headline = await load(headlineFeature);
-  // The headline stands alone in an unnamed first group; a pair missing one side spans the row.
-  const named = await Promise.all(groupFeatures.map(async group => ({ name: group.name,
-    rows: (await Promise.all(group.pairs.map(pair => Promise.all(pair.map(load))))).map(pair => pair.filter(record => record !== null)).filter(pair => pair.length) })));
-  const groups = [...(headline ? [{ name: '', rows: [[headline]] }] : []), ...named.filter(group => group.rows.length)];
+  // A pair missing one side spans the row.
+  const groups = (await Promise.all(recordGroups.map(async group => ({ name: group.name,
+    rows: (await Promise.all(group.pairs.map(pair => Promise.all(pair.map(load))))).map(pair => pair.filter(view => view !== null)).filter(pair => pair.length) })))).filter(group => group.rows.length);
   // Current managers first, then former ones, each by titles, then win %.
   const careers = managers.toSorted((a, b) => Number(b.current) - Number(a.current) || b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
   const streaks = [];
@@ -88,115 +50,39 @@ const history = failure ? null : await withHistorySnapshot(archive, async () => 
       record: `${winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}`}${rivalry.ties ? `–${rivalry.ties}` : ''}` });
   }
   streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
-  // ?manager=<username> highlights one manager everywhere they appear, readable in a group chat; an unknown name highlights no one.
-  const marked = managers.find(manager => manager.name === markParam) ?? null;
-  // A mistyped one offers the nearest handle: one it starts, or one a typo or two away (one per four letters).
-  const typos = (a: string, b: string) => {
-    let row = [...Array(b.length + 1).keys()];
-    for (const [i, x] of [...a].entries()) row = [...b].reduce((next, y, j) => [...next, Math.min(row[j + 1] + 1, next[j] + 1, row[j] + Number(x !== y))], [i + 1]);
-    return row[b.length];
-  };
-  const typed = marked ? '' : markParam?.toLowerCase() ?? '';
-  const near = typed ? managers.map(manager => ({ name: manager.name, cost: typed.length >= 3 && manager.name.toLowerCase().startsWith(typed) ? 0 : typos(typed, manager.name.toLowerCase()) }))
-    .sort((a, b) => a.cost - b.cost)[0] : undefined;
-  // A highlighted manager's rivalries become their record against everyone they've played, counted like the streaks.
-  // Most-played leads, since that's where a record settles anything; among equals the most lopsided goes first. Former managers trail.
-  const currentIds = new Set(current.map(manager => manager.id));
-  // The streak reads from the highlighted manager's side ("Won 3"); a last meeting that tied leaves no streak.
-  const versus = marked ? (await readManagerRivalries(marked.id, { storePath, scope: 'combined' }))!.rows
-    .map(row => ({ name: row.b.name, current: currentIds.has(row.b.id), record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
-      streak: row.streak && `${row.streak.result === 'W' ? 'Won' : 'Lost'} ${row.streak.count}`, games: row.games }))
-    .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name)) : [];
-  // ?vs=<opponent> opens every meeting between the highlighted manager and that opponent, newest first; anyone they never played opens nothing.
-  const facing = marked && versus.find(row => row.name === vsParam) || null;
   // The field ends in the other end zone, painted with the last season that finished.
   const lastDone = seasons.find(season => season.complete);
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, headline, groups, careers, streaks: streaks.slice(0, 5), versus, facing, reigning, marked,
-    missed: markParam && !marked ? markParam : null, suggest: near && near.cost <= Math.max(1, Math.floor(typed.length / 4)) ? near.name : null };
-}, storePath);
-// A manager's name links to the page with them highlighted, or back to no one when they already are. ?u= rides along.
-const markHref = (name: string | null) => {
-  const query = new URLSearchParams({ ...(username && { u: username }), ...(name && name !== history?.marked?.name && { manager: name }) }).toString();
-  return query ? `?${query}` : Astro.url.pathname;
-};
-// A head-to-head record opens every meeting with that opponent, landing on the list; the open one closes it again.
-const vsHref = (name: string) => {
-  const opening = name !== history?.facing?.name;
-  return `?${new URLSearchParams({ ...(username && { u: username }), manager: history!.marked!.name, ...(opening && { vs: name }) })}#${opening ? 'vs' : 'rivalries'}`;
-};
-// The highlight row shares the view itself, without the sharer's ?u=. With JS the address bar's current view is shared instead.
-const viewHref = history?.marked ? `${Astro.url.pathname}?${new URLSearchParams({ manager: history.marked.name, ...(history.facing && { vs: history.facing.name }) })}` : Astro.url.pathname;
-const mine = (name: string) => name === history?.marked?.name;
-// Every manager name on the page is this one link, so each takes the highlight the same way.
-const person = (name: string) => ({ href: markHref(name), 'data-person': name, class: mine(name) ? 'me' : undefined, 'aria-current': mine(name) ? 'true' as const : undefined });
-
-type Row = { value: number; name: string; manager: string; opponent?: string; tied?: boolean; leaderContext?: string; record?: string; pointsPerGame?: number };
-const fixed = (number: number, digits: number) => number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-const value = (record: { percent: boolean; digits: number }, row: Row) =>
-  record.percent ? `${row.value > 0 ? '+' : ''}${fixed(row.value, record.digits)}%` : fixed(row.value, record.digits);
-// Who holds a record, as text and the managers in it, so each manager's own name takes the highlight.
-const who = (feature: Feature, row: Row): (string | { person: string })[] => feature.verb ? [{ person: row.manager }, ` ${feature.verb} ${row.name}`]
-  : row.opponent ? [{ person: row.manager }, row.tied ? ' tied ' : ' beat ', { person: row.opponent }] : [{ person: row.manager }];
-const involves = (row: Row) => mine(row.manager) || !!row.opponent && mine(row.opponent);
-// Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named in who().
-// A season record reads the way the league remembers it: "11–3, 128.4 points a game in 2024".
-const when = (feature: Feature, row: Row) => row.record ? `${row.record}, ${fixed(row.pointsPerGame!, 1)} points a game in ${row.leaderContext!.slice(0, 4)}` : (row.leaderContext ?? '').split(' · ').slice(feature.verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4}) – Week (\d+), \2/,'Weeks $1–$3, $2').replace(/Week (\d+), (\d{4})/g, 'Week $1, $2');
-// Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
-const landing = (key: string) => {
-  const hash = [...key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
-  return `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
-};
+  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, groups, careers, streaks: streaks.slice(0, 5), reigning,
+    manager: named?.id ? nameOf.get(named.id)! : null, missed: named && !named.id ? { name: markParam!, suggestion: named.suggestion } : null };
+});
+// The browser carries the fragment along, so #vs and #rivalries land on the manager's page too.
+if (history?.manager) return Astro.redirect(managerHref(Astro, history.manager, vsParam ? { vs: vsParam } : {}));
 ---
-<Base title={history ? `${history.name} history` : status === 'missing' ? 'League not found' : 'League history'} back={back} full={!history}>
+<League title={`${history?.name} history`} failure={failure}>
   <Fragment slot="endzone">
-    {failure && (
-      <>
-        <h1 class="painted failure">{failure}</h1>
-        {status === 'failed' && <a class="retry" href={Astro.url.pathname + Astro.url.search}>Try again</a>}
-        <Lookup username={username} heading={false} />
-      </>
-    )}
     {history && (
       <>
         <h1 class="painted league-name">{history.name}</h1>
         <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
-        {/* A mistyped ?manager= says so, rather than quietly highlighting no one. */}
-        {history.missed && (
-          <p class="miss">
-            <span>No manager named <strong>{history.missed}</strong> in this league.{history.suggest && <> Did you mean <a {...person(history.suggest)}>{history.suggest}</a>?</>}</span>
-            <a href={markHref(null)}>Clear</a>
-          </p>
-        )}
+        {history.missed && <Miss {...history.missed} href={name => managerHref(Astro, name, vsParam ? { vs: vsParam } : {})} clear={leagueHref(Astro)} />}
       </>
     )}
   </Fragment>
 
   {history && (
-    <>
-      {/* The bar along the bottom names who is highlighted, steps back and forth through their sightings and clears them, then the sections, each marked when the highlight is in it.
-          Confirmations take the name's place in that row for a moment (the row alone when nothing is highlighted), so they never cover the sections or the field. */}
-      <div class="jump">
-        <div class="jump-row">
-          <p class="copied" role="status"></p>
-          <div class="jump-mark" hidden={!history.marked}>
-            <span class="unseen">Highlighting </span><span class="me marking-name">{history.marked?.name}</span>
-            <button type="button" class="jump-step jump-prev" data-step="-1" aria-keyshortcuts="P" title="Previous (P)"><span aria-hidden="true">Prev</span><span class="unseen">Previous</span></button>
-            <button type="button" class="jump-step jump-next" data-step="1" aria-keyshortcuts="N" title="Next (N)">Next</button>
-            <a class="share share-view" href={viewHref} aria-label="Share this highlight" title="Share this highlight"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a>
-            <a href={markHref(null)} aria-keyshortcuts="Escape" title="Clear (Esc)">Clear</a>
-          </div>
-        </div>
-        <nav class="jump-links" aria-label="Sections">
-          <a href="#champions"><span class="yard-no" aria-hidden="true">10</span>Champions</a>
-          {history.groups.length > 0 && <a href="#records"><span class="yard-no" aria-hidden="true">20</span>Fame &amp; shame</a>}
-          <a href="#careers"><span class="yard-no" aria-hidden="true">30</span>Careers</a>
-          <a href="#rivalries" hidden={!history.streaks.length && !history.versus.length}><span class="yard-no" aria-hidden="true">40</span>Rivalries</a>
-        </nav>
-      </div>
+    <nav slot="jump" class="jump-links" aria-label="Sections">
+      <a href="#champions"><span class="yard-no" aria-hidden="true">10</span>Champions</a>
+      {history.groups.length > 0 && <a href="#records"><span class="yard-no" aria-hidden="true">20</span>Fame &amp; shame</a>}
+      <a href="#careers"><span class="yard-no" aria-hidden="true">30</span>Careers</a>
+      {history.streaks.length > 0 && <a href="#rivalries"><span class="yard-no" aria-hidden="true">40</span>Rivalries</a>}
+    </nav>
+  )}
 
+  {history && (
+    <>
       <section class="block" id="champions">
         <h2 class="painted" data-yard="10">Champions</h2>
         {/* The seasons' stagger shares a fixed span, so a long history loads as fast as a short one. */}
@@ -205,7 +91,7 @@ const landing = (key: string) => {
             <li class="yard" style={`--i: ${index}`}>
               <span class="yard-year">{plate.year}</span>
               {plate.complete
-                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<a {...person(champion)}>{champion}</a></>) : '—'}</span>
+                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>) : '—'}</span>
                 : <span class="yard-live"><span class="ball" aria-hidden="true" />In play</span>}
             </li>
           ))}
@@ -219,35 +105,8 @@ const landing = (key: string) => {
         <>
         {group.name && <h3 class="group-name">{group.name}</h3>}
         <ul class="plays">
-          {group.rows.flatMap((pair, pairIndex) => pair.map((record, side) => {
-            const leaders = record.rows.filter(row => row.rank === 1);
-            const others = record.rows.filter(row => row.rank !== 1);
-            const Title = group.name ? 'h4' : 'h3';
-            return (
-              <li id={record.feature.key} class:list={['play', { shame: record.feature.shame, headline: record === history.headline, wide: pair.length === 1, across: side > 0 }]} style={`--i: ${pairIndex}; ${landing(record.feature.key)}`}>
-                {record.feature.shame && (
-                  <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
-                    <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
-                    <path class="flag-fold" d="M30 7c-2 9-1 19 1 29" />
-                    <circle class="flag-knot" cx="11" cy="11" r="7" />
-                  </svg>
-                )}
-                <Title class="play-title"><span class="unseen">{record.feature.shame ? 'Shame: ' : 'Fame: '}</span>{record.feature.name}<a class="share" href={`#${record.feature.key}`} aria-label={`Share ${record.feature.name}`}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a></Title>
-                <div class="play-figure"><span class="play-value">{value(record, leaders[0])}</span><details class="play-how"><summary class="play-unit">{record.feature.unit}</summary><p>{record.feature.how}</p></details></div>
-                <div class="play-who">
-                {leaders.map(row => <p class="play-holder"><strong>{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</strong><span>{when(record.feature, row)}</span></p>)}
-                {others.length > 0 && (
-                  <details class="play-next" open={others.some(involves)} data-marked={others.some(involves) || undefined}>
-                    <summary>{others.length} {others.length > 1 ? 'runners-up' : 'runner-up'}</summary>
-                    <ol>
-                      {others.map(row => <li><span class="next-rank">{row.rank}</span><span class="next-value">{value(record, row)}</span><span class="next-who">{who(record.feature, row).map(part => typeof part === 'string' ? part : <a {...person(part.person)}>{part.person}</a>)}</span><span class="next-when">{when(record.feature, row)}</span></li>)}
-                    </ol>
-                  </details>
-                )}
-                </div>
-              </li>
-            );
-          }))}
+          {group.rows.flatMap((pair, pairIndex) => pair.map((view, side) =>
+            <RecordCard view={view} heading={group.name ? 'h4' : 'h3'} index={pairIndex} headline={!group.name} wide={pair.length === 1} across={side > 0} />))}
         </ul>
         </>
         ))}
@@ -264,7 +123,7 @@ const landing = (key: string) => {
             <tbody>
               {history.careers.map(manager => (
                 <tr class:list={{ former: !manager.current }}>
-                  <th scope="row" data-sort={manager.name}><a {...person(manager.name)}>{manager.name}</a></th>
+                  <th scope="row" data-sort={manager.name}><Manager name={manager.name} /></th>
                   <td class:list={['titles', { won: manager.facts.championships > 0 }]} data-sort={manager.facts.championships}>{manager.facts.championships}</td>
                   <td data-sort={manager.facts.wins}>{manager.facts.record}</td>
                   <td data-sort={manager.facts.winPercentage ?? -1}>{manager.facts.winPercentage === null ? '—' : `${fixed(manager.facts.winPercentage, 1)}%`}</td>
@@ -279,49 +138,13 @@ const landing = (key: string) => {
         </div>
       </section>
 
-      {/* Always rendered, hidden when it has nothing, so a highlight's head-to-head can swap in without a reload. */}
-      <section class="block" id="rivalries" hidden={!history.streaks.length && !history.versus.length}>
-          <h2 class="painted" data-yard="40" tabindex="-1">Rivalries</h2>
-          {/* Highlighted, Rivalries leads with that manager's record against everyone; each record opens every meeting with that opponent.
-              The league's streaks follow either way, so a highlight never hides them. */}
-          {history.versus.length > 0 && (
-            <div class="table-wrap">
-              <table class="versus">
-                <caption><a {...person(history.marked!.name)}>{history.marked!.name}</a> head to head</caption>
-                <thead><tr><th scope="col">Opponent</th><th scope="col">Record</th><th scope="col">Streak</th></tr></thead>
-                <tbody>
-                  {history.versus.map(row => (
-                    <tr class:list={{ former: !row.current }}>
-                      <th scope="row"><a {...person(row.name)}>{row.name}</a></th>
-                      <td class:list={['versus-record', { up: row.edge > 0, down: row.edge < 0 }]}>
-                        <a class="versus-open" href={vsHref(row.name)} aria-label={`${row.record} against ${row.name}, every meeting`} aria-current={row.name === history.facing?.name ? 'true' : undefined}>{row.record}</a>
-                      </td>
-                      <td class="versus-streak">{row.streak ?? '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {history.facing && (
-            <div class="meetings" id="vs">
-              <h3><a {...person(history.marked!.name)}>{history.marked!.name}</a> vs <a {...person(history.facing.name)}>{history.facing.name}</a></h3>
-              <p class="meetings-record">{history.facing.record}, playoffs included</p>
-              <ol>
-                {history.facing.games.map(game => (
-                  <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>
-                    <span class="meet-result">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span>
-                    <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)}</span>
-                    <span class="meet-when">Week&nbsp;{game.week}, {game.year}{game.competition === 'playoffs' && <> <span class="meet-playoffs">Playoffs</span></>}</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
+      {history.streaks.length > 0 && (
+      <section class="block" id="rivalries">
+          <h2 class="painted" data-yard="40">Rivalries</h2>
           {history.streaks.slice(0, 1).map(streak => (
             <div class="streak-top">
               <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
-              <p class="streak-who"><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a></p>
+              <p class="streak-who"><Manager name={streak.winner} /> has beaten <Manager name={streak.loser} /></p>
               <p class="streak-record">{streak.record} all time, playoffs included</p>
             </div>
           ))}
@@ -330,180 +153,26 @@ const landing = (key: string) => {
               {history.streaks.slice(1).map(streak => (
                 <li>
                   <span class="streak-count">{streak.count}<span>straight</span></span>
-                  <p><a {...person(streak.winner)}>{streak.winner}</a> has beaten <a {...person(streak.loser)}>{streak.loser}</a><span>{streak.record} all time</span></p>
+                  <p><Manager name={streak.winner} /> has beaten <Manager name={streak.loser} /><span>{streak.record} all time</span></p>
                 </li>
               ))}
             </ul>
           )}
       </section>
+      )}
     </>
   )}
   {history?.reigning && (
     <footer slot="close" class="endzone close">
       <div class="endzone-inner">
-        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<a {...person(champion)}>{champion}</a></>)}</p>
+        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>)}</p>
         <p class="league-years">{history.reigning.year} champion{history.reigning.titles > 1 && ` · ${history.reigning.titles} titles`}</p>
       </div>
     </footer>
   )}
-</Base>
+</League>
 
 <script>
-  // Next's place in the walk (-1 before its first step), and whether its own scroll is still travelling.
-  let stepped = -1;
-  let travelling = false;
-  // One live region, in the jump bar's highlight row, for the copied link, the highlight and each step.
-  const status = document.querySelector('.copied')!;
-  const markRow = document.querySelector<HTMLElement>('.jump-mark')!;
-  let timer = 0;
-  const say = (text: string, hold = 1800) => {
-    status.textContent = text;
-    clearTimeout(timer);
-    timer = window.setTimeout(() => { status.textContent = ''; }, hold);
-  };
-
-  // Without JS the share link is a plain anchor; with it, phones get the share sheet and desktops copy the link.
-  // A record's link is the record alone: the sharer's ?u= and ?manager= describe their view, not the recipient's.
-  // The highlight row's link is the view the sharer is looking at (the highlight and any open head-to-head), minus their ?u=.
-  document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a.share');
-    if (!link || !navigator.share && !navigator.clipboard) return;
-    event.preventDefault();
-    let url = `${location.origin}${location.pathname}${link.hash}`;
-    if (link.classList.contains('share-view')) {
-      const view = new URL(location.href);
-      view.searchParams.delete('u');
-      view.hash = view.searchParams.has('vs') ? '#vs' : '';
-      url = view.href;
-    } else history.replaceState(null, '', link.hash);
-    if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ url }).catch(() => {});
-    // A refused copy puts the shared link itself in the address bar for copying by hand, as a new entry so Back returns to the sharer's view.
-    else navigator.clipboard.writeText(url).then(() => say('Link copied'), () => {
-      history.pushState(null, '', url);
-      say('Not copied. Use the address bar.', 5000);
-    });
-  });
-
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump-links a')];
-  // Looked up each time: Rivalries is replaced when the highlight changes.
-  const sectionOf = (link: HTMLAnchorElement) => document.getElementById(link.hash.slice(1))!;
-  // The highlighted manager's visible sightings, top to bottom (left to right on one line), as Next walks them.
-  const sightings = () => [...document.querySelectorAll<HTMLAnchorElement>('.field a.me, .close a.me')]
-    .filter(element => element.checkVisibility())
-    .map(element => ({ element, top: Math.round(element.getBoundingClientRect().top + scrollY) }))
-    .sort((a, b) => a.top - b.top);
-  // Each section's bar entry carries a paint chip counting the highlighted manager's sightings in it.
-  const paintBar = () => {
-    const found = sightings();
-    links.forEach(link => {
-      const section = sectionOf(link);
-      const count = found.filter(sighting => section.contains(sighting.element)).length;
-      link.querySelector('.hits')?.remove();
-      if (count) link.insertAdjacentHTML('beforeend', `<b class="hits"><span aria-hidden="true">${count}</span><span class="unseen">, ${count} ${count > 1 ? 'appearances' : 'appearance'}</span></b>`);
-    });
-  };
-  paintBar();
-  // Closing a runner-up box hides its sightings, so the counts follow it. Toggle doesn't bubble.
-  document.addEventListener('toggle', paintBar, true);
-
-  // With JS, highlighting a manager repaints in place instead of reloading to the top; the URL still carries it for sharing.
-  document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-person], .miss a, .jump-mark a:not(.share)');
-    if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
-    event.preventDefault();
-    const url = new URL(location.href);
-    const next = link.dataset.person && link.dataset.person !== url.searchParams.get('manager') ? link.dataset.person : null;
-    // Runners-up opening or closing above the tap change its height; the tapped name holds still.
-    const top = link.getBoundingClientRect().top;
-    if (next) url.searchParams.set('manager', next); else url.searchParams.delete('manager');
-    // An open head-to-head belongs to the old highlight, so it closes with it.
-    url.searchParams.delete('vs');
-    if (url.hash === '#vs') url.hash = '';
-    history.replaceState(null, '', url.pathname + url.search + url.hash);
-    document.querySelectorAll<HTMLAnchorElement>('a[data-person]').forEach(element => {
-      const on = element.dataset.person === next;
-      element.classList.toggle('me', on);
-      on ? element.setAttribute('aria-current', 'true') : element.removeAttribute('aria-current');
-      const target = new URL(url);
-      if (on) target.searchParams.delete('manager'); else target.searchParams.set('manager', element.dataset.person!);
-      element.href = target.pathname + target.search;
-    });
-    // A highlighted runner-up opens its box so the mark is never hidden; a box opened that way closes when the mark moves on.
-    document.querySelectorAll<HTMLDetailsElement>('.play-next').forEach(box => {
-      const holds = !!box.querySelector('.me');
-      if (holds || box.hasAttribute('data-marked')) box.open = holds;
-      box.toggleAttribute('data-marked', holds);
-    });
-    document.querySelector('.miss')?.remove();
-    markRow.querySelector('.marking-name')!.textContent = next;
-    markRow.hidden = !next;
-    stepped = -1;
-    travelling = false;
-    paintBar();
-    // The tapped name holds still, and stays clear of the bar's highlight row that may have just risen over it.
-    if (!link.closest('.miss, .jump')) {
-      const bar = document.querySelector('.jump')!.getBoundingClientRect().top;
-      const { top: moved, height } = link.getBoundingClientRect();
-      scrollBy({ top: moved - top + Math.max(0, top + height + 12 - bar), behavior: 'instant' });
-    }
-    say(next ? `${next} highlighted` : 'Highlight cleared');
-    swapRivalries(url.pathname + url.search);
-  });
-
-  // Rivalries change shape with the highlight and the open head-to-head, so the server renders the section for the URL and it swaps in; a later change wins.
-  // If the swap fails, the URL loads whole, so the section never shows a different view than the address bar.
-  const swapRivalries = (wanted: string, landing?: string) =>
-    fetch(wanted).then(response => response.ok ? response.text() : Promise.reject()).then(html => {
-      if (location.pathname + location.search !== wanted) return;
-      const old = document.getElementById('rivalries')!;
-      const fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('rivalries');
-      if (!fresh) return Promise.reject();
-      const focused = old.contains(document.activeElement);
-      old.replaceWith(fresh);
-      links.find(link => link.hash === '#rivalries')!.hidden = fresh.hidden;
-      watch.observe(fresh);
-      paintBar();
-      const target = landing && document.getElementById(landing);
-      if (target) target.scrollIntoView({ block: 'start' });
-      if (focused) fresh.querySelector<HTMLElement>(target ? `#${landing} h3` : 'h2')?.focus({ preventScroll: true });
-    }).catch(() => { if (location.pathname + location.search === wanted) location.assign(wanted + (landing ? `#${landing}` : '')); });
-
-  // A head-to-head record opens or closes every meeting with that opponent in place, landing on the list.
-  document.addEventListener('click', event => {
-    const link = (event.target as Element).closest<HTMLAnchorElement>('a.versus-open');
-    if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
-    event.preventDefault();
-    const url = new URL(link.href);
-    history.replaceState(null, '', url.pathname + url.search + url.hash);
-    swapRivalries(url.pathname + url.search, url.hash.slice(1));
-  });
-
-  // Next and Prev walk the page's sightings of the highlighted manager, landing each a third of the way down, and wrap at either end.
-  // They count on from the last sighting landed (a smooth scroll may still be travelling, the page may end short of it, or two sit on one line)
-  // until the visitor scrolls on their own; then they start from the first sighting past that line in their direction.
-  addEventListener('scrollend', () => { if (travelling) travelling = false; else stepped = -1; });
-  document.querySelectorAll<HTMLButtonElement>('.jump-step').forEach(button => button.addEventListener('click', () => {
-    const by = Number(button.dataset.step);
-    const line = innerHeight / 3;
-    const tops = sightings().map(sighting => sighting.top);
-    const below = tops.findIndex(top => top > scrollY + line + 4);
-    const above = tops.findLastIndex(top => top < scrollY + line - 4);
-    const target = stepped >= 0 ? (stepped + by + tops.length) % tops.length : by > 0 ? Math.max(0, below) : above >= 0 ? above : tops.length - 1;
-    stepped = target;
-    // A sighting on the line just landed scrolls nowhere, so no scrollend comes to clear this.
-    travelling = Math.abs(tops[target] - line - scrollY) > 1;
-    scrollTo({ top: tops[target] - line });
-    say(`${target + 1} of ${tops.length}`);
-  }));
-  // n and p step, Escape clears, whenever a highlight is on and the keys aren't meant for a text field.
-  addEventListener('keydown', event => {
-    const control = { n: '.jump-next', p: '.jump-prev', Escape: 'a:not(.share)' }[event.key];
-    if (!control || event.metaKey || event.ctrlKey || event.altKey || markRow.hidden
-      || (event.target as Element).closest('input, textarea, select, [contenteditable]')) return;
-    event.preventDefault();
-    markRow.querySelector<HTMLElement>(control)!.click();
-  });
-
   // Each Careers label becomes a button that sorts by its column: most first, a second press flips it, names A to Z.
   // Current managers stay above the dashed line and former ones below it; ties keep the served order. Without JS the served order stands.
   const careers = document.querySelector<HTMLTableElement>('#careers table')!;
@@ -528,13 +197,14 @@ const landing = (key: string) => {
 
   // The jump bar marks the section under a line 30% down the screen. Without JS it just has no mark.
   // The observer watches a band from 30% to 31%; a section counts once its top is inside it, so a top resting in the band still marks.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump-links a')];
+  const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
   const mark = () => {
-    const sections = links.map(sectionOf);
-    const current = sections.findLast(section => !section.hidden && section.getBoundingClientRect().top <= innerHeight * 0.31);
+    const current = sections.findLast(section => section.getBoundingClientRect().top <= innerHeight * 0.31);
     links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
   };
   const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
-  links.forEach(link => watch.observe(sectionOf(link)));
+  sections.forEach(section => watch.observe(section));
   // A jump that lands without crossing a section edge fires no observer callback, so mark on load and whenever scrolling settles.
   mark();
   addEventListener('scrollend', mark);

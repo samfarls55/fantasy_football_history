@@ -23,16 +23,23 @@ export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
-  /** Matchup records: the game was tied, so the first person didn't beat the second. */
-  tied?: boolean;
+  /** Matchup records: the second person, and whether the game was tied, so the first person didn't beat them. */
+  opponentId?: string; tied?: boolean;
   /** Season records: the regular-season record and points per game behind the figure. */
   record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
-  key: string; name: string; group: RecordGroup; unit: string;
-  valueLabel?: string;
-  displayPrecision?: number;
+  key: string; name: string; group: RecordGroup;
+  /** What the figure counts, shown beside it; a percent figure carries its own sign too when it compares with the league. */
+  unit: string; percent?: boolean; signed?: boolean;
+  displayPrecision: number;
+  /** One line on how the record is counted. */
+  rule: string;
+  /** A record nobody wants. */
+  shame?: boolean;
+  /** Player records: what the manager did with the player. */
+  verb?: string;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
   candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
@@ -55,24 +62,42 @@ function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['
 }
 /** Register future category calculators here; all categories use the same ranking/read/page flow. */
 export const recordCategories: CategoryDefinition[] = [
-  { key: 'championships', name: 'Most championships', group: 'Careers', unit: 'titles', scope: 'none', candidates: careerCandidates('championships') },
-  { key: 'wins', name: 'Most wins', group: 'Careers', unit: 'wins', scope: 'games', candidates: careerCandidates('wins') },
-  { key: 'win-percentage', name: 'Highest win percentage', group: 'Careers', unit: '%', scope: 'games', candidates: careerCandidates('win-percentage') },
-  { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', scope: 'games', candidates: careerCandidates('career-points') },
-  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('winning') },
-  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'games', scope: 'games', candidates: streakCandidates('losing') },
-  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title') },
-  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', unit: 'wins above expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season') },
-  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'wins below expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season') },
-  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: '%', valueLabel: 'Scoring vs league', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season') },
-  { key: 'highest-score', name: 'Highest team score', group: 'Matchups', unit: 'points', scope: 'games', candidates: scoreCandidates },
-  { key: 'lowest-score', name: 'Lowest team score', group: 'Matchups', unit: 'points', scope: 'games', order: 'ascending', candidates: scoreCandidates },
-  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', order: 'ascending', candidates: marginCandidates },
-  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'point margin', valueLabel: 'Margin (points)', scope: 'games', candidates: marginCandidates },
-  { key: 'benched-player', name: 'Highest-scoring benched player', group: 'Players', unit: 'points', scope: 'games', candidates: benchCandidates },
-  { key: 'productive-pickup', name: 'Pickups by starting points', group: 'Players', unit: 'starting points', scope: 'games', candidates: pickupCandidates },
-  { key: 'productive-drop', name: "Dropped players' starting points elsewhere", group: 'Players', unit: 'starting points elsewhere', scope: 'games', candidates: dropCandidates },
-  { key: 'player-contributions', name: 'Most starting points for one manager', group: 'Players', unit: 'points', scope: 'games', candidates: contributionCandidates },
+  { key: 'championships', name: 'Most championships', group: 'Careers', unit: 'titles', displayPrecision: 0, scope: 'none', candidates: careerCandidates('championships'),
+    rule: 'Championship games won.' },
+  { key: 'wins', name: 'Most wins', group: 'Careers', unit: 'wins', displayPrecision: 0, scope: 'games', candidates: careerCandidates('wins'),
+    rule: 'Regular-season games won, all seasons together.' },
+  { key: 'win-percentage', name: 'Highest win percentage', group: 'Careers', unit: 'of games won', percent: true, displayPrecision: 1, scope: 'games', candidates: careerCandidates('win-percentage'),
+    rule: 'Regular-season games won, with a tie counting as half a win.' },
+  { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', displayPrecision: 2, scope: 'games', candidates: careerCandidates('career-points'),
+    rule: 'Official regular-season scores added up, all seasons together.' },
+  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
+    rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
+  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
+    rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
+  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title'),
+    rule: 'Their regular-season points per game vs the league average, among teams that didn’t win the title.' },
+  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', unit: 'more wins than their scores earned', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season'),
+    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
+  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'fewer wins than their scores earned', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
+    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
+  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
+    rule: 'Their regular-season points per game vs the league average.' },
+  { key: 'highest-score', name: 'Highest score', group: 'Matchups', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
+    rule: 'A team’s official score for one regular-season week.' },
+  { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
+    rule: 'A team’s official score for one regular-season week. A real zero counts; an unplayed week doesn’t.' },
+  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'point margin', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
+    rule: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' },
+  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'point margin', displayPrecision: 2, scope: 'games', candidates: marginCandidates,
+    rule: 'The gap between the two final scores of a regular-season game.' },
+  { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
+    rule: 'A player’s score in a regular-season week spent on the bench.' },
+  { key: 'productive-pickup', name: 'Best pickup', group: 'Players', unit: 'points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
+    rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
+  { key: 'productive-drop', name: 'Worst drop', group: 'Players', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
+    rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
+  { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
+    rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
 ];
 export const recordSorts = ['rank', 'name', 'newest', 'oldest', 'value-asc'] as const;
 export type RecordSort = typeof recordSorts[number];
@@ -86,7 +111,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\b(points|titles|wins|games)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
@@ -99,17 +124,17 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
   const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
   let displayPrecision = category.displayPrecision;
-  if (category.unit === '%') {
+  if (category.percent) {
     const values = [...new Map(candidates.map(row => [row.metric.key, row.metric.toNumber()])).values()];
-    displayPrecision ??= 1;
     // Add decimals only when distinct ranked values would otherwise share a label.
     while (displayPrecision < 20 && values.some((value, index) => index > 0 && formatRecordValue(value, displayPrecision) === formatRecordValue(values[index - 1], displayPrecision))) displayPrecision++;
   }
+  const nameOf = new Map(archive.people.map(person => [person.id, person.name]));
   let rank = 1;
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
     const { metric, ...rest } = row;
-    return { ...rest, rank, value: metric.toNumber(), exactKey: metric.key };
+    return { ...rest, manager: nameOf.get(row.personId)!, opponent: nameOf.get(row.opponentId!), rank, value: metric.toNumber(), exactKey: metric.key };
   });
   const selectedResult = ranked.find(row => row.id === options.result);
   limit = Math.max(limit, selectedResult?.rank ?? 10);
@@ -135,6 +160,14 @@ export async function readCategory(key: string, options: RecordSelection = {}) {
   if (!category) return null;
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
+}
+/** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
+export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  return recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}))
+    .filter(view => view.leaders.some(row => (row.personId === personId || row.tied && row.opponentId === personId) && (row.value !== 0 || view.category.order === 'ascending')))
+    .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
