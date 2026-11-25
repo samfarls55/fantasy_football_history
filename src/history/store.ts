@@ -9,15 +9,12 @@ function assertArchive(value: unknown): asserts value is Archive {
     throw new Error('The history candidate must be an archive object.');
   }
   const archive = value as Record<string, unknown>;
-  if (archive.version !== 1 || typeof archive.leagueId !== 'string' || !archive.leagueId.trim() ||
+  if (archive.version !== 2 || typeof archive.leagueId !== 'string' || !archive.leagueId.trim() ||
       typeof archive.importedAt !== 'string' || !Number.isFinite(Date.parse(archive.importedAt))) {
-    throw new Error('The history candidate needs schema version 1, a string league ID and an import date.');
+    throw new Error('The history candidate needs schema version 2, a string league ID and an import date.');
   }
   for (const field of ['seasons', 'people', 'franchises', 'contests', 'performances', 'players', 'transactions', 'drafts', 'coverage']) {
     if (!Array.isArray(archive[field])) throw new Error(`The history candidate is missing its ${field} collection.`);
-  }
-  if (!archive.source || typeof archive.source !== 'object' || Array.isArray(archive.source)) {
-    throw new Error('The history candidate is missing its source object.');
   }
   for (const season of archive.seasons as unknown[]) {
     if (!season || typeof season !== 'object' ||
@@ -32,10 +29,11 @@ export function configuredStorePath(storePath?: string): string {
   return resolve(storePath ?? process.env.MUSEUM_STORE_PATH ?? 'data/history.json');
 }
 
-/** Read each publication afresh so a refresh never requires a server restart. */
+/** Read each publication afresh so a refresh never requires a server restart. A version 1 archive counts as missing. */
 export async function loadArchive(storePath?: string): Promise<Archive | null> {
   try {
     const archive: unknown = JSON.parse(await readFile(configuredStorePath(storePath), 'utf8'));
+    if ((archive as { version?: unknown } | null)?.version === 1) return null;
     assertArchive(archive);
     return archive;
   } catch (error) {
@@ -44,13 +42,11 @@ export async function loadArchive(storePath?: string): Promise<Archive | null> {
   }
 }
 
-/** Each visitor request reads one publication, even if a refresh finishes mid-request. */
+/** Each visitor request reads the one archive it was given, even if a refresh finishes mid-request. */
 const snapshots = new AsyncLocalStorage<{ storePath: string; archive: Archive | null }>();
 
-export async function withHistorySnapshot<T>(read: () => Promise<T>, storePath?: string): Promise<T> {
-  const path = configuredStorePath(storePath);
-  const archive = await loadArchive(path);
-  return snapshots.run({ storePath: path, archive }, read);
+export function withHistorySnapshot<T>(archive: Archive | null, read: () => Promise<T>, storePath?: string): Promise<T> {
+  return snapshots.run({ storePath: configuredStorePath(storePath), archive }, read);
 }
 
 /** Visitor reads share their request snapshot; refreshes always read the durable file. */
@@ -60,10 +56,10 @@ export async function readArchive(storePath?: string): Promise<Archive | null> {
 }
 
 /** Publish one complete snapshot. Readers see either the old file or the new file. */
-export async function publishArchive(archive: Archive, storePath?: string): Promise<void> {
+export async function publishArchive(archive: Archive, storePath?: string, previous?: Archive | null): Promise<void> {
   assertArchive(archive);
   const path = configuredStorePath(storePath);
-  const previous = await loadArchive(path);
+  if (previous === undefined) previous = await loadArchive(path);
   if (previous && previous.leagueId !== archive.leagueId) {
     throw new Error('The published archive belongs to another league. Configure a separate store path for the new league.');
   }

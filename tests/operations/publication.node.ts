@@ -20,7 +20,7 @@ function publication(args: string[], storePath: string) {
 // import and calculation slices add their own fixtures to the confirmed seam.
 function candidate(name = 'Autumn league') {
   return {
-    version: 1, leagueId: '9007199254740993123', importedAt: '2026-11-03T12:00:00.000Z',
+    version: 2, leagueId: '9007199254740993123', importedAt: '2026-11-03T12:00:00.000Z',
     seasons: [{
       id: '9007199254740993123', year: '2026', name, previousLeagueId: null,
       complete: false, completedWeeks: [1], regularWeeks: [1], teams: [],
@@ -28,7 +28,7 @@ function candidate(name = 'Autumn league') {
       runnerUpId: null, playoffPersonIds: [], bracket: [],
     }],
     people: [], franchises: [], contests: [], performances: [], players: [],
-    transactions: [], drafts: [], coverage: [], source: {},
+    transactions: [], drafts: [], coverage: [],
   };
 }
 

@@ -12,7 +12,7 @@ const { id = '' } = Astro.params;
 const username = Astro.url.searchParams.get('u')?.trim() ?? '';
 const markParam = Astro.url.searchParams.get('manager');
 const vsParam = Astro.url.searchParams.get('vs');
-const status = /^\d+$/.test(id) ? await ensureLeague(id) : 'missing';
+const { status, archive } = /^\d+$/.test(id) ? await ensureLeague(id) : { status: 'missing' as const, archive: null };
 // A league that can't be shown says why, with the username lookup right there to pick it again.
 const failure = { ready: null, missing: `Sleeper has no league with ID ${id}.`, failed: 'Sleeper didn’t send this league’s history.' }[status];
 if (failure) Astro.response.status = status === 'missing' ? 404 : 502;
@@ -53,7 +53,7 @@ const groupFeatures: { name: string; pairs: Feature[][] }[] = [
 ];
 
 const storePath = leagueStorePath(id);
-const history = failure ? null : await withHistorySnapshot(async () => {
+const history = failure ? null : await withHistorySnapshot(archive, async () => {
   const seasons = (await readSeasons(storePath))!;
   const managers = (await readManagers({ storePath }))!;
   const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));

@@ -1,4 +1,5 @@
 import type { Archive, Season } from './types.ts';
+import { playerBackground } from './players.ts';
 
 type Row = Record<string, unknown>;
 function object(value: unknown, label: string): Row {
@@ -22,7 +23,7 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
     const source = object(playerSource[value], `players/nfl ${value}`);
     const name = typeof source.full_name === 'string' ? source.full_name : `${source.first_name ?? ''} ${source.last_name ?? ''}`.trim();
     if (!name) throw new Error(`players/nfl ${value}: missing player identity`);
-    archive.players.push({ id: value, name, position: typeof source.position === 'string' ? source.position : null });
+    archive.players.push({ id: value, name, position: typeof source.position === 'string' ? source.position : null, ...playerBackground(source) });
   };
   const assets = (value: unknown, label: string) => value == null ? {} : Object.fromEntries(Object.entries(object(value, label)).map(([key, value]) => { player(key); return [key, roster(value, label)]; }));
   const drafts = list(await get(`${path}/drafts`), `${path}/drafts`);

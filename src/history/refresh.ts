@@ -3,6 +3,7 @@ import type { Archive, Provider, RefreshOptions, RefreshResult, Season, SeasonTe
 import { sumPoints } from './decimal.ts';
 import { importOwnershipInputs } from './ownership-import.ts';
 import { ownerArtwork } from './artwork.ts';
+import { playerBackground } from './players.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {
@@ -91,20 +92,15 @@ export const sleeperProvider: Provider = {
 export async function refresh(options: RefreshOptions = {}): Promise<RefreshResult> {
   const leagueId = string(options.leagueId ?? process.env.SLEEPER_LEAGUE_ID ?? '1385327861673529344', 'league ID');
   const storePath = configuredStorePath(options.storePath);
-  const previous = await loadArchive(storePath);
+  const previous = options.previous === undefined ? await loadArchive(storePath) : options.previous;
   const provider = options.provider ?? sleeperProvider;
   const archive: Archive = {
-    version: 1, leagueId, importedAt: (options.now ?? new Date()).toISOString(),
+    version: 2, leagueId, importedAt: (options.now ?? new Date()).toISOString(),
     seasons: [], people: [], franchises: [], contests: [], performances: [], players: [],
-    transactions: [], drafts: [], coverage: [], source: {},
+    transactions: [], drafts: [], coverage: [],
   };
-  const sourceResponses = new Map<string, unknown>();
   async function get(path: string): Promise<unknown> {
-    try {
-      const value = await provider.get(path);
-      sourceResponses.set(path, value);
-      return value;
-    } catch (error) { throw new Error(`${path}: ${error instanceof Error ? error.message : String(error)}`); }
+    try { return await provider.get(path); } catch (error) { throw new Error(`${path}: ${error instanceof Error ? error.message : String(error)}`); }
   }
   const state = object(await get('state/nfl'), 'state/nfl');
   const stateSeason = string(state.season, 'state/nfl season');
@@ -202,7 +198,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
             return typeof value === 'string' ? value.trim() : '';
           });
           const defenseName = position === 'DEF' ? [firstName, lastName].filter(Boolean).join(' ') || team : '';
-          archive.players.push({ id: playerId, name: fullName || (defenseName ? `${defenseName} D/ST` : `Player ${playerId}`), position });
+          archive.players.push({ id: playerId, name: fullName || (defenseName ? `${defenseName} D/ST` : `Player ${playerId}`), position, ...playerBackground(source) });
         }
         return { team, sourcePoints, overridePoints, points: overridePoints ?? sourcePoints, matchupId, starters: lineup, bench };
       });
@@ -290,13 +286,12 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
     await importOwnershipInputs(archive, season, get, playerSource);
     next = previousLeagueId;
   }
-  archive.source = Object.fromEntries(sourceResponses);
   archive.seasons.sort((a, b) => b.year.localeCompare(a.year));
   const benchGaps = archive.coverage.filter(issue => issue.blocks.includes('benched-player'));
   if (previous && !previous.coverage.some(issue => issue.blocks.includes('benched-player')) && benchGaps.length) {
     throw new Error(`Bench record coverage is incomplete: ${benchGaps.map(issue => issue.detail).join('; ')}`);
   }
   const changed = JSON.stringify(previous && { ...previous, importedAt: '' }) !== JSON.stringify({ ...archive, importedAt: '' });
-  await publishArchive(archive, storePath);
+  await publishArchive(archive, storePath, previous);
   return { archive, changed, storePath };
 }

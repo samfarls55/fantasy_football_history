@@ -33,13 +33,13 @@ test('a composite visitor read keeps its published snapshot while another refres
   await withHistory(async storePath => {
     const source = await fixture();
     await publish(storePath, source);
-    const { withHistorySnapshot } = await import('../../src/history/store.ts');
+    const { loadArchive, withHistorySnapshot } = await import('../../src/history/store.ts');
     const { readFranchiseSeason } = await import('../../src/history/franchises.ts');
-    await withHistorySnapshot(async () => {
+    await withHistorySnapshot(await loadArchive(storePath), async () => {
       assert.equal((await readSeason('2020', { storePath }))?.rows.find(row => row.personId === tim)?.points, 25.5);
       source.responses['league/900000000000002020/matchups/1'][0].custom_points = 23.5;
       await publish(storePath, source);
-      const nextRequest = await withHistorySnapshot(() => readManager(tim, { storePath, season: '2020' }), storePath);
+      const nextRequest = await withHistorySnapshot(await loadArchive(storePath), () => readManager(tim, { storePath, season: '2020' }), storePath);
       assert.equal(nextRequest?.facts.points, 23.5, 'a new request sees the correction while the earlier request remains pinned');
       assert.equal((await readManager(tim, { storePath, season: '2020' }))?.facts.points, 25.5);
       const franchise = await readFranchiseSeason('franchise-7', '2020', { storePath });
