@@ -22,16 +22,16 @@ test('published records held share ties, list fame before shame and count a tied
     assert.equal(await readRecordsHeld(manager(1), { storePath }), null, 'unpublished history is not an empty shelf');
     await publish(storePath, recordsSource([[100, 90, 50, 50], [90, 100, 60, 40]]));
     assert.deepEqual(await held(storePath, manager(1)), [
-      ['wins', 1, [one, two, three]], ['career-points', 190, [one, two]], ['winning-streak', 1, [one, two, three]],
-      ['highest-score', 100, [one, two]], ['losing-streak', 1, [one, two, four]],
+      ['wins', 1, [one, two, three]], ['career-points', 190, [one, two]], ['highest-score', 100, [one, two]],
+      ['winning-streak', 1, [one, two, three]], ['losing-streak', 1, [one, two, four]],
     ]);
     assert.deepEqual(await held(storePath, manager(3)), [
-      ['wins', 1, [one, two, three]], ['win-percentage', 75, [three]], ['winning-streak', 1, [one, two, three]],
-      ['closest-game', 0, [three]], ['biggest-blowout', 20, [three]],
+      ['wins', 1, [one, two, three]], ['win-percentage', 75, [three]], ['biggest-blowout', 20, [three]],
+      ['closest-game', 0, [three]], ['winning-streak', 1, [one, two, three]],
     ]);
     // Beaten by the most points is the winner's record; the tie belongs to both. Nobody holds a title count of zero.
     assert.deepEqual(await held(storePath, manager(4)), [
-      ['closest-game', 0, [three]], ['losing-streak', 1, [one, two, four]], ['lowest-score', 40, [four]],
+      ['closest-game', 0, [three]], ['lowest-score', 40, [four]], ['losing-streak', 1, [one, two, four]],
     ]);
     const tied = (await readRecordsHeld(manager(4), { storePath }))!.find(view => view.category.key === 'closest-game')!;
     assert.equal(tied.leaders[0].opponent, four);

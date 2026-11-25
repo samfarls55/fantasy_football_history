@@ -6,7 +6,7 @@ import { recordUnit, type readCategory } from '../history/records.ts';
 
 interface Props {
   view: NonNullable<Awaited<ReturnType<typeof readCategory>>>;
-  heading: 'h3' | 'h4';
+  heading: 'h2' | 'h3';
   /** The card's place in its run, for the stagger. */
   index: number;
   headline?: boolean; wide?: boolean; across?: boolean;

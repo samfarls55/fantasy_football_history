@@ -1,0 +1,19 @@
+---
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+interface Props { plates: { year: string; complete: boolean; champions: string[] }[] }
+const { plates } = Astro.props;
+---
+<Section id="champions" title="Champions">
+  {/* The seasons' stagger shares a fixed span, so a long history loads as fast as a short one. */}
+  <ol class="drive" style={`--step: ${Math.min(90, Math.round(360 / Math.max(1, plates.length - 1)))}ms`}>
+    {plates.map((plate, index) => (
+      <li class="yard" style={`--i: ${index}`}>
+        <span class="yard-year">{plate.year}</span>
+        {plate.complete
+          ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>) : '—'}</span>
+          : <span class="yard-live"><span class="ball" aria-hidden="true" />In play</span>}
+      </li>
+    ))}
+  </ol>
+</Section>

@@ -1,0 +1,88 @@
+---
+// The sortable table: one row per manager, a painted label over each column, current managers over the dashed line and former ones under it.
+import Manager from './Manager.astro';
+import ShareLink from './ShareLink.astro';
+import type { StatColumn } from '../stat-table.ts';
+
+interface Props {
+  /** The ID of the heading that names the table. */
+  labelledby: string;
+  managers: { id: string; name: string; current: boolean }[];
+  columns: StatColumn[];
+  /** The columns that set the order served, the first one leading. */
+  by: string[];
+}
+const { labelledby, managers, columns, by } = Astro.props;
+const keys = by.map(key => columns.find(column => column.key === key)!);
+const order = managers.toSorted((a, b) => {
+  for (const { better, cells } of keys) {
+    const [left, right] = [cells.get(a.id)?.sort, cells.get(b.id)?.sort];
+    if (a.current !== b.current || left === right) continue;
+    if (left === undefined || right === undefined) return left === undefined ? 1 : -1;
+    return better === 'higher' ? right - left : left - right;
+  }
+  return Number(b.current) - Number(a.current) || a.name.localeCompare(b.name);
+});
+---
+<div class="table-wrap">
+  <table class="stats" aria-labelledby={labelledby}>
+    <thead>
+      <tr>
+        <th scope="col"><span class="stat-label">Manager</span></th>
+        {columns.map(column => (
+          <th scope="col" id={column.key} data-better={column.better} aria-sort={column === keys[0] ? column.better === 'higher' ? 'descending' : 'ascending' : undefined}>
+            <span class="stat-label">{column.label}</span>
+            <details class="play-how"><summary class="play-unit">{column.unit}</summary><p>{column.rule}<ShareLink label={`Share ${column.label}`} hash={`#${column.key}`} /></p></details>
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {order.map(manager => (
+        <tr class:list={{ former: !manager.current }}>
+          <th scope="row" data-sort={manager.name}><Manager name={manager.name} />{!manager.current && <span class="unseen"> Former manager</span>}</th>
+          {columns.map(({ key, cells }) => {
+            const cell = cells.get(manager.id);
+            return cell ? (
+              <td data-column={key} data-sort={cell.sort}>
+                {cell.text && <span class="stat-text">{cell.text}</span>}
+                <span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}
+                {cell.sample && <span class="stat-sample">{cell.sample}</span>}
+              </td>
+            ) : <td><span aria-hidden="true">—</span><span class="unseen">Unknown</span></td>;
+          })}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Each label becomes a button that sorts by its column: the better end first, a second press flips it, names A to Z.
+  // Former managers stay below the dashed line, unknowns trail, and ties keep the served order. Without JS the served order stands.
+  for (const table of document.querySelectorAll<HTMLTableElement>('table.stats')) {
+    const headers = [...table.tHead!.rows[0].cells];
+    const served = [...table.tBodies[0].rows];
+    headers.forEach((header, column) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      const label = header.querySelector('.stat-label')!;
+      label.replaceWith(button);
+      button.append(label);
+      button.addEventListener('click', () => {
+        const named = column === 0;
+        const ascending = header.ariaSort ? header.ariaSort === 'descending' : named || header.dataset.better === 'lower';
+        for (const other of headers) other.removeAttribute('aria-sort');
+        header.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
+        const key = (row: HTMLTableRowElement) => row.cells[column].dataset.sort;
+        const former = (row: HTMLTableRowElement) => Number(row.classList.contains('former'));
+        const compare = (a: HTMLTableRowElement, b: HTMLTableRowElement) => {
+          const [left, right] = [key(a), key(b)];
+          if (left === undefined || right === undefined) return Number(left === undefined) - Number(right === undefined);
+          return (named ? left.localeCompare(right) : Number(left) - Number(right)) * (ascending ? 1 : -1);
+        };
+        table.tBodies[0].append(...served.toSorted((a, b) => former(a) - former(b) || compare(a, b) || served.indexOf(a) - served.indexOf(b)));
+      });
+    });
+  }
+</script>

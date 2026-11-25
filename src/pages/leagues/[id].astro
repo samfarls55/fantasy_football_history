@@ -1,28 +1,20 @@
 ---
 import League from '../../layouts/League.astro';
+import Champions from '../../components/Champions.astro';
 import Manager from '../../components/Manager.astro';
 import Miss from '../../components/Miss.astro';
 import RecordCard from '../../components/RecordCard.astro';
-import { fixed, leagueHref, managerHref, openLeague } from '../../league-page.ts';
+import ShareLink from '../../components/ShareLink.astro';
+import { leagueHref, managerHref, openTab } from '../../league-page.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
 import { readManagerName } from '../../history/manager-names.ts';
-import { readCategory } from '../../history/records.ts';
-import { readRivalry } from '../../history/rivalries.ts';
 
 // Links shared while a manager was a highlight on this page name them in ?manager=, with any open head-to-head in ?vs=.
 const markParam = Astro.url.searchParams.get('manager');
 const vsParam = Astro.url.searchParams.get('vs');
-// The headline: the best team that went home empty is the record every league argues about.
-// Below it opposites face each other across the field, fame in white paint and shame under a flag, in themed groups so the run has structure.
-const recordGroups = [
-  { name: '', pairs: [['best-without-title']] },
-  { name: 'Scoring', pairs: [['highest-score', 'lowest-score'], ['biggest-blowout', 'closest-game']] },
-  { name: 'Streaks', pairs: [['winning-streak', 'losing-streak']] },
-  { name: 'Roster & luck', pairs: [['productive-pickup', 'productive-drop'], ['luckiest-season', 'unluckiest-season'], ['benched-player']] },
-];
 
-const { failure, view: history } = await openLeague(Astro, async storePath => {
+const { frame, view } = await openTab(Astro, 'home', async storePath => {
   const seasons = (await readSeasons(storePath))!;
   const managers = (await readManagers({ storePath }))!;
   const nameOf = new Map(managers.map(manager => [manager.id, manager.name]));
@@ -31,181 +23,41 @@ const { failure, view: history } = await openLeague(Astro, async storePath => {
     year: season.year, complete: season.complete,
     champions: season.teams.filter(team => team.finish === 1).map(team => nameOf.get(team.personId) ?? team.name),
   }));
-  const load = async (key: string) => {
-    const view = (await readCategory(key, { storePath }))!;
-    return view.leaders.length ? view : null;
-  };
-  // A pair missing one side spans the row.
-  const groups = (await Promise.all(recordGroups.map(async group => ({ name: group.name,
-    rows: (await Promise.all(group.pairs.map(pair => Promise.all(pair.map(load))))).map(pair => pair.filter(view => view !== null)).filter(pair => pair.length) })))).filter(group => group.rows.length);
-  // Current managers first, then former ones, each by titles, then win %.
-  const careers = managers.toSorted((a, b) => Number(b.current) - Number(a.current) || b.facts.championships - a.facts.championships || (b.facts.winPercentage ?? -1) - (a.facts.winPercentage ?? -1) || a.name.localeCompare(b.name));
-  const streaks = [];
-  const current = managers.filter(manager => manager.current);
-  for (const [index, a] of current.entries()) for (const b of current.slice(index + 1)) {
-    const rivalry = await readRivalry(a.id, b.id, { storePath, scope: 'combined' });
-    if (!rivalry?.streak || rivalry.streak.result !== 'W' && rivalry.streak.result !== 'L' || rivalry.streak.count < 3) continue;
-    const winnerIsA = rivalry.streak.person.id === a.id;
-    streaks.push({ winner: rivalry.streak.person.name, loser: winnerIsA ? b.name : a.name, count: rivalry.streak.count,
-      record: `${winnerIsA ? `${rivalry.wins}–${rivalry.losses}` : `${rivalry.losses}–${rivalry.wins}`}${rivalry.ties ? `–${rivalry.ties}` : ''}` });
-  }
-  streaks.sort((a, b) => b.count - a.count || a.winner.localeCompare(b.winner));
   // The field ends in the other end zone, painted with the last season that finished.
   const lastDone = seasons.find(season => season.complete);
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { name: seasons[0].name, first: seasons.at(-1)!.year, last: seasons[0].year, plates, groups, careers, streaks: streaks.slice(0, 5), reigning,
+  return { first: seasons.at(-1)!.year, last: seasons[0].year, plates, reigning,
     manager: named?.id ? nameOf.get(named.id)! : null, missed: named && !named.id ? { name: markParam!, suggestion: named.suggestion } : null };
 });
 // The browser carries the fragment along, so #vs and #rivalries land on the manager's page too.
-if (history?.manager) return Astro.redirect(managerHref(Astro, history.manager, vsParam ? { vs: vsParam } : {}));
+if (view?.manager) return Astro.redirect(managerHref(Astro, view.manager, vsParam ? { vs: vsParam } : {}));
 ---
-<League title={`${history?.name} history`} failure={failure}>
+<League title={`${view?.league} history`} failure={frame.failure} tabs={frame.tabs} tab={frame.tab}>
   <Fragment slot="endzone">
-    {history && (
+    {view && (
       <>
-        <h1 class="painted league-name">{history.name}</h1>
-        <p class="league-years">{history.first === history.last ? history.first : `${history.first}–${history.last}`}</p>
-        {history.missed && <Miss {...history.missed} href={name => managerHref(Astro, name, vsParam ? { vs: vsParam } : {})} clear={leagueHref(Astro)} />}
+        <h1 class="painted league-name">{view.league}<ShareLink label={`Share ${view.league}`} /></h1>
+        <p class="league-years">{view.first === view.last ? view.first : `${view.first}–${view.last}`}</p>
+        {view.missed && <Miss {...view.missed} href={name => managerHref(Astro, name, vsParam ? { vs: vsParam } : {})} clear={leagueHref(Astro)} />}
       </>
     )}
   </Fragment>
 
-  {history && (
-    <nav slot="jump" class="jump-links" aria-label="Sections">
-      <a href="#champions"><span class="yard-no" aria-hidden="true">10</span>Champions</a>
-      {history.groups.length > 0 && <a href="#records"><span class="yard-no" aria-hidden="true">20</span>Fame &amp; shame</a>}
-      <a href="#careers"><span class="yard-no" aria-hidden="true">30</span>Careers</a>
-      {history.streaks.length > 0 && <a href="#rivalries"><span class="yard-no" aria-hidden="true">40</span>Rivalries</a>}
-    </nav>
-  )}
-
-  {history && (
+  {view && (
     <>
-      <section class="block" id="champions">
-        <h2 class="painted" data-yard="10">Champions</h2>
-        {/* The seasons' stagger shares a fixed span, so a long history loads as fast as a short one. */}
-        <ol class="drive" style={`--step: ${Math.min(90, Math.round(360 / Math.max(1, history.plates.length - 1)))}ms`}>
-          {history.plates.map((plate, index) => (
-            <li class="yard" style={`--i: ${index}`}>
-              <span class="yard-year">{plate.year}</span>
-              {plate.complete
-                ? <span class="yard-champ">{plate.champions.length ? plate.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>) : '—'}</span>
-                : <span class="yard-live"><span class="ball" aria-hidden="true" />In play</span>}
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {history.groups.length > 0 && (
-      <section class="block" id="records">
-        <h2 class="painted" data-yard="20">Fame <span class="shame-word">&amp; shame</span></h2>
-        {history.groups.map(group => (
-        <>
-        {group.name && <h3 class="group-name">{group.name}</h3>}
-        <ul class="plays">
-          {group.rows.flatMap((pair, pairIndex) => pair.map((view, side) =>
-            <RecordCard view={view} heading={group.name ? 'h4' : 'h3'} index={pairIndex} headline={!group.name} wide={pair.length === 1} across={side > 0} />))}
-        </ul>
-        </>
-        ))}
-      </section>
-      )}
-
-      <section class="block" id="careers">
-        <h2 class="painted" data-yard="30" id="careers-name">Careers</h2>
-        {/* The sort key and the numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */}
-        <div class="table-wrap">
-          <table aria-labelledby="careers-name">
-            {/* With JS each column label sorts the table (see the script); the order served is titles, then win %, and Titles says so. */}
-            <thead><tr><th scope="col">Manager</th><th scope="col" aria-sort="descending">Titles</th><th scope="col">Record</th><th scope="col">Win %</th><th scope="col">Playoffs</th><th scope="col">Points</th><th scope="col">Against</th><th scope="col">Seasons</th></tr></thead>
-            <tbody>
-              {history.careers.map(manager => (
-                <tr class:list={{ former: !manager.current }}>
-                  <th scope="row" data-sort={manager.name}><Manager name={manager.name} /></th>
-                  <td class:list={['titles', { won: manager.facts.championships > 0 }]} data-sort={manager.facts.championships}>{manager.facts.championships}</td>
-                  <td data-sort={manager.facts.wins}>{manager.facts.record}</td>
-                  <td data-sort={manager.facts.winPercentage ?? -1}>{manager.facts.winPercentage === null ? '—' : `${fixed(manager.facts.winPercentage, 1)}%`}</td>
-                  <td data-sort={manager.facts.playoffAppearances}>{manager.facts.playoffAppearances}</td>
-                  <td data-sort={manager.facts.points}>{fixed(manager.facts.points, 0)}</td>
-                  <td data-sort={manager.facts.pointsAgainst}>{fixed(manager.facts.pointsAgainst, 0)}</td>
-                  <td data-sort={manager.seasons.length}>{manager.range}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {history.streaks.length > 0 && (
-      <section class="block" id="rivalries">
-          <h2 class="painted" data-yard="40">Rivalries</h2>
-          {history.streaks.slice(0, 1).map(streak => (
-            <div class="streak-top">
-              <p class="streak-run"><span class="streak-big">{streak.count}</span><span class="painted">straight</span></p>
-              <p class="streak-who"><Manager name={streak.winner} /> has beaten <Manager name={streak.loser} /></p>
-              <p class="streak-record">{streak.record} all time, playoffs included</p>
-            </div>
-          ))}
-          {history.streaks.length > 1 && (
-            <ul class="streaks">
-              {history.streaks.slice(1).map(streak => (
-                <li>
-                  <span class="streak-count">{streak.count}<span>straight</span></span>
-                  <p><Manager name={streak.winner} /> has beaten <Manager name={streak.loser} /><span>{streak.record} all time</span></p>
-                </li>
-              ))}
-            </ul>
-          )}
-      </section>
-      )}
+      <Champions plates={view.plates} />
+      {/* The headline: the best team that went home empty is the record every league argues about. */}
+      {view.records.map(record => <ul class="plays" id="records"><RecordCard view={record} heading="h2" index={0} headline wide /></ul>)}
     </>
   )}
-  {history?.reigning && (
+  {view?.reigning && (
     <footer slot="close" class="endzone close">
       <div class="endzone-inner">
-        <p class="painted close-name">{history.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>)}</p>
-        <p class="league-years">{history.reigning.year} champion{history.reigning.titles > 1 && ` · ${history.reigning.titles} titles`}</p>
+        <p class="painted close-name">{view.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>)}</p>
+        <p class="league-years">{view.reigning.year} champion{view.reigning.titles > 1 && ` · ${view.reigning.titles} titles`}</p>
       </div>
     </footer>
   )}
 </League>
-
-<script>
-  // Each Careers label becomes a button that sorts by its column: most first, a second press flips it, names A to Z.
-  // Current managers stay above the dashed line and former ones below it; ties keep the served order. Without JS the served order stands.
-  const careers = document.querySelector<HTMLTableElement>('#careers table')!;
-  const served = [...careers.tBodies[0].rows];
-  careers.querySelectorAll<HTMLTableCellElement>('thead th').forEach((header, column) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.append(...header.childNodes);
-    header.append(button);
-    button.addEventListener('click', () => {
-      const named = column === 0;
-      const ascending = header.getAttribute('aria-sort') ? header.getAttribute('aria-sort') === 'descending' : named;
-      careers.querySelectorAll('thead th').forEach(other => other.removeAttribute('aria-sort'));
-      header.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
-      const key = (row: HTMLTableRowElement) => row.cells[column].dataset.sort!;
-      const order = served.toSorted((a, b) => Number(a.classList.contains('former')) - Number(b.classList.contains('former'))
-        || (named ? key(a).localeCompare(key(b)) : Number(key(a)) - Number(key(b))) * (ascending ? 1 : -1)
-        || served.indexOf(a) - served.indexOf(b));
-      careers.tBodies[0].append(...order);
-    });
-  });
-
-  // The jump bar marks the section under a line 30% down the screen. Without JS it just has no mark.
-  // The observer watches a band from 30% to 31%; a section counts once its top is inside it, so a top resting in the band still marks.
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('.jump-links a')];
-  const sections = links.map(link => document.getElementById(link.hash.slice(1))!);
-  const mark = () => {
-    const current = sections.findLast(section => section.getBoundingClientRect().top <= innerHeight * 0.31);
-    links.forEach((link, index) => sections[index] === current ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current'));
-  };
-  const watch = new IntersectionObserver(mark, { rootMargin: '-30% 0px -69% 0px' });
-  sections.forEach(section => watch.observe(section));
-  // A jump that lands without crossing a section edge fires no observer callback, so mark on load and whenever scrolling settles.
-  mark();
-  addEventListener('scrollend', mark);
-</script>

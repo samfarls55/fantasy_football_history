@@ -1,0 +1,11 @@
+---
+import Tab from '../../../layouts/Tab.astro';
+import Records from '../../../components/Records.astro';
+import { openTab } from '../../../league-page.ts';
+
+const { redirect, frame, view } = await openTab(Astro, 'moves');
+if (redirect) return redirect;
+---
+<Tab {...frame}>
+  {view && <Records views={view.records} heading="h2" />}
+</Tab>

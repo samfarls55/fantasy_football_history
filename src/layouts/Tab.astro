@@ -1,0 +1,16 @@
+---
+// Every tab but Home: the league's name leads back to Home, and the tab's own name is painted across the end zone.
+import League from './League.astro';
+import ShareLink from '../components/ShareLink.astro';
+import { leagueHref, type openTab } from '../league-page.ts';
+
+type Props = Awaited<ReturnType<typeof openTab>>['frame'];
+const { failure, tabs, tab, league } = Astro.props;
+---
+<League title={`${tab?.name} · ${league}`} failure={failure} tabs={tabs} tab={tab} back={league ? { href: leagueHref(Astro), label: league } : undefined}>
+  <Fragment slot="endzone">
+    <h1 class="painted tab-name">{tab?.name}<ShareLink label={`Share ${tab?.name}`} /></h1>
+    <slot name="endzone" />
+  </Fragment>
+  <slot />
+</League>
