@@ -3,6 +3,7 @@ import { Exact } from './decimal.ts';
 import { careerStats } from './careers.ts';
 import { lineupStats } from './lineups.ts';
 import { luckStats } from './luck.ts';
+import { playerStats } from './player-records.ts';
 import { recordUnit } from './records.ts';
 import { weeklyStats } from './weekly.ts';
 import type { Place } from './tabs.ts';
@@ -47,6 +48,7 @@ export const managerStats: ManagerStat[] = [
   // Excuses, Lineups
   ...lineupStats,
   // Players
+  ...playerStats,
   // Draft
   // Moves
 ];

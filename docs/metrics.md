@@ -34,13 +34,13 @@ Completed current-season games count in career/game/player totals. Completed-sea
 
 ## Ranking and tie policy
 
-Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the selected ranking when distinct values would otherwise share a label.
+Use exact source precision, or an exact decimal representation, for calculations and comparisons. Round only for display. Preserve extra decimals needed to distinguish results such as a 0.12-point margin. Category percentages start at one display decimal and increase precision consistently within the ranks included when distinct values there would otherwise share a label.
 
 Use competition ranks, 1, 2, 2, 4. Equal metric values share their rank. Initial category pages include all entries whose rank is at most 10, including all cutoff ties. Show more extends the rank boundary and never splits an equal-value group. A stable identity/date order may arrange tied rows, but it must not award one a better rank. Large shared-leader summaries use a bounded preview, full result count and a link to all tied results. Summary compaction never removes qualifying ranking rows.
 
 Career categories have one aggregate result per person. Season, game, bench and move categories rank individual qualifying performances. A person may appear repeatedly. A player-career contribution category ranks the player/person pair.
 
-Rates require at least one eligible game. Show games or W-L-T next to a rate. A zero-game rate is unknown, not 0%. No additional minimum-game rule is authorized.
+Rates require at least one eligible game. Show games or W-L-T next to a rate. A zero-game rate is unknown, not 0%. Charms and curses have the one authorized minimum; no other minimum-game rule is.
 
 ## Category catalog
 
@@ -212,6 +212,17 @@ A bench performance is a player present on the weekly roster and absent from its
 Missing bench points remain `null` with an internal `player-points` coverage issue blocking `benched-player`. Category reads honor that block for all seasons or the affected selected season, suppressing both rankings and leading holders; a genuine empty selection remains distinct. The block conservatively applies to every game scope within that season. An initial archive can retain unknown lineup rows while the affected record claim stays unavailable. Once a complete bench publication exists, a later missing score rejects the candidate before publication with endpoint/roster/player diagnostics and retains the previous complete history. Numeric zero remains eligible, and empty slots and byes create no bench record.
 
 Current position metadata is not proof of historical lineup eligibility; Lineups uses it and says so. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
+
+## Charms, journeymen and armies
+
+These use completed regular-season weeks and recorded starts. An actual zero is a start; an empty slot isn't. `src/history/player-records.ts` calculates them all.
+
+- **Lucky charms, curses** (`lucky-charms`, `curses`): the win percentage of the decided contests in which the player started, for any manager. A tied contest is neither a result nor a start here. Sam authorized a minimum in spec 37: 5 such starts times the number of seasons in the archive, 40 in the reference league. Among the players who reach it, a charm has fewer than three players with a better rate and more with a worse one; a curse is the reverse. So the three best and three worst show, or fewer when fewer qualify. Ties stand together, a player level with the middle is neither, and nobody is both.
+- **One-man army** (`one-man-army`): one start's points as a share of the official team score, overrides included. A team score of zero or below has no shares.
+- **Journeyman** (`journeyman`): distinct people who had the player, starting or benched, in a completed week. Team defenses are excluded, and so is a player only one person has had.
+- **Most-started player, Scored most against them** (`most-started`, `scored-most-against`): for each person, the player they started most, and the player whose starts against them add up to the most points. Every tied answer shows. The sample is the person's own weeks.
+
+A player holds a charm, curse or journeyman record rather than a person, so it has no holder on a manager page and no place in Recent top-ten results.
 
 ## Acquisition and drop attribution
 
