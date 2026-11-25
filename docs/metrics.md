@@ -61,6 +61,7 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | highest-score | Matchups: Highest score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
 | lowest-score | Matchups: Lowest score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
 | belt-run | Matchups: Longest belt run | Defenses in one reign, descending | Season the reign began/all; no game-scope selector | Career profile |
+| bridesmaid | Careers: Most finals lost without a title | Person's lost title contests, descending, among people with no title | Season/all; no game-scope selector | Career profile |
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
 | points-in-win | Matchups: Fewest points in a win | Winner's official score in one decided contest, ascending | Season/all; regular only | Matchup, selected week/team |
@@ -110,7 +111,7 @@ A manager stat gives each person one value. `src/history/manager-stats.ts` regis
 
 Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end. A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value or a coverage issue blocks its key. A zero is a value.
 
-A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate.
+A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
 
 ## Luck
 
@@ -126,6 +127,17 @@ These use completed regular-season games and official scores, overrides included
 A manager's record with the schedule of another manager compares the first one's official score, each regular-season week, with the score of the second one's opponent that week. When that opponent is the first manager, use the second one's score instead. The diagonal is the actual record. Equal scores are a tie. A week in which either manager had an unpaired bye holds no game, and a pair with no such week has no record, not 0–0.
 
 One completed season shows at a time, the newest unless the `season` URL parameter names another completed season. Rows and columns share the regular-season standings order and hold the people who earned that season's results. A record is better when its win percentage, a tie counting half, is above the actual one. `src/history/schedule-swap.ts` owns the calculation and the seasons that have one; `src/components/RecordGrid.astro` draws it.
+
+## Careers
+
+Legacy's careers table (`src/history/careers.ts`) has one row per person, former managers included and marked. Current managers lead, by titles and then win percentage. Games are completed regular-season ones, the current season's included.
+
+- **Titles, finals lost:** champions and runners-up of resolved title contests. An unresolved title counts for nobody, and a league with no resolved title has no finals-lost column.
+- **Points per game, opponents' points per game:** career points and points against, divided by games played. No games leaves them unknown. Fewer points against ranks first.
+- **Power rating:** Elo. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
+- **Biggest one-year change in finish:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. Equal changes are all listed.
+
+Most finals lost without a title ranks people who lost at least one final and hold no resolved title in any season. Most dominant season is left off Legacy when every team-season that leads it also leads Home's headline, Best season without a title. Manager pages still show it.
 
 ## Rivalries and nemesis
 

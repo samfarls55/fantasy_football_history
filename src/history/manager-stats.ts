@@ -1,5 +1,6 @@
 import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
+import { careerStats } from './careers.ts';
 import { luckStats } from './luck.ts';
 import { recordUnit } from './records.ts';
 import type { Place } from './tabs.ts';
@@ -36,6 +37,7 @@ export interface ManagerStat {
 /** Register per-manager stats here, by place. A place's stats are its table's columns in this order, and the first one orders its rows. */
 export const managerStats: ManagerStat[] = [
   // Legacy
+  ...careerStats,
   // Games
   // Excuses, Luck
   ...luckStats,

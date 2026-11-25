@@ -9,11 +9,11 @@ interface Props {
   labelledby: string;
   managers: { id: string; name: string; current: boolean }[];
   columns: StatColumn[];
-  /** The columns that set the order served, the first one leading. */
+  /** The columns that set the order served, the first one leading. One this league has no value for is passed over. */
   by: string[];
 }
 const { labelledby, managers, columns, by } = Astro.props;
-const keys = by.map(key => columns.find(column => column.key === key)!);
+const keys = by.flatMap(key => columns.find(column => column.key === key) ?? []);
 const order = managers.toSorted((a, b) => {
   for (const { better, cells } of keys) {
     const [left, right] = [cells.get(a.id)?.sort, cells.get(b.id)?.sort];

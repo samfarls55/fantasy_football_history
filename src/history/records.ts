@@ -5,6 +5,7 @@ import { pickupCandidates } from './pickups.ts';
 import { dropCandidates } from './drops.ts';
 import { exCandidates } from './ex.ts';
 import { lopsidedTradeCandidates } from './lopsided-trades.ts';
+import { bridesmaidCandidates } from './careers.ts';
 import { contributionCandidates } from './contributions.ts';
 import { beltCandidates } from './belt.ts';
 import { pickCandidates, slotCandidates } from './drafts.ts';
@@ -44,6 +45,8 @@ export interface CategoryDefinition {
   key: string; name: string; group: RecordGroup;
   /** Where its card lives. A record without a place shows on manager pages alone. */
   place?: Place;
+  /** Left out of its place when this other record already names every result that leads it. */
+  unless?: string;
   /** What the figure counts, shown beside it; a percent figure carries its own sign too when it compares with the league. */
   unit: string; percent?: boolean; signed?: boolean;
   displayPrecision: number;
@@ -95,10 +98,12 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'The winner’s official score in a regular-season game. A tie isn’t a win.' },
   { key: 'points-in-loss', name: 'Most points in a loss', group: 'Matchups', place: 'luck', unit: 'points', displayPrecision: 2, shame: true, scope: 'regular', candidates: resultCandidates('lost'),
     rule: 'The loser’s official score in a regular-season game. A tie isn’t a loss.' },
-  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
+  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', place: 'legacy', unless: 'best-without-title', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
     rule: 'Their regular-season points per game vs the league average.' },
   { key: 'belt-run', name: 'Longest belt run', group: 'Matchups', place: 'legacy', unit: 'defenses', displayPrecision: 0, scope: 'none', candidates: beltCandidates,
     rule: 'Games in one reign the belt holder didn’t lose, regular season and championship playoffs together.' },
+  { key: 'bridesmaid', name: 'Most finals lost without a title', group: 'Careers', place: 'legacy', unit: 'finals lost', displayPrecision: 0, shame: true, scope: 'none', candidates: bridesmaidCandidates,
+    rule: 'Championship games lost by managers who have never won one.' },
   { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week.' },
   { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
@@ -142,7 +147,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|places|seasons)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|places|seasons|trips|finals)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
@@ -196,11 +201,15 @@ export async function readCategory(key: string, options: RecordSelection = {}) {
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
-/** The record cards of these places, in registry order. A record nobody holds has no card. */
+/** The record cards of these places, in registry order. A record nobody holds has no card, nor does one another record already tells. */
 export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  return recordCategories.filter(category => category.place && places.includes(category.place)).map(category => rankCategory(archive, category, {})).filter(view => view.leaders.length);
+  const rank = (category: CategoryDefinition) => rankCategory(archive, category, {});
+  return recordCategories.filter(category => category.place && places.includes(category.place)).map(rank).filter(({ category, leaders }) => {
+    const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => rank(other).leaders);
+    return leaders.some(row => !told.some(other => other.id === row.id));
+  });
 }
 /** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
