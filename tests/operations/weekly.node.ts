@@ -1,16 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-weekly-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const stat = async (storePath: string, key: string) => (await readManagerStats({ storePath }))!.find(stat => stat.key === key);
 /** Each manager's short name, figure, sample and rank, best first. */
 const rows = async (storePath: string, key: string) => (await stat(storePath, key))?.rows

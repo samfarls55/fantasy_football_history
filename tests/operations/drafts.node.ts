@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { readCategory, readHome, readPlaceRecords, readRecordsHeld } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-drafts-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 const lineups: Record<number, Record<string, number>>[] = [
   { 1: { 31: 10.5 }, 2: { 42: 25, 12: 30 }, 3: { 13: 5 }, 4: { 33: 40, 24: 90 } },

@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readRivalryStreaks } from '../../src/history/rivalries.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-rivalry-streaks-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const streaks = async (storePath: string) => (await readRivalryStreaks({ storePath }))!.map(row => [row.winner.name, row.loser.name, row.count, row.record]);
 
 test('published rivalry streaks name three straight wins or more, longest first, with playoffs counted', async () => {

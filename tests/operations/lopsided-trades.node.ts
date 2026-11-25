@@ -1,16 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { aftermathSource, withEarlierSeason, type AftermathMove, type AftermathWeek } from '../fixtures/aftermath-source.ts';
 import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-lopsided-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const [one, two, three, four, five] = [1, 2, 3, 4, 5].map(number => `Record manager 0${number}`);
 const lopsided = async (storePath: string) => (await readCategory('lopsided-trade', { storePath }))!.rows.map(row => [row.value, row.manager, row.opponent, row.sides]);
 

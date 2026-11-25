@@ -1,18 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory as published } from '../support/history.ts';
 import { readCategory, readRecordCollection } from '../../src/history/records.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 
-async function published(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-game-records-'));
-  try { await run(join(directory, 'history.json')); }
-  finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 test('published final margins preserve decimal equality, zero ties, unique contests and both people', async () => {
   await published(async storePath => {

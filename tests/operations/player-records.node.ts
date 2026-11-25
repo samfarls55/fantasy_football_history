@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { aftermathSource, withEarlierSeason } from '../fixtures/aftermath-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 import { readCategory, readHome, readRecordsHeld } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-player-records-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** Managers 1 to 4 always score 100, 90, 80 and 70, so a pairing settles its winner. */
 const week = (pairs: string, starts: Record<number, Record<string, number>>) => ({ pairs, starts });
 const games = (source: { seedLeagueId: string; responses: Record<string, unknown> }, number: number) => source.responses[`league/${source.seedLeagueId}/matchups/${number}`] as any[];

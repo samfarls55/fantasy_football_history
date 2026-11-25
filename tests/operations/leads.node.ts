@@ -1,19 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { managerStats, readManagerStats } from '../../src/history/manager-stats.ts';
 import { readPlaceRecords } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-leads-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** Each visible tab's lead: the stat's anchor, what it's called, its figure and unit, and who holds it. */
 const leads = async (storePath: string) => (await readTabs({ storePath }))!.map(({ key, lead }) => lead && [key, lead.category.key, lead.category.name,
   lead.leaders[0].shown ?? lead.leaders[0].value, lead.category.unit, ...lead.leaders.map(row => row.manager?.replace('Record manager ', 'M'))]);

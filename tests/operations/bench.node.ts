@@ -1,19 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readRecordCollection } from '../../src/history/records.ts';
 import { readMatchup } from '../../src/history/read.ts';
 import { readPlayerContributions } from '../../src/history/contributions.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-bench-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 async function fixture() { return JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8')); }
 
 test('published bench records rank exact player/team/week performances and open the actual bench without adding starts', async () => {

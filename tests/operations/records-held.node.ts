@@ -1,18 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { Exact } from '../../src/history/decimal.ts';
 import { readRecordsHeld, recordCategories } from '../../src/history/records.ts';
 
 const manager = (number: number) => `person-96000000000000000${number}`;
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-records-held-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const held = async (storePath: string, personId: string) => (await readRecordsHeld(personId, { storePath }))!
   .map(view => [view.category.key, view.leaders[0].value, view.leaders.map(row => row.manager)]);
 const [one, two, three, four] = ['Record manager 01', 'Record manager 02', 'Record manager 03', 'Record manager 04'];

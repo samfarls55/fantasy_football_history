@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-move-habits-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 interface Move { type?: string; status?: string; week?: number; at?: string; adds?: Record<string, number> | null; drops?: Record<string, number> | null; rosters?: number[] }
 let next = 970000000000000001n;
 /** Four managers and one scored week. A move with nothing else said is a completed free-agent event; a player's name is his letter. */

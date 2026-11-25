@@ -1,15 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
+import { withHistory } from '../support/history.ts';
 import { refresh } from '../../src/history/refresh.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readContributors, readPlayerContributions } from '../../src/history/contributions.ts';
 import { dropsSource } from '../fixtures/drops-source.ts';
 const tim = 'person-608473907007143936';
 async function fixture() { return dropsSource(JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'))); }
-async function withHistory(run: (storePath: string) => Promise<void>) { const dir = await mkdtemp(join(tmpdir(), 'museum-drops-')); try { await run(join(dir, 'history.json')); } finally { await rm(dir, { recursive: true, force: true }); } }
 function publish(storePath: string, source: any) { return refresh({ storePath, leagueId: source.seedLeagueId, provider: { async get(path) { if (!(path in source.responses)) throw new Error(`Missing controlled response: ${path}`); return structuredClone(source.responses[path]); } } }); }
 
 test('published drops count other people strictly after each drop without merging events or stopping at own reacquisition', async () => {

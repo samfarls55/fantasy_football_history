@@ -1,19 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readBadges } from '../../src/history/badges.ts';
 import { Exact } from '../../src/history/decimal.ts';
 import { closeLosses } from '../../src/history/luck.ts';
 import { managerStats, readManagerStats } from '../../src/history/manager-stats.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-badges-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 type Source = ReturnType<typeof recordsSource>;
 /** Each manager's badge with its figure and rank, by manager. */
 const worn = async (storePath: string) => (await readBadges({ storePath }))!.map(row => [row.manager.replace('Record manager ', 'M'), row.badge, `${row.figure} ${row.unit}`, row.rank]).sort();

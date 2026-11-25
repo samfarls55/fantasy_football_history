@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-lineups-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 type Source = ReturnType<typeof recordsSource>;
 type Scored = [player: string, points: number | null];
 /** A league with these roster slots whose players' IDs start with their position: "RB-1". */

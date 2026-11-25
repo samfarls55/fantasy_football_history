@@ -1,16 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readScheduleSwap } from '../../src/history/schedule-swap.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-schedule-swap-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** A completed season of the given weekly scores, each week paired by the given matchup IDs; a null is an unpaired bye. */
 function completedSeason(scores: number[][], pairings: (number | null)[][]) {
   const source = recordsSource(scores);

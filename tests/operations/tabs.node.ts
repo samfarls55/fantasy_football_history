@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { pickupsSource } from '../fixtures/pickups-source.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { Exact } from '../../src/history/decimal.ts';
@@ -11,10 +9,6 @@ import { managerStats } from '../../src/history/manager-stats.ts';
 import { readPlaceRecords, recordCategories } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-tabs-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const base = async () => JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
 const shown = async (storePath: string) => (await readTabs({ storePath }))!.map(tab => [tab.name, ...tab.places]);
 
