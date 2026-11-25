@@ -1,9 +1,10 @@
 ---
 import Tab from '../../../layouts/Tab.astro';
 import Belt from '../../../components/Belt.astro';
-import Careers from '../../../components/Careers.astro';
 import HeadToHead from '../../../components/HeadToHead.astro';
 import Records from '../../../components/Records.astro';
+import Section from '../../../components/Section.astro';
+import Stats from '../../../components/Stats.astro';
 import { openTab } from '../../../league-page.ts';
 import { readBelt } from '../../../history/belt.ts';
 import { readHeadToHead, readRivalryStreaks } from '../../../history/rivalries.ts';
@@ -18,7 +19,7 @@ if (redirect) return redirect;
 <Tab {...frame}>
   {view && (
     <>
-      <Careers stats={view.stats} />
+      <Section id="careers" title="Careers"><Stats labelledby="careers-name" stats={view.stats} by={['titles', 'win-rate']} /></Section>
       <Records views={view.records} heading="h2" />
       <Belt belt={view.belt} />
       <HeadToHead rows={view.headToHead} streaks={view.streaks} />

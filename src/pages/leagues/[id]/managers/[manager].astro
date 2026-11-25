@@ -6,7 +6,7 @@ import Rank from '../../../../components/Rank.astro';
 import Records from '../../../../components/Records.astro';
 import Section from '../../../../components/Section.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
-import { fixed, isViewer, leagueHref, managerHref, openLeague, tabHref } from '../../../../league-page.ts';
+import { fixed, isViewer, leagueHref, managerHref, openLeague, statHref } from '../../../../league-page.ts';
 import { readBadges } from '../../../../history/badges.ts';
 import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
 import { ordinal } from '../../../../history/careers.ts';
@@ -14,7 +14,7 @@ import { readSeasons } from '../../../../history/read.ts';
 import { readManager } from '../../../../history/managers.ts';
 import { readManagerName } from '../../../../history/manager-names.ts';
 import { readManagerStats } from '../../../../history/manager-stats.ts';
-import { readRecordsHeld, recordUnit } from '../../../../history/records.ts';
+import { readRecordsHeld, recordCategories, recordUnit } from '../../../../history/records.ts';
 import { readManagerRivalries } from '../../../../history/rivalries.ts';
 
 const typed = Astro.params.manager!;
@@ -28,7 +28,7 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
   // Most-played leads, since that's where a record settles anything; among equals the most lopsided goes first. Former managers trail.
   // The streak reads from this manager's side ("Won 3"); a last meeting that tied leaves no streak.
   const versus = (await readManagerRivalries(manager.id, { storePath, scope: 'combined' }))!.rows
-    .map(row => ({ id: row.b.id, name: row.b.name, current: row.b.current, record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
+    .map(row => ({ id: row.b.id, name: row.b.name, current: row.b.current, record: row.record, ties: row.ties, edge: row.wins - row.losses, meetings: row.meetings,
       streak: row.streak && `${row.streak.result === 'W' ? 'Won' : 'Lost'} ${row.streak.count}`, games: row.games }))
     .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name));
   const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;
@@ -47,20 +47,14 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
 const page = view?.page;
 if (view && !page) Astro.response.status = 404;
 
-const facts = page?.manager.facts;
-const belt = page?.belt;
 const badge = page?.badge;
-const plural = (count: number, word: string) => `${word}${count === 1 ? '' : 's'}`;
-const career = facts && [
-  { figure: facts.championships, unit: plural(facts.championships, 'title'), rule: 'Championship games won.' },
-  { figure: facts.record, unit: facts.ties ? 'wins, losses and ties' : 'wins and losses', rule: 'Regular-season games.' },
-  { figure: facts.winPercentage === null ? '—' : `${fixed(facts.winPercentage, 1)}%`, unit: 'of games won', rule: 'Regular-season games won, with a tie counting as half a win.' },
-  { figure: facts.playoffAppearances, unit: plural(facts.playoffAppearances, 'playoff trip'), rule: 'Seasons they reached the championship bracket, a first-round bye included.' },
-  { figure: fixed(facts.points, 0), unit: 'points scored', rule: 'Official regular-season scores added up.' },
-  { figure: fixed(facts.pointsAgainst, 0), unit: 'points against', rule: 'Their opponents’ official scores in those same games.' },
-  ...belt ? [{ figure: belt.reigns, unit: plural(belt.reigns, 'belt reign'), rule: beltRule }] : [],
-  ...belt && belt.bestRun !== null ? [{ figure: belt.bestRun, unit: `${recordUnit('defenses', belt.bestRun)} in best belt run`, rule: 'Games in one reign they didn’t lose, regular season and championship playoffs together.' }] : [],
-];
+const run = recordCategories.find(category => category.key === 'belt-run')!;
+/** The career line: what Legacy's table says of them, then their belt. */
+const career: { label: string; rule: string; figure: string | number; unit: string; sample?: string }[] = page ? [
+  ...['titles', 'record', 'win-rate', 'playoffs', 'points', 'points-against'].flatMap(key => page.ranks.filter(stat => stat.key === key)).map(({ label, rule, row }) => ({ label, rule, ...row })),
+  ...page.belt ? [{ label: 'The belt', rule: beltRule, figure: page.belt.reigns, unit: recordUnit('reigns', page.belt.reigns) }] : [],
+  ...page.belt && page.belt.bestRun !== null ? [{ label: run.name, rule: run.rule, figure: page.belt.bestRun, unit: recordUnit(run.unit, page.belt.bestRun) }] : [],
+] : [];
 ---
 <League title={page ? `${page.manager.name} · ${view!.league}` : 'Manager not found'} failure={failure} tabs={tabs} back={view ? { href: leagueHref(Astro), label: view.league } : undefined} full={!page}>
   <Fragment slot="endzone">
@@ -84,15 +78,15 @@ const career = facts && [
       {badge && (
       <Section id="badge" title={badge.badge}>
         <ul class="ranks">
-          <Rank {...badge} href={`${tabHref(Astro, tabs.find(tab => tab.places.includes(badge.place))!.key)}#${badge.key}`} of={`${badge.of} current managers`} />
+          <Rank {...badge} href={statHref(Astro, tabs, badge)} of={`${badge.of} current managers`} />
         </ul>
       </Section>
       )}
 
       <section class="block" aria-label="Career">
         <ul class="career">
-          {career!.map(stat => (
-            <li><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details></li>
+          {career.map(stat => (
+            <li><span class="career-label">{stat.label}</span><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details>{stat.sample && <span class="stat-sample">{stat.sample}</span>}</li>
           ))}
         </ul>
       </section>
@@ -126,8 +120,8 @@ const career = facts && [
           <>
             <h3>{tab.name}</h3>
             <ul class="ranks">
-              {ranks.map(({ key, label, rule, row, of }) => (
-                <Rank {...row} href={`${tabHref(Astro, tab.key)}#${key}`} label={label} rule={rule} of={String(of)} />
+              {ranks.map(({ key, place, label, rule, row, of }) => (
+                <Rank {...row} href={statHref(Astro, tabs, { place, key })} label={label} rule={rule} of={String(of)} />
               ))}
             </ul>
           </>
@@ -162,7 +156,7 @@ const career = facts && [
         {page.facing && (
           <div class="meetings" id="vs">
             <h3><Manager name={page.manager.name} /> vs <Manager name={page.facing.name} /><ShareLink label={`Share ${page.manager.name} vs ${page.facing.name}`} query={{ vs: page.facing.name }} hash="#vs" /></h3>
-            <p class="meetings-record">{page.facing.record}, playoffs included</p>
+            <p class="meetings-record">{page.facing.record} {page.facing.ties ? 'wins–losses–ties' : 'wins–losses'}</p>
             <ol>
               {page.facing.games.map(game => (
                 <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>

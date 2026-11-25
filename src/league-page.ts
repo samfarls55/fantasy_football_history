@@ -4,7 +4,7 @@ import { readSeasons } from './history/read.ts';
 import { readManagerStats } from './history/manager-stats.ts';
 import { readPlaceRecords } from './history/records.ts';
 import { withHistorySnapshot } from './history/store.ts';
-import { readTabs, tabs as allTabs, type TabKey } from './history/tabs.ts';
+import { readTabs, tabs as allTabs, type Place, type TabKey } from './history/tabs.ts';
 
 type Page = Pick<AstroGlobal, 'params' | 'url'>;
 
@@ -49,6 +49,11 @@ export function leagueHref(page: Page, path = '', query: Record<string, string> 
 
 export function tabHref(page: Page, key: TabKey): string {
   return leagueHref(page, key === 'home' ? '' : `/${key}`);
+}
+
+/** A manager stat's column on the tab that has it. */
+export function statHref(page: Page, tabs: Tabs, { place, key }: { place: Place; key: string }): string {
+  return `${tabHref(page, tabs.find(tab => tab.places.includes(place))!.key)}#${key}`;
 }
 
 export function managerHref(page: Page, name: string, query: Record<string, string> = {}): string {
