@@ -137,6 +137,10 @@ Average margin = sum of first person's final scores minus opponent's final score
 
 A person's nemesis is the opponent with the largest losses-minus-wins value from that person's perspective. Require a positive value. Ties share the result. Include the underlying record/meetings and link to the selected rivalry. If no opponent has a winning record against the person, assign no nemesis.
 
+## Head to head
+
+Every current manager's all-time record against every other, regular season and championship playoffs together, from the rivalry calculation above. A pair who never met has no record, not 0–0, and the grid waits until one pair has met. A record is better when its wins exceed its losses. Rows and columns share name order, and each record leads to that pair's meetings on the row's manager page. `readHeadToHead` in `src/history/rivalries.ts` owns it.
+
 ## Manager pages
 
 Each current and former person has one page, holding only results they earned. Finishes list their completed seasons with the season's team count; a finish the bracket doesn't establish stays unknown. Their record against everyone, and the list of meetings, use the combined scope and mark championship-playoff contests.

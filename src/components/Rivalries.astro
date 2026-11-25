@@ -7,11 +7,11 @@ interface Props { streaks: NonNullable<Awaited<ReturnType<typeof readRivalryStre
 const [longest, ...rest] = Astro.props.streaks.slice(0, 5);
 ---
 {longest && (
-  <Section id="rivalries" title="Rivalries">
+  <Section id="rivalries" title="Rivalry streaks" heading="h3">
     <div class="streak-top">
       <p class="streak-run"><span class="streak-big">{longest.count}</span><span class="painted">straight wins</span></p>
       <p class="streak-who"><Manager name={longest.winner.name} /> has beaten <Manager name={longest.loser.name} /></p>
-      <p class="streak-record">{longest.record} all time, playoffs included</p>
+      <p class="streak-record">{longest.record} all time</p>
     </div>
     {rest.length > 0 && (
       <ul class="streaks">

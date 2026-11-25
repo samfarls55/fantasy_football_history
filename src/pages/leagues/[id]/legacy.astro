@@ -2,16 +2,17 @@
 import Tab from '../../../layouts/Tab.astro';
 import Belt from '../../../components/Belt.astro';
 import Careers from '../../../components/Careers.astro';
+import HeadToHead from '../../../components/HeadToHead.astro';
 import Records from '../../../components/Records.astro';
-import Rivalries from '../../../components/Rivalries.astro';
 import { openTab } from '../../../league-page.ts';
 import { readBelt } from '../../../history/belt.ts';
 import { readManagers } from '../../../history/managers.ts';
-import { readRivalryStreaks } from '../../../history/rivalries.ts';
+import { readHeadToHead, readRivalryStreaks } from '../../../history/rivalries.ts';
 
 const { redirect, frame, view } = await openTab(Astro, 'legacy', async storePath => ({
   managers: (await readManagers({ storePath }))!,
   belt: (await readBelt({ storePath }))!,
+  headToHead: await readHeadToHead({ storePath }),
   streaks: (await readRivalryStreaks({ storePath }))!,
 }));
 if (redirect) return redirect;
@@ -22,7 +23,7 @@ if (redirect) return redirect;
       <Careers managers={view.managers} />
       <Records views={view.records} heading="h2" />
       <Belt belt={view.belt} />
-      <Rivalries streaks={view.streaks} />
+      <HeadToHead rows={view.headToHead} streaks={view.streaks} />
     </>
   )}
 </Tab>
