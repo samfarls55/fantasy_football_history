@@ -52,7 +52,7 @@ const order = managers.toSorted((a, b) => {
                 <span class="stat-counted"><span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}{cell.sample && cell.names && cell.names.length > 1 && ','}</span>{' '}
                 {cell.sample && <span class="stat-sample">{cell.sample}</span>}
               </td>
-            ) : <td class:list={{ named }}><span aria-hidden="true">—</span><span class="unseen">None</span></td>;
+            ) : <td class:list={{ named }}><span aria-hidden="true">—</span><span class="unseen">No figure</span></td>;
           })}
         </tr>
       ))}
