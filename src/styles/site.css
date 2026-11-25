@@ -266,7 +266,11 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 /* "X beat Y" may wrap; its lines then sit a full 44px apart, so each name keeps its own target. */
 .play-holder strong { align-self: flex-start; font-size: 24px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
 .play-holder strong:has(a + a) { display: flex; flex-wrap: wrap; gap: 20px 0.25em; }
-.play-holder > span { color: var(--chalk); }
+.play-context { color: var(--chalk); }
+/* A name in the line under a holder's, so the two targets grow away from each other. */
+.play-context a[data-person]::before, .next-when a[data-person]::before { inset: 0 min(0px, (100% - 44px) / 2) min(0px, 100% - 44px); }
+.play-holder:has(.play-context > a) strong a::before, li:has(.next-when > a) .next-who a::before { inset: min(0px, 100% - 44px) min(0px, (100% - 44px) / 2) 0; }
+.play-context + .play-context { margin-top: 8px; }
 /* The headline record: a solid painted line and the biggest number on the field. */
 .play.headline { padding: 28px 0 40px; border-top: 6px solid var(--flag); }
 .play.headline .play-title { font-size: 24px; color: var(--paint); padding-right: 140px; }
@@ -274,7 +278,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play.headline .play-unit { font-size: 20px; max-width: 18ch; line-height: 1.2; }
 .play.headline .play-holder strong { font-size: 32px; }
 /* The holder's record and scoring are what the league remembers, so they read at the unit's size. */
-.play.headline .play-holder > span { margin-top: 4px; font-size: 20px; color: var(--paint); }
+.play.headline .play-context { margin-top: 4px; font-size: 20px; color: var(--paint); }
 .play.headline .flag { width: 132px; height: 108px; top: 16px; }
 /* On wide screens the holder stands beside the figure and the flag lands past the holder, so number, name and flag read as one play. */
 @media (min-width: 900px) {
@@ -314,16 +318,18 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play-how[open] p { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 /* Each runner-up reads like the leader, small: its rank, then value, who and when under each other.
    A row naming two managers sets its lines a full 44px apart, so a wrap never puts one name's target over the other's. */
-.play-next ol { display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 12px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--chalk); overflow-wrap: anywhere; }
+.play-next ol { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--chalk); overflow-wrap: anywhere; }
 .play-next li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 4px 0; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
 .next-rank { font-weight: 800; color: var(--paint); }
-.next-value { font-weight: 800; white-space: nowrap; text-align: right; color: var(--paint); }
+.next-value { font-weight: 800; color: var(--paint); }
+.next-unit { font-weight: 400; color: var(--chalk); }
+.next-who { grid-column: 2; }
 .next-who:has(a + a) { line-height: 44px; }
 .winners:has(a + a) { line-height: 44px; }
 /* Dates hold together with no-break spaces, so a season's longer line can still wrap. */
-.next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
+.next-when { grid-column: 2; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .next-who:has(a + a) + .next-when { margin-top: -8px; }
 .flag {
   position: absolute; right: 0; top: 10px; width: 56px; height: 46px; overflow: visible; pointer-events: none;
@@ -357,8 +363,11 @@ thead th {
 .stats thead button:hover, .stats thead th[aria-sort] :is(button, .stat-label) { color: var(--paint); }
 .stats thead th[aria-sort] .stat-label::after { content: ''; width: 0; height: 0; border-inline: 5px solid transparent; border-top: 7px solid currentColor; }
 .stats thead th[aria-sort='ascending'] .stat-label::after { transform: rotate(180deg); }
-.stats thead .play-how { margin: -6px 0 0; font-family: var(--text); font-weight: 600; letter-spacing: 0; text-transform: none; }
-.stats thead .play-unit { width: fit-content; margin-left: auto; justify-content: flex-end; font-size: 15px; }
+.stats thead .play-how { margin: 0; font-family: var(--text); font-weight: 600; letter-spacing: 0; text-transform: none; }
+.stats thead .play-unit { max-width: 7.5rem; margin-left: auto; align-items: flex-start; justify-content: flex-end; padding-top: 5px; white-space: normal; font-size: 15px; line-height: 1.2; }
+.stats thead .named :is(button, .stat-label) { justify-content: flex-start; text-align: left; }
+.stats thead .named .play-unit { margin-left: 0; justify-content: flex-start; }
+.stats thead .named .play-how p { margin-left: 0; }
 .stats thead .play-how p { width: min(11rem, 40vw); margin: 0 0 10px auto; white-space: normal; font-weight: 400; }
 .stats thead th:target { box-shadow: 0 -6px 0 var(--paint); }
 .stats tbody :is(th, td) { vertical-align: baseline; }
@@ -395,10 +404,11 @@ tr.former th { font-weight: 600; }
 .grid td { position: relative; min-width: 54px; height: 48px; padding: 0 4px; text-align: center; color: var(--chalk); }
 .grid thead :is(th, td) { height: auto; border-bottom: 0; padding-bottom: 8px; vertical-align: bottom; text-align: left; }
 .grid thead tr:last-child th { border-bottom: 6px solid var(--paint); }
-/* On a phone the side names give way to the records: a long handle wraps. */
-.grid th:first-child { min-width: 112px; max-width: max(112px, 16vw); padding-right: 12px; white-space: normal; }
+/* The side names keep whole up to two fifths of a phone; only a longer handle wraps. */
+.grid th:first-child { max-width: max(132px, 18vw); padding-right: 10px; white-space: normal; }
 .grid thead th[scope='colgroup'] { padding-left: 14px; }
-.grid-axis { position: sticky; left: 126px; }
+.grid th:first-child a[data-person] { overflow-wrap: break-word; }
+.grid-axis { position: sticky; left: 142px; }
 .grid-top { display: flex; align-items: center; margin: 0 auto; width: 44px; line-height: 44px; writing-mode: vertical-rl; transform: rotate(180deg); }
 .grid :is(tbody th, .grid-top) { font-family: var(--text); font-weight: 800; font-size: 17px; line-height: 1.2; letter-spacing: 0; text-transform: none; color: var(--paint); }
 /* A better record is a patch of darker, bolder ground and the actual one is chalked around, so neither needs color, white paint or yellow. */
@@ -649,7 +659,7 @@ tr.former th { font-weight: 600; }
   .play.headline .play-value, .streak-big { font-size: 88px; }
   .play.headline .play-unit { font-size: 17px; }
   .play.headline .play-holder strong { font-size: 24px; }
-  .play.headline .play-holder > span { font-size: 17px; }
+  .play.headline .play-context { font-size: 17px; }
   .play.headline .flag { width: 72px; height: 60px; }
   .block { margin-top: 56px; }
   .league-title { font-size: 28px; }
