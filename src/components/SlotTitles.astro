@@ -5,8 +5,8 @@ import Section from './Section.astro';
 import { isViewer } from '../league-page.ts';
 import type { CardView } from '../history/records.ts';
 
-interface Props { view: CardView }
-const { category, rows } = Astro.props.view;
+interface Props { category: CardView['category']; rows: CardView['rows'] }
+const { category, rows } = Astro.props;
 const slots = rows.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 ---
 <Section id={category.key} title={category.name}>
