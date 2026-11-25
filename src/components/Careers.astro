@@ -1,0 +1,27 @@
+---
+import Section from './Section.astro';
+import StatTable from './StatTable.astro';
+import { fixed } from '../league-page.ts';
+import type { readManagers } from '../history/managers.ts';
+import type { StatCell, StatColumn } from '../stat-table.ts';
+
+interface Props { managers: NonNullable<Awaited<ReturnType<typeof readManagers>>> }
+const { managers } = Astro.props;
+const cells = (read: (manager: typeof managers[number]) => StatCell | null): StatColumn['cells'] =>
+  new Map(managers.flatMap(manager => { const cell = read(manager); return cell ? [[manager.id, cell]] : []; }));
+const count = (number: number): StatCell => ({ figure: fixed(number, 0), sort: number });
+// The sort key and the numbers a league argues over come first, so a phone shows them before any scroll; the years trail.
+const columns: StatColumn[] = [
+  { key: 'titles', label: 'Titles', unit: 'won', rule: 'Championship games won.', better: 'higher', cells: cells(({ facts }) => count(facts.championships)) },
+  { key: 'record', label: 'Record', unit: managers.some(({ facts }) => facts.ties) ? 'wins–losses–ties' : 'wins–losses', rule: 'Regular-season games, sorted by wins.', better: 'higher', cells: cells(({ facts }) => ({ figure: facts.record, sort: facts.wins })) },
+  { key: 'win-rate', label: 'Win %', unit: 'of games', rule: 'Regular-season games won, with a tie counting as half a win.', better: 'higher',
+    cells: cells(({ facts }) => facts.winPercentage === null ? null : { figure: `${fixed(facts.winPercentage, 1)}%`, sort: facts.winPercentage }) },
+  { key: 'playoffs', label: 'Playoffs', unit: 'trips', rule: 'Seasons they reached the championship bracket, a first-round bye included.', better: 'higher', cells: cells(({ facts }) => count(facts.playoffAppearances)) },
+  { key: 'points', label: 'Points scored', unit: 'points', rule: 'Official regular-season scores added up.', better: 'higher', cells: cells(({ facts }) => count(facts.points)) },
+  { key: 'points-against', label: 'Opponents’ points', unit: 'points', rule: 'Their opponents’ official scores in those same games.', better: 'lower', cells: cells(({ facts }) => count(facts.pointsAgainst)) },
+  { key: 'seasons', label: 'Seasons', unit: 'years', rule: 'Seasons they’ve had a team in this league, sorted by how many.', better: 'higher', cells: cells(({ seasons, range }) => ({ figure: range, sort: seasons.length })) },
+];
+---
+<Section id="careers" title="Careers">
+  <StatTable labelledby="careers-name" managers={managers} columns={columns} by={['titles', 'win-rate']} />
+</Section>

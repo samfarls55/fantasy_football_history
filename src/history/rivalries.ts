@@ -55,6 +55,19 @@ export async function readManagerRivalries(personId: string, options: HistorySel
   return { person, rows, nemeses: deficit ? rows.filter(row => row.losses - row.wins === deficit) : [] };
 }
 
+/** Every run of three straight wins or more between two current managers, longest first. */
+export async function readRivalryStreaks(options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  const current = archive.people.filter(person => person.current);
+  return current.flatMap((a, index) => current.slice(index + 1).flatMap(b => {
+    const { streak, wins, losses, ties } = rivalry(archive, a, b, { scope: 'combined' });
+    if (!streak || streak.count < 3) return [];
+    const won = streak.person === a;
+    return [{ winner: streak.person, loser: won ? b : a, count: streak.count, record: [...won ? [wins, losses] : [losses, wins], ...ties ? [ties] : []].join('–') }];
+  })).sort((a, b) => b.count - a.count || a.winner.name.localeCompare(b.winner.name));
+}
+
 export async function readFranchiseRivalries(franchiseId: string, options: HistorySelection = {}) {
   const archive = await readArchive(options.storePath);
   const franchise = archive?.franchises.find(franchise => franchise.id === franchiseId);

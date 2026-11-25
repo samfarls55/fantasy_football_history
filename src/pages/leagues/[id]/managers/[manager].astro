@@ -2,7 +2,7 @@
 import League from '../../../../layouts/League.astro';
 import Manager from '../../../../components/Manager.astro';
 import Miss from '../../../../components/Miss.astro';
-import RecordCard from '../../../../components/RecordCard.astro';
+import Records from '../../../../components/Records.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
 import { fixed, isViewer, leagueHref, managerHref, openLeague } from '../../../../league-page.ts';
 import { readSeasons } from '../../../../history/read.ts';
@@ -14,7 +14,7 @@ import { readManagerRivalries } from '../../../../history/rivalries.ts';
 const typed = Astro.params.manager!;
 const vsParam = Astro.url.searchParams.get('vs');
 
-const { failure, view } = await openLeague(Astro, async storePath => {
+const { failure, tabs, view } = await openLeague(Astro, async storePath => {
   const league = (await readSeasons(storePath))![0].name;
   const named = (await readManagerName(typed, { storePath }))!;
   const manager = named.id ? await readManager(named.id, { storePath }) : null;
@@ -50,7 +50,7 @@ const career = facts && [
   { figure: fixed(facts.pointsAgainst, 0), unit: 'points against', rule: 'Their opponents’ official scores in those same games.' },
 ];
 ---
-<League title={page ? `${page.manager.name} · ${view!.league}` : 'Manager not found'} failure={failure} back={view ? { href: leagueHref(Astro), label: view.league } : undefined} full={!page}>
+<League title={page ? `${page.manager.name} · ${view!.league}` : 'Manager not found'} failure={failure} tabs={tabs} back={view ? { href: leagueHref(Astro), label: view.league } : undefined} full={!page}>
   <Fragment slot="endzone">
     {view && !page && (
       <>
@@ -79,7 +79,7 @@ const career = facts && [
 
       {page.finishes.length > 0 && (
       <section class="block" id="finishes">
-        <h2 class="painted" data-yard="10">Finishes</h2>
+        <h2 class="painted">Finishes</h2>
         <ol class="finishes">
           {page.finishes.map((season, index) => (
             <li class:list={{ won: season.finish === 1 }} style={`--i: ${index}`}>
@@ -94,16 +94,14 @@ const career = facts && [
 
       {page.records.length > 0 && (
       <section class="block" id="records">
-        <h2 class="painted" data-yard="20">Records held</h2>
-        <ul class="plays">
-          {page.records.map((view, index) => <RecordCard view={view} heading="h3" index={Math.floor(index / 2)} across={index % 2 > 0} />)}
-        </ul>
+        <h2 class="painted">Records held</h2>
+        <Records views={page.records} heading="h3" />
       </section>
       )}
 
       {page.versus.length > 0 && (
       <section class="block" id="rivalries">
-        <h2 class="painted" data-yard="30" id="rivalries-name">Head to head</h2>
+        <h2 class="painted" id="rivalries-name">Head to head</h2>
         <details class="play-how"><summary class="play-unit">playoffs included</summary><p>Regular-season and championship-playoff games. Consolation and placement games don’t count.</p></details>
         <div class="table-wrap">
           <table class="versus" aria-labelledby="rivalries-name">

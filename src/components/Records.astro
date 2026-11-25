@@ -1,0 +1,13 @@
+---
+// Record cards two to a row in the order given, so opposites face each other across the field; an odd last one spans it.
+import RecordCard from './RecordCard.astro';
+import type { readPlaceRecords } from '../history/records.ts';
+
+interface Props { views: NonNullable<Awaited<ReturnType<typeof readPlaceRecords>>>; heading: 'h2' | 'h3' }
+const { views, heading } = Astro.props;
+---
+{views.length > 0 && (
+  <ul class="plays">
+    {views.map((view, index) => <RecordCard view={view} heading={heading} index={Math.floor(index / 2)} across={index % 2 > 0} wide={index % 2 === 0 && index === views.length - 1} />)}
+  </ul>
+)}

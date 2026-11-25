@@ -8,6 +8,7 @@ import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
+import type { Place } from './tabs.ts';
 import type { Archive, Scope } from './types.ts';
 
 export const recordGroups = ['Careers', 'Seasons', 'Matchups', 'Players'] as const;
@@ -31,6 +32,8 @@ export interface RecordCandidate {
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
   key: string; name: string; group: RecordGroup;
+  /** Where its card lives. A record without a place shows on manager pages alone. */
+  place?: Place;
   /** What the figure counts, shown beside it; a percent figure carries its own sign too when it compares with the league. */
   unit: string; percent?: boolean; signed?: boolean;
   displayPrecision: number;
@@ -60,7 +63,7 @@ function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['
       period: latestPeriod(periods), href: `/managers/${person.id}/${query.size ? `?${query}` : ''}`, historyLabel: 'Open career' }];
   });
 }
-/** Register future category calculators here; all categories use the same ranking/read/page flow. */
+/** Register future category calculators here; all categories use the same ranking/read/page flow. Cards on a tab follow this order two to a row, so opposites sit together. */
 export const recordCategories: CategoryDefinition[] = [
   { key: 'championships', name: 'Most championships', group: 'Careers', unit: 'titles', displayPrecision: 0, scope: 'none', candidates: careerCandidates('championships'),
     rule: 'Championship games won.' },
@@ -70,33 +73,33 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Regular-season games won, with a tie counting as half a win.' },
   { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', displayPrecision: 2, scope: 'games', candidates: careerCandidates('career-points'),
     rule: 'Official regular-season scores added up, all seasons together.' },
-  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', unit: 'wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
-    rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
-  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
-    rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
-  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title'),
+  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', place: 'home', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title'),
     rule: 'Their regular-season points per game vs the league average, among teams that didn’t win the title.' },
-  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', unit: 'more wins than their scores earned', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season'),
+  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', place: 'luck', unit: 'more wins than their scores earned', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season'),
     rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
-  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', unit: 'fewer wins than their scores earned', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
+  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', place: 'luck', unit: 'fewer wins than their scores earned', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
     rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
     rule: 'Their regular-season points per game vs the league average.' },
-  { key: 'highest-score', name: 'Highest score', group: 'Matchups', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
+  { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week.' },
-  { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
+  { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week. A real zero counts; an unplayed week doesn’t.' },
-  { key: 'closest-game', name: 'Closest game', group: 'Matchups', unit: 'point margin', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
-    rule: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' },
-  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', unit: 'point margin', displayPrecision: 2, scope: 'games', candidates: marginCandidates,
+  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', place: 'games', unit: 'point margin', displayPrecision: 2, scope: 'games', candidates: marginCandidates,
     rule: 'The gap between the two final scores of a regular-season game.' },
-  { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
+  { key: 'closest-game', name: 'Closest game', group: 'Matchups', place: 'games', unit: 'point margin', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
+    rule: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' },
+  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', place: 'games', unit: 'wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
+    rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
+  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
+    rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
+  { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
     rule: 'A player’s score in a regular-season week spent on the bench.' },
-  { key: 'productive-pickup', name: 'Best pickup', group: 'Players', unit: 'points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
+  { key: 'productive-pickup', name: 'Best pickup', group: 'Players', place: 'moves', unit: 'points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
     rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
-  { key: 'productive-drop', name: 'Worst drop', group: 'Players', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
+  { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
     rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
-  { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
+  { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', place: 'players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
     rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
 ];
 export const recordSorts = ['rank', 'name', 'newest', 'oldest', 'value-asc'] as const;
@@ -154,12 +157,22 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   return { category: { ...category, displayPrecision }, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
     href: categoryHref(category.key, { ...selection, result }), nextHref: nextLimit ? categoryHref(category.key, { ...selection, result, limit: nextLimit }) : null };
 }
+/** Whether anyone holds the record in this league. */
+export function hasRecord(archive: Archive, category: CategoryDefinition): boolean {
+  return rankCategory(archive, category, {}).leaders.length > 0;
+}
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
 export async function readCategory(key: string, options: RecordSelection = {}) {
   const category = recordCategories.find(category => category.key === key && category.candidates);
   if (!category) return null;
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
+}
+/** The record cards of these places, in registry order. A record nobody holds has no card. */
+export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  return recordCategories.filter(category => category.place && places.includes(category.place)).map(category => rankCategory(archive, category, {})).filter(view => view.leaders.length);
 }
 /** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {

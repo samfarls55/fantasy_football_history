@@ -21,6 +21,7 @@ const { title, full = false, back } = Astro.props;
         <slot name="endzone" />
       </div>
     </div>
+    <slot name="bar" />
     <main class="field"><slot /></main>
     <slot name="close" />
   </body>

@@ -1,0 +1,24 @@
+---
+import Tab from '../../../layouts/Tab.astro';
+import Careers from '../../../components/Careers.astro';
+import Records from '../../../components/Records.astro';
+import Rivalries from '../../../components/Rivalries.astro';
+import { openTab } from '../../../league-page.ts';
+import { readManagers } from '../../../history/managers.ts';
+import { readRivalryStreaks } from '../../../history/rivalries.ts';
+
+const { redirect, frame, view } = await openTab(Astro, 'legacy', async storePath => ({
+  managers: (await readManagers({ storePath }))!,
+  streaks: (await readRivalryStreaks({ storePath }))!,
+}));
+if (redirect) return redirect;
+---
+<Tab {...frame}>
+  {view && (
+    <>
+      <Careers managers={view.managers} />
+      <Records views={view.records} heading="h2" />
+      <Rivalries streaks={view.streaks} />
+    </>
+  )}
+</Tab>
