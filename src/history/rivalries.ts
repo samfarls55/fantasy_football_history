@@ -68,6 +68,19 @@ export async function readRivalryStreaks(options: { storePath?: string } = {}) {
   })).sort((a, b) => b.count - a.count || a.winner.name.localeCompare(b.winner.name));
 }
 
+/** Every current manager by name, each with their record against every other in that same order. Nobody has one against themself or anyone they never met. */
+export async function readHeadToHead(options: { storePath?: string } = {}) {
+  const archive = await readArchive(options.storePath);
+  if (!archive) return null;
+  const current = archive.people.filter(person => person.current).sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  const rows = current.map(a => ({ id: a.id, name: a.name, cells: current.map(b => {
+    if (a === b) return null;
+    const { meetings, record, wins, losses, ties } = rivalry(archive, a, b, { scope: 'combined' });
+    return meetings ? { record, ties, better: wins > losses } : null;
+  }) }));
+  return rows.some(row => row.cells.some(cell => cell)) ? rows : null;
+}
+
 export async function readFranchiseRivalries(franchiseId: string, options: HistorySelection = {}) {
   const archive = await readArchive(options.storePath);
   const franchise = archive?.franchises.find(franchise => franchise.id === franchiseId);
