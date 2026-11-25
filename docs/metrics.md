@@ -62,6 +62,8 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | lowest-score | Matchups: Lowest score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
+| points-in-win | Matchups: Fewest points in a win | Winner's official score in one decided contest, ascending | Season/all; regular only | Matchup, selected week/team |
+| points-in-loss | Matchups: Most points in a loss | Loser's official score in one decided contest, descending | Season/all; regular only | Matchup, selected week/team |
 | benched-player | Players: Most points left on the bench | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
 | productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
 | productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
@@ -77,7 +79,7 @@ Win percentage = 100 × (wins + 0.5 × ties) / (wins + losses + ties). Preserve 
 
 A scoring high/low uses the official team total, not a player sum. A true completed zero qualifies for the low record; an unplayed or missing result never does.
 
-Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified. Do not invent close-game or blowout thresholds.
+Closest-game margin = absolute difference between final official contest scores. A tied game has margin zero. Biggest blowout uses the same measure descending. A contest appears once, with both people identified. The close-game line under Luck is authorized; do not invent blowout thresholds.
 
 A winning or losing streak follows eligible completed contests in historical order. A tie ends either streak. Career streaks can continue between seasons within the selected scope. Season-specific streaks stop at the boundary. An excluded game is outside that selected scope, not a phantom win or loss. Byes do not extend a streak.
 
@@ -100,6 +102,23 @@ Best season without a title uses dominance among completed nonchampionship team-
 Comparisons use played regular-season team-weeks; source-confirmed unpaired byes supply no team score or actual win. The league scoring denominator includes every eligible team-week across the season, giving all teams the same league PPG even when their played weeks differ. Expected wins still compares each team with the eligible scores in its own played weeks. No played weeks, fewer than two eligible weekly scoring teams, or a zero league scoring denominator leave the relevant comparison unknown. Zero league points invalidate dominance while completed all-zero games still have genuine tied results and all-play expectation. Required score/roster coverage is validated by refresh. A source-declared completed season missing scheduled regular weeks rejects publication and retains the previous archive. An unresolved title outcome leaves Best season without a title ineligible, rather than treating every team as a nonchampion; the other two awards can use their established complete regular scoring coverage.
 
 Season award history uses the completed season's latest completed week and its supported year, including supported postseason completion, with no invented calendar date. The award's recognition period is separate from its regular-only calculation inputs. Public season awards identify the measured season and eligible-week sample, rather than presenting the recognition week as the accomplishment. Category links open the manager-season history. Standings comparisons display at one decimal; category percentages follow the ranking precision rule above. Standings expose `sort=scoring` and `sort=wins-expected`, descending with unknown values last, while retaining official standings as the default. Displayed Wins vs expected is actual minus expected, the exact negative of the Unluckiest season measure. Explain both directions where those values appear, along with scoring versus the season's league average and expected wins from weekly all-play results.
+
+## Manager stats
+
+A manager stat gives each person one value. `src/history/manager-stats.ts` registers them. An entry owns its key, place, plain label, unit, one-line rule, display precision, better end and calculation, and `readManagerStats` returns every known value with its sample and rank. Tables and manager pages show what it returns and calculate nothing.
+
+Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end. A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value or a coverage issue blocks its key. A zero is a value.
+
+A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate.
+
+## Luck
+
+These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. The strongest claim to luck, good or bad, ranks first.
+
+- **Robbed:** a loss with the week's competition rank 2 from the top. **Got away with it:** a win with competition rank 2 from the bottom. Teams tied for the place all count. A tied contest is neither. A week with fewer than four scored teams doesn't count. The sample is the person's counted weeks.
+- **Record in games decided by under 5:** contests with an exact margin above 0 and under 5 points. Sam authorized this threshold in spec 37. Ranked by the share won; no such game leaves it unknown.
+- **Opponents' season highs faced:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time. The sample is the person's regular-season contests in completed seasons.
+- **Most points in a loss, fewest points in a win:** the loser's and winner's official score in a decided contest. A tie is neither.
 
 ## Rivalries and nemesis
 

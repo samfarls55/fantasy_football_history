@@ -1,0 +1,75 @@
+import { Exact } from './decimal.ts';
+import { identity } from './game-records.ts';
+import { completedContests } from './scope.ts';
+import type { ManagerStat } from './manager-stats.ts';
+import type { CategoryDefinition } from './records.ts';
+import type { Archive } from './types.ts';
+
+/** Each regular-season score beside its game and every score of that week. A regular-season game is one week long. */
+function regularScores(archive: Archive) {
+  const games = new Map(archive.contests.map(game => [game.id, game]));
+  const scores = archive.performances.filter(row => row.competition === 'regular');
+  const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
+  return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
+}
+const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+
+/** Scores 2nd from one end of their week that got the opposite result. */
+function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
+  return archive => {
+    const counted = regularScores(archive).filter(({ week }) => week.length >= 4);
+    return new Map([...Map.groupBy(counted, ({ own }) => own.personId)].map(([personId, scores]) => [personId, {
+      value: Exact.from(scores.filter(({ own, game, week }) => !game.tie && (game.winnerId === personId) === (result === 'won')
+        && week.filter(other => result === 'lost' ? other.points > own.points : other.points < own.points).length === 1).length),
+      sample: chances(scores.length, 'week'),
+    }]));
+  };
+}
+
+const closeGames: ManagerStat['values'] = archive => {
+  const sides = completedContests(archive).filter(({ sides: [a, b] }) => {
+    const margin = Exact.from(a.points).subtract(b.points).abs();
+    return margin.compare(0) > 0 && margin.compare(5) < 0;
+  }).flatMap(game => game.sides.map(({ personId }) => ({ personId, won: game.winnerId === personId })));
+  return new Map([...Map.groupBy(sides, side => side.personId)].map(([personId, played]) => {
+    const wins = played.filter(side => side.won).length;
+    return [personId, { value: Exact.from(wins * 100).divide(played.length), shown: `${wins}–${played.length - wins}` }];
+  }));
+};
+
+const highsFaced: ManagerStat['values'] = archive => {
+  const complete = new Set(archive.seasons.filter(season => season.complete).map(season => season.id));
+  const scores = regularScores(archive).filter(({ own }) => complete.has(own.seasonId));
+  const seasonScores = Map.groupBy(scores, ({ own }) => `${own.seasonId}/${own.personId}`);
+  const faced = scores.map(({ own, game, week }) => {
+    const opponent = week.find(other => other.contestId === game.id && other !== own)!;
+    return { personId: own.personId, high: seasonScores.get(`${own.seasonId}/${opponent.personId}`)!.every(other => other.own.points <= opponent.points) };
+  });
+  return new Map([...Map.groupBy(faced, row => row.personId)].map(([personId, games]) =>
+    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: chances(games.length, 'game') }]));
+};
+
+/** One side of each decided regular-season game, with that side's official score. */
+export function resultCandidates(result: 'lost' | 'won'): NonNullable<CategoryDefinition['candidates']> {
+  return (archive, selection) => completedContests(archive).filter(game => !game.tie && (!selection.season || game.year === selection.season)).map(game => {
+    const side = game.sides.find(side => (side.personId === game.winnerId) === (result === 'won'))!;
+    const opponent = game.sides.find(other => other !== side)!;
+    const when = `Week ${game.weeks[0]} · ${game.year}`;
+    return { ...identity(archive, side.personId, game.year), id: game.id, metric: Exact.from(side.points), sample: null,
+      opponentId: opponent.personId, lost: result === 'lost', detail: `${side.teamName} vs ${opponent.teamName}`, leaderContext: when,
+      period: { year: game.year, week: game.weeks[0], playedAt: game.playedAt },
+      href: `/seasons/${game.year}/matchups/${game.id}/?scope=regular&week=${game.weeks[0]}&team=${side.rosterId}`, historyLabel: 'Open matchup' };
+  });
+}
+
+/** Excuses' Luck table: the strongest claim to luck, good or bad, ranks first. */
+export const luckStats: ManagerStat[] = [
+  { key: 'robbed', place: 'luck', label: 'Robbed: lost with the week’s 2nd-best score', unit: 'losses', displayPrecision: 0, better: 'higher', values: secondScores('lost'),
+    rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd all count, but a tied game doesn’t.' },
+  { key: 'got-away', place: 'luck', label: 'Got away with it: won with the week’s 2nd-worst score', unit: 'wins', displayPrecision: 0, better: 'higher', values: secondScores('won'),
+    rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd-worst all count, but a tied game doesn’t.' },
+  { key: 'close-games', place: 'luck', label: 'Record in games decided by under 5', unit: 'wins–losses', displayPrecision: 1, better: 'higher', values: closeGames,
+    rule: 'Regular-season games decided by more than 0 and under 5 points, ranked by the share won.' },
+  { key: 'highs-faced', place: 'luck', label: 'Opponents’ season highs faced', unit: 'games', displayPrecision: 0, better: 'higher', values: highsFaced,
+    rule: 'Completed seasons: games where the opponent had their best score of that regular season. A tied best counts each time.' },
+];

@@ -4,10 +4,11 @@ import Manager from '../../../../components/Manager.astro';
 import Miss from '../../../../components/Miss.astro';
 import Records from '../../../../components/Records.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
-import { fixed, isViewer, leagueHref, managerHref, openLeague } from '../../../../league-page.ts';
+import { fixed, isViewer, leagueHref, managerHref, openLeague, tabHref } from '../../../../league-page.ts';
 import { readSeasons } from '../../../../history/read.ts';
 import { readManager, readManagers } from '../../../../history/managers.ts';
 import { readManagerName } from '../../../../history/manager-names.ts';
+import { readManagerStats } from '../../../../history/manager-stats.ts';
 import { readRecordsHeld } from '../../../../history/records.ts';
 import { readManagerRivalries } from '../../../../history/rivalries.ts';
 
@@ -29,6 +30,10 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
   const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;
   return { league, suggestion: null, page: {
     manager, versus, records: (await readRecordsHeld(manager.id, { storePath }))!,
+    ranks: (await readManagerStats({ storePath }))!.flatMap(({ rows, ...stat }) => {
+      const row = rows.find(row => row.personId === manager.id);
+      return row ? [{ ...stat, row, of: rows.length }] : [];
+    }),
     finishes: manager.seasons.filter(season => season.complete).toReversed(),
     // Every meeting with the opponent ?vs= names; anyone they never played opens nothing.
     facing: opponent?.id ? versus.find(row => row.id === opponent.id) : undefined,
@@ -96,6 +101,31 @@ const career = facts && [
       <section class="block" id="records">
         <h2 class="painted">Records held</h2>
         <Records views={page.records} heading="h3" />
+      </section>
+      )}
+
+      {page.ranks.length > 0 && (
+      <section class="block" id="ranks">
+        <h2 class="painted">Ranks</h2>
+        {tabs.map(tab => ({ tab, ranks: page.ranks.filter(stat => tab.places.includes(stat.place)) })).filter(({ ranks }) => ranks.length).map(({ tab, ranks }) => (
+          <>
+            <h3>{tab.name}</h3>
+            <ul class="ranks">
+              {ranks.map(({ key, label, rule, row, of }) => (
+                <li>
+                  <a href={`${tabHref(Astro, tab.key)}#${key}`}>{label}</a>
+                  <div class="rank-value">
+                    {row.names && <span class="stat-text">{row.names.join(', ')}</span>}
+                    <span class="stat-figure">{row.figure}</span>
+                    <details class="play-how"><summary class="play-unit">{row.unit}</summary><p>{rule}</p></details>
+                    {row.sample && <span class="stat-sample">{row.sample}</span>}
+                  </div>
+                  <p class:list={['rank-place', { first: row.rank === 1 }]}>{row.tied && 'Tied '}<strong>{ordinal(row.rank)}</strong> of {of}</p>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))}
       </section>
       )}
 

@@ -6,6 +6,7 @@ import { dropCandidates } from './drops.ts';
 import { contributionCandidates } from './contributions.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
+import { resultCandidates } from './luck.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
 import type { Place } from './tabs.ts';
@@ -24,8 +25,8 @@ export interface RecordCandidate {
   id: string; personId: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
-  /** Matchup records: the second person, and whether the game was tied, so the first person didn't beat them. */
-  opponentId?: string; tied?: boolean;
+  /** Matchup records: the second person, and whether the game was tied or the first person lost it, so they didn't beat them. */
+  opponentId?: string; tied?: boolean; lost?: boolean;
   /** Season records: the regular-season record and points per game behind the figure. */
   record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
@@ -79,6 +80,10 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
   { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', place: 'luck', unit: 'fewer wins than their scores earned', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
     rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
+  { key: 'points-in-win', name: 'Fewest points in a win', group: 'Matchups', place: 'luck', unit: 'points', displayPrecision: 2, scope: 'regular', order: 'ascending', candidates: resultCandidates('won'),
+    rule: 'The winner’s official score in a regular-season game. A tie isn’t a win.' },
+  { key: 'points-in-loss', name: 'Most points in a loss', group: 'Matchups', place: 'luck', unit: 'points', displayPrecision: 2, shame: true, scope: 'regular', candidates: resultCandidates('lost'),
+    rule: 'The loser’s official score in a regular-season game. A tie isn’t a loss.' },
   { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
     rule: 'Their regular-season points per game vs the league average.' },
   { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
@@ -114,7 +119,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|starts|times|pickups|claims|trades|lineups|places|seasons)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
