@@ -5,11 +5,12 @@ import Miss from '../../../../components/Miss.astro';
 import Records from '../../../../components/Records.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
 import { fixed, isViewer, leagueHref, managerHref, openLeague, tabHref } from '../../../../league-page.ts';
+import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
 import { readSeasons } from '../../../../history/read.ts';
 import { readManager, readManagers } from '../../../../history/managers.ts';
 import { readManagerName } from '../../../../history/manager-names.ts';
 import { readManagerStats } from '../../../../history/manager-stats.ts';
-import { readRecordsHeld } from '../../../../history/records.ts';
+import { readRecordsHeld, recordUnit } from '../../../../history/records.ts';
 import { readManagerRivalries } from '../../../../history/rivalries.ts';
 
 const typed = Astro.params.manager!;
@@ -29,7 +30,7 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
     .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name));
   const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;
   return { league, suggestion: null, page: {
-    manager, versus, records: (await readRecordsHeld(manager.id, { storePath }))!,
+    manager, versus, belt: await readManagerBelt(manager.id, { storePath }), records: (await readRecordsHeld(manager.id, { storePath }))!,
     ranks: (await readManagerStats({ storePath }))!.flatMap(({ rows, ...stat }) => {
       const row = rows.find(row => row.personId === manager.id);
       return row ? [{ ...stat, row, of: rows.length }] : [];
@@ -45,6 +46,7 @@ if (view && !page) Astro.response.status = 404;
 
 const ordinal = (place: number) => `${place}${['th', 'st', 'nd', 'rd'][place % 100 > 10 && place % 100 < 14 ? 0 : place % 10] ?? 'th'}`;
 const facts = page?.manager.facts;
+const belt = page?.belt;
 const plural = (count: number, word: string) => `${word}${count === 1 ? '' : 's'}`;
 const career = facts && [
   { figure: facts.championships, unit: plural(facts.championships, 'title'), rule: 'Championship games won.' },
@@ -53,6 +55,8 @@ const career = facts && [
   { figure: facts.playoffAppearances, unit: plural(facts.playoffAppearances, 'playoff trip'), rule: 'Seasons they reached the championship bracket, a first-round bye included.' },
   { figure: fixed(facts.points, 0), unit: 'points scored', rule: 'Official regular-season scores added up.' },
   { figure: fixed(facts.pointsAgainst, 0), unit: 'points against', rule: 'Their opponents’ official scores in those same games.' },
+  ...belt ? [{ figure: belt.reigns, unit: plural(belt.reigns, 'belt reign'), rule: beltRule }] : [],
+  ...belt && belt.bestRun !== null ? [{ figure: belt.bestRun, unit: `${recordUnit('defenses', belt.bestRun)} in best belt run`, rule: 'Games in one reign they didn’t lose, regular season and championship playoffs together.' }] : [],
 ];
 ---
 <League title={page ? `${page.manager.name} · ${view!.league}` : 'Manager not found'} failure={failure} tabs={tabs} back={view ? { href: leagueHref(Astro), label: view.league } : undefined} full={!page}>

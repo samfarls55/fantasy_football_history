@@ -161,13 +161,13 @@ h2.painted .share { margin-left: 0; }
 }
 .copied:not(:empty) { border-bottom: 2px solid var(--chalk-faint); animation: rise 220ms ease-out both; }
 .copied:empty { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
-/* A mistyped name's way out, a failed page's retry, the halves of Excuses and the seasons of a grid: painted labels on a faint chalk underline. */
-:is(.miss > a, .retry, .halves a, .seasons a) {
+/* A mistyped name's way out, a failed page's retry, the halves of Excuses, the seasons of a grid and the way to every reign: painted labels on a faint chalk underline. */
+:is(.miss > a, .retry, .halves a, .seasons a, .belt-all) {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   color: var(--chalk); text-decoration: underline 2px var(--chalk-faint); text-underline-offset: 5px;
 }
-:is(.miss > a, .retry, .halves a, .seasons a):hover { color: var(--paint); text-decoration-color: var(--paint); }
+:is(.miss > a, .retry, .halves a, .seasons a, .belt-all):hover { color: var(--paint); text-decoration-color: var(--paint); }
 
 /* A manager is their Sleeper handle, so it is set as typed, in the heavy sans, wherever it appears: stencil caps
    would turn o into 0 and l into 1. Around it, headings, figures, years and labels stay in paint. */
@@ -468,6 +468,38 @@ tr.former th { font-weight: 600; }
 .rank-place strong { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; }
 .rank-place.first { color: var(--paint); }
 
+/* The belt: a row of weeks per season, each reign a block from the week it began. The chosen one is hollow, and its holder and start stand painted above the field.
+   A block with room carries its holder's name; the looked-up manager's are white. */
+.belt { position: relative; min-width: 0; margin: 8px 0 0; padding: 96px 0 0; border: 0; border-top: 6px solid var(--paint); }
+.belt-year { display: grid; grid-template-columns: 5rem repeat(var(--weeks), minmax(0, 1fr)); align-items: center; margin-top: 8px; }
+.reign { display: grid; cursor: pointer; }
+.reign input {
+  grid-area: 1 / 1; appearance: none; width: calc(100% - 3px); height: 44px; margin: 0; border: 3px solid transparent; border-radius: 2px;
+  background: var(--chalk-quiet) border-box; cursor: inherit; transition: background-color 160ms ease-out;
+}
+.reign:hover input { background-color: var(--chalk); }
+.reign.vacant input { background: none; border: 3px dashed var(--chalk-quiet); }
+.reign.mine input { background-color: var(--paint); }
+.reign input:checked { background-color: var(--endzone-b); border: 3px solid var(--chalk); }
+.reign input:focus-visible { position: relative; z-index: 1; }
+.reign.mine input:checked { border-color: var(--paint); }
+.reign-name { grid-area: 1 / 1; align-self: center; min-width: 0; container-type: inline-size; pointer-events: none; }
+.reign-name span { display: none; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 800; color: var(--ink-on-paint); }
+.reign input:checked + .reign-name { color: var(--paint); }
+.reign input:checked + .reign-name span { color: inherit; }
+@container (min-width: 112px) { .reign-name span { display: block; } }
+.reign-says { position: absolute; left: 0; top: 14px; }
+.reign input:not(:checked) ~ .reign-says { width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.reign-says strong { display: block; width: fit-content; margin-left: -0.12em; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; overflow-wrap: anywhere; }
+.reign-says > span { color: var(--chalk); }
+.belt-list { margin-top: 16px; }
+.belt-list ol { grid-template-columns: auto minmax(0, 1fr); }
+.belt-list li { align-items: center; min-height: 44px; padding: 0; font-size: 15px; }
+.belt-list li > :first-child { font-size: 18px; color: var(--paint); }
+.belt-all { margin-left: -4px; }
+.belt-holder { margin-top: 12px; font-size: clamp(36px, 6vw, 64px); line-height: 1.15; }
+.belt-holder > [data-person] { margin-left: -0.12em; }
+
 /* A manager's page: their handle as typed across the end zone, then their career in painted figures. */
 .manager-name { margin-top: 28px; font-size: clamp(40px, 10vw, 112px); line-height: 1.15; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }
 .manager-name > [data-person] { margin-left: -0.12em; }
@@ -567,6 +599,7 @@ tr.former th { font-weight: 600; }
   .play.headline .flag { width: 72px; height: 60px; }
   .block { margin-top: 56px; }
   .league-title { font-size: 28px; }
+  .belt-year { grid-template-columns: 3.5rem repeat(var(--weeks), minmax(0, 1fr)); }
   .streaks { grid-template-columns: 1fr; }
   .streaks li { grid-template-columns: 3.5rem 1fr; gap: 12px; padding: 14px 0; }
   .streak-count { font-size: 52px; }

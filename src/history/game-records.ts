@@ -59,9 +59,10 @@ function longestStreak(archive: Archive, personId: string, kind: StreakKind, sel
   }
   return longest;
 }
-function interval(games: Contest[]) {
+export function interval(games: Contest[]) {
   const first = games[0], last = games.at(-1)!;
-  return `Week ${Math.min(...first.weeks)} · ${first.year} – Week ${Math.max(...last.weeks)} · ${last.year}`;
+  const from = `Week ${Math.min(...first.weeks)} · ${first.year}`, through = `Week ${Math.max(...last.weeks)} · ${last.year}`;
+  return from === through ? from : `${from} – ${through}`;
 }
 
 export function streakCandidates(kind: StreakKind): NonNullable<CategoryDefinition['candidates']> {
