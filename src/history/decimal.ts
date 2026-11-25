@@ -14,6 +14,9 @@ export class Exact {
   }
   static from(value: number | string | Exact): Exact {
     if (value instanceof Exact) return value;
+    // Scores are whole hundredths, which need no parsing.
+    const hundredths = Math.round(Number(value) * 100);
+    if (hundredths / 100 === value && Math.abs(hundredths) < 1e15) return new Exact(BigInt(hundredths), 100n);
     const [mantissa, exponent = '0'] = String(value).split('e');
     const [whole, fraction = ''] = mantissa.split('.');
     const scale = fraction.length - Number(exponent);
