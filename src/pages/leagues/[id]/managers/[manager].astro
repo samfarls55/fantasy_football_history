@@ -6,6 +6,7 @@ import Records from '../../../../components/Records.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
 import { fixed, isViewer, leagueHref, managerHref, openLeague, tabHref } from '../../../../league-page.ts';
 import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
+import { ordinal } from '../../../../history/careers.ts';
 import { readSeasons } from '../../../../history/read.ts';
 import { readManager, readManagers } from '../../../../history/managers.ts';
 import { readManagerName } from '../../../../history/manager-names.ts';
@@ -44,7 +45,6 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
 const page = view?.page;
 if (view && !page) Astro.response.status = 404;
 
-const ordinal = (place: number) => `${place}${['th', 'st', 'nd', 'rd'][place % 100 > 10 && place % 100 < 14 ? 0 : place % 10] ?? 'th'}`;
 const facts = page?.manager.facts;
 const belt = page?.belt;
 const plural = (count: number, word: string) => `${word}${count === 1 ? '' : 's'}`;

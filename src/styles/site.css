@@ -334,8 +334,8 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 }
 
 /* Tables: painted column labels over the goal line, a faint yard line under each manager, a painted line to close.
-   Former managers trail under a dashed line. */
-.table-wrap { overflow-x: auto; margin: 20px 0 0 -0.3em; padding-left: 0.3em; }
+   Former managers trail under a dashed line. The wrap holds its unseen words, so they scroll with it and never widen the page. */
+.table-wrap { position: relative; overflow-x: auto; margin: 20px 0 0 -0.3em; padding-left: 0.3em; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
 th, td { padding: 13px 14px; text-align: right; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }

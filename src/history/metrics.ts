@@ -27,7 +27,7 @@ export function careerMetrics(archive: Archive, identity: MetricIdentity, option
   const titleSeasons = seasons.filter(season => season.championId && owned(season).includes(season.championId));
   const facts: CareerFacts = { wins, losses, ties, games: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, winPercentage: winPercentage?.toNumber() ?? null,
     points: points.toNumber(), pointsAgainst: pointsAgainst.toNumber(), championships: titleSeasons.length, playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => owned(season).includes(id))).length };
-  return { facts, points, actualWins, winPercentage, games, performances, titleSeasons };
+  return { facts, points, pointsAgainst, actualWins, winPercentage, games, performances, titleSeasons };
 }
 export function careerFacts(archive: Archive, identity: MetricIdentity, options: MetricSelection = {}): CareerFacts {
   return careerMetrics(archive, identity, options).facts;

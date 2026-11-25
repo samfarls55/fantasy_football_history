@@ -23,12 +23,12 @@ export function extendTenure(tenure: Tenure, year: string, team: SeasonTeam, pre
   if (team.nameSource === 'historical-roster' && team.name !== previousTeam.name) tenure.events.push({ year, kind: 'name', label: `Played as ${team.name}`, predecessor: null });
 }
 
-function personSeasons(archive: Archive, personId: string): TeamSeason[] {
+export function personSeasons(archive: Archive, personId: string): TeamSeason[] {
   return archive.seasons.flatMap(season => season.teams.filter(team => team.personId === personId).map(team => ({ season, team }))).sort((a, b) => a.season.year.localeCompare(b.season.year));
 }
 
 /** Year precision comes from season rosters; account metadata never establishes historical names. */
-function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
+export function personTenures(archive: Archive, entries: TeamSeason[]): Tenure[] {
   const tenures: Tenure[] = [];
   for (const [index, { season, team }] of entries.entries()) {
     const previous = entries[index - 1];
