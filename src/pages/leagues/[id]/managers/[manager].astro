@@ -11,7 +11,7 @@ import { readBadges } from '../../../../history/badges.ts';
 import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
 import { ordinal } from '../../../../history/careers.ts';
 import { readSeasons } from '../../../../history/read.ts';
-import { readManager, readManagers } from '../../../../history/managers.ts';
+import { readManager } from '../../../../history/managers.ts';
 import { readManagerName } from '../../../../history/manager-names.ts';
 import { readManagerStats } from '../../../../history/manager-stats.ts';
 import { readRecordsHeld, recordUnit } from '../../../../history/records.ts';
@@ -25,11 +25,10 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
   const named = (await readManagerName(typed, { storePath }))!;
   const manager = named.id ? await readManager(named.id, { storePath }) : null;
   if (!manager) return { league, suggestion: named.suggestion, page: null };
-  const currentIds = new Set((await readManagers({ storePath }))!.filter(person => person.current).map(person => person.id));
   // Most-played leads, since that's where a record settles anything; among equals the most lopsided goes first. Former managers trail.
   // The streak reads from this manager's side ("Won 3"); a last meeting that tied leaves no streak.
   const versus = (await readManagerRivalries(manager.id, { storePath, scope: 'combined' }))!.rows
-    .map(row => ({ id: row.b.id, name: row.b.name, current: currentIds.has(row.b.id), record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
+    .map(row => ({ id: row.b.id, name: row.b.name, current: row.b.current, record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
       streak: row.streak && `${row.streak.result === 'W' ? 'Won' : 'Lost'} ${row.streak.count}`, games: row.games }))
     .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name));
   const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;

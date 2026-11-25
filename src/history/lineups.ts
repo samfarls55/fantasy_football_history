@@ -1,6 +1,7 @@
 import { Exact, exactSum } from './decimal.ts';
 import { recordedStarts } from './contributions.ts';
 import { identity } from './game-records.ts';
+import { perArchive } from './per-archive.ts';
 import type { ManagerStat, StatValue } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive, LineupPlayer, Performance } from './types.ts';
@@ -42,16 +43,13 @@ function opponents(archive: Archive) {
 }
 
 interface Lineup { own: Performance; opponent: Performance; started: Exact; best: Exact; gap: Exact }
-const solved = new WeakMap<Archive, Lineup[]>();
-/** Every regular-season lineup beside its week's best one, solved once per archive. A week with a slot or score nobody can know is left out. */
-function lineups(archive: Archive): Lineup[] {
-  const known = solved.get(archive);
-  if (known) return known;
+/** Every regular-season lineup beside its week's best one. A week with a slot or score nobody can know is left out. */
+const lineups = perArchive((archive): Lineup[] => {
   const fits = new Map(archive.players.map(player => [player.id, new Set([...slotPositions].filter(([, positions]) => positions.includes(player.position!)).map(([slot]) => slot))]));
   for (const own of archive.performances) for (const { playerId, slot } of own.starters) if (slot) fits.get(playerId)!.add(slot);
   const opponent = opponents(archive);
   const slotsOf = new Map(archive.seasons.map(season => [season.id, startingSlots(season.rosterPositions)]));
-  const rows = archive.performances.filter(own => own.competition === 'regular').flatMap(own => {
+  return archive.performances.filter(own => own.competition === 'regular').flatMap(own => {
     const slots = slotsOf.get(own.seasonId)!;
     const players = [...own.starters, ...own.bench];
     if (!players.length || players.some(player => player.points === null) || own.starters.some(player => player.slot === null) || slots.some(slot => !slotPositions.has(slot))) return [];
@@ -61,9 +59,7 @@ function lineups(archive: Archive): Lineup[] {
     const best = filled.compare(started) < 0 ? started : filled;
     return [{ own, opponent: opponent(own), started, best, gap: best.subtract(started) }];
   });
-  solved.set(archive, rows);
-  return rows;
-}
+});
 
 const chances = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
 /** Each manager's value over the weeks whose best lineup is known. */

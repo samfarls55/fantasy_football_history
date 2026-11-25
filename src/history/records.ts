@@ -15,6 +15,7 @@ import { lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
 import { armyCandidates, charmCandidates, journeymanCandidates } from './player-records.ts';
+import { perArchive } from './per-archive.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
 import type { Place } from './tabs.ts';
@@ -212,9 +213,18 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   return { category: { ...category, displayPrecision }, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
     href: categoryHref(category.key, { ...selection, result }), nextHref: nextLimit ? categoryHref(category.key, { ...selection, result, limit: nextLimit }) : null };
 }
+type Ranking = ReturnType<typeof rankCategory>;
+const rankings = perArchive(() => new Map<CategoryDefinition, Ranking>());
+/** A record in its default selection, which every page reads. */
+function ranking(archive: Archive, category: CategoryDefinition): Ranking {
+  const known = rankings(archive);
+  const view = known.get(category) ?? rankCategory(archive, category, {});
+  known.set(category, view);
+  return view;
+}
 /** Whether anyone holds the record in this league. */
 export function hasRecord(archive: Archive, category: CategoryDefinition): boolean {
-  return rankCategory(archive, category, {}).leaders.length > 0;
+  return ranking(archive, category).leaders.length > 0;
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
 export async function readCategory(key: string, options: RecordSelection = {}) {
@@ -223,7 +233,6 @@ export async function readCategory(key: string, options: RecordSelection = {}) {
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
-type Ranking = ReturnType<typeof rankCategory>;
 /** What a record card shows. */
 export interface CardView {
   category: Omit<CategoryDefinition, 'group' | 'scope'>;
@@ -232,8 +241,8 @@ export interface CardView {
 type CardRow = Partial<Ranking['rows'][number]> & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
 /** A record's card in its place. A record nobody holds has no card, nor does one another record already tells. */
 export function recordCard(archive: Archive, category: CategoryDefinition) {
-  const view = rankCategory(archive, category, {});
-  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => rankCategory(archive, other, {}).leaders);
+  const view = ranking(archive, category);
+  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => ranking(archive, other).leaders);
   return view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
 }
 /** The record cards of these places, in registry order. */
@@ -246,7 +255,7 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  return recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}))
+  return recordCategories.filter(category => category.candidates).map(category => ranking(archive, category))
     .filter(view => view.leaders.some(row => (row.personId === personId || row.tied && row.opponentId === personId) && (row.value !== 0 || view.category.order === 'ascending')))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
@@ -254,7 +263,7 @@ export async function readRecordCollection(options: { storePath?: string } = {})
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => {
-    const view = category.candidates ? rankCategory(archive, category, {}) : null;
+    const view = category.candidates ? ranking(archive, category) : null;
     return { ...category, displayPrecision: view?.category.displayPrecision, leaders: view?.leaders ?? [], href: view ? categoryHref(category.key) : null };
   }) }));
 }
@@ -264,8 +273,8 @@ const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-seas
 export async function readHome(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  const categories = recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}));
-  const identity = (row: ReturnType<typeof rankCategory>['rows'][number]) => {
+  const categories = recordCategories.filter(category => category.candidates).map(category => ranking(archive, category));
+  const identity = (row: Ranking['rows'][number]) => {
     const owner = archive.people.find(person => person.id === row.personId)!;
     return { ...row, owner: { id: owner.id, name: owner.name, avatar: owner.avatar } };
   };

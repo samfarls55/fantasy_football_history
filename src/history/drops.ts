@@ -1,12 +1,12 @@
 import { exactSum } from './decimal.ts';
-import { recordedStarts, playerContributionHref, startGame, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
+import { playerStarts, playerContributionHref, startGame, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipDeparture } from './ownership.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
 /** Every drop keeps its own later same-season history, including starts after a reacquisition. */
 export function dropStarts(archive: Archive, event: OwnershipDeparture, selection: ContributionSelection = {}) {
-  return recordedStarts(archive, {}, { ...selection, season: event.year }).filter(row => row.playerId === event.playerId && row.performance.seasonId === event.seasonId && row.performance.week > event.week && row.performance.personId !== event.personId);
+  return playerStarts(archive, event.seasonId, event.playerId, selection.scope).filter(({ performance }) => performance.week > event.week && performance.personId !== event.personId);
 }
 export function dropHref(event: OwnershipDeparture, selection: ContributionSelection = {}) {
   const query = new URLSearchParams({ tab: 'players', scope: selection.scope ?? 'regular', view: 'drops', event: event.id });

@@ -1,12 +1,12 @@
 import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
-import { recordedStarts, playerContributionHref, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
+import { playerStarts, playerContributionHref, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipSpell } from './ownership.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
 export function pickupStarts(archive: Archive, spell: OwnershipSpell, selection: ContributionSelection = {}) {
-  return recordedStarts(archive, { personId: spell.personId }, { ...selection, season: spell.year }).filter(row => row.playerId === spell.playerId && row.performance.seasonId === spell.seasonId && row.performance.week > spell.addWeek && (spell.departureWeek === null || row.performance.week < spell.departureWeek));
+  return playerStarts(archive, spell.seasonId, spell.playerId, selection.scope).filter(({ performance }) => performance.personId === spell.personId && performance.week > spell.addWeek && (spell.departureWeek === null || performance.week < spell.departureWeek));
 }
 export function pickupHref(spell: OwnershipSpell, selection: ContributionSelection = {}) {
   return `${playerContributionHref({ personId: spell.personId }, spell.playerId, { scope: selection.scope, season: spell.year })}&pickup=${encodeURIComponent(spell.id)}`;

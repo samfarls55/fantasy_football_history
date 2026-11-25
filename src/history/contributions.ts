@@ -3,6 +3,7 @@ import { contextualDrops, selectedDrop } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
 import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
+import { perArchive } from './per-archive.ts';
 import { inScope } from './scope.ts';
 import type { Archive, Performance, Scope } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
@@ -13,14 +14,19 @@ export type ContributionView = typeof contributionViews[number];
 export interface ContributionSelection { storePath?: string; season?: string; scope?: Scope; pickup?: string; view?: ContributionView; event?: string }
 export interface RecordedStart { performance: Performance; playerId: string; points: number }
 
+const startsIn = (performance: Performance): RecordedStart[] => performance.starters.filter(player => player.playerId !== '0' && player.points !== null)
+  .map(player => ({ performance, playerId: player.playerId, points: player.points! }));
 /** Completed paired weekly legs are the shared actual-start boundary, including unresolved multiweek contests. */
 export function recordedStarts(archive: Archive, identity: ContributionIdentity = {}, selection: ContributionSelection = {}): RecordedStart[] {
   return archive.performances.filter(row => (!identity.personId || row.personId === identity.personId)
     && (!identity.franchiseId || row.franchiseId === identity.franchiseId)
     && (!selection.season || row.year === selection.season)
-    && inScope(row.competition, selection.scope ?? 'regular')).flatMap(performance => performance.starters
-    .filter(player => player.playerId !== '0' && player.points !== null)
-    .map(player => ({ performance, playerId: player.playerId, points: player.points! })));
+    && inScope(row.competition, selection.scope ?? 'regular')).flatMap(startsIn);
+}
+const startsByPlayer = perArchive(archive => Map.groupBy(archive.performances.flatMap(startsIn), start => `${start.performance.seasonId}/${start.playerId}`));
+/** One player's starts in a season, for anyone. */
+export function playerStarts(archive: Archive, seasonId: string, playerId: string, scope: Scope = 'regular'): RecordedStart[] {
+  return (startsByPlayer(archive).get(`${seasonId}/${playerId}`) ?? []).filter(({ performance }) => inScope(performance.competition, scope));
 }
 
 function context(archive: Archive, identity: ContributionIdentity) {

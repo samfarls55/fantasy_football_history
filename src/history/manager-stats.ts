@@ -6,6 +6,7 @@ import { lineupStats } from './lineups.ts';
 import { luckStats } from './luck.ts';
 import { moveHabitStats } from './move-habits.ts';
 import { playerStats } from './player-records.ts';
+import { perArchive } from './per-archive.ts';
 import { recordUnit } from './records.ts';
 import { weeklyStats } from './weekly.ts';
 import type { Place } from './tabs.ts';
@@ -57,7 +58,7 @@ export const managerStats: ManagerStat[] = [
   ...moveHabitStats,
 ];
 
-export function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {
+function rank(archive: Archive, { values, ...stat }: ManagerStat) {
   const blocked = archive.coverage.some(issue => issue.blocks.includes(stat.key));
   const known = blocked ? [] : [...values(archive)].map(([personId, { value, ...rest }]) => {
     const { name, current } = archive.people.find(person => person.id === personId)!;
@@ -75,7 +76,15 @@ export function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {
       rank: 1 + known.filter(other => order(other, entry) < 0).length, tied: known.filter(other => order(other, entry) === 0).length > 1 };
   }) };
 }
-export type StatView = ReturnType<typeof rankStat>;
+export type StatView = ReturnType<typeof rank>;
+const views = perArchive(() => new Map<ManagerStat, StatView>());
+/** Everyone's value and rank in a stat, best first. */
+export function rankStat(archive: Archive, stat: ManagerStat): StatView {
+  const known = views(archive);
+  const view = known.get(stat) ?? rank(archive, stat);
+  known.set(stat, view);
+  return view;
+}
 
 /** Whether anyone has a value for the stat in this league. */
 export function hasStat(archive: Archive, stat: ManagerStat): boolean {
