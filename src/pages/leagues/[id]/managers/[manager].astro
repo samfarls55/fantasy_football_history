@@ -2,9 +2,12 @@
 import League from '../../../../layouts/League.astro';
 import Manager from '../../../../components/Manager.astro';
 import Miss from '../../../../components/Miss.astro';
+import Rank from '../../../../components/Rank.astro';
 import Records from '../../../../components/Records.astro';
+import Section from '../../../../components/Section.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
 import { fixed, isViewer, leagueHref, managerHref, openLeague, tabHref } from '../../../../league-page.ts';
+import { readBadges } from '../../../../history/badges.ts';
 import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
 import { ordinal } from '../../../../history/careers.ts';
 import { readSeasons } from '../../../../history/read.ts';
@@ -31,7 +34,7 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
     .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name));
   const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;
   return { league, suggestion: null, page: {
-    manager, versus, belt: await readManagerBelt(manager.id, { storePath }), records: (await readRecordsHeld(manager.id, { storePath }))!,
+    manager, versus, badge: (await readBadges({ storePath }))!.find(badge => badge.personId === manager.id), belt: await readManagerBelt(manager.id, { storePath }), records: (await readRecordsHeld(manager.id, { storePath }))!,
     ranks: (await readManagerStats({ storePath }))!.flatMap(({ rows, ...stat }) => {
       const row = rows.find(row => row.personId === manager.id);
       return row ? [{ ...stat, row, of: rows.length }] : [];
@@ -47,6 +50,7 @@ if (view && !page) Astro.response.status = 404;
 
 const facts = page?.manager.facts;
 const belt = page?.belt;
+const badge = page?.badge;
 const plural = (count: number, word: string) => `${word}${count === 1 ? '' : 's'}`;
 const career = facts && [
   { figure: facts.championships, unit: plural(facts.championships, 'title'), rule: 'Championship games won.' },
@@ -78,6 +82,16 @@ const career = facts && [
 
   {page && (
     <>
+      {badge && (
+      <Section id="badge" title={badge.badge}>
+        <ul class="ranks">
+          <Rank {...badge} href={`${tabHref(Astro, tabs.find(tab => tab.places.includes(badge.place))!.key)}#${badge.key}`} first={badge.rank === 1}>
+            {badge.tied && 'Tied '}<strong>{badge.rank > 1 && `${ordinal(badge.rank)} `}{badge.end}</strong> of {badge.of} current managers
+          </Rank>
+        </ul>
+      </Section>
+      )}
+
       <section class="block" aria-label="Career">
         <ul class="career">
           {career!.map(stat => (
@@ -116,16 +130,7 @@ const career = facts && [
             <h3>{tab.name}</h3>
             <ul class="ranks">
               {ranks.map(({ key, label, rule, row, of }) => (
-                <li>
-                  <a href={`${tabHref(Astro, tab.key)}#${key}`}>{label}</a>
-                  <div class="rank-value">
-                    {row.names && <span class="stat-text">{row.names.join(', ')}</span>}
-                    <span class="stat-figure">{row.figure}</span>
-                    <details class="play-how"><summary class="play-unit">{row.unit}</summary><p>{rule}</p></details>
-                    {row.sample && <span class="stat-sample">{row.sample}</span>}
-                  </div>
-                  <p class:list={['rank-place', { first: row.rank === 1 }]}>{row.tied && 'Tied '}<strong>{ordinal(row.rank)}</strong> of {of}</p>
-                </li>
+                <Rank {...row} href={`${tabHref(Astro, tab.key)}#${key}`} label={label} rule={rule} first={row.rank === 1}>{row.tied && 'Tied '}<strong>{ordinal(row.rank)}</strong> of {of}</Rank>
               ))}
             </ul>
           </>

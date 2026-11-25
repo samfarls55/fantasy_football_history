@@ -469,6 +469,17 @@ tr.former th { font-weight: 600; }
 .rank-place strong { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; }
 .rank-place.first { color: var(--paint); }
 
+/* Every manager beside their badge and its stat; a phone stacks the two. */
+.managers { list-style: none; max-width: 64rem; margin: 20px 0 0; padding: 0; border-top: 6px solid var(--paint); }
+.managers li { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 5fr) minmax(0, 4fr); gap: 0 20px; align-items: baseline; min-height: 56px; padding: 8px 0; border-bottom: 2px solid var(--chalk-faint); }
+.managers [data-person] { justify-self: start; margin-left: -0.12em; font-size: 22px; line-height: 1.2; }
+.badge { font-family: var(--stencil); font-weight: 900; font-size: 24px; line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase; color: var(--chalk); }
+.badge-stat { padding-block: 11px; line-height: 1.3; text-wrap: balance; text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 4px; }
+.badge-stat:is(:hover, :focus-visible) { text-decoration-color: var(--paint); }
+.badge-value { text-align: right; color: var(--chalk); }
+.badge-value .stat-figure { font-weight: 800; font-size: 20px; color: var(--paint); }
+#badge .rank-place strong { font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; }
+
 /* The belt: a row of weeks per season, each reign a block from the week it began. The chosen one is hollow, and its holder and start stand painted above the field.
    A block with room carries its holder's name; the looked-up manager's are white. */
 .belt { position: relative; min-width: 0; margin: 8px 0 0; padding: 96px 0 0; border: 0; border-top: 6px solid var(--paint); }
@@ -595,6 +606,10 @@ tr.former th { font-weight: 600; }
   /* A rank is two lines on a phone: the stat, then the figure and the place. */
   .ranks li { grid-template-columns: minmax(0, 1fr) auto; }
   .ranks a { grid-column: 1 / -1; }
+  /* A badge too: whose it is, then its stat. */
+  .managers li { grid-template-columns: minmax(0, 1fr) auto; }
+  .badge { font-size: 20px; text-align: right; }
+  #badge .rank-place { grid-column: 1 / -1; text-align: left; }
   /* A meeting is two lines on a phone: the result and score, then when it was. */
   .meetings ol { grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; }
   .meet-score { text-align: left; }
