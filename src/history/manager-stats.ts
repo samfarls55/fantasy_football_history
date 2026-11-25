@@ -29,7 +29,7 @@ export interface ManagerStat {
   key: string;
   /** The table it's a column of. */
   place: Place;
-  /** What is counted, in plain words. The league's own data may set it: "150+ point games". */
+  /** What is counted, in plain words. The league's own data may set it: "150+ points". */
   label: Text;
   unit: Text; percent?: boolean;
   displayPrecision: number;

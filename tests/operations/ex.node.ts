@@ -4,6 +4,7 @@ import { publishControlledHistory as publish, withHistory } from '../support/his
 import { aftermathSource, withEarlierSeason } from '../fixtures/aftermath-source.ts';
 import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
 
+// The context is how and when he left, and the card names nobody he started for.
 const exes = async (storePath: string) => (await readCategory('the-ex', { storePath }))!.rows.map(row => [row.manager, row.name, row.value, row.leaderContext, row.startedFor]);
 
 test('published exes score against the manager who let them go in later weeks, until that manager rosters them again', async () => {
@@ -28,9 +29,9 @@ test('published exes score against the manager who let them go in later weeks, u
       { week: 7, type: 'trade', adds: { A: 3 }, drops: { A: 1 } },
     ]));
     assert.deepEqual(await exes(storePath), [
-      ['Record manager 02', 'Player A', 30, 'Record manager 02 · Dropped Week 5 · 2021 · 1 start', ['Record manager 01']],
-      ['Record manager 01', 'Player A', 20.1, 'Record manager 01 · Dropped Week 2 · 2021 · 1 start', ['Record manager 02']],
-      ['Record manager 01', 'Player A', 15, 'Record manager 01 · Traded Week 7 · 2021 · 2 starts', ['Record manager 03']],
+      ['Record manager 02', 'Player A', 30, 'Record manager 02 · Dropped Week 5 · 2021', undefined],
+      ['Record manager 01', 'Player A', 20.1, 'Record manager 01 · Dropped Week 2 · 2021', undefined],
+      ['Record manager 01', 'Player A', 15, 'Record manager 01 · Traded Week 7 · 2021', undefined],
     ]);
     const card = (await readPlaceRecords(['moves'], { storePath }))!.find(view => view.category.key === 'the-ex')!;
     assert.deepEqual(card.leaders.map(row => [row.id, row.exactKey, row.period]), [['900000000000002021:930000000000000003:A:2', '30/1', { year: '2021', week: 6, playedAt: null }]]);
@@ -55,7 +56,7 @@ test('published exes stay with the replaced manager and end with their season', 
       { pairs: '12 34', starts: { 2: { A: 15 } } },
     ], [{ week: 1, type: 'free_agent', drops: { A: 1 } }, { week: 1, type: 'waiver', adds: { A: 2 } }]);
     await publish(storePath, withEarlierSeason(aftermathSource([{ pairs: '12 34', starts: { 2: { A: 60 } } }, { pairs: '12 34', starts: { 2: { A: 70 } } }], []), earlier));
-    assert.deepEqual(await exes(storePath), [['Record manager 05', 'Player A', 15, 'Record manager 05 · Dropped Week 1 · 2020 · 1 start', ['Record manager 02']]]);
+    assert.deepEqual(await exes(storePath), [['Record manager 05', 'Player A', 15, 'Record manager 05 · Dropped Week 1 · 2020', undefined]]);
     assert.deepEqual((await readCategory('the-ex', { storePath, season: '2021' }))!.rows, []);
   });
 });

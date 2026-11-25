@@ -54,7 +54,7 @@ test('published season highs faced wait for a completed season and count a tied 
     (source.responses[`league/${source.seedLeagueId}`] as any).status = 'complete';
     await publish(storePath, source);
     // M1's high of 100 came twice, both against M2. M2's 90, M3's 95 and M4's 60 came once each.
-    assert.deepEqual(await rows(storePath, 'highs-faced'), [['M02', '2', '3 games', 1], ['M01', '1', '3 games', 2], ['M03', '1', '3 games', 2], ['M04', '1', '3 games', 2]]);
+    assert.deepEqual(await rows(storePath, 'highs-faced'), [['M02', '2', undefined, 1], ['M01', '1', undefined, 2], ['M03', '1', undefined, 2], ['M04', '1', undefined, 2]]);
     // An override takes M1's week 2 to 99, so M2 faced M1's only high in week 1.
     games(source, 2)[0].custom_points = 99;
     await publish(storePath, source);
@@ -81,7 +81,7 @@ test('published luck stats stay with the person who held the roster, former mana
     assert.deepEqual(await rows(storePath, 'robbed'), [['M99', '2', '2 weeks', 1], ['M02', '1', '1 week', 2], ['M01', '0', '3 weeks', 3], ['M03', '0', '3 weeks', 3], ['M04', '0', '3 weeks', 3]]);
     assert.deepEqual(await rows(storePath, 'close-games'), [['M01', '2–0', undefined, 1], ['M99', '0–2', undefined, 2]]);
     // M3 and M4 repeated their scores, so each faced a tied high twice. M2 has no completed season: unknown, not zero.
-    assert.deepEqual(await rows(storePath, 'highs-faced'), [['M03', '2', '2 games', 1], ['M04', '2', '2 games', 1], ['M01', '1', '2 games', 3], ['M99', '1', '2 games', 3]]);
+    assert.deepEqual(await rows(storePath, 'highs-faced'), [['M03', '2', undefined, 1], ['M04', '2', undefined, 1], ['M01', '1', undefined, 3], ['M99', '1', undefined, 3]]);
     const robbed = (await readManagerStats({ storePath }))!.find(stat => stat.key === 'robbed')!;
     assert.deepEqual(robbed.rows.filter(row => !row.current).map(row => row.name), ['Record manager 99']);
   });

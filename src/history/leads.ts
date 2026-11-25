@@ -7,8 +7,8 @@ import type { Archive } from './types.ts';
 const wording: Record<string, { name?: string; verb?: string; shame?: boolean; worst?: boolean }> = {
   titles: { name: 'Most titles' },
   record: { name: 'Most wins' },
-  'losses-better-lineup': { name: 'Most losses a better lineup wins', shame: true, worst: true },
-  'most-started': { name: 'Most starts by one player for one manager', verb: 'started' },
+  'losses-better-lineup': { name: 'Most winnable losses', shame: true, worst: true },
+  'most-started': { name: 'Most-started player', verb: 'started' },
   'most-drafted': { verb: 'drafted' },
   'drafted-team': { verb: 'drafted' },
   'drafted-college': { verb: 'drafted' },

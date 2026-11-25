@@ -20,8 +20,8 @@ const sevenRecords = Array.from({ length: 6 }, (_, index) => {
 test('published charms and curses are the three best and three worst team records, whoever started the player', async () => {
   await withHistory(async storePath => {
     await publish(storePath, aftermathSource(sevenRecords, []));
-    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player P6', '6–0', '100.0% of games won'], [2, 'Player P5', '5–1', '83.3% of games won'], [3, 'Player P4', '4–2', '66.7% of games won']]);
-    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player P0', '0–6', '0.0% of games won'], [2, 'Player P1', '1–5', '16.7% of games won'], [3, 'Player P2', '2–4', '33.3% of games won']]);
+    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player P6', '6–0', '100.0% won'], [2, 'Player P5', '5–1', '83.3% won'], [3, 'Player P4', '4–2', '66.7% won']]);
+    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player P0', '0–6', '0.0% won'], [2, 'Player P1', '1–5', '16.7% won'], [3, 'Player P2', '2–4', '33.3% won']]);
     const leader = (await readCategory('lucky-charms', { storePath }))!.leaders[0];
     assert.deepEqual([leader.manager, leader.period], [undefined, null], 'a player holds it, not a manager');
   });
@@ -41,13 +41,13 @@ test('published charms and curses wait for five starts in every season, and keep
     const source = aftermathSource(fiveWeeks, []);
     await publish(storePath, source);
     // Player F won all four of his starts, one short.
-    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player A', '5–0', '100.0% of games won'], [2, 'Player B', '3–2', '60.0% of games won']]);
-    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–5', '0.0% of games won'], [2, 'Player C', '2–3', '40.0% of games won'], [2, 'Player E', '2–3', '40.0% of games won']]);
+    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player A', '5–0', '100.0% won'], [2, 'Player B', '3–2', '60.0% won']]);
+    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–5', '0.0% won'], [2, 'Player C', '2–3', '40.0% won'], [2, 'Player E', '2–3', '40.0% won']]);
     // An override ties managers 1 and 3 in week 5: players A and C have four decided starts left, and player E is in the middle of three.
     games(source, 5)[2].custom_points = 100;
     await publish(storePath, source);
-    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player B', '3–2', '60.0% of games won']]);
-    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–5', '0.0% of games won']]);
+    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player B', '3–2', '60.0% won']]);
+    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–5', '0.0% won']]);
   });
   await withHistory(async storePath => {
     const alike = week('12 34', { 1: { A: 1 }, 3: { B: 1 } });
@@ -60,8 +60,8 @@ test('published charms and curses add up a player’s teams across seasons and m
   await withHistory(async storePath => {
     // Manager 5 ran roster 1 in the first season. A second season asks for ten starts.
     await publish(storePath, withEarlierSeason(aftermathSource(fiveWeeks.map(({ pairs, starts }) => week(pairs, { ...starts, 2: { B2: 1 } })), []), aftermathSource(fiveWeeks, [])));
-    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player A', '10–0', '100.0% of games won']]);
-    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–10', '0.0% of games won']]);
+    assert.deepEqual(await records(storePath, 'lucky-charms'), [[1, 'Player A', '10–0', '100.0% won']]);
+    assert.deepEqual(await records(storePath, 'curses'), [[1, 'Player D', '0–10', '0.0% won']]);
   });
 });
 
@@ -143,10 +143,10 @@ test('published most-started players list every tie, count an actual zero and ke
       week('12 34', { 1: { A: 10 } }), week('13 24', { 1: { A: 10 } }), week('14 23', { 1: { A: 10 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'most-started'), [
-      ['05', ['Player A'], '3 starts', 'of 3 weeks', 1],
-      ['01', ['Player B'], '2 starts', 'of 3 weeks', 2],
-      ['02', ['Player C', 'Player D'], '2 starts each', 'of 6 weeks', 2],
-      ['03', ['Player C'], '1 start', 'of 6 weeks', 4],
+      ['05', ['Player A'], '3 starts', '3 weeks', 1],
+      ['01', ['Player B'], '2 starts', '3 weeks', 2],
+      ['02', ['Player C', 'Player D'], '2 starts each', '6 weeks', 2],
+      ['03', ['Player C'], '1 start', '6 weeks', 4],
     ]);
   });
 });
@@ -162,12 +162,12 @@ test('published scored-most-against adds up an opponent’s starters exactly, ti
       week('12 34', { 2: { A: 30.25 } }), week('12 34', { 2: { A: 30.25 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'scored-most-against'), [
-      ['05', ['Player A'], '60.50 points', 'in 2 weeks', 1],
-      ['04', ['Player B'], '12.50 points', 'in 4 weeks', 2],
-      ['01', ['Player A', 'Player C'], '0.30 points each', 'in 2 weeks', 3],
-      ['02', ['Player E'], '0.00 points', 'in 4 weeks', 4],
+      ['05', ['Player A'], '60.50 points', '2 weeks', 1],
+      ['04', ['Player B'], '12.50 points', '4 weeks', 2],
+      ['01', ['Player A', 'Player C'], '0.30 points each', '2 weeks', 3],
+      ['02', ['Player E'], '0.00 points', '4 weeks', 4],
     ]);
     const stats = (await readManagerStats({ storePath, places: ['players'] }))!;
-    assert.deepEqual(stats.map(stat => [stat.label, stat.unit]), [['Most-started player', 'starts'], ['Scored most against them', 'points']]);
+    assert.deepEqual(stats.map(stat => [stat.label, stat.unit]), [['Most-started player', 'starts'], ['Top scorer against', 'points']]);
   });
 });

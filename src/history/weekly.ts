@@ -21,7 +21,7 @@ function bigScoreLine(archive: Archive) {
 const bigScores: ManagerStat['values'] = archive => {
   const line = bigScoreLine(archive);
   return new Map([...Map.groupBy(regularScores(archive), ({ own }) => own.personId)].map(([personId, scores]) =>
-    [personId, { value: Exact.from(scores.filter(({ own }) => own.points >= line).length), sample: plural(scores.length, 'game') }]));
+    [personId, { value: Exact.from(scores.filter(({ own }) => own.points >= line).length), sample: plural(scores.length, 'week') }]));
 };
 
 /** Standard deviation of each score as a share of its week's average. An all-zero week has no such share, and one score has no swing. */
@@ -54,12 +54,12 @@ export const weeklyStats: ManagerStat[] = [
     rule: 'Regular-season weeks they had the league’s best score. Everyone tied for it gets one.' },
   { key: 'bottom-scores', place: 'games', label: 'Week’s bottom score', unit: 'times', displayPrecision: 0, better: 'lower', values: extremes('bottom'),
     rule: 'Regular-season weeks they had the league’s worst score. Everyone tied for it gets one.' },
-  { key: 'big-scores', place: 'games', label: archive => `${bigScoreLine(archive)}+ point games`, unit: 'games', displayPrecision: 0, better: 'higher', values: bigScores,
-    rule: 'Regular-season scores at or above the league’s line: its 80th-percentile score, to the nearest 10.' },
-  { key: 'boom-or-bust', place: 'games', label: 'Boom or bust: typical weekly swing, % of league average', unit: 'of league average', percent: true, displayPrecision: 1, better: 'higher', values: boomOrBust,
-    rule: 'How far their regular-season scores typically land from their own average, with each score taken as a share of that week’s league average (the standard deviation).' },
-  { key: 'early-wins', place: 'games', label: 'Win % in weeks 1–5', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: winRate(1, 5),
-    rule: 'Regular-season games won in weeks 1 to 5, with a tie counting as half a win.' },
-  { key: 'late-wins', place: 'games', label: 'Win % from week 9', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: winRate(9),
-    rule: 'Regular-season games won from week 9 to the end of the regular season, with a tie counting as half a win.' },
+  { key: 'big-scores', place: 'games', label: archive => `${bigScoreLine(archive)}+ points`, unit: 'games', displayPrecision: 0, better: 'higher', values: bigScores,
+    rule: 'Regular-season games with a score at or above the league’s line: its 80th-percentile score, to the nearest 10.' },
+  { key: 'boom-or-bust', place: 'games', label: 'Boom or bust', unit: 'weekly swing', percent: true, displayPrecision: 1, better: 'higher', values: boomOrBust,
+    rule: 'Typical weekly swing as a share of the league average: how far their regular-season scores land from their own average, each taken as a share of that week’s league average (the standard deviation).' },
+  { key: 'early-wins', place: 'games', label: 'Early win %', unit: 'weeks 1–5', percent: true, displayPrecision: 1, better: 'higher', values: winRate(1, 5),
+    rule: 'Share of regular-season games won in weeks 1 to 5, with a tie counting as half a win.' },
+  { key: 'late-wins', place: 'games', label: 'Late win %', unit: 'week 9 on', percent: true, displayPrecision: 1, better: 'higher', values: winRate(9),
+    rule: 'Share of games won from week 9 to the end of the regular season, with a tie counting as half a win.' },
 ];

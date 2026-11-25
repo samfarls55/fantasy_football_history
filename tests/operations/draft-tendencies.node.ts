@@ -7,7 +7,7 @@ import { publishControlledHistory as publish } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 
-/** Publishes a league and reads each Draft column's rows: rank, manager, names, figure with its unit, sample. */
+/** Publishes a league and reads each Draft column's rows: rank, manager, names, figure with its unit, and the sample, which no Draft column carries. */
 async function tendencies(source: ReturnType<typeof draftsSource>) {
   const directory = await mkdtemp(join(tmpdir(), 'museum-tendencies-'));
   const storePath = join(directory, 'history.json');
@@ -30,10 +30,10 @@ test('published drafted most often counts every type of finished draft for the p
     { year: '2019', drafts: [draftOf({ id: '19', rounds: 1, slots: 4, order: [1, 3, 2, 4], traded: { 13: 4 }, settings: { player_type: 1 } })] },
   ]));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'Player 11', '3 times', 'in 3 drafts'],
-    [2, 'Record manager 02', 'Player 12, Player 22, Player 32, Player 42', '2 times each', 'in 2 drafts'],
-    [2, 'Record manager 03', 'Player 13, Player 23, Player 33, Player 43', '2 times each', 'in 3 drafts'],
-    [2, 'Record manager 04', 'Player 14', '2 times', 'in 2 drafts'],
+    [1, 'Record manager 01', 'Player 11', '3 times', undefined],
+    [2, 'Record manager 02', 'Player 12, Player 22, Player 32, Player 42', '2 times each', undefined],
+    [2, 'Record manager 03', 'Player 13, Player 23, Player 33, Player 43', '2 times each', undefined],
+    [2, 'Record manager 04', 'Player 14', '2 times', undefined],
   ]);
 });
 
@@ -54,9 +54,9 @@ test('published most-drafted NFL team is the one recorded with each pick, team d
     13: null, 23: null, 33: 'DAL', 43: 'DAL', 14: 'GB', 24: 'CHI', 34: 'DET', 44: 'MIN',
   }, { 11: { team: 'LV' }, 21: { team: 'LV', position: 'DEF' } }));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'OAK', '2 times', 'in 4 picks'],
-    [1, 'Record manager 02', 'KC, NYJ', '2 times each', 'in 4 picks'],
-    [1, 'Record manager 03', 'DAL', '2 times', 'in 2 picks'],
+    [1, 'Record manager 01', 'OAK', '2 times', undefined],
+    [1, 'Record manager 02', 'KC, NYJ', '2 times each', undefined],
+    [1, 'Record manager 03', 'DAL', '2 times', undefined],
   ]);
 });
 
@@ -69,9 +69,9 @@ test('published most-drafted college leaves out team defenses and unknown colleg
     14: { college: 'Texas', position: 'DEF' }, 24: { college: 'Texas', position: 'DEF' }, 34: { college: 'Texas', position: 'DEF' }, 44: { college: 'Utah' }, 54: { college: 'Utah' },
   }));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'Iowa, Ohio State', '2 times each', 'in 5 picks'],
-    [1, 'Record manager 02', 'LSU', '2 times', 'in 2 picks'],
-    [1, 'Record manager 04', 'Utah', '2 times', 'in 2 picks'],
+    [1, 'Record manager 01', 'Iowa, Ohio State', '2 times each', undefined],
+    [1, 'Record manager 02', 'LSU', '2 times', undefined],
+    [1, 'Record manager 04', 'Utah', '2 times', undefined],
   ]);
 });
 
@@ -95,10 +95,10 @@ test('published average draft age measures each known birth date on the day of t
   })) Object.assign(source.responses['players/nfl'][id], player);
   const { 'draft-age': rows } = await tendencies(source);
   assert.deepEqual(rows, [
-    [1, 'Newcomer 4', undefined, '20.0 years', '1 pick'],
-    [1, 'Record manager 01', undefined, '20.0 years', '2 picks'],
-    [1, 'Record manager 04', undefined, '20.0 years', '1 pick'],
-    [4, 'Record manager 02', undefined, '22.5 years', '2 picks'],
-    [5, 'Record manager 03', undefined, '30.5 years', '2 picks'],
+    [1, 'Newcomer 4', undefined, '20.0 years', undefined],
+    [1, 'Record manager 01', undefined, '20.0 years', undefined],
+    [1, 'Record manager 04', undefined, '20.0 years', undefined],
+    [4, 'Record manager 02', undefined, '22.5 years', undefined],
+    [5, 'Record manager 03', undefined, '30.5 years', undefined],
   ], 'the youngest rank first');
 });

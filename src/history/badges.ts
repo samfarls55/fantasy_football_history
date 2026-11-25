@@ -28,15 +28,16 @@ export async function readBadges(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   const pairs = badges.flatMap(({ name: badge, stat, end }, order) => {
-    const { rows, key, place, label, rule, better } = rankStat(archive, stat);
+    const { rows, key, place, label, unit, rule, better } = rankStat(archive, stat);
     const current = rows.filter(row => row.current);
     // A stat's ranks count from its better end, so the other end counts back.
     const direction = (better === 'higher') === (end === 'highest') ? 1 : -1;
-    // The badge is the nickname, so a label led by its own drops it.
+    // A badge named like its stat would say the name twice, so what the stat counts stands in.
+    const counted = label.toLowerCase() === badge.toLowerCase() ? unit[0].toUpperCase() + unit.slice(1) : label;
     return current.filter(row => row.value > 0).map(({ name: manager, ...row }) => {
       const rank = 1 + current.filter(other => direction * (other.rank - row.rank) < 0).length;
       const tied = current.filter(other => other.rank === row.rank).length > 1;
-      return { ...row, manager, badge, order, key, place, rule, label: label.replace(/^.+: ./, start => start.at(-1)!.toUpperCase()),
+      return { ...row, manager, badge, order, key, place, rule, label: counted,
         rank, tied, standing: standing(rank, tied, end), of: current.length };
     });
   }).sort((a, b) => a.rank - b.rank || a.order - b.order || a.personId.localeCompare(b.personId));

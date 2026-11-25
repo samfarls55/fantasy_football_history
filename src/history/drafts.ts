@@ -64,15 +64,13 @@ function personPicks(archive: Archive) {
 type PersonPick = NonNullable<ReturnType<ReturnType<typeof personPicks>['get']>>[number];
 
 /** Each person's most-drafted answer, and every tied one. Answers drafted once each are no tendency. */
-function mostDrafted(answer: (row: PersonPick) => string | null | undefined, sample: (known: PersonPick[]) => string, name = answer): ManagerStat['values'] {
+function mostDrafted(answer: (row: PersonPick) => string | null | undefined, name = answer): ManagerStat['values'] {
   return archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
-    const known = picks.filter(answer);
-    const answers = [...Map.groupBy(known, answer).values()];
+    const answers = [...Map.groupBy(picks.filter(answer), answer).values()];
     const most = Math.max(...answers.map(rows => rows.length));
-    return most > 1 ? [[personId, { value: Exact.from(most), names: answers.filter(rows => rows.length === most).map(([row]) => name(row)!).sort((a, b) => a.localeCompare(b)), sample: sample(known) }]] : [];
+    return most > 1 ? [[personId, { value: Exact.from(most), names: answers.filter(rows => rows.length === most).map(([row]) => name(row)!).sort((a, b) => a.localeCompare(b)) }]] : [];
   }));
 }
-const picksMade = (rows: PersonPick[]) => `in ${plural(rows.length, 'pick')}`;
 
 const easternDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' });
 const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
@@ -80,17 +78,17 @@ const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archi
     const start = draft.source.start_time;
     return start && player.birthDate && player.position !== 'DEF' ? [(Date.parse(easternDay.format(start)) - Date.parse(player.birthDate)) / 86_400_000] : [];
   });
-  return days.length ? [[personId, { value: exactSum(days).divide(Exact.from('365.25').multiply(days.length)), sample: plural(days.length, 'pick') }]] : [];
+  return days.length ? [[personId, { value: exactSum(days).divide(Exact.from('365.25').multiply(days.length)) }]] : [];
 }));
 
 /** Draft's Scouting reports table. */
 export const draftStats: ManagerStat[] = [
-  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, rows => `in ${plural(new Set(rows.map(row => row.draft)).size, 'draft')}`, row => row.player.name),
+  { key: 'most-drafted', place: 'draft', label: 'Most-drafted player', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, row => row.player.name),
     rule: 'The player they picked most, at least twice. Every finished draft of any type, keepers included.' },
-  { key: 'drafted-team', place: 'draft', label: 'Most-drafted NFL team', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.pick.source.metadata.team, picksMade),
+  { key: 'drafted-team', place: 'draft', label: 'Most-drafted team', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.pick.source.metadata.team),
     rule: 'The NFL team they picked from most, at least twice, going by each player’s team at the draft. Every finished draft of any type, keepers included.' },
-  { key: 'drafted-college', place: 'draft', label: 'Most-drafted college', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.position === 'DEF' ? null : row.player.college, picksMade),
+  { key: 'drafted-college', place: 'draft', label: 'Most-drafted college', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.position === 'DEF' ? null : row.player.college),
     rule: 'The college they picked from most, at least twice. Every finished draft of any type, keepers included; team defenses and unknown colleges don’t count.' },
-  { key: 'draft-age', place: 'draft', label: 'Average age when drafted', unit: 'years', displayPrecision: 1, better: 'lower', values: draftAge,
+  { key: 'draft-age', place: 'draft', label: 'Average draft age', unit: 'years', displayPrecision: 1, better: 'lower', values: draftAge,
     rule: 'The average of each player’s age on the day of the draft. Every finished draft of any type, keepers included; team defenses and unknown birth dates don’t count.' },
 ];

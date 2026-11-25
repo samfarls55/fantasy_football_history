@@ -99,64 +99,64 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Regular-season games won, with a tie counting as half a win.' },
   { key: 'career-points', name: 'Most career points', group: 'Careers', unit: 'points', displayPrecision: 2, scope: 'games', candidates: careerCandidates('career-points'),
     rule: 'Official regular-season scores added up, all seasons together.' },
-  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', place: 'home', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title'),
+  { key: 'best-without-title', name: 'Best season without a title', group: 'Seasons', place: 'home', unit: 'scoring vs league', percent: true, signed: true, displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('best-without-title'),
     rule: 'Their regular-season points per game vs the league average, among teams that didn’t win the title.' },
-  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', place: 'luck', unit: 'more wins than their scores earned', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season'),
-    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many extra they got.' },
-  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', place: 'luck', unit: 'fewer wins than their scores earned', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
-    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, that’s the wins their scores earned; this is how many they fell short.' },
-  { key: 'points-in-win', name: 'Fewest points in a win', group: 'Matchups', place: 'luck', unit: 'regular-season points', displayPrecision: 2, scope: 'regular', order: 'ascending', candidates: resultCandidates('won'),
+  { key: 'luckiest-season', name: 'Luckiest season', group: 'Seasons', place: 'luck', unit: 'wins above expected', displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('luckiest-season'),
+    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, those are their expected wins; this is how many more they got.' },
+  { key: 'unluckiest-season', name: 'Unluckiest season', group: 'Seasons', place: 'luck', unit: 'wins below expected', displayPrecision: 1, shame: true, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('unluckiest-season'),
+    rule: 'Each regular-season week counts as the share of the league they outscored. Added up, those are their expected wins; this is how many fewer they got.' },
+  { key: 'points-in-win', name: 'Fewest points in a win', group: 'Matchups', place: 'luck', unit: 'points', displayPrecision: 2, scope: 'regular', order: 'ascending', candidates: resultCandidates('won'),
     rule: 'The winner’s official score in a regular-season game. A tie isn’t a win.' },
-  { key: 'points-in-loss', name: 'Most points in a loss', group: 'Matchups', place: 'luck', unit: 'regular-season points', displayPrecision: 2, shame: true, scope: 'regular', candidates: resultCandidates('lost'),
+  { key: 'points-in-loss', name: 'Most points in a loss', group: 'Matchups', place: 'luck', unit: 'points', displayPrecision: 2, shame: true, scope: 'regular', candidates: resultCandidates('lost'),
     rule: 'The loser’s official score in a regular-season game. A tie isn’t a loss.' },
-  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', place: 'legacy', unless: 'best-without-title', unit: 'vs league avg', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
+  { key: 'dominant-season', name: 'Most dominant season', group: 'Seasons', place: 'legacy', unless: 'best-without-title', unit: 'scoring vs league', percent: true, signed: true, displayPrecision: 1, scope: 'regular', completedSeasons: true, candidates: seasonCandidates('dominant-season'),
     rule: 'Their regular-season points per game vs the league average.' },
   { key: 'belt-run', name: 'Longest belt run', group: 'Matchups', place: 'legacy', unit: 'defenses', displayPrecision: 0, scope: 'none', candidates: beltCandidates,
     rule: 'Games in one reign the belt holder didn’t lose, regular season and championship playoffs together.' },
-  { key: 'bridesmaid', name: 'Most finals lost without a title', group: 'Careers', place: 'legacy', unit: 'finals lost', displayPrecision: 0, shame: true, scope: 'none', candidates: bridesmaidCandidates,
+  { key: 'bridesmaid', name: 'Most finals lost without a title', group: 'Careers', place: 'legacy', unit: 'finals', displayPrecision: 0, shame: true, scope: 'none', candidates: bridesmaidCandidates,
     rule: 'Championship games lost by managers who have never won one.' },
-  { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'regular-season points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
+  { key: 'highest-score', name: 'Highest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week.' },
-  { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', place: 'games', unit: 'regular-season points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
+  { key: 'lowest-score', name: 'Lowest score', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, shame: true, scope: 'games', order: 'ascending', candidates: scoreCandidates,
     rule: 'A team’s official score for one regular-season week. A real zero counts; an unplayed week doesn’t.' },
-  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', place: 'games', unit: 'regular-season point margin', displayPrecision: 2, scope: 'games', candidates: marginCandidates,
+  { key: 'biggest-blowout', name: 'Biggest blowout', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', candidates: marginCandidates,
     rule: 'The gap between the two final scores of a regular-season game.' },
-  { key: 'closest-game', name: 'Closest game', group: 'Matchups', place: 'games', unit: 'regular-season point margin', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
+  { key: 'closest-game', name: 'Closest game', group: 'Matchups', place: 'games', unit: 'points', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
     rule: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' },
-  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', place: 'games', unit: 'regular-season wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
+  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', place: 'games', unit: 'wins', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
     rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
-  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'regular-season losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
+  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'losses', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
     rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
-  { key: 'worst-managed-week', name: 'Worst-managed week', group: 'Matchups', place: 'lineups', unit: 'regular-season points short of their best lineup', displayPrecision: 2, shame: true, scope: 'regular', candidates: worstManagedCandidates,
-    rule: `What the best legal lineup from that regular-season week’s roster would have added. ${currentPositions}` },
-  { key: 'benched-player', name: 'Most points left on the bench by one player', group: 'Players', place: 'lineups', unit: 'regular-season points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
-    rule: 'A player’s score in a regular-season week spent on the bench.' },
-  { key: 'lowest-starter', name: 'Lowest starter score', group: 'Players', place: 'lineups', unit: 'regular-season points', displayPrecision: 2, verb: 'started', shame: true, scope: 'games', order: 'ascending', candidates: lowestStarterCandidates,
+  { key: 'worst-managed-week', name: 'Worst-managed week', group: 'Matchups', place: 'lineups', unit: 'below best lineup', displayPrecision: 2, shame: true, scope: 'regular', candidates: worstManagedCandidates,
+    rule: `Points the best legal lineup from that regular-season week’s roster would have added. ${currentPositions}` },
+  { key: 'benched-player', name: 'Best benched player', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
+    rule: 'The most points one player scored in a regular-season week spent on the bench.' },
+  { key: 'lowest-starter', name: 'Lowest starter score', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'started', shame: true, scope: 'games', order: 'ascending', candidates: lowestStarterCandidates,
     rule: 'A player’s recorded score in a regular-season starting lineup. An empty slot doesn’t count.' },
-  { key: 'productive-pickup', name: 'Best pickup', group: 'Players', place: 'moves', unit: 'regular-season points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
+  { key: 'productive-pickup', name: 'Best pickup', group: 'Players', place: 'moves', unit: 'points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
     rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
-  { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'regular-season points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
+  { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'points for other managers', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
     rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
-  { key: 'cant-quit-you', name: 'Can’t quit you: most pickups of one player', group: 'Players', place: 'moves', unit: 'pickups', displayPrecision: 0, verb: 'picked up', scope: 'none', candidates: repeatPickupCandidates,
-    rule: 'Completed waiver claims and free-agent moves by one manager for the same player, all seasons together. At least two.' },
-  { key: 'the-ex', name: 'The ex: most points against the manager who let him go', group: 'Players', place: 'moves', unit: 'regular-season points against that manager', displayPrecision: 2, verb: 'let go of', shame: true, scope: 'games', candidates: exCandidates,
-    rule: 'What the player scored as a starter against the manager who dropped or traded him, in later regular-season weeks that season, until that manager got him back.' },
-  { key: 'lopsided-trade', name: 'Most lopsided trade', group: 'Players', place: 'moves', unit: 'more regular-season points as starters', displayPrecision: 2, scope: 'games', candidates: lopsidedTradeCandidates,
+  { key: 'cant-quit-you', name: 'Can’t quit you', group: 'Players', place: 'moves', unit: 'pickups', displayPrecision: 0, verb: 'picked up', scope: 'none', candidates: repeatPickupCandidates,
+    rule: 'The most pickups of one player by one manager: completed waiver claims and free-agent moves, all seasons together. At least two.' },
+  { key: 'the-ex', name: 'The ex', group: 'Players', place: 'moves', unit: 'revenge points', displayPrecision: 2, verb: 'let go of', shame: true, scope: 'games', candidates: exCandidates,
+    rule: 'The most points a player scored as a starter against the manager who dropped or traded him, in later regular-season weeks that season, until that manager got him back.' },
+  { key: 'lopsided-trade', name: 'Most lopsided trade', group: 'Players', place: 'moves', unit: 'more points as starters', displayPrecision: 2, scope: 'games', candidates: lopsidedTradeCandidates,
     rule: 'The gap between what each side’s new players scored in its starting lineups in the weeks after the trade, until each player left or that regular season ended. Only trades between two managers, with no picks or waiver budget.' },
-  { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', place: 'players', unit: 'regular-season points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
+  { key: 'player-contributions', name: 'Top scorer for one manager', group: 'Players', place: 'players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
     rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
-  { key: 'one-man-army', name: 'One-man army: largest share of a team’s score', group: 'Players', place: 'players', unit: 'of the team’s score', percent: true, displayPrecision: 1, verb: 'started', scope: 'regular', candidates: armyCandidates,
-    rule: 'What one starter scored in a regular-season week, out of the team’s official score. A team score of zero or below doesn’t count.' },
-  { key: 'lucky-charms', name: 'Lucky charms: teams win most when he starts', group: 'Players', place: 'players', unit: 'team’s record when he starts', displayPrecision: 1, open: true, scope: 'regular', candidates: charmCandidates('best'),
-    rule: 'Decided regular-season games he started for any manager, ranked by the share won. At least 5 starts for every season of the league.' },
-  { key: 'curses', name: 'Curses: teams lose most when he starts', group: 'Players', place: 'players', unit: 'team’s record when he starts', displayPrecision: 1, shame: true, open: true, scope: 'regular', order: 'ascending', candidates: charmCandidates('worst'),
-    rule: 'Decided regular-season games he started for any manager, ranked by the share lost. At least 5 starts for every season of the league.' },
-  { key: 'journeyman', name: 'Journeyman: on the most managers’ rosters', group: 'Players', place: 'players', unit: 'managers', displayPrecision: 0, scope: 'regular', candidates: journeymanCandidates,
-    rule: 'Managers who had him, starting or on the bench, in a regular-season week. Team defenses don’t count.' },
-  { key: 'best-steal', name: 'Best steal: most points from a pick in the second half of the rounds', group: 'Players', place: 'draft', unit: 'regular-season points as the drafter’s starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
-    rule: 'What a pick from the second half of the rounds scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
-  { key: 'worst-bust', name: 'Worst bust: fewest points from a first-round pick', group: 'Players', place: 'draft', unit: 'regular-season points as the drafter’s starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
-    rule: 'What a first-round pick scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
+  { key: 'one-man-army', name: 'One-man army', group: 'Players', place: 'players', unit: 'of the team’s score', percent: true, displayPrecision: 1, verb: 'started', scope: 'regular', candidates: armyCandidates,
+    rule: 'The largest share of a team’s official score from one starter in a regular-season week. A team score of zero or below doesn’t count.' },
+  { key: 'lucky-charms', name: 'Lucky charms', group: 'Players', place: 'players', unit: 'when he starts', displayPrecision: 1, open: true, scope: 'regular', candidates: charmCandidates('best'),
+    rule: 'His teams’ record in the decided regular-season games he started for any manager, ranked by the share won. At least 5 starts for every season of the league.' },
+  { key: 'curses', name: 'Curses', group: 'Players', place: 'players', unit: 'when he starts', displayPrecision: 1, shame: true, open: true, scope: 'regular', order: 'ascending', candidates: charmCandidates('worst'),
+    rule: 'His teams’ record in the decided regular-season games he started for any manager, ranked by the share lost. At least 5 starts for every season of the league.' },
+  { key: 'journeyman', name: 'Journeyman', group: 'Players', place: 'players', unit: 'managers', displayPrecision: 0, scope: 'regular', candidates: journeymanCandidates,
+    rule: 'The most managers who had him on their roster, starting or on the bench, in a regular-season week. Team defenses don’t count.' },
+  { key: 'best-steal', name: 'Best steal', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
+    rule: 'The most points a pick from the second half of the rounds scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
+  { key: 'worst-bust', name: 'Worst bust', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
+    rule: 'The fewest points a first-round pick scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
   { key: 'titles-by-slot', name: 'Titles by draft slot', group: 'Seasons', place: 'draft', unit: 'titles', displayPrecision: 0, rest: 'Other slots', scope: 'none', completedSeasons: true, candidates: slotCandidates,
     rule: 'Champions who drafted from that slot. Seasons with a snake or linear draft of full rosters.' },
 ];
@@ -172,7 +172,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons|trips|finals|managers|reigns)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|weeks|places|seasons|trips|finals|managers|reigns)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 const byName = new Intl.Collator(undefined, { numeric: true }).compare;
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
@@ -244,11 +244,14 @@ export interface CardView {
   rows: CardRow[]; leaders: CardRow[];
 }
 type CardRow = Partial<Ranking['rows'][number]> & { names?: string[] } & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
+/** Whether the record named in this one's `unless` already leads with this result. */
+function isTold(archive: Archive, category: Pick<CategoryDefinition, 'unless'>, row: { id: string }): boolean {
+  return recordCategories.some(other => other.key === category.unless && ranking(archive, other).leaders.some(leader => leader.id === row.id));
+}
 /** A record's card in its place. A record nobody holds has no card, nor does one another record already tells. */
 export function recordCard(archive: Archive, category: CategoryDefinition) {
   const view = ranking(archive, category);
-  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => ranking(archive, other).leaders);
-  return isHeld(view) && view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
+  return isHeld(view) && view.leaders.some(row => !isTold(archive, category, row)) ? view : null;
 }
 /** The record cards of these places, in registry order. */
 export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
@@ -256,12 +259,12 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
   if (!archive) return null;
   return recordCategories.filter(category => category.place && places.includes(category.place)).flatMap(category => recordCard(archive, category) ?? []);
 }
-/** Every record a person holds or shares, fame before shame. */
+/** Every record a person holds or shares, fame before shame. One that another record already tells for them is left out. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordCategories.map(category => ranking(archive, category))
-    .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.shared && row.opponentId === personId))
+    .filter(view => isHeld(view) && view.leaders.some(row => (row.personId === personId || row.shared && row.opponentId === personId) && !isTold(archive, view.category, row)))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {

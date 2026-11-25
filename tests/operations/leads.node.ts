@@ -29,11 +29,11 @@ test('published leads are one chosen stat from each tab, with the values its tab
     await publish(storePath, finished([draftOf({ id: '20' })]));
     assert.deepEqual(await leads(storePath), [
       null,
-      ['legacy', 'bridesmaid', 'Most finals lost without a title', 1, 'finals lost', 'M02'],
-      ['games', 'highest-score', 'Highest score', 120.5, 'regular-season points', 'M01'],
-      ['excuses', 'losses-better-lineup', 'Most losses a better lineup wins', '1', 'loss', 'M02'],
-      ['players', 'most-started', 'Most starts by one player for one manager', '2', 'starts', 'M01'],
-      ['draft', 'best-steal', 'Best steal: most points from a pick in the second half of the rounds', 30.75, 'regular-season points as the drafter’s starter', 'M01'],
+      ['legacy', 'bridesmaid', 'Most finals lost without a title', 1, 'finals', 'M02'],
+      ['games', 'highest-score', 'Highest score', 120.5, 'points', 'M01'],
+      ['excuses', 'losses-better-lineup', 'Most winnable losses', '1', 'loss', 'M02'],
+      ['players', 'most-started', 'Most-started player', '2', 'starts', 'M01'],
+      ['draft', 'best-steal', 'Best steal', 30.75, 'points as a starter', 'M01'],
       ['moves', 'pickups', 'Most pickups', '2', 'pickups', 'M03'],
     ]);
   });
@@ -46,11 +46,11 @@ test('published leads fall back to the first stat on the page that somebody hold
     const [home, legacy, ...rest] = await leads(storePath);
     assert.equal(home, null);
     // Titles lead Legacy's table, but nobody holds a count of zero.
-    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'wins–losses–ties, regular season', 'M01', 'M02', 'M03']);
+    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'W–L–T', 'M01', 'M02', 'M03']);
     assert.deepEqual((await readTabs({ storePath }))![1].lead!.leaders.map(row => row.sample), ['1–1', '1–1', '1–0–1'], 'equal wins with unequal records each keep their own');
     assert.deepEqual(rest, [
-      ['games', 'highest-score', 'Highest score', 100, 'regular-season points', 'M01', 'M02'],
-      ['excuses', 'points-in-win', 'Fewest points in a win', 60, 'regular-season points', 'M03'],
+      ['games', 'highest-score', 'Highest score', 100, 'points', 'M01', 'M02'],
+      ['excuses', 'points-in-win', 'Fewest points in a win', 60, 'points', 'M03'],
     ]);
   });
   await withHistory(async storePath => {
@@ -58,7 +58,7 @@ test('published leads fall back to the first stat on the page that somebody hold
     const auction = draftOf({ id: '20', source: { type: 'auction' } });
     auction.picks[3].metadata.team = 'CHI';
     await publish(storePath, finished([auction]));
-    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03']);
+    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted team', '4', 'times', 'M01', 'M02', 'M03']);
     assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].names, ['TB']);
     // With M4's all Buccaneers too, everyone ties, so nothing leads.
     auction.picks[3].metadata.team = 'TB';
@@ -70,7 +70,7 @@ test('published leads fall back to the first stat on the page that somebody hold
     const source = finished([draftOf({ id: '20' })]);
     Object.assign(source.responses[`league/${source.seedLeagueId}/matchups/1`][1], { players: ['32'], players_points: { 32: 25 } });
     await publish(storePath, source);
-    assert.deepEqual((await leads(storePath))[3], ['excuses', 'luckiest-season', 'Luckiest season', 4 / 3, 'more wins than their scores earned', 'M03']);
+    assert.deepEqual((await leads(storePath))[3], ['excuses', 'luckiest-season', 'Luckiest season', 4 / 3, 'wins above expected', 'M03']);
   });
 });
 

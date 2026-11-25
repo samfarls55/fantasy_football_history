@@ -21,7 +21,7 @@ export function charmCandidates(end: 'best' | 'worst'): CategoryDefinition['cand
       const worse = players.filter(other => other.rate.compare(rate) < 0).length;
       const [ahead, behind] = end === 'best' ? [better, worse] : [worse, better];
       return ahead < Math.min(3, behind) ? [{ id, name: names.get(id)!, avatar: null, metric: rate, shown: `${wins}–${losses}`, sample: null,
-        leaderContext: `${rate.toNumber().toFixed(1)}% of games won`, period: null, href: '' }] : [];
+        leaderContext: `${rate.toNumber().toFixed(1)}% won`, period: null, href: '' }] : [];
     });
   };
 }
@@ -48,7 +48,7 @@ export function journeymanCandidates(archive: Archive, selection: RecordSelectio
 }
 
 /** The player each person's lineups, or their opponents', got the most from, every tie named. */
-function topPlayer(side: 'own' | 'opponent', of: string, total: (starts: RecordedStart[]) => Exact): ManagerStat['values'] {
+function topPlayer(side: 'own' | 'opponent', total: (starts: RecordedStart[]) => Exact): ManagerStat['values'] {
   return archive => {
     const names = new Map(archive.players.map(player => [player.id, player.name]));
     const weeks = Map.groupBy(regularWeeks(archive), row => row.personId);
@@ -56,15 +56,15 @@ function topPlayer(side: 'own' | 'opponent', of: string, total: (starts: Recorde
     return new Map([...starts].map(([personId, starts]) => {
       const players = [...Map.groupBy(starts, start => start.playerId)].map(([id, starts]) => ({ name: names.get(id)!, total: total(starts) })).sort((a, b) => b.total.compare(a.total) || a.name.localeCompare(b.name));
       const value = players[0].total;
-      return [personId, { value, names: players.filter(player => !player.total.compare(value)).map(player => player.name), sample: `${of} ${plural(weeks.get(personId)!.length, 'week')}` }];
+      return [personId, { value, names: players.filter(player => !player.total.compare(value)).map(player => player.name), sample: plural(weeks.get(personId)!.length, 'week') }];
     }));
   };
 }
 
 /** Players' table. */
 export const playerStats: ManagerStat[] = [
-  { key: 'most-started', place: 'players', label: 'Most-started player', unit: 'starts', displayPrecision: 0, better: 'higher', values: topPlayer('own', 'of', starts => Exact.from(starts.length)),
+  { key: 'most-started', place: 'players', label: 'Most-started player', unit: 'starts', displayPrecision: 0, better: 'higher', values: topPlayer('own', starts => Exact.from(starts.length)),
     rule: 'Regular-season weeks in that manager’s starting lineup, all seasons together.' },
-  { key: 'scored-most-against', place: 'players', label: 'Scored most against them', unit: 'points', displayPrecision: 2, better: 'higher', values: topPlayer('opponent', 'in', starts => exactSum(starts.map(start => start.points))),
-    rule: 'What the player scored as a starter against that manager in the regular season, all seasons together.' },
+  { key: 'scored-most-against', place: 'players', label: 'Top scorer against', unit: 'points', displayPrecision: 2, better: 'higher', values: topPlayer('opponent', starts => exactSum(starts.map(start => start.points))),
+    rule: 'The most points one player scored as a starter against that manager in the regular season, all seasons together.' },
 ];

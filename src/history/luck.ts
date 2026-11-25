@@ -29,13 +29,13 @@ function closeSides(archive: Archive) {
   return [...Map.groupBy(sides, side => side.personId)].map(([personId, played]) => ({ personId, played: played.length, wins: played.filter(side => side.won).length }));
 }
 const closeGames: ManagerStat = {
-  key: 'close-games', place: 'luck', label: 'Record in games decided by under 5', unit: 'wins–losses', displayPrecision: 1, better: 'higher',
+  key: 'close-games', place: 'luck', label: 'Close games', unit: 'W–L within 5 points', displayPrecision: 1, better: 'higher',
   values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(wins * 100).divide(played), shown: `${wins}–${played - wins}` }])),
-  rule: 'Regular-season games decided by more than 0 and under 5 points, ranked by the share won.',
+  rule: 'Wins and losses in regular-season games decided by more than 0 and under 5 points, ranked by the share won.',
 };
 /** The losses in that column's records. Only a badge ranks them, so they're no column of their own and keep its key. */
 export const closeLosses: ManagerStat = {
-  ...closeGames, label: 'Losses in games decided by under 5', unit: 'losses', displayPrecision: 0,
+  ...closeGames, label: 'Close losses', unit: 'losses', displayPrecision: 0,
   values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${plural(played, 'game')}` }])),
   rule: 'Regular-season games lost by under 5 points.',
 };
@@ -49,7 +49,7 @@ const highsFaced: ManagerStat['values'] = archive => {
     return { personId: own.personId, high: seasonScores.get(`${own.seasonId}/${opponent.personId}`)!.every(other => other.own.points <= opponent.points) };
   });
   return new Map([...Map.groupBy(faced, row => row.personId)].map(([personId, games]) =>
-    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: plural(games.length, 'game') }]));
+    [personId, { value: Exact.from(games.filter(game => game.high).length) }]));
 };
 
 /** One side of each decided regular-season game, with that side's official score. */
@@ -67,11 +67,11 @@ export function resultCandidates(result: 'lost' | 'won'): CategoryDefinition['ca
 
 /** Excuses' Luck table: the strongest claim to luck, good or bad, ranks first. */
 export const luckStats: ManagerStat[] = [
-  { key: 'robbed', place: 'luck', label: 'Robbed: lost with the week’s 2nd-best score', unit: 'losses', displayPrecision: 0, better: 'higher', values: secondScores('lost'),
-    rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd all count, but a tied game doesn’t.' },
-  { key: 'got-away', place: 'luck', label: 'Got away with it: won with the week’s 2nd-worst score', unit: 'wins', displayPrecision: 0, better: 'higher', values: secondScores('won'),
-    rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd-worst all count, but a tied game doesn’t.' },
+  { key: 'robbed', place: 'luck', label: 'Robbed', unit: 'losses with 2nd-best score', displayPrecision: 0, better: 'higher', values: secondScores('lost'),
+    rule: 'Regular-season games lost with the week’s 2nd-best score, in weeks with at least four scores. Teams tied for 2nd all count, but a tied game doesn’t.' },
+  { key: 'got-away', place: 'luck', label: 'Got away with it', unit: 'wins with 2nd-worst score', displayPrecision: 0, better: 'higher', values: secondScores('won'),
+    rule: 'Regular-season games won with the week’s 2nd-worst score, in weeks with at least four scores. Teams tied for 2nd-worst all count, but a tied game doesn’t.' },
   closeGames,
-  { key: 'highs-faced', place: 'luck', label: 'Opponents’ season highs faced', unit: 'games', displayPrecision: 0, better: 'higher', values: highsFaced,
-    rule: 'Completed seasons: games where the opponent had their best score of that regular season. A tied best counts each time.' },
+  { key: 'highs-faced', place: 'luck', label: 'Faced a season high', unit: 'times', displayPrecision: 0, better: 'higher', values: highsFaced,
+    rule: 'Completed seasons: games where the opponent had their own best score of that regular season. A tied best counts each time.' },
 ];

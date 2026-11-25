@@ -3,7 +3,6 @@ import { identity } from './game-records.ts';
 import { personSeasons, personTenures } from './managers.ts';
 import { careerMetrics } from './metrics.ts';
 import { completedContests } from './scope.ts';
-import { plural } from './wording.ts';
 import type { ManagerStat, StatValue } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive, Person, Season } from './types.ts';
@@ -18,11 +17,8 @@ function perPerson(read: (person: Person, archive: Archive) => StatValue | null)
 const fromCareer = (read: (career: ReturnType<typeof careerMetrics>, person: Person, archive: Archive) => StatValue | null) =>
   perPerson((person, archive) => read(careerMetrics(archive, { personId: person.id }), person, archive));
 
-/** Counts that can only happen in some seasons, beside how many of those the person had. */
-const ofSeasons = (chance: (season: Season) => boolean, happened: (season: Season, personId: string) => boolean) => perPerson(({ id }, { seasons }) => {
-  const played = seasons.filter(season => chance(season) && season.teams.some(team => team.personId === id));
-  return { value: Exact.from(played.filter(season => happened(season, id)).length), sample: plural(played.length, 'season') };
-});
+/** How many seasons something happened to each person in. */
+const seasonCount = (happened: (season: Season, personId: string) => boolean) => perPerson(({ id }, { seasons }) => ({ value: Exact.from(seasons.filter(season => happened(season, id)).length) }));
 
 /** Everyone who lost a final and has never won one. */
 export const bridesmaidCandidates: CategoryDefinition['candidates'] = (archive, selection) => archive.people.flatMap(person => {
@@ -62,33 +58,32 @@ const yearChanges: ManagerStat['values'] = archive => new Map(archive.people.fla
   });
   if (!changes.length) return [];
   const size = Math.max(...changes.map(change => change.size));
-  return [[person.id, { value: Exact.from(size), names: changes.filter(change => change.size === size).map(change => change.name),
-    sample: `over ${plural(seasons.filter(({ season, team }) => season.complete && team.finish).length, 'season')}` }]];
+  return [[person.id, { value: Exact.from(size), names: changes.filter(change => change.size === size).map(change => change.name) }]];
 }));
 
 /** Legacy's careers table. The numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */
 export const careerStats: ManagerStat[] = [
-  { key: 'titles', place: 'legacy', label: 'Titles', unit: 'won', displayPrecision: 0, better: 'higher', values: ofSeasons(season => season.championId !== null, (season, personId) => season.championId === personId),
+  { key: 'titles', place: 'legacy', label: 'Titles', unit: 'won', displayPrecision: 0, better: 'higher', values: seasonCount((season, personId) => season.championId === personId),
     rule: 'Championship games won.' },
-  { key: 'finals-lost', place: 'legacy', label: 'Finals lost', unit: 'finals', displayPrecision: 0, better: 'higher', values: ofSeasons(season => season.runnerUpId !== null, (season, personId) => season.runnerUpId === personId),
+  { key: 'finals-lost', place: 'legacy', label: 'Finals lost', unit: 'finals', displayPrecision: 0, better: 'higher', values: seasonCount((season, personId) => season.runnerUpId === personId),
     rule: 'Championship games lost.' },
-  { key: 'record', place: 'legacy', label: 'Record', unit: archive => `${completedContests(archive).some(game => game.tie) ? 'wins–losses–ties' : 'wins–losses'}, regular season`, displayPrecision: 0, better: 'higher',
+  { key: 'record', place: 'legacy', label: 'Record', unit: archive => completedContests(archive).some(game => game.tie) ? 'W–L–T' : 'W–L', displayPrecision: 0, better: 'higher',
     values: fromCareer(({ facts }) => ({ value: Exact.from(facts.wins), shown: facts.record })),
-    rule: 'Regular-season games, ranked by wins.' },
+    rule: 'Wins and losses in regular-season games, then ties if the league has any, ranked by wins.' },
   { key: 'win-rate', place: 'legacy', label: 'Win %', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: fromCareer(({ winPercentage }) => winPercentage && { value: winPercentage }),
     rule: 'Regular-season games won, with a tie counting as half a win.' },
-  { key: 'playoffs', place: 'legacy', label: 'Playoffs', unit: 'trips', displayPrecision: 0, better: 'higher', values: ofSeasons(season => season.playoffPersonIds.length > 0, (season, personId) => season.playoffPersonIds.includes(personId)),
+  { key: 'playoffs', place: 'legacy', label: 'Playoffs', unit: 'trips', displayPrecision: 0, better: 'higher', values: seasonCount((season, personId) => season.playoffPersonIds.includes(personId)),
     rule: 'Seasons they reached the championship bracket, a first-round bye included.' },
-  { key: 'points', place: 'legacy', label: 'Points per game', unit: 'points', displayPrecision: 1, better: 'higher',
+  { key: 'points', place: 'legacy', label: 'PPG', unit: 'points', displayPrecision: 1, better: 'higher',
     values: fromCareer(({ points, games }) => games.length ? { value: points.divide(games.length) } : null),
-    rule: 'Official regular-season scores added up, divided by games played.' },
-  { key: 'points-against', place: 'legacy', label: 'Opponents’ points per game', unit: 'points', displayPrecision: 1, better: 'lower',
+    rule: 'Points per game: official regular-season scores added up, divided by games played.' },
+  { key: 'points-against', place: 'legacy', label: 'PPG against', unit: 'points', displayPrecision: 1, better: 'lower',
     values: fromCareer(({ pointsAgainst, games }) => games.length ? { value: pointsAgainst.divide(games.length) } : null),
-    rule: 'Their opponents’ official scores in those same games, divided by games played.' },
-  { key: 'power-rating', place: 'legacy', label: 'Power rating', unit: 'rating points', displayPrecision: 0, better: 'higher', values: powerRatings,
-    rule: 'Elo: everyone starts at 1,500, and a regular-season win takes up to 24 points from the opponent, more from a higher-rated one.' },
-  { key: 'one-year-change', place: 'legacy', label: 'Biggest one-year change in finish', unit: 'places', displayPrecision: 0, better: 'higher', values: yearChanges,
-    rule: 'The biggest move, up or down, between their final finishes in back-to-back finished seasons.' },
+    rule: 'Opponents’ points per game: their official scores against this manager in the regular season, divided by games played.' },
+  { key: 'power-rating', place: 'legacy', label: 'Power rating', unit: 'Elo', displayPrecision: 0, better: 'higher', values: powerRatings,
+    rule: 'Elo rating: everyone starts at 1,500, and a regular-season win takes up to 24 rating points from the opponent, more from a higher-rated one.' },
+  { key: 'one-year-change', place: 'legacy', label: 'Biggest swing', unit: 'places', displayPrecision: 0, better: 'higher', values: yearChanges,
+    rule: 'The biggest one-year change in finish, up or down, between back-to-back finished seasons.' },
   { key: 'seasons', place: 'legacy', label: 'Seasons', unit: 'years', displayPrecision: 0, better: 'higher',
     values: perPerson((person, archive) => {
       const seasons = personSeasons(archive, person.id);

@@ -91,23 +91,23 @@ export const currentPositions = 'Positions are the players’ current ones, toda
 
 /** Excuses' Lineups table: the best share of the best lineup ranks first, then the fewest mistakes and the most perfect lineups. */
 export const lineupStats: ManagerStat[] = [
-  { key: 'lineup-share', place: 'lineups', label: 'Points started, % of best lineup', unit: 'of best lineup', percent: true, displayPrecision: 1, better: 'higher',
+  { key: 'lineup-share', place: 'lineups', label: 'Lineup efficiency', unit: 'of best lineup', percent: true, displayPrecision: 1, better: 'higher',
     values: perManager(weeks => {
       const best = exactSum(weeks.map(week => week.best));
       return best.compare(0) > 0 ? { value: exactSum(weeks.map(week => week.started)).multiply(100).divide(best), sample: plural(weeks.length, 'week') } : null;
     }),
     rule: `Regular-season starters’ points as a share of the best legal lineup from that week’s roster. ${currentPositions}` },
-  { key: 'losses-better-lineup', place: 'lineups', label: 'Losses a better lineup wins', unit: 'losses', displayPrecision: 0, better: 'lower',
+  { key: 'losses-better-lineup', place: 'lineups', label: 'Winnable losses', unit: 'losses', displayPrecision: 0, better: 'lower',
     values: perManager(weeks => {
       const lost = weeks.filter(({ own, opponent }) => own.points < opponent.points);
-      return { value: Exact.from(lost.filter(({ own, opponent, gap }) => gap.add(own.points).compare(opponent.points) > 0).length), sample: `of ${plural(lost.length, 'loss', 'losses')}` };
+      return { value: Exact.from(lost.filter(({ own, opponent, gap }) => gap.add(own.points).compare(opponent.points) > 0).length), sample: `of ${lost.length}` };
     }),
-    rule: `Regular-season losses where the official score plus what the best legal lineup would have added beats the opponent’s. ${currentPositions}` },
-  { key: 'perfect-lineups', place: 'lineups', label: 'Perfect lineups', unit: 'lineups', displayPrecision: 0, better: 'higher',
+    rule: `Regular-season losses a better lineup wins: the official score plus what the best legal lineup would have added beats the opponent’s. ${currentPositions}` },
+  { key: 'perfect-lineups', place: 'lineups', label: 'Perfect lineups', unit: 'weeks', displayPrecision: 0, better: 'higher',
     values: perManager(weeks => ({ value: Exact.from(weeks.filter(week => !week.gap.compare(0)).length), sample: plural(weeks.length, 'week') })),
     rule: `Regular-season weeks when no legal lineup from the roster scored more. ${currentPositions}` },
-  { key: 'zero-starters', place: 'lineups', label: 'Starters who scored 0', unit: 'starters', displayPrecision: 0, better: 'lower',
+  { key: 'zero-starters', place: 'lineups', label: 'Starters who scored 0', unit: 'starts', displayPrecision: 0, better: 'lower',
     values: archive => new Map([...Map.groupBy(managedStarts(archive), start => start.performance.personId)].map(([personId, starts]) =>
-      [personId, { value: Exact.from(starts.filter(start => start.points === 0).length), sample: `of ${plural(starts.length, 'start')}` }])),
+      [personId, { value: Exact.from(starts.filter(start => start.points === 0).length) }])),
     rule: 'Regular-season starters with a recorded score of exactly 0. An empty slot doesn’t count.' },
 ];

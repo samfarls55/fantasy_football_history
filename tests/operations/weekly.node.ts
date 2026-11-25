@@ -33,11 +33,11 @@ test('published big-score games count from the 80th-percentile score rounded to 
     const bigScores = async () => [(await stat(storePath, 'big-scores'))!.label, await rows(storePath, 'big-scores')];
     await publish(storePath, source);
     // 16 of the 20 scores are 145 or lower, so 145 is the 80th percentile and the line is 150. A 150 reaches it and 149.99 doesn't.
-    assert.deepEqual(await bigScores(), ['150+ point games', [['M01', '2', '5 games', 1], ['M02', '1', '5 games', 2], ['M03', '0', '5 games', 3], ['M04', '0', '5 games', 3]]]);
+    assert.deepEqual(await bigScores(), ['150+ points', [['M01', '2', '5 weeks', 1], ['M02', '1', '5 weeks', 2], ['M03', '0', '5 weeks', 3], ['M04', '0', '5 weeks', 3]]]);
     // An official 144.99 in place of the 145 takes the line to 140.
     games(source, 2)[1].custom_points = 144.99;
     await publish(storePath, source);
-    assert.deepEqual(await bigScores(), ['140+ point games', [['M01', '2', '5 games', 1], ['M02', '2', '5 games', 1], ['M03', '1', '5 games', 3], ['M04', '0', '5 games', 4]]]);
+    assert.deepEqual(await bigScores(), ['140+ points', [['M01', '2', '5 weeks', 1], ['M02', '2', '5 weeks', 1], ['M03', '1', '5 weeks', 3], ['M04', '0', '5 weeks', 4]]]);
   });
 });
 

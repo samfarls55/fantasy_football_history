@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
 import { final, seasonsSource, titled, type Year } from '../fixtures/seasons-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
-import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
+import { readCategory, readPlaceRecords, readRecordsHeld } from '../../src/history/records.ts';
 
 async function published<T>(source: Parameters<typeof publish>[1], read: (storePath: string) => Promise<T>) {
   const directory = await mkdtemp(join(tmpdir(), 'museum-careers-'));
@@ -25,8 +25,8 @@ test('published careers give every person, current or replaced, one row of the r
   await published(await base(), async storePath => {
     const table = await careers(storePath);
     assert.deepEqual([...table.values()].map(stat => [stat.key, stat.label, stat.unit]).filter(([key]) => !['power-rating', 'one-year-change'].includes(key)), [
-      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'wins–losses–ties, regular season'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
-      ['points', 'Points per game', 'points'], ['points-against', 'Opponents’ points per game', 'points'], ['seasons', 'Seasons', 'years'],
+      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'W–L–T'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
+      ['points', 'PPG', 'points'], ['points-against', 'PPG against', 'points'], ['seasons', 'Seasons', 'years'],
     ]);
     const row = (name: string) => ['titles', 'finals-lost', 'record', 'win-rate', 'playoffs', 'points', 'points-against', 'seasons'].map(key => table.get(key)!.rows.find(row => row.name === name)!.figure);
     // Woody14's roster went to Timh17 and alecswartout's to sebastian12; neither career crosses over.
@@ -56,7 +56,7 @@ test('published power ratings start at 1500, move by 24 in historical order and 
     { ...titled([[[2, 1, 100, 90], [4, 3, 100, 90]], [[3, 4, 100, 90]]], 3, 4), owners: [1, 5, 3, 4] },
   ), async storePath => {
     const { label, unit, rows } = (await careers(storePath)).get('power-rating')!;
-    assert.deepEqual([label, unit], ['Power rating', 'rating points']);
+    assert.deepEqual([label, unit], ['Power rating', 'Elo']);
     // M3's 1487.59 and M2's 1488 both show 1,488, so they tie. M2, gone since 2021, stays, marked.
     assert.deepEqual(rows.map(row => [row.name, row.figure, row.rank, row.current]),
       [['M5', '1,513', 1, true], ['M1', '1,511', 2, true], ['M4', '1,500', 3, true], ['M2', '1,488', 4, false], ['M3', '1,488', 4, true]]);
@@ -85,31 +85,29 @@ const finishes = [
 test('published one-year changes compare a person’s consecutive finished seasons and skip a gap or an unresolved finish', async () => {
   await published(seasonsSource(...finishes), async storePath => {
     const { label, rows } = (await careers(storePath)).get('one-year-change')!;
-    assert.equal(label, 'Biggest one-year change in finish');
-    assert.deepEqual(rows.map(row => [row.name, row.figure, row.unit, row.names!.join(', ').replaceAll('\u00a0', ' '), row.rank]), [
+    assert.equal(label, 'Biggest swing');
+    assert.deepEqual(rows.map(row => [row.name, row.figure, row.unit, row.names!.join('; ').replaceAll('\u00a0', ' '), row.rank]), [
       ['M4', '3', 'places', '4th to 1st in 2022', 1],
       ['M2', '2', 'places', '2nd to 4th in 2022', 2],
       // 3rd in 2021 and 1st in 2023 with 2022 away is no one-year change.
       ['M3', '2', 'places', '1st to 3rd in 2024', 2],
       // Two equal moves, and the unresolved 2024 final leaves a third unknown.
-      ['M1', '1', 'place each', '1st to 2nd in 2022, 2nd to 3rd in 2023', 4],
+      ['M1', '1', 'place each', '1st to 2nd in 2022; 2nd to 3rd in 2023', 4],
     ]);
   });
   // One finished season is no change, so M5 above is unknown, and in a first season so is everyone.
   await published(seasonsSource(placed([1, 2, 3, 4])), async storePath => assert.equal(await column(storePath, 'one-year-change'), undefined));
 });
 
-test('published counts of titles, finals and playoffs show the seasons they come from', async () => {
+test('published counts of titles, finals, playoffs and one-year changes stand alone, with no sample beside them', async () => {
   const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort(([a], [b]) => String(a).localeCompare(String(b)));
   await published(seasonsSource(...finishes), async storePath => {
-    // The 2024 title is unresolved, so it was nobody's chance at one.
-    const resolved = [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '2 seasons'], ['M4', '3 seasons'], ['M5', '1 season']];
-    assert.deepEqual(await samples(storePath, 'titles'), resolved);
-    assert.deepEqual(await samples(storePath, 'finals-lost'), resolved);
-    // The 2025 bracket is set, with its final still to come.
-    assert.deepEqual(await samples(storePath, 'playoffs'), [['M1', '5 seasons'], ['M2', '5 seasons'], ['M3', '4 seasons'], ['M4', '5 seasons'], ['M5', '1 season']]);
-    // A finish the bracket doesn't establish can't have changed.
-    assert.deepEqual(await samples(storePath, 'one-year-change'), [['M1', 'over 3 seasons'], ['M2', 'over 3 seasons'], ['M3', 'over 3 seasons'], ['M4', 'over 4 seasons']]);
+    const everyone = [['M1', undefined], ['M2', undefined], ['M3', undefined], ['M4', undefined], ['M5', undefined]];
+    assert.deepEqual(await samples(storePath, 'titles'), everyone);
+    assert.deepEqual(await samples(storePath, 'finals-lost'), everyone);
+    assert.deepEqual(await samples(storePath, 'playoffs'), everyone);
+    // M5's one finished season is no change, so they have no row.
+    assert.deepEqual(await samples(storePath, 'one-year-change'), everyone.slice(0, 4));
   });
 });
 
@@ -136,16 +134,18 @@ test('published finals lost count resolved finals alone, and the most without a 
   });
 });
 
-test('published most dominant season leaves Legacy when it is Home’s headline team-season', async () => {
+test('published most dominant season leaves Legacy, and its holder’s records, when it is Home’s headline team-season', async () => {
   const season = (first: number, third: number, unresolved = false) => seasonsSource({ ...placed([1, 2, 3, 4], { unresolved }), weeks: [[[1, 2, first, 90], [3, 4, third, 80]], [[1, 2, 100, 90], [3, 4, 100, 90]]] });
   const dominant = (source: ReturnType<typeof seasonsSource>) => published(source, async storePath => {
-    const held = (await readCategory('dominant-season', { storePath }))!.leaders.map(row => row.name);
+    const leaders = (await readCategory('dominant-season', { storePath }))!.leaders;
     const card = (await readPlaceRecords(['legacy'], { storePath }))!.find(view => view.category.key === 'dominant-season');
-    return { held, card: card?.leaders.map(row => row.name) };
+    // Which of the two records each leader's own page lists.
+    const shelves = await Promise.all(leaders.map(async row => (await readRecordsHeld(row.personId!, { storePath }))!.map(view => view.category.key).filter(key => ['dominant-season', 'best-without-title'].includes(key))));
+    return { held: leaders.map(row => row.name), card: card?.leaders.map(row => row.name), shelves };
   });
   // M1 wins the title each time. M3 outscoring everyone without it is already Home's headline.
-  assert.deepEqual(await dominant(season(100, 200)), { held: ['M3'], card: undefined });
-  assert.deepEqual(await dominant(season(200, 100)), { held: ['M1'], card: ['M1'] });
-  assert.deepEqual(await dominant(season(200, 200)), { held: ['M1', 'M3'], card: ['M1', 'M3'] }, 'Home names only one of the two');
-  assert.deepEqual(await dominant(season(100, 200, true)), { held: ['M3'], card: ['M3'] }, 'an unresolved title leaves Home no headline');
+  assert.deepEqual(await dominant(season(100, 200)), { held: ['M3'], card: undefined, shelves: [['best-without-title']] });
+  assert.deepEqual(await dominant(season(200, 100)), { held: ['M1'], card: ['M1'], shelves: [['dominant-season']] });
+  assert.deepEqual(await dominant(season(200, 200)), { held: ['M1', 'M3'], card: ['M1', 'M3'], shelves: [['dominant-season'], ['best-without-title']] }, 'Home names only one of the two');
+  assert.deepEqual(await dominant(season(100, 200, true)), { held: ['M3'], card: ['M3'], shelves: [['dominant-season']] }, 'an unresolved title leaves Home no headline');
 });

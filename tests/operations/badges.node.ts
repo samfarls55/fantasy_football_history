@@ -85,9 +85,9 @@ test('published Wild Card and Metronome are the two ends of boom or bust, and a 
     // Half of each gap is its standard deviation: 0, 4, 5, 7, 18 and 10.
     await publish(storePath, recordsSource([[150, 90, 120, 80, 100, 60], [150, 98, 110, 66, 136, 40]]));
     // M1's swing of 0 ranks 1st from the low end but isn't above zero, so Metronome waits for M2, 2nd.
-    assert.deepEqual(await worn(storePath), [['M01', 'Juggernaut', '2 times', 1], ['M02', 'Metronome', '4.0% of league average', 2], ['M05', 'Wild Card', '18.0% of league average', 1], ['M06', 'Cellar Dweller', '2 times', 1]]);
+    assert.deepEqual(await worn(storePath), [['M01', 'Juggernaut', '2 times', 1], ['M02', 'Metronome', '4.0% weekly swing', 2], ['M05', 'Wild Card', '18.0% weekly swing', 1], ['M06', 'Cellar Dweller', '2 times', 1]]);
     assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.standing, row.label]), [
-      ['Wild Card', 'Highest', 'Typical weekly swing, % of league average'], ['Metronome', '2nd lowest', 'Typical weekly swing, % of league average']]);
+      ['Wild Card', 'Highest', 'Boom or bust'], ['Metronome', '2nd lowest', 'Boom or bust']]);
   });
 });
 
@@ -100,7 +100,7 @@ test('published Heartbroken counts the losses in the close-game record, and adds
     assert.deepEqual(luck[0].rows.map(row => [row.name.slice(-2), row.figure]), [['03', '2–1'], ['04', '1–2']]);
     const heartbroken = (await readBadges({ storePath }))!.find(row => row.badge === 'Heartbroken')!;
     assert.deepEqual([heartbroken.manager, heartbroken.figure, heartbroken.unit, heartbroken.sample, heartbroken.label, heartbroken.key],
-      ['Record manager 04', '2', 'losses', 'of 3 games', 'Losses in games decided by under 5', 'close-games']);
+      ['Record manager 04', '2', 'losses', 'of 3 games', 'Close losses', 'close-games']);
   });
 });
 
@@ -137,19 +137,19 @@ test('published badges run out in a league with more managers than badges, in li
         ['01', 'Juggernaut', 'Week’s top score'],
         ['02', 'Tinkerer', 'Pickups'],
         ['03', 'Bridesmaid', 'Finals lost'],
-        ['04', 'Night Owl', 'Pickups, midnight–5am ET'],
-        ['05', 'Wild Card', 'Typical weekly swing, % of league average'],
-        ['06', 'Metronome', 'Typical weekly swing, % of league average'],
-        ['07', 'Own Worst Enemy', 'Losses a better lineup wins'],
-        ['08', 'Heartbroken', 'Losses in games decided by under 5'],
+        ['04', 'Night Owl', 'Midnight–5am'],
+        ['05', 'Wild Card', 'Boom or bust'],
+        ['06', 'Metronome', 'Boom or bust'],
+        ['07', 'Own Worst Enemy', 'Winnable losses'],
+        ['08', 'Heartbroken', 'Close losses'],
         ['09', 'Cellar Dweller', 'Week’s bottom score'],
-        ['10', 'Rollercoaster', 'Biggest one-year change in finish'],
+        ['10', 'Rollercoaster', 'Biggest swing'],
         ['11', 'Ride or Die', 'Most-started player'],
         ['12', 'Denied', 'Failed claims'],
         ['13', 'Dealmaker', 'Trades'],
-        ['14', 'Robbed', 'Lost with the week’s 2nd-best score'],
-        ['15', 'Bandit', 'Won with the week’s 2nd-worst score'],
-        ['16', 'Closer', 'Win % from week 9'],
+        ['14', 'Robbed', 'Losses with 2nd-best score'],
+        ['15', 'Bandit', 'Got away with it'],
+        ['16', 'Closer', 'Late win %'],
       ]);
     });
   } finally {
