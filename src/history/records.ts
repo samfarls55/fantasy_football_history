@@ -5,6 +5,7 @@ import { pickupCandidates } from './pickups.ts';
 import { dropCandidates } from './drops.ts';
 import { contributionCandidates } from './contributions.ts';
 import { beltCandidates } from './belt.ts';
+import { pickCandidates, slotCandidates } from './drafts.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
@@ -23,13 +24,16 @@ export function comparePeriods(a: HistoricalPeriod | null, b: HistoricalPeriod |
 export function periodLabel(period: HistoricalPeriod | null): string { return period ? `Week ${period.week} · ${period.year}` : '—'; }
 export function latestPeriod(rows: HistoricalPeriod[]): HistoricalPeriod | null { return rows.reduce<HistoricalPeriod | null>((latest, row) => comparePeriods(row, latest) > 0 ? { year: row.year, week: row.week, playedAt: row.playedAt } : latest, null); }
 export interface RecordCandidate {
-  id: string; personId: string; name: string; avatar: string | null; metric: Exact;
+  /** A record a draft slot holds has no person. */
+  id: string; personId?: string; name: string; avatar: string | null; metric: Exact;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
   /** Matchup records: the second person, and whether the game was tied or the first person lost it, so they didn't beat them. */
   opponentId?: string; tied?: boolean; lost?: boolean;
   /** Season records: the regular-season record and points per game behind the figure. */
   record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
+  /** Slot records: who won from it, and when. */
+  winners?: { personId: string; year: string }[];
 }
 export interface RecordSelection { storePath?: string; season?: string; scope?: Scope; sort?: string; limit?: number; result?: string }
 export interface CategoryDefinition {
@@ -45,6 +49,8 @@ export interface CategoryDefinition {
   shame?: boolean;
   /** Player records: what the manager did with the player. */
   verb?: string;
+  /** What to call the places below first when all of them show, rather than the runners-up. */
+  rest?: string;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
   candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
@@ -109,6 +115,12 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
   { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', place: 'players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
     rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
+  { key: 'best-steal', name: 'Best steal', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
+    rule: 'What a pick from the second half of the rounds scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
+  { key: 'worst-bust', name: 'Worst bust', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
+    rule: 'What a first-round pick scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
+  { key: 'titles-by-slot', name: 'Titles by draft slot', group: 'Seasons', place: 'draft', unit: 'titles', displayPrecision: 0, rest: 'Other slots', scope: 'none', completedSeasons: true, candidates: slotCandidates,
+    rule: 'Champions who drafted from that slot. Seasons with a snake or linear draft of full rosters.' },
 ];
 export const recordSorts = ['rank', 'name', 'newest', 'oldest', 'value-asc'] as const;
 export type RecordSort = typeof recordSorts[number];
@@ -133,7 +145,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const selection = { season, scope, sort, limit };
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
-  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name, undefined, { numeric: true }) || a.id.localeCompare(b.id));
   let displayPrecision = category.displayPrecision;
   if (category.percent) {
     const values = [...new Map(candidates.map(row => [row.metric.key, row.metric.toNumber()])).values()];
@@ -145,7 +157,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
     const { metric, ...rest } = row;
-    return { ...rest, manager: nameOf.get(row.personId)!, opponent: nameOf.get(row.opponentId!), rank, value: metric.toNumber(), exactKey: metric.key };
+    return { ...rest, manager: nameOf.get(row.personId!), opponent: nameOf.get(row.opponentId!), winners: row.winners?.map(winner => ({ manager: nameOf.get(winner.personId)!, year: winner.year })), rank, value: metric.toNumber(), exactKey: metric.key };
   });
   const selectedResult = ranked.find(row => row.id === options.result);
   limit = Math.max(limit, selectedResult?.rank ?? 10);

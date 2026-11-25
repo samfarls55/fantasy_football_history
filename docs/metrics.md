@@ -187,6 +187,16 @@ The original exact-timing audit remains historical evidence in [coverage.md](cov
 
 Keeper flags remain nullable where unknown. Preserve source picks and transaction assets internally so ownership can be reproduced. Unsuccessful or unknown-status events never become completed moves.
 
+## Draft results
+
+Best steal, Worst bust and Titles by draft slot read one draft per completed season: its largest finished snake or linear draft, by picks, whose rounds cover every lineup and bench spot in that draft's own `slots_*` settings. The season's later roster positions don't decide this, because a league can add spots after drafting. An auction has no comparable rounds. A rookie draft (`player_type` 1, or fewer rounds than spots) covers part of a roster. A season without such a draft supplies no result, and a league without one shows no card.
+
+A steal is a pick from the second half of the rounds (round × 2 > rounds, so the middle of an odd number of rounds counts), ranked by most points. A bust is a pick from round 1, ranked by fewest. Both sum the player's actual regular-season starting points that season for the drafter, the person whose roster made the pick (`roster_id`), whoever's slot it came from. Starts for another manager after a trade or drop don't count, and no starts is a real zero. A pick flagged as a keeper is excluded. An unknown flag excludes nothing. These rank recorded starting points and never a draft value formula.
+
+Titles by draft slot counts the resolved champions who drafted from each slot, with competition ranks and every slot shown, including those with none. The champion's slot is the draft order's slot for their account. A champion the order doesn't name took the roster over, and has the slot most of that roster's picks came from. A traded pick never moves a manager's slot. A slot holds this record rather than a person, so it has no holder on a manager page and no place in Recent top-ten results.
+
+`src/history/drafts.ts` selects the draft and calculates all three. Pick results are dated by their season's completion.
+
 ## Recent Home results
 
 Label the list Recent top-ten results. Select performances currently in a category's first ten ranks, including ties, with a supported historical period. Order by historical event date, not import time, then category key and result ID for stable ties. Deduplicate the same category/result identity. Select the newest result from each distinct category until six places are filled, then fill any spare places from the remaining candidates. Present the selected results in their original historical order. A category entry links to its ranking with that result retained. This selection does not establish that a record was newly broken.
