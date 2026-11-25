@@ -431,7 +431,6 @@ tr.former th { font-weight: 600; }
 .versus { max-width: 46rem; }
 .versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
 .versus-record.up { color: var(--paint); }
-.versus-record.down { color: var(--flag); }
 .versus-streak { font-weight: 800; }
 /* Each head-to-head record is the link to every meeting with that opponent; the open one is underscored in its own color. */
 .versus-open {
@@ -448,8 +447,6 @@ tr.former th { font-weight: 600; }
 .meetings li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 10px 0; border-top: 2px solid var(--chalk-faint); }
 .meet-result { font-family: var(--stencil); font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 0.04em; }
 .meetings .won .meet-result { color: var(--paint); }
-.meetings .lost .meet-result { color: var(--flag); }
-.meetings .tied .meet-result { color: var(--chalk); }
 .meet-score { font-weight: 800; font-size: 20px; text-align: right; white-space: nowrap; }
 .meet-when { font-size: 17px; color: var(--chalk); }
 .meet-playoffs { margin-left: 4px; white-space: nowrap; font-family: var(--stencil); font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paint); }
@@ -468,6 +465,7 @@ tr.former th { font-weight: 600; }
 .rank-value .stat-figure { font-weight: 800; font-size: 20px; }
 .rank-value .play-how { margin: 0; }
 .rank-value .play-unit { font-size: 15px; }
+.meet-result { color: var(--chalk); }
 .rank-value .stat-sample { margin-bottom: 8px; }
 .rank-value .play-how:not([open]) + .stat-sample { margin-top: -8px; }
 .rank-place { text-align: right; color: var(--chalk); }
