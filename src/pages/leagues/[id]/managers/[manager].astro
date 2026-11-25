@@ -4,7 +4,6 @@ import Manager from '../../../../components/Manager.astro';
 import Miss from '../../../../components/Miss.astro';
 import Rank from '../../../../components/Rank.astro';
 import Records from '../../../../components/Records.astro';
-import Section from '../../../../components/Section.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
 import { fixed, isViewer, leagueHref, managerHref, openLeague, statHref } from '../../../../league-page.ts';
 import { readBadges } from '../../../../history/badges.ts';
@@ -67,7 +66,9 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
     {page && (
       <>
         <h1 class="manager-name"><span data-person class:list={[{ me: isViewer(Astro, page.manager.name) }]}>{page.manager.name}{isViewer(Astro, page.manager.name) && <span class="unseen"> (you)</span>}</span><ShareLink label={`Share ${page.manager.name}`} /></h1>
-        <p class="league-years">{page.manager.range}{!page.manager.current && ' · Former manager'}</p>
+        <p class="league-years">{page.manager.range}{!page.manager.current && ', former manager'}</p>
+        {/* The badge is who they are in this league, so it sits with the name, beside the stat that earned it. */}
+        {badge && <p class="manager-badge" id="badge"><strong class="badge">{badge.badge}</strong><span><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>: {badge.names && `${badge.names.join(', ')}, `}{badge.figure}{badge.unit.toLowerCase() !== badge.label.toLowerCase() && ` ${badge.unit}`}, {badge.standing.toLowerCase()} of {badge.of} current managers</span></p>}
         {page.missed && <Miss {...page.missed} href={name => managerHref(Astro, page.manager.name, { vs: name })} clear={managerHref(Astro, page.manager.name)} />}
       </>
     )}
@@ -75,14 +76,6 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
 
   {page && (
     <>
-      {badge && (
-      <Section id="badge" title={badge.badge}>
-        <ul class="ranks">
-          <Rank {...badge} href={statHref(Astro, tabs, badge)} of={`${badge.of} current managers`} />
-        </ul>
-      </Section>
-      )}
-
       <section class="block" id="careers" aria-label="Career">
         <ul class="career">
           {career.map(stat => (
@@ -130,7 +123,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
       )}
 
       {page.versus.length > 0 && (
-      <section class="block" id="rivalries">
+      <section class="block versus-block" id="rivalries">
         <h2 class="painted" id="rivalries-name">Head to head</h2>
         <details class="play-how"><summary class="play-unit">playoffs included</summary><p>Regular-season and championship-playoff games. Consolation and placement games don’t count.</p></details>
         <div class="table-wrap">
@@ -161,7 +154,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
               {page.facing.games.map(game => (
                 <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>
                   <span class="meet-result">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span>
-                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)} points</span>
+                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)} <span class="meet-unit">points</span></span>
                   <span class="meet-when">Week&nbsp;{game.week}, {game.year}{game.competition === 'playoffs' && <> <span class="meet-playoffs">Playoffs</span></>}</span>
                 </li>
               ))}

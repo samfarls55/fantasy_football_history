@@ -53,10 +53,15 @@ if (view?.manager) return Astro.redirect(managerHref(Astro, view.manager, vsPara
 
   {view && (
     <>
-      <Champions plates={view.plates} />
-      <BeltHolder belt={view.belt} />
-      {/* The headline: the best team that went home empty is the record every league argues about. */}
-      {view.records.map(record => <ul class="plays" id="records"><RecordCard view={record} heading="h2" index={0} headline wide /></ul>)}
+      {/* Wide screens set the champions beside who holds the belt and the headline record. */}
+      <div class="home-top">
+        <Champions plates={view.plates} />
+        <div class="home-side">
+          <BeltHolder belt={view.belt} />
+          {/* The headline: the best team that went home empty is the record every league argues about. */}
+          {view.records.map(record => <ul class="plays" id="records"><RecordCard view={record} heading="h2" index={0} headline /></ul>)}
+        </div>
+      </div>
       <Records views={leading.map(tab => tab.lead!)} tabs={leading} heading="h2" />
       <Managers managers={view.managers} badges={view.badges} tabs={frame.tabs} />
     </>
@@ -65,7 +70,7 @@ if (view?.manager) return Astro.redirect(managerHref(Astro, view.manager, vsPara
     <footer slot="close" class="endzone close">
       <div class="endzone-inner">
         <p class="painted close-name">{view.reigning.champions.map((champion, index) => <>{index > 0 && ' & '}<Manager name={champion} /></>)}</p>
-        <p class="league-years">{view.reigning.year} champion{view.reigning.titles > 1 && ` · ${view.reigning.titles} titles`}</p>
+        <p class="league-years">{view.reigning.year} champion{view.reigning.titles > 1 && `, ${view.reigning.titles} titles`}</p>
       </div>
     </footer>
   )}

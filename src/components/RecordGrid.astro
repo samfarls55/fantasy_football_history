@@ -22,7 +22,7 @@ interface GridCell {
 const { labelledby, rowLabel, columnLabel, rows } = Astro.props;
 ---
 <div class="table-wrap">
-  <table class="grid" aria-labelledby={labelledby}>
+  <table class="grid" aria-labelledby={labelledby} style={`--n: ${rows.length}`}>
     <colgroup></colgroup><colgroup span={rows.length}></colgroup>
     <thead>
       <tr><td></td><th scope="colgroup" colspan={rows.length}><span class="grid-axis">{columnLabel}</span></th></tr>

@@ -28,7 +28,7 @@ const rows = seasons.map(({ year, weeks }) => ({ year, spans: reigns.flatMap((re
             <label class:list={['reign', { vacant: !person, mine: person && isViewer(Astro, person.name) }]} style={`--span: ${start + 1} / ${end + 1}`}>
               <input type="radio" name="reign" checked={year === rows.at(-1)!.year && index === spans.length - 1} />
               <span class="reign-name" aria-hidden="true"><span>{person?.name}</span></span>
-              <span class="reign-says"><strong data-person class:list={[{ me: person && isViewer(Astro, person.name) }]}>{person?.name ?? 'Vacant'}{person && isViewer(Astro, person.name) && <span class="unseen"> (you)</span>}</strong> <span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></span>
+              <span class="reign-says"><strong data-person class:list={[{ me: person && isViewer(Astro, person.name) }]}>{person?.name ?? 'Vacant'}{person && isViewer(Astro, person.name) && <span class="unseen"> (you)</span>}</strong> <span>{person && `${defenses(count)} `}from {reignStart(from)}</span></span>
             </label>
           ))}
         </div>

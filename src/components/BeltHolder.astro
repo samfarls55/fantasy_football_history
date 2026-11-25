@@ -11,7 +11,7 @@ const reign = Astro.props.belt.reigns.at(-1);
 {reign?.person && (
   <Section id="belt-holder" title="Holds the belt">
     <p class="belt-holder"><Manager name={reign.person.name} /></p>
-    <details class="play-how"><summary class="play-unit">since {reignStart(reign.from)} · {reign.defenses} {recordUnit('defenses', reign.defenses)}</summary><p>{beltRule}</p></details>
+    <details class="play-how"><summary class="play-unit">{reign.defenses} {recordUnit('defenses', reign.defenses)} since {reignStart(reign.from)}</summary><p>{beltRule}</p></details>
     <a class="belt-all" href={`${tabHref(Astro, 'legacy')}#belt`}>Every reign</a>
   </Section>
 )}
