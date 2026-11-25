@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
+import { recordsSource } from '../fixtures/records-source.ts';
 import { readRivalryStreaks } from '../../src/history/rivalries.ts';
 
 async function withHistory(run: (storePath: string) => Promise<void>) {
@@ -24,6 +25,19 @@ test('published rivalry streaks name three straight wins or more, longest first,
     (source.responses['league/900000000000002021/matchups/2'] as any[])[1].points = 1;
     await publish(storePath, source);
     assert.deepEqual(await streaks(storePath), [['Record manager 04', 'Record manager 03', 6, '6–0'], ['Record manager 01', 'Record manager 02', 4, '6–1']]);
+  });
+});
+
+test('published rivalry streaks are the five longest, and every one tied with the fifth', async () => {
+  await withHistory(async storePath => {
+    // Six pairs play four weeks. 02's run over 01 is four, the other pairs' three after an opening loss.
+    const week = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
+    const opening = [1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1];
+    await publish(storePath, recordsSource([opening, week, week, week]));
+    assert.deepEqual((await streaks(storePath)).map(([winner,, count]) => [winner, count]), [['Record manager 02', 4], ...['04', '06', '08', '10', '12'].map(number => [`Record manager ${number}`, 3])]);
+    // With five runs of four, the run of three is sixth.
+    await publish(storePath, recordsSource([[...opening.slice(0, 2), 1, 2, 1, 2, 1, 2, 1, 2, 2, 1], week, week, week]));
+    assert.deepEqual((await streaks(storePath)).map(([,, count]) => count), [4, 4, 4, 4, 4]);
   });
 });
 
