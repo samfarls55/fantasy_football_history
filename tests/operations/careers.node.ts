@@ -56,7 +56,7 @@ test('published power ratings start at 1500, move by 24 in historical order and 
     { ...titled([[[2, 1, 100, 90], [4, 3, 100, 90]], [[3, 4, 100, 90]]], 3, 4), owners: [1, 5, 3, 4] },
   ), async storePath => {
     const { label, unit, rows } = (await careers(storePath)).get('power-rating')!;
-    assert.deepEqual([label, unit], ['Power rating', 'Elo']);
+    assert.deepEqual([label, unit], ['Power rating', 'rating points']);
     // M3's 1487.59 and M2's 1488 both show 1,488, so they tie. M2, gone since 2021, stays, marked.
     assert.deepEqual(rows.map(row => [row.name, row.figure, row.rank, row.current]),
       [['M5', '1,513', 1, true], ['M1', '1,511', 2, true], ['M4', '1,500', 3, true], ['M2', '1,488', 4, false], ['M3', '1,488', 4, true]]);
@@ -86,28 +86,26 @@ test('published one-year changes compare a person’s consecutive finished seaso
   await published(seasonsSource(...finishes), async storePath => {
     const { label, rows } = (await careers(storePath)).get('one-year-change')!;
     assert.equal(label, 'Biggest swing');
-    assert.deepEqual(rows.map(row => [row.name, row.figure, row.unit, row.names!.join('; ').replaceAll('\u00a0', ' '), row.rank]), [
+    assert.deepEqual(rows.map(row => [row.name, row.figure, row.unit, row.sample!.replaceAll('\u00a0', ' '), row.rank]), [
       ['M4', '3', 'places', '4th to 1st in 2022', 1],
       ['M2', '2', 'places', '2nd to 4th in 2022', 2],
       // 3rd in 2021 and 1st in 2023 with 2022 away is no one-year change.
       ['M3', '2', 'places', '1st to 3rd in 2024', 2],
-      // Two equal moves, and the unresolved 2024 final leaves a third unknown.
-      ['M1', '1', 'place each', '1st to 2nd in 2022; 2nd to 3rd in 2023', 4],
+      // Two equal moves show the later one and count the other, and the unresolved 2024 final leaves a third unknown.
+      ['M1', '1', 'place', '2nd to 3rd in 2023, 1 more', 4],
     ]);
   });
   // One finished season is no change, so M5 above is unknown, and in a first season so is everyone.
   await published(seasonsSource(placed([1, 2, 3, 4])), async storePath => assert.equal(await column(storePath, 'one-year-change'), undefined));
 });
 
-test('published counts of titles, finals, playoffs and one-year changes stand alone, with no sample beside them', async () => {
+test('published counts of titles, finals and playoffs stand alone, with no sample beside them', async () => {
   const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort(([a], [b]) => String(a).localeCompare(String(b)));
   await published(seasonsSource(...finishes), async storePath => {
     const everyone = [['M1', undefined], ['M2', undefined], ['M3', undefined], ['M4', undefined], ['M5', undefined]];
     assert.deepEqual(await samples(storePath, 'titles'), everyone);
     assert.deepEqual(await samples(storePath, 'finals-lost'), everyone);
     assert.deepEqual(await samples(storePath, 'playoffs'), everyone);
-    // M5's one finished season is no change, so they have no row.
-    assert.deepEqual(await samples(storePath, 'one-year-change'), everyone.slice(0, 4));
   });
 });
 

@@ -1,9 +1,11 @@
 ---
-// One row of ranks: a stat that opens its column, what this manager's is, and where that puts them among everyone, drawn as a marker on a line from first to last.
+// One row of ranks: a stat that opens its column, what this manager's is, and where that puts them among everyone, drawn as a ball on a line from first to last.
+// Most stats rank the most first, so a place alone means that. One that ranks the fewest first says "lowest", and its last place is the highest.
 import Names from './Names.astro';
 import { ordinal } from '../history/careers.ts';
-interface Props { href: string; label: string; rule: string; figure: string; unit: string; names?: string[]; rank: number; tied: boolean; of: number }
-const { href, label, rule, figure, unit, names, rank, tied, of } = Astro.props;
+interface Props { href: string; label: string; rule: string; figure: string; unit: string; names?: string[]; rank: number; tied: boolean; of: number; low: boolean; last: boolean }
+const { href, label, rule, figure, unit, names, rank, tied, of, low, last } = Astro.props;
+const place = last ? low ? 'highest' : 'last' : low ? `${rank > 1 ? `${ordinal(rank)} ` : ''}lowest` : ordinal(rank);
 ---
 <li>
   <a href={href}>{label}</a>
@@ -12,6 +14,6 @@ const { href, label, rule, figure, unit, names, rank, tied, of } = Astro.props;
     <span class="stat-figure">{figure}</span>
     <details class="play-how"><summary class="play-unit">{unit}</summary><p>{rule}</p></details>
   </div>
-  <span class="rank-line" style={`--at: ${of > 1 ? (rank - 1) / (of - 1) : 0}; --of: ${of}`} aria-hidden="true"></span>
-  <p class:list={['rank-place', { first: rank === 1 }]}>{tied && <abbr title="Tied">T-</abbr>}{ordinal(rank)}<span class="unseen"> of {of}</span></p>
+  <span class="rank-line" style={`--at: ${last ? 1 : of > 1 ? (rank - 1) / (of - 1) : 0}; --of: ${of}`} aria-hidden="true"></span>
+  <p class:list={['rank-place', { first: rank === 1 }]}>{tied && <abbr title="Tied">T-</abbr>}{place}<span class="unseen"> of {of}</span></p>
 </li>

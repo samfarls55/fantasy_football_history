@@ -87,7 +87,7 @@ test('published Wild Card and Metronome are the two ends of boom or bust, and a 
     // M1's swing of 0 ranks 1st from the low end but isn't above zero, so Metronome waits for M2, 2nd.
     assert.deepEqual(await worn(storePath), [['M01', 'Juggernaut', '2 times', 1], ['M02', 'Metronome', '4.0% weekly swing', 2], ['M05', 'Wild Card', '18.0% weekly swing', 1], ['M06', 'Cellar Dweller', '2 times', 1]]);
     assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.standing, row.label]), [
-      ['Wild Card', 'Highest', 'Boom or bust'], ['Metronome', '2nd lowest', 'Boom or bust']]);
+      ['Wild Card', 'Highest', 'Weekly swing'], ['Metronome', '2nd lowest', 'Weekly swing']]);
   });
 });
 
@@ -138,8 +138,8 @@ test('published badges run out in a league with more managers than badges, in li
         ['02', 'Tinkerer', 'Pickups'],
         ['03', 'Bridesmaid', 'Finals lost'],
         ['04', 'Night Owl', 'Midnight–5am'],
-        ['05', 'Wild Card', 'Boom or bust'],
-        ['06', 'Metronome', 'Boom or bust'],
+        ['05', 'Wild Card', 'Weekly swing'],
+        ['06', 'Metronome', 'Weekly swing'],
         ['07', 'Own Worst Enemy', 'Winnable losses'],
         ['08', 'Heartbroken', 'Close losses'],
         ['09', 'Cellar Dweller', 'Week’s bottom score'],

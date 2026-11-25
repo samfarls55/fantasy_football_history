@@ -131,7 +131,7 @@ These use completed regular-season games and official scores, overrides included
 
 - **Robbed:** a loss with the week's competition rank 2 from the top. **Got away with it:** a win with competition rank 2 from the bottom. Teams tied for the place all count. A tied contest is neither. A week with fewer than four scored teams doesn't count. The sample is the person's counted weeks.
 - **Close games:** the win–loss record in contests with an exact margin above 0 and under 5 points. Sam authorized this threshold in spec 37. Ranked by the share won; no such game leaves it unknown.
-- **Faced a season high:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time.
+- **Opponents’ season highs:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time.
 - **Most points in a loss, fewest points in a win:** the loser's and winner's official score in a decided contest. A tie is neither.
 
 ## Lineups
@@ -165,8 +165,8 @@ Legacy's careers table (`src/history/careers.ts`) has one row per person, former
 
 - **Titles, finals lost:** champions and runners-up of resolved title contests. **Playoffs:** seasons they qualified. An unresolved title counts for nobody, so a league with no resolved title has neither column.
 - **PPG, PPG against:** career points and points against, divided by games played. No games leaves them unknown. Fewer points against ranks first.
-- **Power rating:** Elo, which is also its unit. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
-- **Biggest swing:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. Equal changes are all listed, each as "1st to 10th in 2020".
+- **Power rating:** Elo, in rating points. Everyone starts at 1500 and each contest moves the two people's ratings by 24 × (result − expected result), where a win is 1, a tie 0.5, and expected = 1 / (1 + 10^((opponent's rating − own rating) / 400)). Seasons and weeks run in order, every contest of a week uses the ratings from before that week, and ratings carry from season to season with the person. A new person on an old roster starts at 1500. It shows whole numbers and ranks by the number shown.
+- **Biggest swing:** the largest absolute difference between a person's final finishes in two consecutive completed seasons, whichever roster they held. A season away, an unfinished season or an unknown finish makes no pair, and no pair leaves it unknown. The seasons it happened in are its sample, as "1st to 10th in 2020"; of equal changes the latest shows, with how many more there were.
 
 Most finals lost without a title ranks people who lost at least one final and hold no resolved title in any season. Most dominant season is left off Legacy when every team-season that leads it also leads Home's headline, Best season without a title. A manager's page leaves it out the same way, when each of their team-seasons that leads it also leads Best season without a title.
 
@@ -200,7 +200,7 @@ Each current manager has at most one badge, shown on Home and their page with th
 
 A pair is a badge and a current manager whose value is above zero. Its rank is that manager's competition rank among current managers from the badge's end, so a zero still holds its place in the ranking and former managers hold none. Pairs go out lowest rank first, then in list order, then by person ID, each one only if its badge and manager are both free. A stat that is left out, or a manager without a value, makes no pair. Managers left over have no badge.
 
-Close-game losses (Close losses) are the losses in the `close-games` records, from the same contests, with the person's close games as the sample. That column ranks by the share won, so `closeLosses` in `src/history/luck.ts` ranks the count for the badge alone. It shares the column's key, coverage blocks and link, and is neither a column nor a rank of its own. A badge shows its stat's label, or the stat's unit with a capital when the label is the badge's own name: Robbed shows "Losses with 2nd-best score".
+Close-game losses (Close losses) are the losses in the `close-games` records, from the same contests, with the person's close games as the sample. That column ranks by the share won, so `closeLosses` in `src/history/luck.ts` ranks the count for the badge alone. It shares the column's key, coverage blocks and link, and is neither a column nor a rank of its own. A badge shows its stat's label, or the stat's unit with a capital when the label is the badge's own name: Robbed shows "Losses with 2nd-best score". Wild Card and Metronome, the two ends of Boom or bust, both show "Weekly swing".
 
 ## The belt
 
@@ -267,7 +267,7 @@ The import checks the draft and pick fields these read. A draft without usable s
 
 ## Scouting reports
 
-Most-drafted player, Most-drafted team, Most-drafted college and Average draft age count every pick of every finished draft: snake, linear, auction or rookie, the current season's included, and a season's second draft as well. A keeper is a pick like any other. A pick belongs to the person whose roster made it that season (`roster_id`), so a replaced manager keeps their own. An unfinished draft counts for nobody.
+Most-drafted player, Most-drafted team, Most-drafted college and Average player age count every pick of every finished draft: snake, linear, auction or rookie, the current season's included, and a season's second draft as well. A keeper is a pick like any other. A pick belongs to the person whose roster made it that season (`roster_id`), so a replaced manager keeps their own. An unfinished draft counts for nobody.
 
 - **Team** is the NFL team recorded with the pick at the draft, and a pick recorded without one is left out. Team defenses count.
 - **College** and **age** come from the player list and leave out team defenses and unknown values. The import reads "No College", "None" and "null" in any letter case as an unknown college; other spellings stay as listed.

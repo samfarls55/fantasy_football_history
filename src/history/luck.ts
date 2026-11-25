@@ -72,6 +72,6 @@ export const luckStats: ManagerStat[] = [
   { key: 'got-away', place: 'luck', label: 'Got away with it', unit: 'wins with 2nd-worst score', displayPrecision: 0, better: 'higher', values: secondScores('won'),
     rule: 'Regular-season games won with the week’s 2nd-worst score, in weeks with at least four scores. Teams tied for 2nd-worst all count, but a tied game doesn’t.' },
   closeGames,
-  { key: 'highs-faced', place: 'luck', label: 'Faced a season high', unit: 'times', displayPrecision: 0, better: 'higher', values: highsFaced,
+  { key: 'highs-faced', place: 'luck', label: 'Opponents’ season highs', unit: 'faced', displayPrecision: 0, better: 'higher', values: highsFaced,
     rule: 'Completed seasons: games where the opponent had their own best score of that regular season. A tied best counts each time.' },
 ];

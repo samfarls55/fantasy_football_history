@@ -58,7 +58,9 @@ const yearChanges: ManagerStat['values'] = archive => new Map(archive.people.fla
   });
   if (!changes.length) return [];
   const size = Math.max(...changes.map(change => change.size));
-  return [[person.id, { value: Exact.from(size), names: changes.filter(change => change.size === size).map(change => change.name) }]];
+  const equal = changes.filter(change => change.size === size);
+  // The swing is the figure, and which seasons it was is its detail: the latest of equal ones, with how many more there were.
+  return [[person.id, { value: Exact.from(size), sample: `${equal.at(-1)!.name}${equal.length > 1 ? `, ${equal.length - 1} more` : ''}` }]];
 }));
 
 /** Legacy's careers table. The numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */
@@ -80,7 +82,7 @@ export const careerStats: ManagerStat[] = [
   { key: 'points-against', place: 'legacy', label: 'PPG against', unit: 'points', displayPrecision: 1, better: 'lower',
     values: fromCareer(({ pointsAgainst, games }) => games.length ? { value: pointsAgainst.divide(games.length) } : null),
     rule: 'Opponents’ points per game: their official scores against this manager in the regular season, divided by games played.' },
-  { key: 'power-rating', place: 'legacy', label: 'Power rating', unit: 'Elo', displayPrecision: 0, better: 'higher', values: powerRatings,
+  { key: 'power-rating', place: 'legacy', label: 'Power rating', unit: 'rating points', displayPrecision: 0, better: 'higher', values: powerRatings,
     rule: 'Elo rating: everyone starts at 1,500, and a regular-season win takes up to 24 rating points from the opponent, more from a higher-rated one.' },
   { key: 'one-year-change', place: 'legacy', label: 'Biggest swing', unit: 'places', displayPrecision: 0, better: 'higher', values: yearChanges,
     rule: 'The biggest one-year change in finish, up or down, between back-to-back finished seasons.' },

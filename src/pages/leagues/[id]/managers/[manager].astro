@@ -35,7 +35,7 @@ const { failure, tabs, view } = await openLeague(Astro, async storePath => {
     manager, versus, badge: (await readBadges({ storePath }))!.find(badge => badge.personId === manager.id), belt: await readManagerBelt(manager.id, { storePath }), records: (await readRecordsHeld(manager.id, { storePath }))!,
     ranks: (await readManagerStats({ storePath }))!.flatMap(({ rows, ...stat }) => {
       const row = rows.find(row => row.personId === manager.id);
-      return row ? [{ ...stat, row, of: rows.length }] : [];
+      return row ? [{ ...stat, row, of: rows.length, last: row.rank > 1 && !rows.some(other => other.rank > row.rank) }] : [];
     }),
     finishes: manager.seasons.filter(season => season.complete).toReversed(),
     // Every meeting with the opponent ?vs= names; anyone they never played opens nothing.
@@ -122,8 +122,8 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
           <>
             <h3>{tab.name}</h3>
             <ul class="ranks">
-              {ranks.map(({ key, place, label, rule, row, of }) => (
-                <Rank {...row} href={statHref(Astro, tabs, { place, key })} label={label} rule={rule} of={of} />
+              {ranks.map(({ key, place, label, rule, better, row, of, last }) => (
+                <Rank {...row} href={statHref(Astro, tabs, { place, key })} label={label} rule={rule} of={of} low={better === 'lower'} last={last} />
               ))}
             </ul>
           </>
@@ -159,7 +159,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
           <div class="meetings" id="vs">
             <div class="meetings-head">
             <h3><Manager name={page.manager.name} /> vs <Manager name={page.facing.name} /><ShareLink label={`Share ${page.manager.name} vs ${page.facing.name}`} query={{ vs: page.facing.name }} hash="#vs" /></h3>
-            <p class="meetings-record">{page.facing.record}<span class="unseen"> {page.facing.ties ? 'wins–losses–ties' : 'wins–losses'}</span>{page.facing.streak && `, ${page.facing.streak.toLowerCase()}`}</p>
+            <p class="meetings-record">{page.facing.record}<span class="unseen"> {page.facing.ties ? 'wins–losses–ties' : 'wins–losses'}</span></p>
             </div>
             <ol>
               {page.facing.games.map(game => (

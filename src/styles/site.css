@@ -396,7 +396,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
    Labels are sentences as often as words, so every table sets them in the sans like the figures under them.
    Former managers trail under a dashed line. The wrap holds its unseen words, so they scroll with it and never widen the page. */
 /* Focus stays clear of the sideline on one side and the fade on the other: nothing a reader reaches by keyboard lands under either. */
-.table-wrap { position: relative; overflow-x: auto; margin-inline: -0.3em -8px; padding: 6px 8px 0 0.3em; scroll-padding-inline: 11.5rem 60px; }
+.table-wrap { position: relative; overflow-x: auto; margin-left: -0.3em; padding: 6px 0 0 0.3em; scroll-padding-inline: 11.5rem 60px; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
 th, td { padding: var(--s-3) 7px; text-align: right; }
 th:last-child, td:last-child { padding-right: 0; }
@@ -412,6 +412,7 @@ thead th { font: 800 15px/1.2 var(--text); color: var(--paint); border-bottom: 6
 .stats.many :is(th, td).named { padding-left: 32px; }
 .stats.many thead .stat-label { max-width: 6.5rem; }
 .stats :is(th, td):first-child { padding-left: 0; }
+.stats :is(th, td):last-child:not(.named) { padding-right: 6px; }
 /* Wide screens share the room out: every column of figures the same width, a column of names twice that. A phone's table keeps to its content and scrolls. */
 @media (min-width: 900px) { .stats thead th { width: var(--share, auto); } }
 /* A column's label stands on its unit and the unit on the goal line, so every label and every unit of a table ends on one line however long a label runs. */
@@ -433,7 +434,7 @@ thead th { font: 800 15px/1.2 var(--text); color: var(--paint); border-bottom: 6
 /* A figure is what a row is read for, so it is heavier than the sample under it. */
 .stats td:not(.named) .stat-figure { font-size: 18px; font-weight: 600; }
 /* The current manager who leads a column stands on a patch of darker ground, as a better record does in the grids. */
-.stats td.top .stat-figure { padding: 2px 0; background: rgba(0, 20, 5, 0.38); box-shadow: -8px 0 0 rgba(0, 20, 5, 0.38), 8px 0 0 rgba(0, 20, 5, 0.38); font-weight: 800; }
+.stats td.top .stat-figure { padding: 2px 0; background: rgba(0, 20, 5, 0.38); box-shadow: -6px 0 0 rgba(0, 20, 5, 0.38), 6px 0 0 rgba(0, 20, 5, 0.38); font-weight: 800; }
 .stat-sample { display: block; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .stats .stat-sample { font-size: 14px; }
 /* Names read from the left, each one whole; several share a line while the column has room. The figure under them carries its chances beside it. */
@@ -451,6 +452,7 @@ tr:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
 tr.former { color: var(--chalk); }
 .former-mark { display: block; font-weight: 400; line-height: 1.3; font-size: 14px; color: var(--chalk); }
 tr.former th { font-weight: 600; }
+@media (min-width: 900px) { .stats .former-mark { display: inline; margin-left: var(--s-2); } }
 /* A title is fame, so its count is heavier than the zeros around it. Stencil is kept off table figures: its 1 reads as a bar at this size. A zero stays a zero: a dash here means missing data. */
 .stats [data-column='titles']:not([data-sort='0']) .stat-figure { font-weight: 800; }
 /* Too narrow for every column, the managers hold the left edge like a sideline and the stats run under them.
@@ -524,15 +526,14 @@ tr.former th { font-weight: 600; }
   .versus-block .meetings { margin-top: calc(var(--s-3) - var(--tap-pad)); padding-top: 6px; border-top: 0; }
 }
 /* The opponent whose meetings are open stands on darker ground. */
-/* The dark ground runs a little past the row on either side, so no name or mark moves to make room for it. */
-.versus-block .table-wrap { margin-inline: -12px; padding-inline: 12px; }
+/* Every row is inset the same, so the open one's dark ground has a margin and no name moves to make room for it. */
+.versus :is(th, td):first-child { padding-left: var(--s-3); }
+.versus :is(th, td):last-child { padding-right: var(--s-3); }
 .versus tr:has(.versus-open[aria-current]) { background: rgba(0, 20, 5, 0.34); }
-.versus tr:has(.versus-open[aria-current]) > :first-child { box-shadow: -12px 0 0 rgba(0, 20, 5, 0.34); }
-.versus tr:has(.versus-open[aria-current]) > :last-child { box-shadow: 12px 0 0 rgba(0, 20, 5, 0.34); }
 .versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
 .versus-record.up { color: var(--paint); }
 /* Every meeting as a mark, the oldest first: a win is a solid block of chalk, a loss an empty one, a tie half. The run at the right end is the streak. */
-.versus-marks .marks { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 3px; max-width: 13rem; vertical-align: middle; }
+.versus-marks .marks { display: inline-flex; justify-content: flex-end; gap: 3px; vertical-align: middle; }
 .versus-marks i { width: 10px; height: 18px; border: 2px solid var(--chalk); border-radius: 1px; }
 .versus-marks i.won { background: var(--chalk); }
 .versus-marks i.tied { background: linear-gradient(var(--chalk), var(--chalk)) no-repeat 0 100% / 100% 50%; }
@@ -570,9 +571,9 @@ tr.former th { font-weight: 600; }
 #ranks h3 { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
 .ranks { list-style: none; border-top: 6px solid var(--paint); }
 /* A rank is one line: the stat, the figure with its unit, then where that puts them: a ball on a line of hash marks, one per manager, first place at the left. */
-.ranks li { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr) 4.5rem; gap: 0 var(--s-5); align-items: baseline; border-bottom: 2px solid var(--chalk-faint); }
+.ranks li { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr) 7rem; gap: 0 var(--s-5); align-items: baseline; border-bottom: 2px solid var(--chalk-faint); }
 .rank-line {
-  position: relative; align-self: center; height: 14px;
+  position: relative; align-self: start; margin-top: 17px; height: 14px;
   background: repeating-linear-gradient(90deg, var(--chalk-quiet) 0 2px, transparent 2px calc((100% - 2px) / (var(--of) - 1))) 0 0 / 100% 100%;
 }
 .rank-line::after {
@@ -666,7 +667,7 @@ tr.former th { font-weight: 600; }
 .finish-chart li { position: absolute; left: calc(var(--x) / max(1, var(--n) - 1) * 100%); top: calc(var(--y) * 100%); width: 0; height: 0; }
 .finish-chart li::before { content: ''; position: absolute; width: 14px; height: 14px; translate: -50% -50%; border: 3px solid var(--paint); border-radius: 50%; background: var(--turf-b); }
 .finish-chart .won::before { width: 30px; height: 18px; border: 0; background: radial-gradient(ellipse at 40% 30%, #a65530, var(--leather) 60%, #4f220f); box-shadow: 0 3px 4px rgba(0, 0, 0, 0.35); }
-.finish-place { position: absolute; bottom: 14px; left: 0; translate: -50% 0; font-family: var(--stencil); font-weight: 900; font-size: 30px; line-height: 1; white-space: nowrap; color: var(--paint); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); }
+.finish-place { position: absolute; bottom: 14px; left: 0; translate: -50% 0; padding: 0 4px; border-radius: 2px; background: var(--turf-b); font-family: var(--stencil); font-weight: 900; font-size: 30px; line-height: 1; white-space: nowrap; color: var(--paint); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); }
 .finish-year { font-family: var(--stencil); font-weight: 700; font-size: 22px; line-height: 1; color: var(--chalk); }
 .finish-chart .finish-year { position: absolute; top: calc((1 - var(--y)) * var(--plot) + 16px); left: 0; translate: -50% 0; }
 
@@ -707,14 +708,15 @@ tr.former th { font-weight: 600; }
 .extremes li:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
 .extreme-who { text-align: center; font-size: 18px; }
 .extreme { display: flex; align-items: center; gap: var(--s-2); font-size: 18px; font-weight: 800; }
-.extreme::before { content: ''; flex: none; width: calc(var(--share) * (100% - 3rem)); height: 18px; border-radius: 1px; background: color-mix(in srgb, var(--chalk) 72%, var(--turf-b)); }
+.extreme::before { content: ''; flex: none; width: calc(var(--share) * (100% - 3rem)); height: 18px; border-radius: 1px; background: var(--chalk); }
 .extreme.low { flex-direction: row-reverse; }
 .extreme.low::before { background: var(--flag); }
 
 /* Titles by draft slot: the slots stand along a rafter and a banner hangs under each for every title won from it. The visitor's own are white.
    A banner's cloth is a layer behind its words, so the cut never clips a name's focus ring. A big league's rafter scrolls. */
 .slots-wrap { position: relative; overflow-x: auto; }
-.slots { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(88px, 1fr)); }
+.slots { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(92px, 1fr)); }
+.banners a[data-person] { overflow-wrap: normal; }
 .slots > li { display: flex; flex-direction: column; min-width: 0; }
 .slot-number { padding-bottom: var(--s-2); border-bottom: 6px solid var(--paint); font-family: var(--stencil); font-weight: 900; font-size: 34px; line-height: 1; text-align: center; color: var(--chalk); }
 .slots > li:not(:has(.banners li)) .slot-number { color: var(--chalk-quiet); }
@@ -778,7 +780,10 @@ tr.former th { font-weight: 600; }
 }
 @media (max-width: 560px) {
   /* A rank is two lines on a phone: the stat, then the figure, the line and the place. */
-  .ranks li { grid-template-columns: minmax(0, 1fr) 5.5rem 3.5rem; }
+  .ranks li { grid-template-columns: minmax(0, 1fr) 5.5rem 6.5rem; }
+  .rank-line { margin-top: 5px; }
+  .versus-marks i { width: 6px; }
+  .versus-marks .marks { gap: 2px; }
   .ranks a { grid-column: 1 / -1; padding-bottom: 0; }
   /* A badge too: whose it is, then its stat. */
   .managers li { grid-template-columns: minmax(0, 1fr) auto; }

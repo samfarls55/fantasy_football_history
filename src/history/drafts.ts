@@ -89,6 +89,6 @@ export const draftStats: ManagerStat[] = [
     rule: 'The NFL team they picked from most, at least twice, going by each player’s team at the draft. Every finished draft of any type, keepers included.' },
   { key: 'drafted-college', place: 'draft', label: 'Most-drafted college', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.position === 'DEF' ? null : row.player.college),
     rule: 'The college they picked from most, at least twice. Every finished draft of any type, keepers included; team defenses and unknown colleges don’t count.' },
-  { key: 'draft-age', place: 'draft', label: 'Average draft age', unit: 'years', displayPrecision: 1, better: 'lower', values: draftAge,
+  { key: 'draft-age', place: 'draft', label: 'Average player age', unit: 'years', displayPrecision: 1, better: 'lower', values: draftAge,
     rule: 'The average of each player’s age on the day of the draft. Every finished draft of any type, keepers included; team defenses and unknown birth dates don’t count.' },
 ];

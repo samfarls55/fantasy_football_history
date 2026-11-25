@@ -10,8 +10,8 @@ const { category, rows } = Astro.props.view;
 const slots = rows.toSorted((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 ---
 <Section id={category.key} title={category.name}>
-  <details class="play-how"><summary class="play-unit">titles from each slot</summary><p>{category.rule}</p></details>
-  <div class="slots-wrap">
+  <details class="play-how"><summary class="play-unit">titles</summary><p>{category.rule}</p></details>
+  <div class="table-wrap slots-wrap">
     <ol class="slots" style={`--n: ${slots.length}`}>
       {slots.map(slot => (
         <li>
