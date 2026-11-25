@@ -53,13 +53,15 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
       const week = integer(source.leg, `${endpoint} leg`);
       const adds = assets(source.adds, `${endpoint} adds`);
       const drops = assets(source.drops, `${endpoint} drops`);
+      const type = id(source.type, `${endpoint} type`);
+      if (status === 'complete' && type === 'trade') for (const value of list(source.roster_ids, `${endpoint} roster_ids`)) roster(value, `${endpoint} roster_ids`);
       if (status === 'complete') for (const playerId of new Set([...Object.keys(adds), ...Object.keys(drops)])) {
         const key = `${playerId}:${week}:${completedAt}`;
         if (chronology.has(key)) throw new Error(`${endpoint}: ambiguous recorded chronology for player ${playerId}, week ${week}`);
         chronology.set(key, transactionId);
       }
       archive.transactions.push({ id: transactionId, seasonId: season.id, year: season.year, week,
-        type: id(source.type, `${endpoint} type`), status, completedAt, adds, drops, source, orderingSupported: false });
+        type, status, completedAt, adds, drops, source, orderingSupported: false });
     }
   }
 }

@@ -521,6 +521,27 @@ tr.former th { font-weight: 600; }
 .won :is(.finish-place, .finish-of) { color: var(--paint); }
 .won .finish-of { font-weight: 800; }
 
+/* Trade map: managers hold the left sideline and each pair's arc runs out to its own count. The arcs stretch to the width there is;
+   rows and counts keep their size, so a 16-manager league still reads on a phone. White is the visitor's own name and trades,
+   so the rest are a solid mix of chalk and turf: where they cross they never build up to it. */
+.trade-map { --line: color-mix(in srgb, var(--chalk) 60%, var(--turf-b)); display: grid; grid-template-columns: fit-content(42%) minmax(0, calc(var(--reach) * 56px)); margin-top: 12px; }
+.trade-names > div { display: flex; align-items: center; justify-content: flex-end; height: 36px; padding-right: 8px; font-size: 16px; line-height: 1.05; text-align: right; overflow-wrap: anywhere; }
+.trade-arcs { position: relative; margin-right: 14px; border-left: 4px solid var(--line); }
+.trade-arcs svg { position: absolute; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--line); }
+.trade-arcs path { vector-effect: non-scaling-stroke; }
+.trade-arcs path.mine { stroke: var(--paint); }
+.trade-count {
+  position: absolute; transform: translate(-50%, -50%); min-width: 19px; padding: 0 2px; border-radius: 9px;
+  font-size: 14px; font-weight: 800; line-height: 18px; text-align: center; color: var(--chalk); background: var(--endzone-b);
+}
+.trade-count.mine { color: var(--ink-on-paint); background: var(--paint); }
+.trade-pairs { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); column-gap: 48px; }
+.trade-pairs li { display: grid; grid-template-columns: 5rem minmax(0, 1fr); align-items: baseline; padding: 4px 0; border-top: 2px solid var(--chalk-faint); }
+.trade-total { color: var(--chalk); }
+.trade-total strong { font-family: var(--stencil); font-weight: 900; font-size: 24px; }
+/* A wrapped pair's lines sit a full 44px apart, so each name keeps its own target. */
+.trade-who { line-height: 44px; overflow-wrap: anywhere; }
+
 /* Home: the whole screen is the end zone. */
 .lookup { padding-top: 13vh; max-width: 720px; }
 .lookup h1 { font-size: clamp(64px, 12vw, 148px); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }

@@ -18,7 +18,7 @@ export function aftermathSource(weeks: AftermathWeek[], moves: AftermathMove[]) 
     }
   });
   moves.forEach(({ week, type, adds = null, drops = null, status = 'complete', draft_picks = [], waiver_budget = [] }, index) =>
-    responses[`league/${source.seedLeagueId}/transactions/${week}`].push({ transaction_id: `93000000000000${String(index).padStart(4, '0')}`, leg: week, type, status, status_updated: 1000 + index, created: 900 + index, adds, drops, draft_picks, waiver_budget, metadata: null }));
+    responses[`league/${source.seedLeagueId}/transactions/${week}`].push({ transaction_id: `93000000000000${String(index).padStart(4, '0')}`, leg: week, type, status, status_updated: 1000 + index, created: 900 + index, adds, drops, roster_ids: [...new Set([...Object.values(adds ?? {}), ...Object.values(drops ?? {})])], draft_picks, waiver_budget, metadata: null }));
   return source;
 }
 

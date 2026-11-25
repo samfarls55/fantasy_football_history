@@ -205,6 +205,12 @@ The ex (`the-ex`, `src/history/ex.ts`) ranks each completed drop or trade depart
 
 Most lopsided trade (`lopsided-trade`, `src/history/lopsided-trades.ts`) ranks the gap between what the two sides received. Each received player counts starting points for the receiver with `tradeWeek < startWeek < departureWeek`, the productive-pickup window. Only a completed trade between exactly two people qualifies. One with any draft pick or waiver budget is left out, because no rule may value either. A side that received no player scores zero, and an equal trade is never a candidate. The row names both people, the players each received and each side's total.
 
+## Trades
+
+A trade is a completed source event of type `trade`, in any recorded week of any season, whatever it exchanged: players, draft picks or waiver budget. Failed, pending and unknown-status events are not trades. The people in it are whoever managed the source's `roster_ids` that season; a completed trade whose `roster_ids` are missing or name an unknown roster rejects the candidate before publication. `completedTrades` in `src/history/trades.ts` is the one read of them.
+
+Each trade counts once for each person in it. The trade map counts the trades each pair of people has shared, so a three-team trade counts once for each of its three pairs. The map holds everyone who has traded, former managers included, and its list holds the same pairs and counts.
+
 ## Recent Home results
 
 Label the list Recent top-ten results. Select performances currently in a category's first ten ranks, including ties, with a supported historical period. Order by historical event date, not import time, then category key and result ID for stable ties. Deduplicate the same category/result identity. Select the newest result from each distinct category until six places are filled, then fill any spare places from the remaining candidates. Present the selected results in their original historical order. A category entry links to its ranking with that result retained. This selection does not establish that a record was newly broken.
