@@ -1,12 +1,13 @@
 import { exactSum } from './decimal.ts';
-import { recordedStarts, playerContributionHref, startGame, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
+import { playerStarts, playerContributionHref, startGame, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipDeparture } from './ownership.ts';
+import { plural } from './wording.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
 /** Every drop keeps its own later same-season history, including starts after a reacquisition. */
 export function dropStarts(archive: Archive, event: OwnershipDeparture, selection: ContributionSelection = {}) {
-  return recordedStarts(archive, {}, { ...selection, season: event.year }).filter(row => row.playerId === event.playerId && row.performance.seasonId === event.seasonId && row.performance.week > event.week && row.performance.personId !== event.personId);
+  return playerStarts(archive, event.seasonId, event.playerId, selection.scope).filter(({ performance }) => performance.week > event.week && performance.personId !== event.personId);
 }
 export function dropHref(event: OwnershipDeparture, selection: ContributionSelection = {}) {
   const query = new URLSearchParams({ tab: 'players', scope: selection.scope ?? 'regular', view: 'drops', event: event.id });
@@ -40,7 +41,7 @@ export function selectedDrop(archive: Archive, identity: ContributionIdentity, s
 }
 export function dropCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   return drops(archive, {}, selection).map(row => ({ id: row.event.id, personId: row.person.id, name: row.player.name, avatar: null, metric: row.metric,
-    sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · Week ${row.event.week} · ${row.event.year}`,
+    sample: plural(row.starts.length, 'start'), leaderContext: `${row.person.name} · Week ${row.event.week} · ${row.event.year}`,
     period: row.starts.length ? { year: row.event.year, week: Math.max(...row.starts.map(start => start.performance.week)), playedAt: null } : null, href: row.href, historyLabel: 'Open drop history',
     secondary: [{ name: `${row.person.name} · Week ${row.event.week} · ${row.event.year}`, href: `/managers/${row.person.id}/seasons/${row.event.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));
 }

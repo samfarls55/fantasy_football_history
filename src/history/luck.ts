@@ -1,18 +1,12 @@
 import { Exact } from './decimal.ts';
 import { identity } from './game-records.ts';
+import { opponentOf, regularScores } from './performances.ts';
 import { completedContests } from './scope.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive } from './types.ts';
 
-/** Each regular-season score beside its game and every score of that week. A regular-season game is one week long. */
-export function regularScores(archive: Archive) {
-  const games = new Map(archive.contests.map(game => [game.id, game]));
-  const scores = archive.performances.filter(row => row.competition === 'regular');
-  const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
-  return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
-}
-export const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 /** Scores 2nd from one end of their week that got the opposite result. */
 function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
@@ -21,7 +15,7 @@ function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
     return new Map([...Map.groupBy(counted, ({ own }) => own.personId)].map(([personId, scores]) => [personId, {
       value: Exact.from(scores.filter(({ own, game, week }) => !game.tie && (game.winnerId === personId) === (result === 'won')
         && week.filter(other => result === 'lost' ? other.points > own.points : other.points < own.points).length === 1).length),
-      sample: chances(scores.length, 'week'),
+      sample: plural(scores.length, 'week'),
     }]));
   };
 }
@@ -42,7 +36,7 @@ const closeGames: ManagerStat = {
 /** The losses in that column's records. Only a badge ranks them, so they're no column of their own and keep its key. */
 export const closeLosses: ManagerStat = {
   ...closeGames, label: 'Losses in games decided by under 5', unit: 'losses', displayPrecision: 0,
-  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${chances(played, 'game')}` }])),
+  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${plural(played, 'game')}` }])),
   rule: 'Regular-season games lost by under 5 points.',
 };
 
@@ -50,22 +44,22 @@ const highsFaced: ManagerStat['values'] = archive => {
   const complete = new Set(archive.seasons.filter(season => season.complete).map(season => season.id));
   const scores = regularScores(archive).filter(({ own }) => complete.has(own.seasonId));
   const seasonScores = Map.groupBy(scores, ({ own }) => `${own.seasonId}/${own.personId}`);
-  const faced = scores.map(({ own, game, week }) => {
-    const opponent = week.find(other => other.contestId === game.id && other !== own)!;
+  const faced = scores.map(({ own }) => {
+    const opponent = opponentOf(archive, own);
     return { personId: own.personId, high: seasonScores.get(`${own.seasonId}/${opponent.personId}`)!.every(other => other.own.points <= opponent.points) };
   });
   return new Map([...Map.groupBy(faced, row => row.personId)].map(([personId, games]) =>
-    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: chances(games.length, 'game') }]));
+    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: plural(games.length, 'game') }]));
 };
 
 /** One side of each decided regular-season game, with that side's official score. */
-export function resultCandidates(result: 'lost' | 'won'): NonNullable<CategoryDefinition['candidates']> {
+export function resultCandidates(result: 'lost' | 'won'): CategoryDefinition['candidates'] {
   return (archive, selection) => completedContests(archive).filter(game => !game.tie && (!selection.season || game.year === selection.season)).map(game => {
     const side = game.sides.find(side => (side.personId === game.winnerId) === (result === 'won'))!;
     const opponent = game.sides.find(other => other !== side)!;
     const when = `Week ${game.weeks[0]} · ${game.year}`;
     return { ...identity(archive, side.personId, game.year), id: game.id, metric: Exact.from(side.points), sample: null,
-      opponentId: opponent.personId, lost: result === 'lost', detail: `${side.teamName} vs ${opponent.teamName}`, leaderContext: when,
+      opponentId: opponent.personId, result, detail: `${side.teamName} vs ${opponent.teamName}`, leaderContext: when,
       period: { year: game.year, week: game.weeks[0], playedAt: game.playedAt },
       href: `/seasons/${game.year}/matchups/${game.id}/?scope=regular&week=${game.weeks[0]}&team=${side.rosterId}`, historyLabel: 'Open matchup' };
   });

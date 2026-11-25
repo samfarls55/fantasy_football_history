@@ -19,16 +19,16 @@ const rows = seasons.map(({ year, weeks }) => ({ year, spans: reigns.flatMap((re
 {reigns.length > 0 && (
   <Section id="belt" title="The belt">
     <details class="play-how"><summary class="play-unit">holder by week, playoffs included</summary><p>{beltRule}</p></details>
-    <fieldset class="belt" style={`--weeks: ${Math.max(...seasons.map(season => season.weeks))}`}>
+    <fieldset class="belt" style={`--weeks: ${Math.max(...seasons.map(season => season.weeks))}; --rows: ${rows.length}`}>
       <legend class="unseen">Reigns</legend>
-      {rows.map(({ year, spans }) => (
-        <div class="belt-year">
+      {rows.map(({ year, spans }, row) => (
+        <div class="belt-year" style={`--row: ${row + 2}`}>
           <span class="finish-year">{year}</span>
           {spans.map(({ person, from, defenses: count, start, end }, index) => (
-            <label class:list={['reign', { vacant: !person, mine: person && isViewer(Astro, person.name) }]} style={`grid-column: ${start + 1} / ${end + 1}`}>
+            <label class:list={['reign', { vacant: !person, mine: person && isViewer(Astro, person.name) }]} style={`--span: ${start + 1} / ${end + 1}`}>
               <input type="radio" name="reign" checked={year === rows.at(-1)!.year && index === spans.length - 1} />
               <span class="reign-name" aria-hidden="true"><span>{person?.name}</span></span>
-              <span class="reign-says"><strong data-person class:list={[{ me: person && isViewer(Astro, person.name) }]}>{person?.name ?? 'Vacant'}</strong> <span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></span>
+              <span class="reign-says"><strong data-person class:list={[{ me: person && isViewer(Astro, person.name) }]}>{person?.name ?? 'Vacant'}{person && isViewer(Astro, person.name) && <span class="unseen"> (you)</span>}</strong> <span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></span>
             </label>
           ))}
         </div>
@@ -38,7 +38,7 @@ const rows = seasons.map(({ year, weeks }) => ({ year, spans: reigns.flatMap((re
       <summary>Every reign</summary>
       <ol>
         {reigns.toReversed().map(({ person, from, defenses: count }) => (
-          <li><span>{person ? <Manager name={person.name} /> : 'Vacant'}</span><span>from {reignStart(from)}{person && ` · ${defenses(count)}`}</span></li>
+          <li><span>{person ? <Manager name={person.name} /> : 'Vacant'}</span><span><span>from {reignStart(from)}</span>{person && <span>{defenses(count)}</span>}</span></li>
         ))}
       </ol>
     </details>

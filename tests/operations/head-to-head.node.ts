@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 import { readHeadToHead, readManagerRivalries } from '../../src/history/rivalries.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-head-to-head-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** Each manager's record against every other, the columns in the order of the rows. */
 async function grid(storePath: string) {
   return (await readHeadToHead({ storePath }))!.map(row => [row.name.replace('Record manager ', ''), ...row.cells.map(cell => cell?.record ?? null)]);

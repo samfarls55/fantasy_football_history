@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
-import { age, seed, sharedStore, stored } from '../support/stores.ts';
+import { seed, sharedStore, stored, stores } from '../support/stores.ts';
 import { readSeasons } from '../../src/history/read.ts';
 import { withHistorySnapshot } from '../../src/history/store.ts';
 
@@ -12,7 +12,9 @@ async function instance(name: string, storePath: string): Promise<typeof import(
   return import(`../../src/leagues.ts?${name}`).finally(() => delete process.env.HISTORY_DATA_PATH);
 }
 
-test('a visitor waits for at most one import per refresh window, whichever instance answers', async () => {
+const hour = 60 * 60 * 1000;
+
+test('a visitor waits for at most one import per refresh window, whichever instance answers', async t => {
   await sharedStore(async storePath => {
     const source = JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
     const id = source.seedLeagueId;
@@ -40,14 +42,14 @@ test('a visitor waits for at most one import per refresh window, whichever insta
       }, path);
 
       // Past the refresh window, a failed refresh keeps the last good archive.
-      const stale = JSON.stringify({ ...JSON.parse(await stored(path)), importedAt: new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString() });
-      await seed(path, stale);
+      t.mock.timers.enable({ apis: ['Date'], now: Date.now() + 13 * hour });
+      const published = await stored(path);
       const { 'league/900000000000002020/matchups/1': missing } = source.responses;
       delete source.responses['league/900000000000002020/matchups/1'];
       const kept = await second.ensureLeague(id);
       assert.equal(kept.status, 'ready');
-      assert.deepEqual(kept.archive, JSON.parse(stale));
-      assert.equal(await stored(path), stale);
+      assert.deepEqual(kept.archive, JSON.parse(published));
+      assert.equal(await stored(path), published);
 
       // The next refresh reuses the day's player list, and both instances then read its publication.
       source.responses['league/900000000000002020/matchups/1'] = missing;
@@ -60,10 +62,42 @@ test('a visitor waits for at most one import per refresh window, whichever insta
       assert.equal(requested.length, 0);
 
       // A day later the list is downloaded once more.
-      await seed(path, stale);
-      await age(join(dirname(storePath), 'players-nfl.json'), 25);
+      t.mock.timers.tick(25 * hour);
       await second.ensureLeague(id);
       assert.equal(requested.filter(path => path === 'players/nfl').length, 1);
+    } finally {
+      globalThis.fetch = network;
+    }
+  });
+});
+
+for (const withHistory of stores) test(`an instance reads the store once per refresh window, and a store it can't read is a failed visit (${withHistory.name})`, async t => {
+  await withHistory(async storePath => {
+    const source = JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
+    const id = source.seedLeagueId;
+    const network = globalThis.fetch;
+    globalThis.fetch = async input => {
+      const path = String(input).slice('https://api.sleeper.app/v1/'.length);
+      return path in source.responses ? Response.json(source.responses[path]) : new Response(null, { status: 404 });
+    };
+    try {
+      const { ensureLeague, leagueStorePath } = await instance(`held-${withHistory.name}`, storePath);
+      const path = leagueStorePath(id);
+      const { archive } = await ensureLeague(id);
+      const published = await stored(path);
+      // A second visit that opened this would fail, or see another league's name.
+      await seed(path, '{ unreadable');
+      assert.deepEqual(await ensureLeague(id), { status: 'ready', archive });
+
+      // Past the refresh window the store is read again: first unreadable, then older than the window.
+      t.mock.timers.enable({ apis: ['Date'], now: Date.now() + 13 * hour });
+      assert.deepEqual(await ensureLeague(id), { status: 'failed', archive: null });
+      await seed(path, published);
+      source.responses[`league/${id}`].name = 'Renamed league';
+      const refreshed = await ensureLeague(id);
+      assert.equal(refreshed.archive?.seasons[0].name, 'Renamed league');
+      await seed(path, '{ unreadable');
+      assert.deepEqual(await ensureLeague(id), refreshed);
     } finally {
       globalThis.fetch = network;
     }

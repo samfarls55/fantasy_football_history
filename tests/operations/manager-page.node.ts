@@ -1,17 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 import { readManager } from '../../src/history/managers.ts';
 import { readManagerRivalries } from '../../src/history/rivalries.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-manager-page-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const finishes = async (storePath: string, personId: string) => (await readManager(personId, { storePath }))!.seasons
   .filter(season => season.complete).map(season => [season.year, season.finish, season.teams]);
 

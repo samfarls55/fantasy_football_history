@@ -1,18 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory as published } from '../support/history.ts';
 import { readCategory, readRecordCollection } from '../../src/history/records.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { streaksSource } from '../fixtures/streaks-source.ts';
 
-async function published(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-game-records-'));
-  try { await run(join(directory, 'history.json')); }
-  finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 test('published final margins preserve decimal equality, zero ties, unique contests and both people', async () => {
   await published(async storePath => {
@@ -27,8 +20,11 @@ test('published final margins preserve decimal equality, zero ties, unique conte
     assert.equal(closest!.rows[2].secondary?.[0].name, 'Record manager 02');
     assert.match(closest!.rows[2].secondary![0].href, /\/managers\/.+\/seasons\/2021\/\?scope=regular/);
     // A margin record belongs to the game's winner, whichever side the contest stored first (99.9 lost to 100 here); a tied game says so.
-    assert.deepEqual([closest!.rows[1].name, closest!.rows[1].secondary?.[0].name, closest!.rows[1].tied], ['Record manager 02', 'Record manager 01', false]);
-    assert.equal(closest!.rows[0].tied, true);
+    assert.deepEqual([closest!.rows[1].name, closest!.rows[1].secondary?.[0].name, closest!.rows[1].result], ['Record manager 02', 'Record manager 01', 'won']);
+    assert.equal(closest!.rows[0].result, 'tied');
+    const met = async (key: string) => (await readCategory(key, { storePath }))!.rows.slice(0, 2).map(row => [row.name, row.value, row.result, row.opponent].map(text => String(text).replace('Record manager ', 'M')));
+    assert.deepEqual(await met('highest-score'), [['M01', '100.12', 'won', 'M02'], ['M02', '100', 'lost', 'M01']]);
+    assert.deepEqual(await met('lowest-score'), [['M05', '0', 'tied', 'M06'], ['M06', '0', 'tied', 'M05']]);
     assert.deepEqual((await readCategory('biggest-blowout', { storePath }))?.leaders.map(row => [row.value, row.rank]), [[4, 1]]);
     assert.equal((await readRecordCollection({ storePath }))?.find(group => group.name === 'Matchups')?.categories.find(category => category.key === 'closest-game')?.leaders[0].value, 0);
     (source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[])[0].custom_points = 100.25;

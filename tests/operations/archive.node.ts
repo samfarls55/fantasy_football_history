@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { seed, stored, stores } from '../support/stores.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readSeason, readSeasons } from '../../src/history/read.ts';
@@ -11,10 +11,6 @@ import { loadArchive, withHistorySnapshot } from '../../src/history/store.ts';
 
 const tim = 'person-608473907007143936';
 async function fixture() { return JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8')); }
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'archive-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 // A version 1 file as production holds it: raw responses inside, and a league name no read may ever show.
 const versionOne = (leagueId: string) => JSON.stringify({
   version: 1, leagueId, importedAt: '2026-11-03T11:59:00.000Z',
@@ -117,7 +113,7 @@ test('drafts and transactions keep the source fields later stats read', async ()
   });
 });
 
-test('a visit imports a version 1 league again, then reads one parsed archive without going back to the store', async () => {
+test('a visit imports a version 1 league again, then reads one parsed archive without going back to the store', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'archive-visit-'));
   const network = globalThis.fetch;
   const source = await fixture();
@@ -151,6 +147,7 @@ test('a visit imports a version 1 league again, then reads one parsed archive wi
     }, storePath);
 
     // A stale archive whose refresh fails is still what the visit reads.
+    t.mock.timers.enable({ apis: ['Date'], now: Date.now() + 13 * 60 * 60 * 1000 });
     await publish(storePath, source, '2026-11-03T12:00:00Z');
     delete source.responses['league/900000000000002020/matchups/1'];
     const stale = await ensureLeague(id);

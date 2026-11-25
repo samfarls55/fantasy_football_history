@@ -4,13 +4,11 @@ import { readSeasons } from './history/read.ts';
 import { readManagerStats } from './history/manager-stats.ts';
 import { readPlaceRecords } from './history/records.ts';
 import { withHistorySnapshot } from './history/store.ts';
-import { readTabs, tabs as allTabs, type TabKey } from './history/tabs.ts';
+import { readTabs, tabs as allTabs, type Place, type TabKey } from './history/tabs.ts';
 
 type Page = Pick<AstroGlobal, 'params' | 'url'>;
 
 type Tabs = NonNullable<Awaited<ReturnType<typeof readTabs>>>;
-/** One publication's tabs never change, and every page shows them, so each league's are worked out once per import. */
-const tabsOf = new Map<string, { importedAt: string; tabs: Tabs }>();
 
 /** Every page under a league opens the same way: import it if needed, then read its tabs and its whole view from one publication, or say why it can't be shown. */
 export async function openLeague<T>(page: Page & Pick<AstroGlobal, 'response'>, read: (storePath: string) => Promise<T>) {
@@ -18,10 +16,7 @@ export async function openLeague<T>(page: Page & Pick<AstroGlobal, 'response'>, 
   const { status, archive } = /^\d+$/.test(id) ? await ensureLeague(id) : { status: 'missing' as const, archive: null };
   if (status === 'ready') {
     const storePath = leagueStorePath(id);
-    return withHistorySnapshot(archive, async () => {
-      if (tabsOf.get(id)?.importedAt !== archive!.importedAt) tabsOf.set(id, { importedAt: archive!.importedAt, tabs: (await readTabs({ storePath }))! });
-      return { failure: null, tabs: tabsOf.get(id)!.tabs, view: await read(storePath) };
-    }, storePath);
+    return withHistorySnapshot(archive, async () => ({ failure: null, tabs: (await readTabs({ storePath }))!, view: await read(storePath) }), storePath);
   }
   page.response.status = status === 'missing' ? 404 : 502;
   return { failure: status, tabs: [] as Tabs, view: null };
@@ -54,6 +49,11 @@ export function leagueHref(page: Page, path = '', query: Record<string, string> 
 
 export function tabHref(page: Page, key: TabKey): string {
   return leagueHref(page, key === 'home' ? '' : `/${key}`);
+}
+
+/** A manager stat's column on the tab that has it. */
+export function statHref(page: Page, tabs: Tabs, { place, key }: { place: Place; key: string }): string {
+  return `${tabHref(page, tabs.find(tab => tab.places.includes(place))!.key)}#${key}`;
 }
 
 export function managerHref(page: Page, name: string, query: Record<string, string> = {}): string {

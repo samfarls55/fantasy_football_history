@@ -1,6 +1,7 @@
 ---
 // The sortable table: one row per manager, a painted label over each column, current managers over the dashed line and former ones under it.
 import Manager from './Manager.astro';
+import Names from './Names.astro';
 import ShareLink from './ShareLink.astro';
 import type { StatColumn } from '../stat-table.ts';
 
@@ -12,7 +13,9 @@ interface Props {
   /** The columns that set the order served, the first one leading. One this league has no value for is passed over. */
   by: string[];
 }
-const { labelledby, managers, columns, by } = Astro.props;
+const { labelledby, managers, by } = Astro.props;
+// A column of names reads from the left, the rest line their figures up on the right.
+const columns = Astro.props.columns.map(column => ({ ...column, named: [...column.cells.values()].some(cell => cell.names) }));
 const keys = by.flatMap(key => columns.find(column => column.key === key) ?? []);
 const order = managers.toSorted((a, b) => {
   for (const { better, cells } of keys) {
@@ -30,9 +33,9 @@ const order = managers.toSorted((a, b) => {
       <tr>
         <th scope="col"><span class="stat-label">Manager</span></th>
         {columns.map(column => (
-          <th scope="col" id={column.key} data-better={column.better} aria-sort={column === keys[0] ? column.better === 'higher' ? 'descending' : 'ascending' : undefined}>
-            <span class="stat-label">{column.label}</span>
-            <details class="play-how"><summary class="play-unit">{column.unit}</summary><p>{column.rule}<ShareLink label={`Share ${column.label}`} hash={`#${column.key}`} /></p></details>
+          <th scope="col" id={column.key} class:list={{ named: column.named }} data-better={column.better} aria-sort={column === keys[0] ? column.better === 'higher' ? 'descending' : 'ascending' : undefined}>
+            <span class:list={['stat-label', { long: column.label.length > 24 }]}>{column.label.replace(' %', ' %')}</span>
+            <details class="play-how"><summary class="play-unit"><span>{column.unit.replaceAll('–', '⁠–⁠')}</span></summary><p>{column.rule}<ShareLink label={`Share ${column.label}`} hash={`#${column.key}`} /></p></details>
           </th>
         ))}
       </tr>
@@ -40,16 +43,16 @@ const order = managers.toSorted((a, b) => {
     <tbody>
       {order.map(manager => (
         <tr class:list={{ former: !manager.current }}>
-          <th scope="row" data-sort={manager.name}><Manager name={manager.name} />{!manager.current && <span class="unseen"> Former manager</span>}</th>
-          {columns.map(({ key, cells }) => {
+          <th scope="row" data-sort={manager.name}><Manager name={manager.name} />{!manager.current && <span class="former-mark"> Former</span>}</th>
+          {columns.map(({ key, cells, named }) => {
             const cell = cells.get(manager.id);
             return cell ? (
-              <td data-column={key} data-sort={cell.sort}>
-                {cell.text && <span class="stat-text">{cell.text}</span>}
-                <span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}
+              <td class:list={{ named, several: cell.names && cell.names.length > 1 }} data-column={key} data-sort={cell.sort}>
+                {cell.names && <div class="stat-text"><Names names={cell.names} /></div>}
+                <span class="stat-counted"><span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}{cell.sample && cell.names && cell.names.length > 1 && ','}</span>{' '}
                 {cell.sample && <span class="stat-sample">{cell.sample}</span>}
               </td>
-            ) : <td><span aria-hidden="true">—</span><span class="unseen">Unknown</span></td>;
+            ) : <td class:list={{ named }}><span aria-hidden="true">—</span><span class="unseen">None</span></td>;
           })}
         </tr>
       ))}

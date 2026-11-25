@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { stores } from '../support/stores.ts';
 import { readSeasons, readSeason } from '../../src/history/read.ts';
 import { readManager } from '../../src/history/managers.ts';
@@ -17,10 +15,6 @@ const tim = 'person-608473907007143936';
 const sebastian = 'person-740265931783245824';
 const alec = 'person-473910025325113344';
 async function fixture() { return dropsSource(JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'))); }
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'refresh-acceptance-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 test('unpublished seasons remain unavailable rather than becoming known empty history', async () => {
   await withHistory(async storePath => {

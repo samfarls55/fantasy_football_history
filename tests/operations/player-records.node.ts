@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { aftermathSource, withEarlierSeason } from '../fixtures/aftermath-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
 import { readCategory, readHome, readRecordsHeld } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-player-records-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** Managers 1 to 4 always score 100, 90, 80 and 70, so a pairing settles its winner. */
 const week = (pairs: string, starts: Record<number, Record<string, number>>) => ({ pairs, starts });
 const games = (source: { seedLeagueId: string; responses: Record<string, unknown> }, number: number) => source.responses[`league/${source.seedLeagueId}/matchups/${number}`] as any[];
@@ -84,12 +77,12 @@ test('published one-man army is a starter’s share of the official team score, 
     games(source, 2)[0].custom_points = -5;
     await publish(storePath, source);
     const army = (await readCategory('one-man-army', { storePath }))!;
-    assert.deepEqual(army.rows.map(row => [row.rank, row.manager, row.name, row.value, row.leaderContext, row.period]), [
-      [1, 'Record manager 01', 'Player A', 60, 'Record manager 01 · Week 1 · 2021 · 60.00 of 100.00 points vs Record manager 02', { year: '2021', week: 1, playedAt: null }],
-      [2, 'Record manager 02', 'Player B', 50, 'Record manager 02 · Week 1 · 2021 · 45.00 of 90.00 points vs Record manager 01', { year: '2021', week: 1, playedAt: null }],
-      [3, 'Record manager 03', 'Player C', 40, 'Record manager 03 · Week 1 · 2021 · 50.00 of 125.00 points vs Record manager 04', { year: '2021', week: 1, playedAt: null }],
-      [4, 'Record manager 02', 'Player B', 22.5, 'Record manager 02 · Week 2 · 2021 · 20.25 of 90.00 points vs Record manager 04', { year: '2021', week: 2, playedAt: null }],
-      [5, 'Record manager 02', 'Player Z', 0, 'Record manager 02 · Week 1 · 2021 · 0.00 of 90.00 points vs Record manager 01', { year: '2021', week: 1, playedAt: null }],
+    assert.deepEqual(army.rows.map(row => [row.rank, row.manager, row.name, row.value, row.leaderContext, row.opponent, row.period]), [
+      [1, 'Record manager 01', 'Player A', 60, 'Record manager 01 · Week 1 · 2021 · 60.00 of 100.00 points', 'Record manager 02', { year: '2021', week: 1, playedAt: null }],
+      [2, 'Record manager 02', 'Player B', 50, 'Record manager 02 · Week 1 · 2021 · 45.00 of 90.00 points', 'Record manager 01', { year: '2021', week: 1, playedAt: null }],
+      [3, 'Record manager 03', 'Player C', 40, 'Record manager 03 · Week 1 · 2021 · 50.00 of 125.00 points', 'Record manager 04', { year: '2021', week: 1, playedAt: null }],
+      [4, 'Record manager 02', 'Player B', 22.5, 'Record manager 02 · Week 2 · 2021 · 20.25 of 90.00 points', 'Record manager 04', { year: '2021', week: 2, playedAt: null }],
+      [5, 'Record manager 02', 'Player Z', 0, 'Record manager 02 · Week 1 · 2021 · 0.00 of 90.00 points', 'Record manager 01', { year: '2021', week: 1, playedAt: null }],
     ]);
     assert.ok((await readRecordsHeld('person-960000000000000001', { storePath }))!.some(view => view.category.key === 'one-man-army'));
   });
@@ -150,10 +143,10 @@ test('published most-started players list every tie, count an actual zero and ke
       week('12 34', { 1: { A: 10 } }), week('13 24', { 1: { A: 10 } }), week('14 23', { 1: { A: 10 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'most-started'), [
-      ['05', ['Player A'], '3 starts', '3 weeks', 1],
-      ['01', ['Player B'], '2 starts', '3 weeks', 2],
-      ['02', ['Player C', 'Player D'], '2 starts', '6 weeks', 2],
-      ['03', ['Player C'], '1 start', '6 weeks', 4],
+      ['05', ['Player A'], '3 starts', 'of 3 weeks', 1],
+      ['01', ['Player B'], '2 starts', 'of 3 weeks', 2],
+      ['02', ['Player C', 'Player D'], '2 starts each', 'of 6 weeks', 2],
+      ['03', ['Player C'], '1 start', 'of 6 weeks', 4],
     ]);
   });
 });
@@ -169,10 +162,10 @@ test('published scored-most-against adds up an opponent’s starters exactly, ti
       week('12 34', { 2: { A: 30.25 } }), week('12 34', { 2: { A: 30.25 } }),
     ], [])));
     assert.deepEqual(await stat(storePath, 'scored-most-against'), [
-      ['05', ['Player A'], '60.50 points', '2 weeks', 1],
-      ['04', ['Player B'], '12.50 points', '4 weeks', 2],
-      ['01', ['Player A', 'Player C'], '0.30 points', '2 weeks', 3],
-      ['02', ['Player E'], '0.00 points', '4 weeks', 4],
+      ['05', ['Player A'], '60.50 points', 'in 2 weeks', 1],
+      ['04', ['Player B'], '12.50 points', 'in 4 weeks', 2],
+      ['01', ['Player A', 'Player C'], '0.30 points each', 'in 2 weeks', 3],
+      ['02', ['Player E'], '0.00 points', 'in 4 weeks', 4],
     ]);
     const stats = (await readManagerStats({ storePath, places: ['players'] }))!;
     assert.deepEqual(stats.map(stat => [stat.label, stat.unit]), [['Most-started player', 'starts'], ['Scored most against them', 'points']]);

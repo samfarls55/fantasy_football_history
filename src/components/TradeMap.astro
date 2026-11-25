@@ -1,8 +1,9 @@
 ---
 // Who trades with whom: managers down a sideline and an arc for each pair, as wide as they stand apart, so no two counts share a spot.
-// The drawing is for the eye alone; the list under it holds every pair and links the names.
+// The drawing is for the eye alone, and for up to 16 managers; the list under it holds every pair and links the names.
 import Manager from './Manager.astro';
 import Section from './Section.astro';
+import { recordUnit } from '../history/records.ts';
 import { isViewer } from '../league-page.ts';
 import type { readTradeMap } from '../history/trades.ts';
 
@@ -17,7 +18,7 @@ const arcs = pairs.map(({ a, b, count }) => ({ from: managers.indexOf(a), to: ma
 {pairs.length > 0 && (
   <Section id="trade-map" title="Trade map">
     <details class="play-how"><summary class="play-unit">trades between each pair</summary><p>Every completed trade, whether for players, picks or waiver budget. A three-team trade counts once for each pair.</p></details>
-    <div class="trade-map" style={`--reach: ${reach}`} aria-hidden="true">
+    {managers.length <= 16 && <div class="trade-map" style={`--reach: ${reach}`} aria-hidden="true">
       <div class="trade-names">{managers.map(person => <div><span data-person class:list={{ me: marked(person) }}>{person.name}</span></div>)}</div>
       <div class="trade-arcs">
         <svg viewBox={`0 0 ${reach} ${managers.length}`} preserveAspectRatio="none">
@@ -25,9 +26,9 @@ const arcs = pairs.map(({ a, b, count }) => ({ from: managers.indexOf(a), to: ma
         </svg>
         {arcs.map(({ from, to, count, mine }) => <span class:list={['trade-count', { mine }]} style={`left: ${(to - from) / reach * 100}%; top: ${(from + to + 1) / 2 / managers.length * 100}%`}>{count}</span>)}
       </div>
-    </div>
+    </div>}
     <ul class="trade-pairs" aria-labelledby="trade-map-name">
-      {pairs.map(({ a, b, count }) => <li><span class="trade-total"><strong>{count}</strong> {count === 1 ? 'trade' : 'trades'}</span><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
+      {pairs.map(({ a, b, count }) => <li><span class="trade-total"><strong>{count}</strong> {recordUnit('trades', count)}</span><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
     </ul>
   </Section>
 )}

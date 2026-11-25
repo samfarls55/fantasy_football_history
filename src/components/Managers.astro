@@ -1,8 +1,9 @@
 ---
 // Every manager, each current one beside the badge they wear and the stat that earned it.
 import Manager from './Manager.astro';
+import Names from './Names.astro';
 import Section from './Section.astro';
-import { tabHref, type openLeague } from '../league-page.ts';
+import { statHref, type openLeague } from '../league-page.ts';
 import type { readBadges } from '../history/badges.ts';
 
 interface Props {
@@ -22,8 +23,8 @@ const rows = managers.map(manager => ({ ...manager, badge: badges.find(badge => 
         {badge && (
           <>
             <strong class="badge">{badge.badge}</strong>
-            <a class="badge-stat" href={`${tabHref(Astro, tabs.find(tab => tab.places.includes(badge.place))!.key)}#${badge.key}`}>{badge.label}</a>
-            <span class="badge-value">{badge.names && <span class="stat-text">{badge.names.join(', ')}</span>}<span class="stat-figure">{badge.figure}</span> {badge.unit}</span>
+            <div><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a><span class="stat-sample">{badge.standing} of {badge.of}</span></div>
+            <div class="badge-value">{badge.names && <div class="stat-text"><Names names={badge.names} /></div>}<span><span class="stat-figure">{badge.figure}</span> {badge.unit}</span>{badge.sample && <span class="stat-sample">{badge.sample}</span>}</div>
           </>
         )}
       </li>

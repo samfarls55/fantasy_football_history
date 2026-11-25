@@ -25,7 +25,7 @@ test('published careers give every person, current or replaced, one row of the r
   await published(await base(), async storePath => {
     const table = await careers(storePath);
     assert.deepEqual([...table.values()].map(stat => [stat.key, stat.label, stat.unit]).filter(([key]) => !['power-rating', 'one-year-change'].includes(key)), [
-      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'wins–losses–ties'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
+      ['titles', 'Titles', 'won'], ['finals-lost', 'Finals lost', 'finals'], ['record', 'Record', 'wins–losses–ties, regular season'], ['win-rate', 'Win %', 'of games'], ['playoffs', 'Playoffs', 'trips'],
       ['points', 'Points per game', 'points'], ['points-against', 'Opponents’ points per game', 'points'], ['seasons', 'Seasons', 'years'],
     ]);
     const row = (name: string) => ['titles', 'finals-lost', 'record', 'win-rate', 'playoffs', 'points', 'points-against', 'seasons'].map(key => table.get(key)!.rows.find(row => row.name === name)!.figure);
@@ -92,11 +92,25 @@ test('published one-year changes compare a person’s consecutive finished seaso
       // 3rd in 2021 and 1st in 2023 with 2022 away is no one-year change.
       ['M3', '2', 'places', '1st to 3rd in 2024', 2],
       // Two equal moves, and the unresolved 2024 final leaves a third unknown.
-      ['M1', '1', 'place', '1st to 2nd in 2022, 2nd to 3rd in 2023', 4],
+      ['M1', '1', 'place each', '1st to 2nd in 2022, 2nd to 3rd in 2023', 4],
     ]);
   });
   // One finished season is no change, so M5 above is unknown, and in a first season so is everyone.
   await published(seasonsSource(placed([1, 2, 3, 4])), async storePath => assert.equal(await column(storePath, 'one-year-change'), undefined));
+});
+
+test('published counts of titles, finals and playoffs show the seasons they come from', async () => {
+  const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort();
+  await published(seasonsSource(...finishes), async storePath => {
+    // The 2024 title is unresolved, so it was nobody's chance at one.
+    const resolved = [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '2 seasons'], ['M4', '3 seasons'], ['M5', '1 season']];
+    assert.deepEqual(await samples(storePath, 'titles'), resolved);
+    assert.deepEqual(await samples(storePath, 'finals-lost'), resolved);
+    // The 2025 bracket is set, with its final still to come.
+    assert.deepEqual(await samples(storePath, 'playoffs'), [['M1', '5 seasons'], ['M2', '5 seasons'], ['M3', '4 seasons'], ['M4', '5 seasons'], ['M5', '1 season']]);
+    // A finish the bracket doesn't establish can't have changed.
+    assert.deepEqual(await samples(storePath, 'one-year-change'), [['M1', 'over 3 seasons'], ['M2', 'over 3 seasons'], ['M3', 'over 3 seasons'], ['M4', 'over 4 seasons']]);
+  });
 });
 
 test('published finals lost count resolved finals alone, and the most without a title is a record', async () => {
@@ -116,8 +130,8 @@ test('published finals lost count resolved finals alone, and the most without a 
     assert.deepEqual([row.leaderContext, row.period], ['2022, 2023', { year: '2023', week: 2, playedAt: null }]);
   });
   await published(seasonsSource(placed([1, 2, 3, 4], { unresolved: true })), async storePath => {
-    assert.deepEqual(await column(storePath, 'titles'), [['M1', '0'], ['M2', '0'], ['M3', '0'], ['M4', '0']]);
-    assert.equal(await column(storePath, 'finals-lost'), undefined, 'a league with no resolved title has no finals to have lost');
+    assert.equal(await column(storePath, 'titles'), undefined, 'a league with no resolved title has none to count');
+    assert.equal(await column(storePath, 'finals-lost'), undefined, 'and no finals to have lost');
     assert.deepEqual(await bridesmaids(storePath), []);
   });
 });

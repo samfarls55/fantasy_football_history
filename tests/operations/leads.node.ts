@@ -1,19 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
-import { managerStats } from '../../src/history/manager-stats.ts';
+import { managerStats, readManagerStats } from '../../src/history/manager-stats.ts';
 import { readPlaceRecords } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-leads-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 /** Each visible tab's lead: the stat's anchor, what it's called, its figure and unit, and who holds it. */
 const leads = async (storePath: string) => (await readTabs({ storePath }))!.map(({ key, lead }) => lead && [key, lead.category.key, lead.category.name,
   lead.leaders[0].shown ?? lead.leaders[0].value, lead.category.unit, ...lead.leaders.map(row => row.manager?.replace('Record manager ', 'M'))]);
@@ -40,7 +33,7 @@ test('published leads are one chosen stat from each tab, with the values its tab
       ['games', 'highest-score', 'Highest score', 120.5, 'points', 'M01'],
       ['excuses', 'losses-better-lineup', 'Most losses a better lineup wins', '1', 'loss', 'M02'],
       ['players', 'most-started', 'Most starts by one player for one manager', '2', 'starts', 'M01'],
-      ['draft', 'best-steal', 'Best steal', 30.75, 'points as a starter', 'M01'],
+      ['draft', 'best-steal', 'Best steal: most points from a late-round pick', 30.75, 'points as a starter', 'M01'],
       ['moves', 'pickups', 'Most pickups', '2', 'pickups', 'M03'],
     ]);
   });
@@ -53,7 +46,7 @@ test('published leads fall back to the first stat on the page that somebody hold
     const [home, legacy, ...rest] = await leads(storePath);
     assert.equal(home, null);
     // Titles lead Legacy's table, but nobody holds a count of zero.
-    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'wins–losses–ties', 'M01', 'M02', 'M03']);
+    assert.deepEqual(legacy, ['legacy', 'record', 'Most wins', '1–1', 'wins–losses–ties, regular season', 'M01', 'M02', 'M03']);
     assert.deepEqual((await readTabs({ storePath }))![1].lead!.leaders.map(row => row.sample), ['1–1', '1–1', '1–0–1'], 'equal wins with unequal records each keep their own');
     assert.deepEqual(rest, [
       ['games', 'highest-score', 'Highest score', 100, 'points', 'M01', 'M02'],
@@ -61,10 +54,16 @@ test('published leads fall back to the first stat on the page that somebody hold
     ]);
   });
   await withHistory(async storePath => {
-    // An auction draft has no steal, bust or slot, so Draft leads from its table: every pick was a Buccaneer.
-    await publish(storePath, finished([draftOf({ id: '20', source: { type: 'auction' } })]));
-    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03', 'M04']);
-    assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].name, 'TB');
+    // An auction draft has no steal, bust or slot, so Draft leads from its table: every pick of M1's, M2's and M3's was a Buccaneer.
+    const auction = draftOf({ id: '20', source: { type: 'auction' } });
+    auction.picks[3].metadata.team = 'CHI';
+    await publish(storePath, finished([auction]));
+    assert.deepEqual((await leads(storePath))[5], ['draft', 'drafted-team', 'Most-drafted NFL team', '4', 'times', 'M01', 'M02', 'M03']);
+    assert.deepEqual((await readTabs({ storePath }))![5].lead!.leaders[0].names, ['TB']);
+    // With M4's all Buccaneers too, everyone ties, so nothing leads.
+    auction.picks[3].metadata.team = 'TB';
+    await publish(storePath, finished([auction]));
+    assert.deepEqual((await leads(storePath))[5], null);
   });
   await withHistory(async storePath => {
     // Without the bench, no better lineup wins anything. Manager 3's 2–0 beat the 2⁄3 of a win that outscoring one of three others twice earned.
@@ -72,6 +71,17 @@ test('published leads fall back to the first stat on the page that somebody hold
     Object.assign(source.responses[`league/${source.seedLeagueId}/matchups/1`][1], { players: ['32'], players_points: { 32: 25 } });
     await publish(storePath, source);
     assert.deepEqual((await leads(storePath))[3], ['excuses', 'luckiest-season', 'Luckiest season', 4 / 3, 'more wins than their scores earned', 'M03']);
+  });
+});
+
+test('published leads are never a stat every manager ties on', async () => {
+  await withHistory(async storePath => {
+    // Nobody has played a game yet, so all Legacy knows is that everyone is in their first season.
+    const source = recordsSource([[0, 0, 0, 0]]);
+    Object.assign((source.responses[`league/${source.seedLeagueId}`] as any).settings, { last_scored_leg: 0 });
+    await publish(storePath, source);
+    assert.deepEqual(await leads(storePath), [null, null]);
+    assert.deepEqual((await readManagerStats({ storePath }))!.map(stat => stat.key), ['seasons']);
   });
 });
 

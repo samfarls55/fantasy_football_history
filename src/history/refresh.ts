@@ -4,7 +4,7 @@ import { sumPoints } from './decimal.ts';
 import { importOwnershipInputs } from './ownership-import.ts';
 import { ownerArtwork } from './artwork.ts';
 import { playerBackground } from './players.ts';
-import { startingSlots } from './lineups.ts';
+import { startingSlots } from './rosters.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {

@@ -1,3 +1,6 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { refresh } from '../../src/history/refresh.ts';
 
 interface ControlledHistorySource {
@@ -13,4 +16,10 @@ export function publishControlledHistory(storePath: string, source: ControlledHi
       return structuredClone(source.responses[path]);
     },
   } });
+}
+
+/** Runs with a store of its own that nothing has been published to. */
+export async function withHistory(run: (storePath: string) => Promise<void>) {
+  const directory = await mkdtemp(join(tmpdir(), 'history-'));
+  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
 }

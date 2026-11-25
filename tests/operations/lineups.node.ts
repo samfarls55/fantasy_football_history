@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readManagerStats } from '../../src/history/manager-stats.ts';
-import { readCategory } from '../../src/history/records.ts';
+import { readCategory, readPlaceRecords } from '../../src/history/records.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-lineups-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 type Source = ReturnType<typeof recordsSource>;
 type Scored = [player: string, points: number | null];
 /** A league with these roster slots whose players' IDs start with their position: "RB-1". */
@@ -34,8 +27,8 @@ function lineup(source: Source, week: number, manager: number, starters: Scored[
 /** Each manager's short name, figure and sample, rank 1 first. */
 const rows = async (storePath: string, key: string) => (await readManagerStats({ storePath }))!.find(stat => stat.key === key)?.rows
   .map(row => [row.name.replace('Record manager ', 'M'), row.figure, row.sample]);
-/** The worst-managed weeks: manager, gap and when. */
-const worst = async (storePath: string) => (await readCategory('worst-managed-week', { storePath }))!.rows.map(row => [row.manager!.replace('Record manager ', 'M'), row.value, row.leaderContext]);
+/** The worst-managed weeks: manager, gap, when, and how they fared against whom. */
+const worst = async (storePath: string) => (await readCategory('worst-managed-week', { storePath }))!.rows.map(row => [row.manager!.replace('Record manager ', 'M'), row.value, row.leaderContext, row.result, row.opponent!.replace('Record manager ', 'M')]);
 
 test('published best lineups are a true best assignment where either greedy order loses', async () => {
   await withHistory(async storePath => {
@@ -44,10 +37,10 @@ test('published best lineups are a true best assignment where either greedy orde
     lineup(source, 1, 1, [['TE-1', 2], ['WR-1', 20]], [['RB-1', 10]]);
     lineup(source, 1, 2, [['WR-2', 20], ['RB-2', 2]], [['TE-2', 10]]);
     await publish(storePath, source);
-    assert.deepEqual(await worst(storePath), [['M01', 8, 'Week 1 · 2021 · vs Record manager 02'], ['M02', 8, 'Week 1 · 2021 · vs Record manager 01']]);
+    assert.deepEqual(await worst(storePath), [['M01', 8, 'Week 1 · 2021', 'tied', 'M02'], ['M02', 8, 'Week 1 · 2021', 'tied', 'M01']]);
     // 22 of 30 is 73.33%.
     assert.deepEqual(await rows(storePath, 'lineup-share'), [['M01', '73.3%', '1 week'], ['M02', '73.3%', '1 week']]);
-    assert.deepEqual(await rows(storePath, 'perfect-lineups'), [['M01', '0', '1 week'], ['M02', '0', '1 week']]);
+    assert.equal(await rows(storePath, 'perfect-lineups'), undefined, 'nobody has had one');
   });
 });
 
@@ -60,7 +53,7 @@ test('published best lineups let a player fill any slot type they have started i
     // It holds for anyone in the league who rosters him. TE-2 has never started at QB, so his 40 has no slot.
     lineup(source, 3, 2, [['QB-2', 4], ['WR-3', 9]], [['TE-1', 24], ['TE-2', 40]]);
     await publish(storePath, source);
-    assert.deepEqual(await worst(storePath), [['M01', 20, 'Week 2 · 2021 · vs Record manager 02'], ['M02', 20, 'Week 3 · 2021 · vs Record manager 01']]);
+    assert.deepEqual(await worst(storePath), [['M01', 20, 'Week 2 · 2021', 'tied', 'M02'], ['M02', 20, 'Week 3 · 2021', 'tied', 'M01']]);
     assert.deepEqual(await rows(storePath, 'perfect-lineups'), [['M01', '1', '2 weeks'], ['M02', '0', '1 week']]);
   });
 });
@@ -109,11 +102,11 @@ test('published losses a better lineup wins add the gap to the official score, w
     lineup(source, 6, 1, [['RB-1', 10]], [['RB-2', null]]); // Nobody knows about this loss.
     const other = lineup(source, 5, 2, [['RB-3', 10]]);
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '2', 'of 3 losses'], ['M02', '0', 'of 1 loss']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M02', '0', 'of 1 loss'], ['M01', '2', 'of 3 losses']]);
     // M2's override to 110 turns week 5 into a loss that the 30 M1 left on the bench would have won.
     other.custom_points = 110;
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '3', 'of 4 losses'], ['M02', '0', 'of 0 losses']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M02', '0', 'of 0 losses'], ['M01', '3', 'of 4 losses']]);
     assert.deepEqual((await worst(storePath)).map(([, gap]) => gap), [50, 30, 15, 5.01, 5], 'no override changed a gap');
   });
 });
@@ -130,13 +123,41 @@ test('published zero-point starters and lowest starter scores count recorded sco
     for (const row of games) row.matchup_id = null;
     lineup(source, 3, 1, [['RB-1', 0], ['WR-1', -20], ['TE-1', null]]);
     await publish(storePath, source);
-    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M01', '2', 'of 5 starts'], ['M02', '0', 'of 4 starts']]);
-    assert.deepEqual((await readCategory('lowest-starter', { storePath }))!.rows.slice(0, 4).map(row => [row.rank, row.value, row.name, row.leaderContext]), [
-      [1, -0.5, 'Player WR-1', 'Record manager 01 · Week 2 · 2021 · vs Record manager 02'],
-      [1, -0.5, 'Player WR-2', 'Record manager 02 · Week 2 · 2021 · vs Record manager 01'],
-      [3, 0, 'Player RB-1', 'Record manager 01 · Week 1 · 2021 · vs Record manager 02'],
-      [3, 0, 'Player RB-1', 'Record manager 01 · Week 2 · 2021 · vs Record manager 02'],
+    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M02', '0', 'of 4 starts'], ['M01', '2', 'of 5 starts']]);
+    assert.deepEqual((await readCategory('lowest-starter', { storePath }))!.rows.slice(0, 4).map(row => [row.rank, row.value, row.name, row.leaderContext, row.opponent]), [
+      [1, -0.5, 'Player WR-1', 'Record manager 01 · Week 2 · 2021', 'Record manager 02'],
+      [1, -0.5, 'Player WR-2', 'Record manager 02 · Week 2 · 2021', 'Record manager 01'],
+      [3, 0, 'Player RB-1', 'Record manager 01 · Week 1 · 2021', 'Record manager 02'],
+      [3, 0, 'Player RB-1', 'Record manager 01 · Week 2 · 2021', 'Record manager 02'],
     ]);
+  });
+});
+
+test('published lineup stats and cards leave out a best-ball season, whose lineups Sleeper sets', async () => {
+  await withHistory(async storePath => {
+    const source = league(['RB', 'BN'], [[10, 20]]);
+    const old = league(['RB', 'BN'], [[40, 50]]);
+    (old.responses[`league/${old.seedLeagueId}`] as any).settings.best_ball = 1;
+    lineup(old, 1, 1, [['RB-1', 0]], [['RB-2', 30]]);
+    lineup(old, 1, 2, [['RB-3', -4]], [['RB-4', -9]]);
+    lineup(source, 1, 1, [['RB-1', 0]], [['RB-2', 5]]);
+    lineup(source, 1, 2, [['RB-3', 8]], [['RB-4', 6]]);
+    const oldId = '900000000000002020';
+    for (const [path, value] of Object.entries(old.responses)) if (path.startsWith('league/')) source.responses[path.replace(old.seedLeagueId, oldId)] = value;
+    Object.assign(source.responses[`league/${oldId}`] as any, { league_id: oldId, season: '2020', status: 'complete' });
+    (source.responses[`league/${source.seedLeagueId}`] as any).previous_league_id = oldId;
+    await publish(storePath, source);
+    const cards = async (key: string) => (await readCategory(key, { storePath }))!.rows.map(row => [row.name, row.value, row.period!.year]);
+    assert.deepEqual(await rows(storePath, 'lineup-share'), [['M02', '100.0%', '1 week'], ['M01', '0.0%', '1 week']]);
+    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M02', '0', 'of 1 start'], ['M01', '1', 'of 1 start']]);
+    assert.deepEqual(await worst(storePath), [['M01', 5, 'Week 1 · 2021', 'lost', 'M02']]);
+    assert.deepEqual(await cards('lowest-starter'), [['Player RB-1', 0, '2021'], ['Player RB-3', 8, '2021']]);
+    assert.deepEqual(await cards('benched-player'), [['Player RB-4', 6, '2021'], ['Player RB-2', 5, '2021']]);
+    // A league that only plays best ball has no such stat, and no such half of Excuses.
+    (source.responses[`league/${source.seedLeagueId}`] as any).settings.best_ball = 1;
+    await publish(storePath, source);
+    assert.deepEqual((await readManagerStats({ storePath, places: ['lineups'] })), []);
+    assert.deepEqual(await readPlaceRecords(['lineups'], { storePath }), []);
   });
 });
 
@@ -154,8 +175,8 @@ test('published lineup stats stay with the person who held the roster', async ()
     (source.responses[`league/${oldId}/rosters`] as any[])[0].owner_id = '960000000000009999';
     await publish(storePath, source);
     assert.deepEqual(await rows(storePath, 'lineup-share'), [['M01', '100.0%', '1 week'], ['M99', '0.0%', '1 week']]);
-    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M99', '1', 'of 1 loss'], ['M01', '0', 'of 1 loss']]);
-    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M99', '1', 'of 1 start'], ['M01', '0', 'of 1 start']]);
-    assert.deepEqual(await worst(storePath), [['M99', 30, 'Week 1 · 2020 · vs Record manager 02']]);
+    assert.deepEqual(await rows(storePath, 'losses-better-lineup'), [['M01', '0', 'of 1 loss'], ['M99', '1', 'of 1 loss']]);
+    assert.deepEqual(await rows(storePath, 'zero-starters'), [['M01', '0', 'of 1 start'], ['M99', '1', 'of 1 start']]);
+    assert.deepEqual(await worst(storePath), [['M99', 30, 'Week 1 · 2020', 'lost', 'M02']]);
   });
 });

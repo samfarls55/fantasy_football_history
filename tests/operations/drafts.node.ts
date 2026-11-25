@@ -1,17 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { draftOf, draftsSource } from '../fixtures/drafts-source.ts';
 import { readCategory, readHome, readPlaceRecords, readRecordsHeld } from '../../src/history/records.ts';
 import { readTabs } from '../../src/history/tabs.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-drafts-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 
 const lineups: Record<number, Record<string, number>>[] = [
   { 1: { 31: 10.5 }, 2: { 42: 25, 12: 30 }, 3: { 13: 5 }, 4: { 33: 40, 24: 90 } },
@@ -55,6 +48,9 @@ test('published worst bust ranks first-round picks, leaving out known keepers al
 
 const draftTab = async (storePath: string) => (await readTabs({ storePath }))!.some(tab => tab.key === 'draft');
 
+const placeless = draftOf({ id: '20' });
+Object.assign(placeless.picks[5], { round: null, metadata: null });
+
 test('published auction, rookie and unfinished drafts supply no draft result', async () => {
   for (const [draft, tab] of [
     // The tab still opens for the scouting reports.
@@ -63,6 +59,10 @@ test('published auction, rookie and unfinished drafts supply no draft result', a
     [draftOf({ id: '20', settings: { player_type: 1 } }), true],
     [draftOf({ id: '20', rounds: 3, slots: 4 }), true],
     [draftOf({ id: '20', source: { status: 'paused' } }), false],
+    // A draft Sleeper sent without settings, or with a pick it can't place, can't be measured.
+    [draftOf({ id: '20', source: { settings: null } }), true],
+    [draftOf({ id: '20', source: { settings: { rounds: '4', slots_qb: 1, slots_flex: 1, slots_bn: 2 } } }), true],
+    [placeless, true],
   ] as const) await withHistory(async storePath => {
     await publish(storePath, draftsSource([{ year: '2020', drafts: [draft], lineups }]));
     assert.deepEqual(await readPlaceRecords(['draft'], { storePath }), []);

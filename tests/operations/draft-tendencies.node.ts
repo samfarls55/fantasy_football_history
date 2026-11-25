@@ -30,10 +30,10 @@ test('published drafted most often counts every type of finished draft for the p
     { year: '2019', drafts: [draftOf({ id: '19', rounds: 1, slots: 4, order: [1, 3, 2, 4], traded: { 13: 4 }, settings: { player_type: 1 } })] },
   ]));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'Player 11', '3 times', '3 drafts'],
-    [2, 'Record manager 02', 'Player 12, Player 22, Player 32, Player 42', '2 times', '2 drafts'],
-    [2, 'Record manager 03', 'Player 13, Player 23, Player 33, Player 43', '2 times', '3 drafts'],
-    [2, 'Record manager 04', 'Player 14', '2 times', '2 drafts'],
+    [1, 'Record manager 01', 'Player 11', '3 times', 'in 3 drafts'],
+    [2, 'Record manager 02', 'Player 12, Player 22, Player 32, Player 42', '2 times each', 'in 2 drafts'],
+    [2, 'Record manager 03', 'Player 13, Player 23, Player 33, Player 43', '2 times each', 'in 3 drafts'],
+    [2, 'Record manager 04', 'Player 14', '2 times', 'in 2 drafts'],
   ]);
 });
 
@@ -54,9 +54,9 @@ test('published most-drafted NFL team is the one recorded with each pick, team d
     13: null, 23: null, 33: 'DAL', 43: 'DAL', 14: 'GB', 24: 'CHI', 34: 'DET', 44: 'MIN',
   }, { 11: { team: 'LV' }, 21: { team: 'LV', position: 'DEF' } }));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'OAK', '2 times', '4 picks'],
-    [1, 'Record manager 02', 'KC, NYJ', '2 times', '4 picks'],
-    [1, 'Record manager 03', 'DAL', '2 times', '2 picks'],
+    [1, 'Record manager 01', 'OAK', '2 times', 'in 4 picks'],
+    [1, 'Record manager 02', 'KC, NYJ', '2 times each', 'in 4 picks'],
+    [1, 'Record manager 03', 'DAL', '2 times', 'in 2 picks'],
   ]);
 });
 
@@ -69,9 +69,9 @@ test('published most-drafted college leaves out team defenses and unknown colleg
     14: { college: 'Texas', position: 'DEF' }, 24: { college: 'Texas', position: 'DEF' }, 34: { college: 'Texas', position: 'DEF' }, 44: { college: 'Utah' }, 54: { college: 'Utah' },
   }));
   assert.deepEqual(rows, [
-    [1, 'Record manager 01', 'Iowa, Ohio State', '2 times', '5 picks'],
-    [1, 'Record manager 02', 'LSU', '2 times', '2 picks'],
-    [1, 'Record manager 04', 'Utah', '2 times', '2 picks'],
+    [1, 'Record manager 01', 'Iowa, Ohio State', '2 times each', 'in 5 picks'],
+    [1, 'Record manager 02', 'LSU', '2 times', 'in 2 picks'],
+    [1, 'Record manager 04', 'Utah', '2 times', 'in 2 picks'],
   ]);
 });
 

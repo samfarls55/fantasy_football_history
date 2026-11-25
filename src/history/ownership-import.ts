@@ -10,6 +10,13 @@ function list(value: unknown, label: string): unknown[] { if (!Array.isArray(val
 function id(value: unknown, label: string): string { if (typeof value !== 'string' || !value.trim()) throw new Error(`${label}: expected a string ID`); return value; }
 function integer(value: unknown, label: string): number { if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) throw new Error(`${label}: expected a safe nonnegative integer`); return value; }
 
+// What a stat reads of a draft or a trade is checked here, once. A league whose drafts lack it still imports.
+const text = (value: unknown) => typeof value === 'string' ? value : null;
+const count = (value: unknown) => Number.isSafeInteger(value) ? value as number : null;
+const fields = (value: unknown): Row => value && typeof value === 'object' ? value as Row : {};
+const counts = (value: unknown) => Object.fromEntries(Object.entries(fields(value)).filter((entry): entry is [string, number] => count(entry[1]) !== null));
+const items = (value: unknown) => Array.isArray(value) ? value : [];
+
 /** Validate and retain ownership inputs once, at the provider boundary. Raw assets stay internal. */
 export async function importOwnershipInputs(archive: Archive, season: Season, get: (path: string) => Promise<unknown>, playerSource: Row) {
   const path = `league/${season.id}`;
@@ -34,9 +41,11 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
       const pick = object(value, `draft/${draftId}/picks`);
       const playerId = id(pick.player_id, `draft/${draftId}/picks player_id`); player(playerId);
       if (pick.is_keeper != null && typeof pick.is_keeper !== 'boolean') throw new Error(`draft/${draftId}/picks: invalid keeper flag`);
-      return { playerId, rosterId: pick.roster_id == null ? null : roster(pick.roster_id, `draft/${draftId}/picks roster_id`), keeper: pick.is_keeper == null ? null : pick.is_keeper, source: pick };
+      return { playerId, rosterId: pick.roster_id == null ? null : roster(pick.roster_id, `draft/${draftId}/picks roster_id`), keeper: pick.is_keeper == null ? null : pick.is_keeper,
+        source: { ...pick, round: count(pick.round), pick_no: count(pick.pick_no), draft_slot: count(pick.draft_slot), metadata: { ...fields(pick.metadata), team: text(fields(pick.metadata).team) } } };
     });
-    archive.drafts.push({ id: draftId, seasonId: season.id, source, picks });
+    archive.drafts.push({ id: draftId, seasonId: season.id, picks,
+      source: { ...source, status: text(source.status), type: text(source.type), start_time: count(source.start_time), draft_order: counts(source.draft_order), settings: counts(source.settings) } });
   }
   const seen = new Map<string, string>();
   const chronology = new Map<string, string>();
@@ -61,7 +70,7 @@ export async function importOwnershipInputs(archive: Archive, season: Season, ge
         chronology.set(key, transactionId);
       }
       archive.transactions.push({ id: transactionId, seasonId: season.id, year: season.year, week,
-        type, status, completedAt, adds, drops, source, orderingSupported: false });
+        type, status, completedAt, adds, drops, source: { ...source, roster_ids: items(source.roster_ids), draft_picks: items(source.draft_picks), waiver_budget: items(source.waiver_budget) }, orderingSupported: false });
     }
   }
 }

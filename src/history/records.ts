@@ -11,12 +11,14 @@ import { contributionCandidates } from './contributions.ts';
 import { beltCandidates } from './belt.ts';
 import { pickCandidates, slotCandidates } from './drafts.ts';
 import { benchCandidates } from './bench.ts';
-import { lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
+import { currentPositions, lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
 import { armyCandidates, charmCandidates, journeymanCandidates } from './player-records.ts';
+import { perArchive } from './per-archive.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
+import { plural } from './wording.ts';
 import type { Place } from './tabs.ts';
 import type { Archive, Scope } from './types.ts';
 
@@ -36,8 +38,10 @@ export interface RecordCandidate {
   shown?: string;
   sample: string | null; period: HistoricalPeriod | null; href: string;
   detail?: string; matchupLabel?: string;
-  /** Matchup records: the second person, and whether the game was tied or the first person lost it, so they didn't beat them. */
-  opponentId?: string; tied?: boolean; lost?: boolean;
+  /** The person they met. Matchup records: how they fared, and whether a tie makes it the opponent's record too. */
+  opponentId?: string; result?: 'won' | 'lost' | 'tied'; shared?: boolean;
+  /** The ex: the managers who started him. */
+  startedForIds?: string[];
   /** Trades: what each side received, and what it scored for them. */
   sides?: { manager: string; received: string[]; points: number }[];
   /** Season records: the regular-season record and points per game behind the figure. */
@@ -66,10 +70,10 @@ export interface CategoryDefinition {
   /** The places below first show without opening them. */
   open?: boolean;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
-  candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
+  candidates: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
 type CareerCategory = 'championships' | 'wins' | 'win-percentage' | 'career-points';
-function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['candidates']> {
+function careerCandidates(key: CareerCategory): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.people.filter(person => archive.seasons.some(season => (!selection.season || season.year === selection.season) && season.teams.some(team => team.personId === person.id))).flatMap(person => {
     const metrics = careerMetrics(archive, { personId: person.id }, selection);
     const metric = key === 'career-points' ? metrics.points : key === 'win-percentage' ? metrics.winPercentage : Exact.from(key === 'wins' ? metrics.facts.wins : metrics.facts.championships);
@@ -81,7 +85,7 @@ function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['
     if (selection.season) query.set('season', selection.season);
     if (key !== 'championships') query.set('scope', selection.scope ?? 'regular');
     return [{ id: person.id, personId: person.id, name: person.name, avatar: latestTeam.avatar, metric,
-      sample: key === 'win-percentage' ? `${metrics.facts.record} · ${metrics.facts.games} ${metrics.facts.games === 1 ? 'game' : 'games'}` : null,
+      sample: key === 'win-percentage' ? `${metrics.facts.record} · ${plural(metrics.facts.games, 'game')}` : null,
       period: latestPeriod(periods), href: `/managers/${person.id}/${query.size ? `?${query}` : ''}`, historyLabel: 'Open career' }];
   });
 }
@@ -119,13 +123,13 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'The gap between the two final scores of a regular-season game.' },
   { key: 'closest-game', name: 'Closest game', group: 'Matchups', place: 'games', unit: 'point margin', displayPrecision: 2, scope: 'games', order: 'ascending', candidates: marginCandidates,
     rule: 'The gap between the two final scores of a regular-season game. A tie counts as zero.' },
-  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', place: 'games', unit: 'wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
+  { key: 'winning-streak', name: 'Longest winning streak', group: 'Careers', place: 'games', unit: 'regular-season wins in a row', displayPrecision: 0, scope: 'games', candidates: streakCandidates('winning'),
     rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
-  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
+  { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'regular-season losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
     rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
   { key: 'worst-managed-week', name: 'Worst-managed week', group: 'Matchups', place: 'lineups', unit: 'points short of their best lineup', displayPrecision: 2, shame: true, scope: 'regular', candidates: worstManagedCandidates,
-    rule: 'What the best legal lineup from that regular-season week’s roster would have added. Positions are current ones, plus any slot the player has started in here.' },
-  { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
+    rule: `What the best legal lineup from that regular-season week’s roster would have added. ${currentPositions}` },
+  { key: 'benched-player', name: 'Most points left on the bench by one player', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
     rule: 'A player’s score in a regular-season week spent on the bench.' },
   { key: 'lowest-starter', name: 'Lowest starter score', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'started', shame: true, scope: 'games', order: 'ascending', candidates: lowestStarterCandidates,
     rule: 'A player’s recorded score in a regular-season starting lineup. An empty slot doesn’t count.' },
@@ -149,9 +153,9 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Decided regular-season games he started for any manager, ranked by the share lost. At least 5 starts for every season of the league.' },
   { key: 'journeyman', name: 'Journeyman: on the most managers’ rosters', group: 'Players', place: 'players', unit: 'managers', displayPrecision: 0, scope: 'regular', candidates: journeymanCandidates,
     rule: 'Managers who had him, starting or on the bench, in a regular-season week. Team defenses don’t count.' },
-  { key: 'best-steal', name: 'Best steal', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
+  { key: 'best-steal', name: 'Best steal: most points from a late-round pick', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', scope: 'regular', completedSeasons: true, candidates: pickCandidates('best-steal'),
     rule: 'What a pick from the second half of the rounds scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
-  { key: 'worst-bust', name: 'Worst bust', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
+  { key: 'worst-bust', name: 'Worst bust: fewest points from a first-round pick', group: 'Players', place: 'draft', unit: 'points as a starter', displayPrecision: 2, verb: 'drafted', shame: true, scope: 'regular', order: 'ascending', completedSeasons: true, candidates: pickCandidates('worst-bust'),
     rule: 'What a first-round pick scored in the drafter’s regular-season starting lineups that season. Finished seasons with a snake or linear draft of full rosters; known keepers don’t count.' },
   { key: 'titles-by-slot', name: 'Titles by draft slot', group: 'Seasons', place: 'draft', unit: 'titles', displayPrecision: 0, rest: 'Other slots', scope: 'none', completedSeasons: true, candidates: slotCandidates,
     rule: 'Champions who drafted from that slot. Seasons with a snake or linear draft of full rosters.' },
@@ -168,7 +172,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons|trips|finals|managers)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons|trips|finals|managers|reigns)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 const byName = new Intl.Collator(undefined, { numeric: true }).compare;
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
@@ -180,13 +184,13 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const selection = { season, scope, sort, limit };
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
-  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || byName(a.name, b.name) || a.id.localeCompare(b.id));
+  const candidates = (blocked ? [] : category.candidates(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || byName(a.name, b.name) || a.id.localeCompare(b.id));
   const nameOf = new Map(archive.people.map(person => [person.id, person.name]));
   let rank = 1;
   const ranked = candidates.map((row, index) => {
     if (index && row.metric.compare(candidates[index - 1].metric)) rank = index + 1;
-    const { metric, ...rest } = row;
-    return { ...rest, manager: nameOf.get(row.personId!), opponent: nameOf.get(row.opponentId!), winners: row.winners?.map(winner => ({ manager: nameOf.get(winner.personId)!, year: winner.year })), rank, value: metric.toNumber(), exactKey: metric.key };
+    const { metric, startedForIds, ...rest } = row;
+    return { ...rest, manager: nameOf.get(row.personId!), opponent: nameOf.get(row.opponentId!), startedFor: startedForIds?.map(id => nameOf.get(id)!), winners: row.winners?.map(winner => ({ manager: nameOf.get(winner.personId)!, year: winner.year })), rank, value: metric.toNumber(), exactKey: metric.key };
   });
   const selectedResult = ranked.find(row => row.id === options.result);
   limit = Math.max(limit, selectedResult?.rank ?? 10);
@@ -212,29 +216,39 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   return { category: { ...category, displayPrecision }, seasons, season, scope: scope ?? null, sort, limit, result, rows, leaders, blocked, total: ranked.length, nextLimit,
     href: categoryHref(category.key, { ...selection, result }), nextHref: nextLimit ? categoryHref(category.key, { ...selection, result, limit: nextLimit }) : null };
 }
+type Ranking = ReturnType<typeof rankCategory>;
+const rankings = perArchive(() => new Map<CategoryDefinition, Ranking>());
+/** A record in its default selection, which every page reads. */
+function ranking(archive: Archive, category: CategoryDefinition): Ranking {
+  const known = rankings(archive);
+  const view = known.get(category) ?? rankCategory(archive, category, {});
+  known.set(category, view);
+  return view;
+}
+/** Nobody holds a count or total of zero, unless the lowest wins. */
+const isHeld = ({ leaders, category }: Ranking) => leaders.length > 0 && (leaders[0].value !== 0 || category.order === 'ascending');
 /** Whether anyone holds the record in this league. */
 export function hasRecord(archive: Archive, category: CategoryDefinition): boolean {
-  return rankCategory(archive, category, {}).leaders.length > 0;
+  return isHeld(ranking(archive, category));
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
 export async function readCategory(key: string, options: RecordSelection = {}) {
-  const category = recordCategories.find(category => category.key === key && category.candidates);
+  const category = recordCategories.find(category => category.key === key);
   if (!category) return null;
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
-type Ranking = ReturnType<typeof rankCategory>;
 /** What a record card shows. */
 export interface CardView {
-  category: Omit<CategoryDefinition, 'group' | 'scope'>;
+  category: Omit<CategoryDefinition, 'group' | 'scope' | 'candidates'>;
   rows: CardRow[]; leaders: CardRow[];
 }
-type CardRow = Partial<Ranking['rows'][number]> & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
+type CardRow = Partial<Ranking['rows'][number]> & { names?: string[] } & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
 /** A record's card in its place. A record nobody holds has no card, nor does one another record already tells. */
 export function recordCard(archive: Archive, category: CategoryDefinition) {
-  const view = rankCategory(archive, category, {});
-  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => rankCategory(archive, other, {}).leaders);
-  return view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
+  const view = ranking(archive, category);
+  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => ranking(archive, other).leaders);
+  return isHeld(view) && view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
 }
 /** The record cards of these places, in registry order. */
 export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
@@ -242,20 +256,20 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
   if (!archive) return null;
   return recordCategories.filter(category => category.place && places.includes(category.place)).flatMap(category => recordCard(archive, category) ?? []);
 }
-/** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
+/** Every record a person holds or shares, fame before shame. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  return recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}))
-    .filter(view => view.leaders.some(row => (row.personId === personId || row.tied && row.opponentId === personId) && (row.value !== 0 || view.category.order === 'ascending')))
+  return recordCategories.map(category => ranking(archive, category))
+    .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.shared && row.opponentId === personId))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
 export async function readRecordCollection(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => {
-    const view = category.candidates ? rankCategory(archive, category, {}) : null;
-    return { ...category, displayPrecision: view?.category.displayPrecision, leaders: view?.leaders ?? [], href: view ? categoryHref(category.key) : null };
+    const view = ranking(archive, category);
+    return { ...category, displayPrecision: view.category.displayPrecision, leaders: view.leaders, href: categoryHref(category.key) };
   }) }));
 }
 
@@ -264,8 +278,8 @@ const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-seas
 export async function readHome(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  const categories = recordCategories.filter(category => category.candidates).map(category => rankCategory(archive, category, {}));
-  const identity = (row: ReturnType<typeof rankCategory>['rows'][number]) => {
+  const categories = recordCategories.map(category => ranking(archive, category));
+  const identity = (row: Ranking['rows'][number]) => {
     const owner = archive.people.find(person => person.id === row.personId)!;
     return { ...row, owner: { id: owner.id, name: owner.name, avatar: owner.avatar } };
   };

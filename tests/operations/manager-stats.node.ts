@@ -33,7 +33,13 @@ test('published manager stats share competition ranks, start from the better end
   const values = { 1: { value: Exact.from(3) }, 2: { value: Exact.from(1) }, 4: { value: Exact.from(3) } };
   assert.deepEqual(ranks(await read({}, values)), [['01', '3', 'points', 1, true], ['04', '3', 'points', 1, true], ['02', '1', 'point', 3, false]]);
   assert.deepEqual(ranks(await read({ better: 'lower' }, values)), [['02', '1', 'point', 1, false], ['01', '3', 'points', 2, true], ['04', '3', 'points', 2, true]]);
+  const standings = async (better: ManagerStat['better']) => (await read({ better }, values)).rows.map(row => row.standing);
+  assert.deepEqual(await standings('higher'), ['Tied highest', 'Tied highest', '3rd highest']);
+  assert.deepEqual(await standings('lower'), ['Lowest', 'Tied 2nd lowest', 'Tied 2nd lowest']);
   assert.equal(await read({}, {}), undefined, 'a stat nobody has a value for is left out');
+  const zeros = { 1: { value: Exact.from(0) }, 2: { value: 0 } };
+  assert.equal(await read({}, zeros), undefined, 'and so is one where every value is zero');
+  assert.equal(await read({}, { ...zeros, 3: { value: 0.4 } }), undefined, 'shown as 0');
 });
 
 test('published manager stats rank exact values exactly and inexact ones as displayed', async () => {
@@ -45,7 +51,7 @@ test('published manager stats rank exact values exactly and inexact ones as disp
 
 test('published manager stats keep every tied name, a record shown for its rate and a label set by the league', async () => {
   const named = await read({ unit: 'starts' }, { 1: { value: Exact.from(44), names: ['Player A', 'Player B'], sample: '96 weeks' }, 2: { value: Exact.from(1), names: ['Player C'] } });
-  assert.deepEqual(named.rows.map(row => [row.names, row.figure, row.unit, row.sample]), [[['Player A', 'Player B'], '44', 'starts', '96 weeks'], [['Player C'], '1', 'start', undefined]]);
+  assert.deepEqual(named.rows.map(row => [row.names, row.figure, row.unit, row.sample]), [[['Player A', 'Player B'], '44', 'starts each', '96 weeks'], [['Player C'], '1', 'start', undefined]]);
   const record = await read({ unit: 'wins–losses', displayPrecision: 1 }, { 1: { value: Exact.from(50), shown: '7–7' }, 2: { value: Exact.from(100), shown: '1–0' } });
   assert.deepEqual(ranks(record), [['02', '1–0', 'wins–losses', 1, false], ['01', '7–7', 'wins–losses', 2, false]]);
   const derived = await read({ label: archive => `${Math.max(...archive.performances.map(row => row.points))}+ point games`, unit: archive => `games of ${archive.performances.length}` }, { 1: { value: Exact.from(2) } });

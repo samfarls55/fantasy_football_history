@@ -5,6 +5,6 @@ interface Props { id: string; title: string; heading?: 'h2' | 'h3'; query?: Reco
 const { id, title, heading: Title = 'h2', query } = Astro.props;
 ---
 <section class="block" id={id}>
-  <Title class="painted"><span id={`${id}-name`}>{title}</span><ShareLink label={`Share ${title}`} query={query} hash={`#${id}`} /></Title>
+  <Title class="painted"><span><span id={`${id}-name`}>{title}</span><ShareLink label={`Share ${title}`} query={query} hash={`#${id}`} /></span></Title>
   <slot />
 </section>

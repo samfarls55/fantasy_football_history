@@ -1,18 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { Exact } from '../../src/history/decimal.ts';
 import { readRecordsHeld, recordCategories } from '../../src/history/records.ts';
 
 const manager = (number: number) => `person-96000000000000000${number}`;
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-records-held-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 const held = async (storePath: string, personId: string) => (await readRecordsHeld(personId, { storePath }))!
   .map(view => [view.category.key, view.leaders[0].value, view.leaders.map(row => row.manager)]);
 const [one, two, three, four] = ['Record manager 01', 'Record manager 02', 'Record manager 03', 'Record manager 04'];
@@ -36,6 +30,19 @@ test('published records held share ties, list fame before shame and count a tied
     const tied = (await readRecordsHeld(manager(4), { storePath }))!.find(view => view.category.key === 'closest-game')!;
     assert.equal(tied.leaders[0].opponent, four);
     assert.deepEqual(await held(storePath, 'missing'), []);
+  });
+});
+
+test('published records held by one side of a tied game stay with that side', async () => {
+  await withHistory(async storePath => {
+    // Manager 1's bench would have added 30 to the tie with manager 2.
+    const source = recordsSource([[90, 90, 60, 40]]);
+    Object.assign((source.responses[`league/${source.seedLeagueId}/matchups/1`] as any[])[0], { starters: ['a'], starters_points: [0], players: ['a', 'b'], players_points: { a: 0, b: 30 } });
+    for (const id of ['a', 'b']) (source.responses['players/nfl'] as any)[id] = { full_name: `Player ${id}`, position: 'QB' };
+    await publish(storePath, source);
+    const keys = async (personId: string) => (await held(storePath, personId)).map(([key]) => key).filter(key => ['closest-game', 'worst-managed-week', 'benched-player', 'lowest-starter'].includes(key as string));
+    assert.deepEqual(await keys(manager(1)), ['closest-game', 'worst-managed-week', 'benched-player', 'lowest-starter']);
+    assert.deepEqual(await keys(manager(2)), ['closest-game']);
   });
 });
 

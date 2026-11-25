@@ -1,19 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { test } from 'node:test';
-import { publishControlledHistory as publish } from '../support/history.ts';
+import { publishControlledHistory as publish, withHistory } from '../support/history.ts';
 import { recordsSource } from '../fixtures/records-source.ts';
 import { readBadges } from '../../src/history/badges.ts';
 import { Exact } from '../../src/history/decimal.ts';
 import { closeLosses } from '../../src/history/luck.ts';
 import { managerStats, readManagerStats } from '../../src/history/manager-stats.ts';
 
-async function withHistory(run: (storePath: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'museum-badges-'));
-  try { await run(join(directory, 'history.json')); } finally { await rm(directory, { recursive: true, force: true }); }
-}
 type Source = ReturnType<typeof recordsSource>;
 /** Each manager's badge with its figure and rank, by manager. */
 const worn = async (storePath: string) => (await readBadges({ storePath }))!.map(row => [row.manager.replace('Record manager ', 'M'), row.badge, `${row.figure} ${row.unit}`, row.rank]).sort();
@@ -51,7 +44,7 @@ test('published badges break equal ranks by the badge list, then by person ID', 
     Object.assign(team(source, 3), { display_name: 'Abe' });
     await publish(storePath, source);
     assert.deepEqual(await worn(storePath), [['Abe', 'Dealmaker', '1 trade', 1], ['M01', 'Juggernaut', '1 time', 1], ['M04', 'Cellar Dweller', '1 time', 1], ['Zed', 'Tinkerer', '2 pickups', 1]]);
-    assert.deepEqual((await readBadges({ storePath }))!.map(row => [row.badge, row.tied, row.of]), [['Juggernaut', false, 4], ['Tinkerer', true, 4], ['Cellar Dweller', false, 4], ['Dealmaker', true, 4]]);
+    assert.deepEqual((await readBadges({ storePath }))!.map(row => [row.badge, row.standing, row.of]), [['Juggernaut', 'Highest', 4], ['Tinkerer', 'Tied highest', 4], ['Cellar Dweller', 'Highest', 4], ['Dealmaker', 'Tied highest', 4]]);
   });
 });
 
@@ -93,8 +86,8 @@ test('published Wild Card and Metronome are the two ends of boom or bust, and a 
     await publish(storePath, recordsSource([[150, 90, 120, 80, 100, 60], [150, 98, 110, 66, 136, 40]]));
     // M1's swing of 0 ranks 1st from the low end but isn't above zero, so Metronome waits for M2, 2nd.
     assert.deepEqual(await worn(storePath), [['M01', 'Juggernaut', '2 times', 1], ['M02', 'Metronome', '4.0% of league average', 2], ['M05', 'Wild Card', '18.0% of league average', 1], ['M06', 'Cellar Dweller', '2 times', 1]]);
-    assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.end, row.label]), [
-      ['Wild Card', 'highest', 'Typical weekly swing, % of league average'], ['Metronome', 'lowest', 'Typical weekly swing, % of league average']]);
+    assert.deepEqual((await readBadges({ storePath }))!.filter(row => row.key === 'boom-or-bust').map(row => [row.badge, row.standing, row.label]), [
+      ['Wild Card', 'Highest', 'Typical weekly swing, % of league average'], ['Metronome', '2nd lowest', 'Typical weekly swing, % of league average']]);
   });
 });
 
@@ -103,8 +96,8 @@ test('published Heartbroken counts the losses in the close-game record, and adds
     // M3 and M4 play two 1-point games that M4 loses and a 2-point one that M3 loses. M1 is always top and M2 always bottom.
     await publish(storePath, recordsSource([[130, 60, 90, 89], [130, 60, 90, 89], [130, 60, 88, 90]]));
     const luck = (await readManagerStats({ storePath, places: ['luck'] }))!;
-    assert.deepEqual(luck.map(stat => stat.key), ['robbed', 'got-away', 'close-games']);
-    assert.deepEqual(luck[2].rows.map(row => [row.name.slice(-2), row.figure]), [['03', '2–1'], ['04', '1–2']]);
+    assert.deepEqual(luck.map(stat => stat.key), ['close-games']);
+    assert.deepEqual(luck[0].rows.map(row => [row.name.slice(-2), row.figure]), [['03', '2–1'], ['04', '1–2']]);
     const heartbroken = (await readBadges({ storePath }))!.find(row => row.badge === 'Heartbroken')!;
     assert.deepEqual([heartbroken.manager, heartbroken.figure, heartbroken.unit, heartbroken.sample, heartbroken.label, heartbroken.key],
       ['Record manager 04', '2', 'losses', 'of 3 games', 'Losses in games decided by under 5', 'close-games']);

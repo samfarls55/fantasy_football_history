@@ -1,6 +1,7 @@
 import { readSeason } from './read.ts';
 import { completedContests } from './scope.ts';
 import { readArchive } from './store.ts';
+import { winLoss } from './wording.ts';
 import type { Archive } from './types.ts';
 
 /** The completed seasons with regular-season games to swap, the newest first. */
@@ -36,7 +37,7 @@ export async function readScheduleSwap(options: { storePath?: string; season?: s
     return { id: team.personId, name: team.personName, cells: teams.map(({ rosterId }) => {
       const { wins, losses, ties, games } = swap(team.rosterId, rosterId);
       // Never in a game the same week: no record, rather than 0–0.
-      return games ? { ties, record: [wins, losses, ...ties ? [ties] : []].join('–'), actual: rosterId === team.rosterId,
+      return games ? { ties, record: winLoss(wins, losses, ties), actual: rosterId === team.rosterId,
         better: (2 * wins + ties) * actual.games > (2 * actual.wins + actual.ties) * games } : null;
     }) };
   });

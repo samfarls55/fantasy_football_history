@@ -1,0 +1,11 @@
+---
+// Who holds a record, with the player or the opponent it was about.
+import Manager from './Manager.astro';
+import Names from './Names.astro';
+import type { CardView } from '../history/records.ts';
+interface Props { row: CardView['rows'][number]; verb?: string }
+const { row, verb } = Astro.props;
+// How the holder fared against the opponent.
+const met = row.sides ? 'out-traded' : { won: 'beat', lost: 'lost to', tied: 'tied' }[row.result!];
+---
+{row.manager ? <Manager name={row.manager} /> : row.name}{verb ? <> {verb} <Names names={row.names ?? [row.name]} /></> : row.opponent && <> {met} <Manager name={row.opponent} /></>}

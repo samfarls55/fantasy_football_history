@@ -1,0 +1,15 @@
+---
+// When a record happened and whom else it took, under its holder.
+import Manager from './Manager.astro';
+import Winners from './Winners.astro';
+import { fixed } from '../league-page.ts';
+import type { CardView } from '../history/records.ts';
+interface Props { row: CardView['rows'][number]; verb?: string; precision: number; class: string }
+const { row, verb, precision, class: style } = Astro.props;
+// Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named as the holder.
+// A season record reads the way the league remembers it: "11–3, 128.4 points a game in 2024".
+const when = row.record ? `${row.record}, ${fixed(row.pointsPerGame!, 1)} points a game in\u00a0${row.leaderContext!.slice(0, 4)}`
+  : (row.leaderContext ?? row.sample ?? '').split(' · ').slice(verb ? 1 : 0).join(', ').replace(/Week (\d+), (\d{4}) – Week (\d+), \2/, 'Weeks\u00a0$1–$3,\u00a0$2').replace(/Week (\d+), (\d{4})/g, 'Week\u00a0$1,\u00a0$2');
+---
+{(when || row.winners) && <span class={style}>{when}{verb && row.opponent && <>{', vs '}<Manager name={row.opponent} /></>}{row.startedFor?.map((name, index) => <>{index ? ' and ' : ' for '}<Manager name={name} /></>)}{row.winners && <Winners winners={row.winners} />}</span>}
+{row.sides?.map(side => <span class={style}><Manager name={side.manager} /> received {side.received.length ? `${side.received.join(', ')}: ${fixed(side.points, precision)} points` : 'nothing'}</span>)}
