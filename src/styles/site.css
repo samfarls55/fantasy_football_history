@@ -345,9 +345,11 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 
 /* Tables: painted column labels over the goal line, a faint yard line under each manager, a painted line to close.
    Former managers trail under a dashed line. The wrap holds its unseen words, so they scroll with it and never widen the page. */
-.table-wrap { position: relative; overflow-x: auto; margin: 14px 0 0 -0.3em; padding: 6px 0 0 0.3em; }
+/* Focus stays clear of the sideline on one side and the fade on the other: nothing a reader reaches by keyboard lands under either. */
+.table-wrap { position: relative; overflow-x: auto; margin: 14px 0 0 -0.3em; padding: 6px 0 0 0.3em; scroll-padding-inline: 11.5rem 60px; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
-th, td { padding: 13px 14px; text-align: right; }
+th, td { padding: 10px 7px; text-align: right; }
+th:last-child, td:last-child { padding-right: 0; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
 thead th {
   font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;
@@ -355,13 +357,15 @@ thead th {
 }
 /* Each column's unit sits under its label and opens its rule, which takes a fixed width so an open one never stretches the table far.
    With JS the label is a full-width button; the sorted one is painted and carries a caret pointing the way it runs. */
-.stats thead th { vertical-align: top; padding-block: 0 4px; scroll-margin-inline: 12rem 56px; }
-.stats thead :is(button, .stat-label) { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; justify-content: flex-end; }
+.stats thead th { vertical-align: top; padding-block: 0 4px; font-size: 18px; }
+/* Labels of up to three lines end on one line, so the units under them do too. */
+.stats thead :is(button, th > .stat-label) { display: inline-flex; align-items: flex-end; min-height: 58px; justify-content: flex-end; }
 /* A label that says what's counted can run long, so it wraps instead of widening its column. */
-.stats thead .stat-label { width: max-content; max-width: 10.5rem; white-space: normal; text-align: right; text-wrap: balance; }
+.stats thead .stat-label.long { min-width: 7rem; }
+.stats thead .stat-label { max-width: 9rem; white-space: normal; text-align: right; text-wrap: balance; }
 .stats thead button { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
 .stats thead button:hover, .stats thead th[aria-sort] :is(button, .stat-label) { color: var(--paint); }
-.stats thead th[aria-sort] .stat-label::after { content: ''; width: 0; height: 0; border-inline: 5px solid transparent; border-top: 7px solid currentColor; }
+.stats thead th[aria-sort] .stat-label::after { content: ''; display: inline-block; margin: 0 0 3px 6px; width: 0; height: 0; border-inline: 5px solid transparent; border-top: 7px solid currentColor; }
 .stats thead th[aria-sort='ascending'] .stat-label::after { transform: rotate(180deg); }
 .stats thead .play-how { margin: 0; font-family: var(--text); font-weight: 600; letter-spacing: 0; text-transform: none; }
 .stats thead .play-unit { max-width: 7.5rem; margin-left: auto; align-items: flex-start; justify-content: flex-end; padding-top: 5px; white-space: normal; font-size: 15px; line-height: 1.2; }
@@ -370,15 +374,23 @@ thead th {
 .stats thead .named .play-how p { margin-left: 0; }
 .stats thead .play-how p { width: min(11rem, 40vw); margin: 0 0 10px auto; white-space: normal; font-weight: 400; }
 .stats thead th:target { box-shadow: 0 -6px 0 var(--paint); }
-.stats tbody :is(th, td) { vertical-align: baseline; }
-.stat-text, .stat-sample { display: block; }
-.stat-text { min-width: 9em; white-space: normal; font-weight: 600; }
-.stat-sample { font-size: 15px; line-height: 1.3; color: var(--chalk); }
-tbody th { font-weight: 800; font-size: 20px; }
+.stats tbody :is(th, td) { vertical-align: baseline; line-height: 1.25; }
+.stat-sample { display: block; font-size: 15px; line-height: 1.3; color: var(--chalk); }
+.stats .stat-sample { font-size: 14px; }
+/* Names read from the left, each one whole and a line of its own. The figure under them carries its chances beside it, so a row is two lines. */
+.stat-text { font-weight: 600; }
+.one { white-space: nowrap; }
+:is(.stat-text, .names-rest) .one { display: block; }
+.stats .named { text-align: left; }
+.named .stat-sample { display: inline; }
+.names-rest { margin: 0; }
+.names-rest summary { font-size: 15px; }
+tbody th { font-weight: 800; font-size: 18px; }
 tbody tr { border-bottom: 2px solid var(--chalk-faint); }
 .stats tbody tr:last-child { border-bottom: 4px solid var(--paint); }
 tr:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
 tr.former { color: var(--chalk); }
+.former-mark { display: block; font-weight: 400; line-height: 1.3; font-size: 15px; color: var(--chalk); }
 tr.former th { font-weight: 600; }
 /* No title reads as plain chalk table text; a title is fame, so it's big white stencil paint. A zero stays a zero: a dash here means missing data. */
 [data-column='titles']:not([data-sort='0']) .stat-figure { font-family: var(--stencil); font-weight: 900; font-size: 32px; line-height: 0.8; color: var(--paint); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); }
@@ -436,7 +448,7 @@ tr.former th { font-weight: 600; }
 /* Each name's 44px target grows away from the other one, so when "has beaten" wraps the two never overlap. */
 .streaks a[data-person]:first-of-type::before { inset: calc(100% - 44px) 0 0; }
 .streaks a[data-person]:last-of-type::before { inset: 0 0 calc(100% - 44px); }
-/* A manager's record against each opponent: a winning record in paint, a losing one is shame, so it takes the flag's yellow (28px stencil, large text: 4:1). */
+/* A manager's record against each opponent: a winning record in paint, the rest in chalk. Losing to a rival is no shame. */
 .versus { max-width: 46rem; }
 .versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
 .versus-record.up { color: var(--paint); }
@@ -448,13 +460,14 @@ tr.former th { font-weight: 600; }
 }
 .versus-open:is(:hover, :focus-visible) { text-decoration-color: currentColor; }
 .versus-open[aria-current] { text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
-/* Every meeting, newest first: the manager's result in fame paint or shame yellow, the score from their side, then when. */
+/* Every meeting, newest first: the manager's result, a win in paint, the score from their side, then when. */
 .meetings { max-width: 46rem; margin-top: 28px; padding-top: 20px; border-top: 3px dashed var(--chalk-faint); scroll-margin-top: 24px; }
 .meetings h3 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; line-height: max(44px, 1.15em); }
 .meetings-record { margin-top: 4px; font-size: 20px; color: var(--chalk); }
 .meetings ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 20px; }
 .meetings li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 10px 0; border-top: 2px solid var(--chalk-faint); }
 .meet-result { font-family: var(--stencil); font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 0.04em; }
+.meet-result { color: var(--chalk); }
 .meetings .won .meet-result { color: var(--paint); }
 .meet-score { font-weight: 800; font-size: 20px; text-align: right; white-space: nowrap; }
 .meet-when { font-size: 17px; color: var(--chalk); }
@@ -474,7 +487,6 @@ tr.former th { font-weight: 600; }
 .rank-value .stat-figure { font-weight: 800; font-size: 20px; }
 .rank-value .play-how { margin: 0; }
 .rank-value .play-unit { font-size: 15px; }
-.meet-result { color: var(--chalk); }
 .rank-value .stat-sample { margin-bottom: 8px; }
 .rank-value .play-how:not([open]) + .stat-sample { margin-top: -8px; }
 .rank-place { text-align: right; color: var(--chalk); }
@@ -488,6 +500,8 @@ tr.former th { font-weight: 600; }
 .badge { font-family: var(--stencil); font-weight: 900; font-size: 24px; line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase; color: var(--chalk); }
 .badge-stat { position: relative; display: inline-block; line-height: 1.3; text-wrap: balance; text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 4px; }
 .badge-stat:is(:hover, :focus-visible) { text-decoration-color: var(--paint); }
+.badge-stat::before { content: ''; position: absolute; inset: min(0px, (100% - 44px) / 2) 0; }
+.managers .stat-sample { margin-top: 3px; }
 .badge-value { text-align: right; color: var(--chalk); }
 .badge-value .stat-figure { font-weight: 800; font-size: 20px; color: var(--paint); }
 #badge .rank-place strong { display: inline; font-family: var(--stencil); font-weight: 900; font-size: 24px; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -500,7 +514,7 @@ tr.former th { font-weight: 600; }
 .belt-year > .finish-year { grid-column: 1; }
 .reign > :is(input, .reign-name) { grid-column: var(--span); }
 .reign input {
-  grid-area: 1 / 1; appearance: none; width: calc(100% - 3px); height: 44px; margin: 0; border: 3px solid transparent; border-radius: 2px;
+  appearance: none; width: calc(100% - 3px); scroll-margin-block: 108px; height: 44px; margin: 0; border: 3px solid transparent; border-radius: 2px;
   background: var(--chalk-quiet) border-box; cursor: inherit; transition: background-color 160ms ease-out;
 }
 .reign:hover input { background-color: var(--chalk); }
@@ -510,8 +524,6 @@ tr.former th { font-weight: 600; }
 .reign input:focus-visible { position: relative; z-index: 1; }
 .reign.mine input:checked { border-color: var(--paint); }
 .reign-name { min-width: 0; container-type: inline-size; pointer-events: none; }
-.badge-stat::before { content: ''; position: absolute; inset: min(0px, (100% - 44px) / 2) 0; }
-.managers .stat-sample { margin-top: 3px; }
 .reign-name span { display: none; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 800; color: var(--ink-on-paint); }
 .reign input:checked + .reign-name { color: var(--paint); }
 .reign input:checked + .reign-name span { color: inherit; }
@@ -625,10 +637,14 @@ tr.former th { font-weight: 600; }
   /* A rank is two lines on a phone: the stat, then the figure and the place. */
   .ranks li { grid-template-columns: minmax(0, 1fr) auto; }
   .ranks a { grid-column: 1 / -1; }
+  .ranks:not(#badge .ranks) .rank-place strong { display: block; }
   /* A badge too: whose it is, then its stat. */
   .managers li { grid-template-columns: minmax(0, 1fr) auto; }
   .badge { font-size: 20px; text-align: right; }
   #badge .rank-place { grid-column: 1 / -1; text-align: left; }
+  .finishes { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+  .finishes li { padding: 2px 4px 2px 12px; }
+  .finish-place { font-size: 34px; }
   /* A meeting is two lines on a phone: the result and score, then when it was. */
   .meetings ol { grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; }
   .meet-score { text-align: left; }
@@ -648,14 +664,10 @@ tr.former th { font-weight: 600; }
   .play.shame .play-title { padding-right: 52px; }
   .play .flag { width: 44px; height: 36px; top: 8px; --dx: 0px; }
   .play-value { font-size: 56px; }
-  .ranks:not(#badge .ranks) .rank-place strong { display: block; }
   .play-unit { font-size: 16px; line-height: 1.2; }
   .play-holder strong { font-size: 20px; }
-  th, td { padding: 12px 8px; }
+  th, td { padding-inline: 7px; }
   .play.headline .play-title { font-size: 20px; padding-right: 72px; }
-  .finishes { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
-  .finishes li { padding: 2px 4px 2px 12px; }
-  .finish-place { font-size: 34px; }
   .play.headline .play-value, .streak-big { font-size: 88px; }
   .play.headline .play-unit { font-size: 17px; }
   .play.headline .play-holder strong { font-size: 24px; }
