@@ -52,6 +52,20 @@ test('published tabs leave out the half of Excuses with no stat, and gain a tab 
   });
 });
 
+test('published tabs open Excuses for a schedule swap alone', async () => {
+  await withHistory(async storePath => {
+    // A whole week of byes leaves no season complete enough to call lucky and a tie no result, but the tied game still swaps.
+    const source = recordsSource([[90, 90], [0, 0]]);
+    (source.responses[`league/${source.seedLeagueId}`] as any).status = 'complete';
+    for (const row of source.responses[`league/${source.seedLeagueId}/matchups/2`] as any[]) row.matchup_id = null;
+    await publish(storePath, source);
+    const stats = managerStats.splice(0);
+    try {
+      assert.deepEqual(await shown(storePath), [['Home', 'home'], ['Legacy', 'legacy'], ['Games', 'games'], ['Excuses', 'luck']]);
+    } finally { managerStats.push(...stats); }
+  });
+});
+
 test('published tabs know which anchors from the one-page league moved to them', async () => {
   await withHistory(async storePath => {
     await publish(storePath, pickupsSource(await base()));

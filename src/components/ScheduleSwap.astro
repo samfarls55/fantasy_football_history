@@ -1,0 +1,19 @@
+---
+// Each manager's record under every schedule, one completed season at a time.
+import RecordGrid from './RecordGrid.astro';
+import Section from './Section.astro';
+import { leagueHref } from '../league-page.ts';
+import type { readScheduleSwap } from '../history/schedule-swap.ts';
+
+interface Props { swap: Awaited<ReturnType<typeof readScheduleSwap>> }
+const { swap } = Astro.props;
+---
+{swap && (
+  <Section id="schedule-swap" title="Schedule swap" heading="h3" query={{ season: swap.year }}>
+    <nav class="seasons" aria-label="Schedule swap season">
+      {swap.years.map(year => <a href={`${leagueHref(Astro, '/excuses', { season: year })}#schedule-swap`} aria-current={year === swap.year ? 'true' : undefined}>{year}</a>)}
+    </nav>
+    <details class="play-how"><summary class="play-unit">{swap.rows.some(row => row.cells.some(cell => cell?.ties)) ? 'wins–losses–ties' : 'wins–losses'}</summary><p>Their own score each regular-season week against that schedule’s opponent, or against its owner when the two met. The box is the actual record; bold beats it.</p></details>
+    <RecordGrid labelledby="schedule-swap-name" rowLabel="Record of" columnLabel="with the schedule of" rows={swap.rows} />
+  </Section>
+)}

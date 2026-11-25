@@ -120,6 +120,12 @@ These use completed regular-season games and official scores, overrides included
 - **Opponents' season highs faced:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time. The sample is the person's regular-season contests in completed seasons.
 - **Most points in a loss, fewest points in a win:** the loser's and winner's official score in a decided contest. A tie is neither.
 
+## Schedule swap
+
+A manager's record with the schedule of another manager compares the first one's official score, each regular-season week, with the score of the second one's opponent that week. When that opponent is the first manager, use the second one's score instead. The diagonal is the actual record. Equal scores are a tie. A week in which either manager had an unpaired bye holds no game, and a pair with no such week has no record, not 0–0.
+
+One completed season shows at a time, the newest unless the `season` URL parameter names another completed season. Rows and columns share the regular-season standings order and hold the people who earned that season's results. A record is better when its win percentage, a tie counting half, is above the actual one. `src/history/schedule-swap.ts` owns the calculation and the seasons that have one; `src/components/RecordGrid.astro` draws it.
+
 ## Rivalries and nemesis
 
 Each selected pair uses completed contests in the selected season/game scope. Show W-L-T, meetings, average official margin from the first person's perspective, and the current streak. Changing the pair order reverses score-margin signs and W/L perspective.
