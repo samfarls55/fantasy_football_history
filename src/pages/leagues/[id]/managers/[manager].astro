@@ -167,7 +167,7 @@ const career = facts && [
               {page.facing.games.map(game => (
                 <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>
                   <span class="meet-result">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span>
-                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)}</span>
+                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)} points</span>
                   <span class="meet-when">Week&nbsp;{game.week}, {game.year}{game.competition === 'playoffs' && <> <span class="meet-playoffs">Playoffs</span></>}</span>
                 </li>
               ))}

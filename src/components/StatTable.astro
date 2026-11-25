@@ -1,6 +1,7 @@
 ---
 // The sortable table: one row per manager, a painted label over each column, current managers over the dashed line and former ones under it.
 import Manager from './Manager.astro';
+import Names from './Names.astro';
 import ShareLink from './ShareLink.astro';
 import type { StatColumn } from '../stat-table.ts';
 
@@ -45,7 +46,7 @@ const order = managers.toSorted((a, b) => {
             const cell = cells.get(manager.id);
             return cell ? (
               <td data-column={key} data-sort={cell.sort}>
-                {cell.text && <span class="stat-text">{cell.text}</span>}
+                {cell.names && <div class="stat-text"><Names names={cell.names} /></div>}
                 <span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}
                 {cell.sample && <span class="stat-sample">{cell.sample}</span>}
               </td>

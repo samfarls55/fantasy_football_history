@@ -19,7 +19,7 @@ export interface StatCell {
   /** A figure's own unit, where the column is one of names: "44 starts". */
   unit?: string;
   /** Whom the figure is about, above it. */
-  text?: string;
+  names?: string[];
   /** The chances behind the figure, below it. */
   sample?: string;
 }
