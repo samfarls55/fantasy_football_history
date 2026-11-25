@@ -1,5 +1,6 @@
 import { playerContributionHref } from './contributions.ts';
 import { Exact } from './decimal.ts';
+import { rosterPerson } from './rosters.ts';
 import { completedTrades } from './trades.ts';
 import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
@@ -8,13 +9,9 @@ import type { Archive, Transaction } from './types.ts';
 
 /** Each move with the people who held the rosters it adds a player to that season. */
 function adds(archive: Archive, moves: Transaction[]) {
-  return moves.flatMap(move => {
-    const { teams } = archive.seasons.find(season => season.id === move.seasonId)!;
-    return [...new Set(Object.values(move.adds))].map(rosterId => ({ move, personId: teams.find(team => team.rosterId === rosterId)!.personId }));
-  });
+  return moves.flatMap(move => [...new Set(Object.values(move.adds))].map(rosterId => ({ move, personId: rosterPerson(archive, move.seasonId, rosterId)! })));
 }
 const pickups = (archive: Archive) => adds(archive, archive.transactions.filter(move => move.status === 'complete' && (move.type === 'waiver' || move.type === 'free_agent')));
-const failedClaims = (archive: Archive) => adds(archive, archive.transactions.filter(move => move.status === 'failed' && move.type === 'waiver'));
 
 /** Everyone's count, zero included, beside their chances: what they did that could have counted, or else their seasons. */
 function counts(archive: Archive, counted: { personId: string }[], of?: { word: string; tries: { personId: string }[] }): ReturnType<ManagerStat['values']> {
@@ -61,7 +58,7 @@ export const moveHabitStats: ManagerStat[] = [
     rule: 'Players added through completed waiver claims and free-agent moves, in any week.' },
   { key: 'failed-claims', place: 'moves', label: 'Failed claims', unit: 'claims', displayPrecision: 0, better: 'higher',
     values: archive => {
-      const failed = failedClaims(archive);
+      const failed = adds(archive, archive.transactions.filter(move => move.status === 'failed' && move.type === 'waiver'));
       return counts(archive, failed, { word: 'claim', tries: [...failed, ...pickups(archive).filter(({ move }) => move.type === 'waiver')] });
     },
     rule: 'Waiver claims that failed, whatever the reason.' },

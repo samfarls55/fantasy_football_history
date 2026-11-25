@@ -1,12 +1,11 @@
+import { rosterPerson } from './rosters.ts';
 import { readArchive } from './store.ts';
 import type { Archive } from './types.ts';
 
 /** Every completed trade with the ID of each person in it, whatever they exchanged. The import has checked the source's rosters. */
 export function completedTrades(archive: Archive) {
-  return archive.transactions.filter(row => row.type === 'trade' && row.status === 'complete').map(transaction => {
-    const { teams } = archive.seasons.find(season => season.id === transaction.seasonId)!;
-    return { transaction, personIds: [...new Set(transaction.source.roster_ids.map(id => teams.find(team => team.rosterId === String(id))!.personId))] };
-  });
+  return archive.transactions.filter(row => row.type === 'trade' && row.status === 'complete').map(transaction =>
+    ({ transaction, personIds: [...new Set(transaction.source.roster_ids.map(id => rosterPerson(archive, transaction.seasonId, String(id))!))] }));
 }
 
 /** Everyone who has traded, the most trades first, and how often each pair has shared one. */

@@ -3,13 +3,11 @@ import { recordedStarts } from './contributions.ts';
 import { identity } from './game-records.ts';
 import { legResult, managedWeeks, opponentOf } from './performances.ts';
 import { perArchive } from './per-archive.ts';
+import { startingSlots } from './rosters.ts';
 import { plural } from './wording.ts';
 import type { ManagerStat, StatValue } from './manager-stats.ts';
 import type { CategoryDefinition, RecordSelection } from './records.ts';
 import type { Archive, LineupPlayer, Performance } from './types.ts';
-
-/** The slots a starter fills, in lineup order. */
-export const startingSlots = (rosterPositions: string[]) => rosterPositions.filter(slot => !['BN', 'IR', 'TAXI'].includes(slot));
 
 const line = ['DL', 'DE', 'DT', 'NT'];
 const linebackers = ['LB', 'ILB', 'OLB'];
@@ -89,7 +87,7 @@ export const lowestStarterCandidates: NonNullable<CategoryDefinition['candidates
 };
 
 /** Every rule that judges a lineup says whose positions it goes by. */
-const currentPositions = 'Positions are current ones, plus any slot the player has started in here.';
+export const currentPositions = 'Positions are current ones, plus any slot the player has started in here.';
 
 /** Excuses' Lineups table: the best share of the best lineup ranks first, then the fewest mistakes and the most perfect lineups. */
 export const lineupStats: ManagerStat[] = [

@@ -11,7 +11,7 @@ import { contributionCandidates } from './contributions.ts';
 import { beltCandidates } from './belt.ts';
 import { pickCandidates, slotCandidates } from './drafts.ts';
 import { benchCandidates } from './bench.ts';
-import { lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
+import { currentPositions, lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
 import { armyCandidates, charmCandidates, journeymanCandidates } from './player-records.ts';
@@ -128,7 +128,7 @@ export const recordCategories: CategoryDefinition[] = [
   { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
     rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
   { key: 'worst-managed-week', name: 'Worst-managed week', group: 'Matchups', place: 'lineups', unit: 'points short of their best lineup', displayPrecision: 2, shame: true, scope: 'regular', candidates: worstManagedCandidates,
-    rule: 'What the best legal lineup from that regular-season week’s roster would have added. Positions are current ones, plus any slot the player has started in here.' },
+    rule: `What the best legal lineup from that regular-season week’s roster would have added. ${currentPositions}` },
   { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
     rule: 'A player’s score in a regular-season week spent on the bench.' },
   { key: 'lowest-starter', name: 'Lowest starter score', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'started', shame: true, scope: 'games', order: 'ascending', candidates: lowestStarterCandidates,

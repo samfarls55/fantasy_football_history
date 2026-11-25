@@ -1,5 +1,5 @@
 import { Exact } from './decimal.ts';
-import { regularScores } from './luck.ts';
+import { regularScores } from './performances.ts';
 import { completedContests } from './scope.ts';
 import { plural, winLoss } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';

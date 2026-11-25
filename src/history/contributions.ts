@@ -3,6 +3,7 @@ import { contextualDrops, selectedDrop } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
 import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
+import { opponentOf } from './performances.ts';
 import { perArchive } from './per-archive.ts';
 import { inScope } from './scope.ts';
 import { plural } from './wording.ts';
@@ -48,7 +49,7 @@ export function playerContributionHref(identity: ContributionIdentity, playerId:
 export function startGame(archive: Archive, start: RecordedStart, scope: Scope) {
   const performance = start.performance;
   const contest = archive.contests.find(contest => contest.id === performance.contestId)!;
-  const opponentPerformance = archive.performances.find(other => other.contestId === contest.id && other.week === performance.week && other.rosterId !== performance.rosterId)!;
+  const opponentPerformance = opponentOf(archive, performance);
   const owner = archive.people.find(person => person.id === performance.personId)!;
   const opponent = archive.people.find(person => person.id === opponentPerformance.personId)!;
   return { year: performance.year, week: performance.week, points: start.points, owner, opponent, teamPoints: performance.points, opponentPoints: opponentPerformance.points,

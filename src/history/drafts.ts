@@ -1,6 +1,7 @@
 import { playerContributionHref, recordedStarts } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
 import { plural } from './wording.ts';
+import { rosterPerson } from './rosters.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { Archive, Season } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
@@ -23,9 +24,9 @@ export function pickCandidates(key: 'best-steal' | 'worst-bust'): NonNullable<Ca
     const starts = recordedStarts(archive, {}, { season: season.year });
     return draft.picks.filter(pick => !pick.keeper && (key === 'worst-bust' ? pick.source.round === 1 : pick.source.round! * 2 > draft.rounds)).flatMap(pick => {
       // The roster that made the pick, whoever's slot it came from.
-      const team = season.teams.find(team => team.rosterId === pick.rosterId);
-      if (!team) return [];
-      const person = archive.people.find(person => person.id === team.personId)!;
+      const personId = rosterPerson(archive, season.id, pick.rosterId);
+      if (!personId) return [];
+      const person = archive.people.find(person => person.id === personId)!;
       const own = starts.filter(start => start.playerId === pick.playerId && start.performance.personId === person.id);
       return [{ id: `${draft.id}:${pick.playerId}`, personId: person.id, name: archive.players.find(player => player.id === pick.playerId)!.name, avatar: null, metric: exactSum(own.map(start => start.points)),
         sample: plural(own.length, 'start'), leaderContext: `${person.name} · ${key === 'worst-bust' ? `Pick ${pick.source.pick_no}` : `Round ${pick.source.round}`} · ${season.year}`,
@@ -55,13 +56,10 @@ export function slotCandidates(archive: Archive, selection: RecordSelection): Re
 /** Each person's picks in finished drafts of every type, keepers included. */
 function personPicks(archive: Archive) {
   const players = new Map(archive.players.map(player => [player.id, player]));
-  return Map.groupBy(archive.drafts.filter(draft => draft.source.status === 'complete').flatMap(draft => {
-    const { teams } = archive.seasons.find(season => season.id === draft.seasonId)!;
-    return draft.picks.flatMap(pick => {
-      const team = teams.find(team => team.rosterId === pick.rosterId);
-      return team ? [{ personId: team.personId, draft, pick, player: players.get(pick.playerId)! }] : [];
-    });
-  }), row => row.personId);
+  return Map.groupBy(archive.drafts.filter(draft => draft.source.status === 'complete').flatMap(draft => draft.picks.flatMap(pick => {
+    const personId = rosterPerson(archive, draft.seasonId, pick.rosterId);
+    return personId ? [{ personId, draft, pick, player: players.get(pick.playerId)! }] : [];
+  })), row => row.personId);
 }
 type PersonPick = NonNullable<ReturnType<ReturnType<typeof personPicks>['get']>>[number];
 
@@ -75,7 +73,6 @@ function mostDrafted(answer: (row: PersonPick) => string | null | undefined, sam
   }));
 }
 const picksMade = (rows: PersonPick[]) => plural(rows.length, 'pick');
-const draftsMade = (rows: PersonPick[]) => plural(new Set(rows.map(row => row.draft)).size, 'draft');
 
 const easternDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' });
 const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
@@ -88,7 +85,7 @@ const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archi
 
 /** Draft's Scouting reports table. */
 export const draftStats: ManagerStat[] = [
-  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, draftsMade, row => row.player.name),
+  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, rows => plural(new Set(rows.map(row => row.draft)).size, 'draft'), row => row.player.name),
     rule: 'The player they picked most, at least twice. Every finished draft of any type, keepers included.' },
   { key: 'drafted-team', place: 'draft', label: 'Most-drafted NFL team', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.pick.source.metadata.team, picksMade),
     rule: 'The NFL team they picked from most, at least twice, going by each player’s team at the draft. Every finished draft of any type, keepers included.' },

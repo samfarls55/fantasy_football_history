@@ -1,6 +1,6 @@
 import { recordedStarts, type RecordedStart } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
-import { opponentOf } from './performances.ts';
+import { opponentOf, regularWeeks } from './performances.ts';
 import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
@@ -40,7 +40,7 @@ export function armyCandidates(archive: Archive, selection: RecordSelection): Re
 /** How many people rostered each player in a regular-season week. One who never moved isn't a journeyman, and neither is a team defense. */
 export function journeymanCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   const managers = new Map<string, Set<string>>();
-  for (const row of archive.performances.filter(row => row.competition === 'regular' && (!selection.season || row.year === selection.season))) for (const { playerId } of [...row.starters, ...row.bench]) {
+  for (const row of regularWeeks(archive).filter(row => (!selection.season || row.year === selection.season))) for (const { playerId } of [...row.starters, ...row.bench]) {
     managers.set(playerId, (managers.get(playerId) ?? new Set()).add(row.personId));
   }
   return archive.players.filter(player => player.position !== 'DEF' && (managers.get(player.id)?.size ?? 0) > 1)
@@ -51,7 +51,7 @@ export function journeymanCandidates(archive: Archive, selection: RecordSelectio
 function topPlayer(side: 'own' | 'opponent', total: (starts: RecordedStart[]) => Exact): ManagerStat['values'] {
   return archive => {
     const names = new Map(archive.players.map(player => [player.id, player.name]));
-    const weeks = Map.groupBy(archive.performances.filter(row => row.competition === 'regular'), row => row.personId);
+    const weeks = Map.groupBy(regularWeeks(archive), row => row.personId);
     const starts = Map.groupBy(recordedStarts(archive), ({ performance }) => (side === 'own' ? performance : opponentOf(archive, performance)).personId);
     return new Map([...starts].map(([personId, starts]) => {
       const players = [...Map.groupBy(starts, start => start.playerId)].map(([id, starts]) => ({ name: names.get(id)!, total: total(starts) })).sort((a, b) => b.total.compare(a.total) || a.name.localeCompare(b.name));

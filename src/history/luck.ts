@@ -1,18 +1,12 @@
 import { Exact } from './decimal.ts';
 import { identity } from './game-records.ts';
+import { opponentOf, regularScores } from './performances.ts';
 import { completedContests } from './scope.ts';
 import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive } from './types.ts';
 
-/** Each regular-season score beside its game and every score of that week. A regular-season game is one week long. */
-export function regularScores(archive: Archive) {
-  const games = new Map(archive.contests.map(game => [game.id, game]));
-  const scores = archive.performances.filter(row => row.competition === 'regular');
-  const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
-  return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
-}
 
 /** Scores 2nd from one end of their week that got the opposite result. */
 function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
@@ -50,8 +44,8 @@ const highsFaced: ManagerStat['values'] = archive => {
   const complete = new Set(archive.seasons.filter(season => season.complete).map(season => season.id));
   const scores = regularScores(archive).filter(({ own }) => complete.has(own.seasonId));
   const seasonScores = Map.groupBy(scores, ({ own }) => `${own.seasonId}/${own.personId}`);
-  const faced = scores.map(({ own, game, week }) => {
-    const opponent = week.find(other => other.contestId === game.id && other !== own)!;
+  const faced = scores.map(({ own }) => {
+    const opponent = opponentOf(archive, own);
     return { personId: own.personId, high: seasonScores.get(`${own.seasonId}/${opponent.personId}`)!.every(other => other.own.points <= opponent.points) };
   });
   return new Map([...Map.groupBy(faced, row => row.personId)].map(([personId, games]) =>
