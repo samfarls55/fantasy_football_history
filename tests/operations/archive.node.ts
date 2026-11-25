@@ -117,7 +117,7 @@ test('drafts and transactions keep the source fields later stats read', async ()
   });
 });
 
-test('a visit imports a version 1 league again, then reads one parsed archive without going back to the store', async () => {
+test('a visit imports a version 1 league again, then reads one parsed archive without going back to the store', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'archive-visit-'));
   const network = globalThis.fetch;
   const source = await fixture();
@@ -151,6 +151,7 @@ test('a visit imports a version 1 league again, then reads one parsed archive wi
     }, storePath);
 
     // A stale archive whose refresh fails is still what the visit reads.
+    t.mock.timers.enable({ apis: ['Date'], now: Date.now() + 13 * 60 * 60 * 1000 });
     await publish(storePath, source, '2026-11-03T12:00:00Z');
     delete source.responses['league/900000000000002020/matchups/1'];
     const stale = await ensureLeague(id);

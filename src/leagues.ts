@@ -33,14 +33,25 @@ export async function findLeagues(username: string): Promise<{ name: string; lea
   return { name: user.display_name, leagues: [] };
 }
 
-/** A league's archive for one request, imported on its first visit and again once it is older than 12 hours. */
+/** The last league this instance read, parsed. */
+let held: Archive | null = null;
+const fresh = (archive: Archive) => Date.now() - Date.parse(archive.importedAt) < maxAge;
+
+/** A league's archive, imported on its first visit and again once it is older than 12 hours. Until then, an instance opens the store once for the league it holds. */
 export async function ensureLeague(leagueId: string): Promise<{ status: 'ready' | 'missing' | 'failed'; archive: Archive | null }> {
-  const archive = await loadArchive(leagueStorePath(leagueId));
-  if (archive && Date.now() - Date.parse(archive.importedAt) < maxAge) return { status: 'ready', archive };
+  if (held?.leagueId === leagueId && fresh(held)) return { status: 'ready', archive: held };
+  const storePath = leagueStorePath(leagueId);
+  const published = await loadArchive(storePath).then(archive => ({ archive }), error => console.error(`League ${leagueId} could not be read`, error));
+  if (!published) return { status: 'failed', archive: null };
+  const { archive } = published;
+  if (archive && fresh(archive)) {
+    held = archive;
+    return { status: 'ready', archive };
+  }
   let pending = imports.get(leagueId);
   if (!pending) {
-    pending = refresh({ leagueId, storePath: leagueStorePath(leagueId), previous: archive, provider: sleeperImportProvider(resolve(dataDirectory, 'players-nfl.json')) })
-      .then(result => result.archive)
+    pending = refresh({ leagueId, storePath, previous: archive, provider: sleeperImportProvider(resolve(dataDirectory, 'players-nfl.json')) })
+      .then(result => held = result.archive)
       .finally(() => imports.delete(leagueId));
     imports.set(leagueId, pending);
   }

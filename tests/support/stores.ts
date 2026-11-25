@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, readdir, rm, utimes, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { registerHooks } from 'node:module';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
@@ -42,8 +42,4 @@ export async function seed(storePath: string, contents: string) {
 export async function stored(storePath: string): Promise<string> {
   const contents = await readFile(kept(storePath));
   return (shared() ? gunzipSync(contents) : contents).toString();
-}
-export async function age(storePath: string, hours: number) {
-  const then = new Date(Date.now() - hours * 60 * 60 * 1000);
-  await utimes(kept(storePath), then, then);
 }

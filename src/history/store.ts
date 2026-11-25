@@ -28,7 +28,7 @@ export function configuredStorePath(storePath?: string): string {
   return resolve(storePath ?? process.env.MUSEUM_STORE_PATH ?? 'data/history.json');
 }
 
-/** Read each publication afresh so a refresh never requires a server restart. A version 1 archive counts as missing. */
+/** Open the store and parse its publication. A version 1 archive counts as missing. */
 export async function loadArchive(storePath?: string): Promise<Archive | null> {
   const contents = await readPublished(configuredStorePath(storePath));
   if (contents === null) return null;

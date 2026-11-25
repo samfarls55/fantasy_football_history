@@ -8,4 +8,4 @@ Version 2 drops the raw responses. Transactions, drafts and picks keep their sou
 
 A version 1 archive counts as missing, so a league imports again on its next visit. Archives are derived from Sleeper, so nothing is migrated.
 
-`ensureLeague` returns the archive it checked or imported, and the page passes it to `withHistorySnapshot`. A request parses the archive at most once, even when it refreshes the league. Concurrent visits that share an import share its archive object, so reads must never change the archive.
+`ensureLeague` returns the archive it checked or imported, and the page passes it to `withHistorySnapshot`. A request parses the archive at most once, even when it refreshes the league, and an instance that holds the league doesn't parse it at all ([ADR 0004](0004-shared-archives-on-vercel-blob.md)). Visits share the archive object, so reads must never change the archive.
