@@ -100,7 +100,7 @@ test('published one-year changes compare a person’s consecutive finished seaso
 });
 
 test('published counts of titles, finals and playoffs show the seasons they come from', async () => {
-  const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort();
+  const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort(([a], [b]) => String(a).localeCompare(String(b)));
   await published(seasonsSource(...finishes), async storePath => {
     // The 2024 title is unresolved, so it was nobody's chance at one.
     const resolved = [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '2 seasons'], ['M4', '3 seasons'], ['M5', '1 season']];

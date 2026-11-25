@@ -32,7 +32,7 @@ for (const withHistory of stores) test(`a version 1 archive counts as missing an
 
     const published = JSON.parse(await stored(storePath));
     assert.equal(published.version, 2);
-    assert.deepEqual(Object.keys(published).sort(), ['contests', 'coverage', 'drafts', 'franchises', 'importedAt', 'leagueId', 'people', 'performances', 'players', 'seasons', 'transactions', 'version']);
+    assert.deepEqual(Object.keys(published).sort((a, b) => a.localeCompare(b)), ['contests', 'coverage', 'drafts', 'franchises', 'importedAt', 'leagueId', 'people', 'performances', 'players', 'seasons', 'transactions', 'version']);
   });
 });
 

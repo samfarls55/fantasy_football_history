@@ -9,7 +9,7 @@ import { managerStats, readManagerStats } from '../../src/history/manager-stats.
 
 type Source = ReturnType<typeof recordsSource>;
 /** Each manager's badge with its figure and rank, by manager. */
-const worn = async (storePath: string) => (await readBadges({ storePath }))!.map(row => [row.manager.replace('Record manager ', 'M'), row.badge, `${row.figure} ${row.unit}`, row.rank]).sort();
+const worn = async (storePath: string) => (await readBadges({ storePath }))!.map(row => [row.manager.replace('Record manager ', 'M'), row.badge, `${row.figure} ${row.unit}`, row.rank]).sort(([a], [b]) => String(a).localeCompare(String(b)));
 const team = (source: Source, roster: number) => (source.responses[`league/${source.seedLeagueId}/users`] as any[])[roster - 1];
 /** Free-agent pickups by day, one per entry, each of a new player by that roster. */
 function pickups(source: Source, rosters: number[]) {

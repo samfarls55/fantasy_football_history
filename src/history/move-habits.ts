@@ -42,7 +42,7 @@ export function repeatPickupCandidates(archive: Archive, selection: RecordSelect
     .flatMap(({ move, personId }) => Object.keys(move.adds).map(playerId => ({ move, personId, playerId })));
   return [...Map.groupBy(added, row => `${row.personId}/${row.playerId}`)].filter(([, rows]) => rows.length > 1).map(([id, rows]) => {
     const [{ personId, playerId }] = rows;
-    const last = rows.map(({ move }) => move).reduce((latest, move) => move.completedAt! > latest.completedAt! ? move : latest);
+    const last = rows.reduce((latest, { move }) => move.completedAt! > latest.completedAt! ? move : latest, rows[0].move);
     const years = new Set(rows.map(({ move }) => move.year)).size;
     const managed = seasons.filter(season => season.teams.some(team => team.personId === personId)).length;
     return { id, personId, name: archive.players.find(player => player.id === playerId)!.name, avatar: null, metric: Exact.from(rows.length), sample: null,
