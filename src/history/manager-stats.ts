@@ -1,6 +1,7 @@
 import { readArchive } from './store.ts';
 import { Exact } from './decimal.ts';
 import { luckStats } from './luck.ts';
+import { moveHabitStats } from './move-habits.ts';
 import { recordUnit } from './records.ts';
 import type { Place } from './tabs.ts';
 import type { Archive } from './types.ts';
@@ -43,6 +44,7 @@ export const managerStats: ManagerStat[] = [
   // Players
   // Draft
   // Moves
+  ...moveHabitStats,
 ];
 
 function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {

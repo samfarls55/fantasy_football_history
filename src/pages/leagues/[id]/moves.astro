@@ -1,6 +1,8 @@
 ---
 import Tab from '../../../layouts/Tab.astro';
 import Records from '../../../components/Records.astro';
+import Section from '../../../components/Section.astro';
+import Stats from '../../../components/Stats.astro';
 import TradeMap from '../../../components/TradeMap.astro';
 import { openTab } from '../../../league-page.ts';
 import { readTradeMap } from '../../../history/trades.ts';
@@ -14,6 +16,7 @@ if (redirect) return redirect;
   {view && (
     <>
       <Records views={view.records} heading="h2" />
+      {view.stats.length > 0 && <Section id="move-habits" title="Move habits"><Stats labelledby="move-habits-name" stats={view.stats} /></Section>}
       <TradeMap map={view.trades} />
     </>
   )}
