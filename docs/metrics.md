@@ -145,13 +145,21 @@ Productive drop = actual starting points for other league people in weeks strict
 
 A drop detail retains the dropping person/year at the top and lists actual receiving-person contributions with game links. It can link to each receiving person's scoped player history. Do not put those later points into the dropping person's career contribution total.
 
-Rank observed contributions, with no invented significance cutoff. Keep zero-start acquisitions and drops as zero-value history with no invented contribution period. Neutral public headings describe starting points rather than claiming every move was productive. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, trade-winner formula or draft-value formula.
+Rank observed contributions, with no invented significance cutoff. Keep zero-start acquisitions and drops as zero-value history with no invented contribution period. Neutral public headings describe starting points rather than claiming every move was productive. Contextual Players lists show the top ten ranked places plus ties and link to the ranked category. Pickup detail retains the acquisition spell/year in its URL, visible context, totals and games. Its whole-manager-history link explicitly leaves that spell scope. Do not add an exhaustive transaction feed, a draft-value formula, or any trade comparison beyond the lopsided-trade rule below.
 
 Order completed ownership events by source week and recorded `status_updated` chronology within that week. Validate missing or tied same-player/week recorded timestamps at import rather than inventing a tie-break. This order resolves recorded ownership changes only. Weekly snapshots establish initial observed ownership; they never create a synthetic pickup. Draft picks identify the receiving roster using `roster_id`, independently of `picked_by` or original draft-pick ownership. Completed events of unfamiliar types preserve their ownership assets. Failed, pending and unknown-status events never change a spell.
 
 The original exact-timing audit remains historical evidence in [coverage.md](coverage.md). Timestamp-shaped transaction fields do not prove event-before-NFL-start order. The revised full-week policy does not need that unsupported precision and credits no excluded move week.
 
 Keeper flags remain nullable where unknown. Preserve source picks and transaction assets internally so ownership can be reproduced. Unsuccessful or unknown-status events never become completed moves.
+
+## The ex and lopsided trades
+
+Spec 37 authorizes both measures. Both use recorded starting points in weeks strictly after the move week, within its season and the selected game scope, and exact same-week attribution stays forbidden.
+
+The ex (`the-ex`, `src/history/ex.ts`) ranks each completed drop or trade departure by the player's later starts against the person who made it, with `departureWeek < startWeek < nextArrivalWeek`, where the arrival is that person's next one for the player. Starts for every other person count when the opponent is that person. Each departure is a separate candidate held by the person who let the player go, and one with no such start is not a candidate. An implicit closure outside a trade is not a departure here.
+
+Most lopsided trade (`lopsided-trade`, `src/history/lopsided-trades.ts`) ranks the gap between what the two sides received. Each received player counts starting points for the receiver with `tradeWeek < startWeek < departureWeek`, the productive-pickup window. Only a completed trade between exactly two people qualifies. One with any draft pick or waiver budget is left out, because no rule may value either. A side that received no player scores zero, and an equal trade is never a candidate. The row names both people, the players each received and each side's total.
 
 ## Recent Home results
 

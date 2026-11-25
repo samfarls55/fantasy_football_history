@@ -3,6 +3,8 @@ import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
 import { pickupCandidates } from './pickups.ts';
 import { dropCandidates } from './drops.ts';
+import { exCandidates } from './ex.ts';
+import { lopsidedTradeCandidates } from './lopsided-trades.ts';
 import { contributionCandidates } from './contributions.ts';
 import { benchCandidates } from './bench.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
@@ -26,6 +28,8 @@ export interface RecordCandidate {
   detail?: string; matchupLabel?: string;
   /** Matchup records: the second person, and whether the game was tied, so the first person didn't beat them. */
   opponentId?: string; tied?: boolean;
+  /** Trades: what each side received, and what it scored for them. */
+  sides?: { manager: string; received: string[]; points: number }[];
   /** Season records: the regular-season record and points per game behind the figure. */
   record?: string; pointsPerGame?: number; leaderContext?: string; historyLabel?: string; secondary?: { name: string; href: string }[];
 }
@@ -99,6 +103,10 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
   { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
     rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
+  { key: 'the-ex', name: 'The ex: most points against the manager who let him go', group: 'Players', place: 'moves', unit: 'points against that manager', displayPrecision: 2, verb: 'let go of', shame: true, scope: 'games', candidates: exCandidates,
+    rule: 'What the player scored as a starter against the manager who dropped or traded him, in later regular-season weeks that season, until that manager got him back.' },
+  { key: 'lopsided-trade', name: 'Most lopsided trade', group: 'Players', place: 'moves', unit: 'more points as starters', displayPrecision: 2, scope: 'games', candidates: lopsidedTradeCandidates,
+    rule: 'The gap between what each side’s new players scored in its starting lineups in the weeks after the trade, until each player left or that regular season ended. Only trades between two managers, with no picks or waiver budget.' },
   { key: 'player-contributions', name: 'Most points for one manager', group: 'Players', place: 'players', unit: 'points as a starter', displayPrecision: 2, verb: 'started', scope: 'games', candidates: contributionCandidates,
     rule: 'What the player scored in that manager’s regular-season starting lineups, all seasons together.' },
 ];

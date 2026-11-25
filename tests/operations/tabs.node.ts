@@ -53,7 +53,7 @@ test('published tabs know which anchors from the one-page league moved to them',
     assert.deepEqual(anchors, {
       home: ['champions', 'records', 'best-without-title'], legacy: ['careers', 'rivalries'],
       games: ['highest-score', 'lowest-score', 'biggest-blowout', 'closest-game', 'winning-streak', 'losing-streak'],
-      excuses: ['luckiest-season', 'unluckiest-season', 'benched-player'], players: ['player-contributions'], moves: ['productive-pickup', 'productive-drop'],
+      excuses: ['luckiest-season', 'unluckiest-season', 'benched-player'], players: ['player-contributions'], moves: ['productive-pickup', 'productive-drop', 'the-ex', 'lopsided-trade'],
     });
   });
 });
