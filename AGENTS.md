@@ -17,7 +17,7 @@ Before domain exploration or changes, read docs/agents/domain.md.
 
 ## Status
 
-Enter a Sleeper username, pick a league, see its history. Read PRODUCT.md first, then ADR 0002 for how imports work. `src/history/` is the engine; `src/pages/` is the site. Tag `v0-archive` keeps the first single-league museum UI and its planning documents.
+Enter a Sleeper username, pick a league, see its history. Read PRODUCT.md first, then ADR 0002 for how imports work and ADR 0004 for where archives live. `src/history/` is the engine; `src/pages/` is the site. Tag `v0-archive` keeps the first single-league museum UI and its planning documents.
 
 ## Commands
 

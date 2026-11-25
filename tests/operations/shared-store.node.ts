@@ -1,0 +1,71 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { test } from 'node:test';
+import { age, seed, sharedStore, stored } from '../support/stores.ts';
+import { readSeasons } from '../../src/history/read.ts';
+import { withHistorySnapshot } from '../../src/history/store.ts';
+
+/** A server instance of its own: its own imports in flight and its own disk. */
+async function instance(name: string, storePath: string): Promise<typeof import('../../src/leagues.ts')> {
+  process.env.HISTORY_DATA_PATH = join(dirname(storePath), name);
+  return import(`../../src/leagues.ts?${name}`).finally(() => delete process.env.HISTORY_DATA_PATH);
+}
+
+test('a visitor waits for at most one import per refresh window, whichever instance answers', async () => {
+  await sharedStore(async storePath => {
+    const source = JSON.parse(await readFile(new URL('../fixtures/provider-history.json', import.meta.url), 'utf8'));
+    const id = source.seedLeagueId;
+    const network = globalThis.fetch;
+    const requested: string[] = [];
+    globalThis.fetch = async input => {
+      const path = String(input).slice('https://api.sleeper.app/v1/'.length);
+      requested.push(path);
+      return path in source.responses ? Response.json(source.responses[path]) : new Response(null, { status: 404 });
+    };
+    try {
+      const first = await instance('first', storePath);
+      const visits = await Promise.all([first.ensureLeague(id), first.ensureLeague(id), first.ensureLeague(id)]);
+      assert.deepEqual(visits.map(visit => visit.status), ['ready', 'ready', 'ready']);
+      assert.ok(requested.includes('players/nfl'));
+      assert.equal(new Set(requested).size, requested.length, 'concurrent visits share one import');
+
+      requested.length = 0;
+      const second = await instance('second', storePath);
+      const read = await second.ensureLeague(id);
+      assert.equal(requested.length, 0, 'another instance already imported this league');
+      const path = second.leagueStorePath(id);
+      await withHistorySnapshot(read.archive, async () => {
+        assert.deepEqual((await readSeasons(path))?.map(season => season.name), ['Synthetic history 2021', 'Synthetic history 2020', 'Synthetic history 2019']);
+      }, path);
+
+      // Past the refresh window, a failed refresh keeps the last good archive.
+      const stale = JSON.stringify({ ...JSON.parse(await stored(path)), importedAt: new Date(Date.now() - 13 * 60 * 60 * 1000).toISOString() });
+      await seed(path, stale);
+      const { 'league/900000000000002020/matchups/1': missing } = source.responses;
+      delete source.responses['league/900000000000002020/matchups/1'];
+      const kept = await second.ensureLeague(id);
+      assert.equal(kept.status, 'ready');
+      assert.deepEqual(kept.archive, JSON.parse(stale));
+      assert.equal(await stored(path), stale);
+
+      // The next refresh reuses the day's player list, and both instances then read its publication.
+      source.responses['league/900000000000002020/matchups/1'] = missing;
+      source.responses[`league/${id}`].name = 'Renamed league';
+      requested.length = 0;
+      assert.equal((await first.ensureLeague(id)).archive?.seasons[0].name, 'Renamed league');
+      assert.equal(requested.includes('players/nfl'), false);
+      requested.length = 0;
+      assert.equal((await second.ensureLeague(id)).archive?.seasons[0].name, 'Renamed league');
+      assert.equal(requested.length, 0);
+
+      // A day later the list is downloaded once more.
+      await seed(path, stale);
+      await age(join(dirname(storePath), 'players-nfl.json'), 25);
+      await second.ensureLeague(id);
+      assert.equal(requested.filter(path => path === 'players/nfl').length, 1);
+    } finally {
+      globalThis.fetch = network;
+    }
+  });
+});

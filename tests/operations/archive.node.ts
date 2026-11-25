@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { publishControlledHistory as publish } from '../support/history.ts';
+import { seed, stored, stores } from '../support/stores.ts';
 import { readCategory } from '../../src/history/records.ts';
 import { readSeason, readSeasons } from '../../src/history/read.ts';
 import { loadArchive, withHistorySnapshot } from '../../src/history/store.ts';
@@ -22,10 +23,10 @@ const versionOne = (leagueId: string) => JSON.stringify({
   source: { 'state/nfl': { season: '2021', week: 4 } },
 });
 
-test('a version 1 archive counts as missing and is imported again without raw responses', async () => {
+for (const withHistory of stores) test(`a version 1 archive counts as missing and is imported again without raw responses (${withHistory.name})`, async () => {
   await withHistory(async storePath => {
     const source = await fixture();
-    await writeFile(storePath, versionOne(source.seedLeagueId));
+    await seed(storePath, versionOne(source.seedLeagueId));
     assert.equal(await readSeasons(storePath), null);
     assert.equal(await readCategory('highest-score', { storePath }), null);
 
@@ -33,7 +34,7 @@ test('a version 1 archive counts as missing and is imported again without raw re
     assert.deepEqual((await readSeasons(storePath))?.map(season => season.year), ['2021', '2020', '2019']);
     assert.equal((await readSeason('2020', { storePath }))?.rows.find(row => row.personId === tim)?.points, 25.5);
 
-    const published = JSON.parse(await readFile(storePath, 'utf8'));
+    const published = JSON.parse(await stored(storePath));
     assert.equal(published.version, 2);
     assert.deepEqual(Object.keys(published).sort(), ['contests', 'coverage', 'drafts', 'franchises', 'importedAt', 'leagueId', 'people', 'performances', 'players', 'seasons', 'transactions', 'version']);
   });
@@ -68,20 +69,20 @@ test('players keep college and birth date, and either may be unknown', async () 
   });
 });
 
-test('a failed refresh keeps the last good archive and a repeat import of the same history reports no change', async () => {
+for (const withHistory of stores) test(`a failed refresh keeps the last good archive and a repeat import of the same history reports no change (${withHistory.name})`, async () => {
   await withHistory(async storePath => {
     const source = await fixture();
     const broken = structuredClone(source);
     delete broken.responses['league/900000000000002020/matchups/1'];
     // Nothing good exists yet: the version 1 file stays missing rather than becoming readable.
-    await writeFile(storePath, versionOne(source.seedLeagueId));
+    await seed(storePath, versionOne(source.seedLeagueId));
     await assert.rejects(publish(storePath, broken), /Missing controlled response/);
     assert.equal(await readSeasons(storePath), null);
 
     await publish(storePath, source);
-    const good = await readFile(storePath, 'utf8');
+    const good = await stored(storePath);
     await assert.rejects(publish(storePath, broken, '2026-11-04T12:00:00Z'), /Missing controlled response/);
-    assert.equal(await readFile(storePath, 'utf8'), good);
+    assert.equal(await stored(storePath), good);
 
     // Provider answers outside the league's history are no longer part of it.
     source.responses['players/nfl']['999'] = { player_id: '999', full_name: 'Never rostered', position: 'WR' };

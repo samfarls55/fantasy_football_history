@@ -1,6 +1,6 @@
 # ADR 0002: On-demand league imports with a per-league archive
 
-Status: accepted, November 19, 2026. Supersedes [ADR 0001](0001-local-node-delivery.md).
+Status: accepted, November 19, 2026. Supersedes [ADR 0001](0001-local-node-delivery.md). Its storage part is superseded by [ADR 0004](0004-shared-archives-on-vercel-blob.md).
 
 The product changed from one configured league per deployment to any Sleeper league: a visitor enters a Sleeper username, picks one of that user's leagues and sees its history. There is no scheduled refresh and no host yet.
 

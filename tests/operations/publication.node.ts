@@ -2,13 +2,15 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
+import { stores } from '../support/stores.ts';
 
 const project = resolve(import.meta.dirname, '../..');
 
 function publication(args: string[], storePath: string) {
-  const result = spawnSync(process.execPath, ['scripts/history-publication.ts', ...args], {
+  const result = spawnSync(process.execPath, ['--import', pathToFileURL(resolve(project, 'tests/support/stores.ts')).href, 'scripts/history-publication.ts', ...args], {
     cwd: project,
     env: { ...process.env, MUSEUM_STORE_PATH: storePath },
     encoding: 'utf8',
@@ -32,10 +34,9 @@ function candidate(name = 'Autumn league') {
   };
 }
 
-test('published history survives a new process and a correction replaces the visible season', async () => {
+for (const withHistory of stores) test(`published history survives a new process and a correction replaces the visible season (${withHistory.name})`, () => withHistory(async storePath => {
   const directory = await mkdtemp(join(tmpdir(), 'museum-publication-'));
   try {
-    const storePath = join(directory, 'durable', 'history.json');
     const inputPath = join(directory, 'candidate.json');
     await writeFile(inputPath, JSON.stringify(candidate()));
     const published = publication(['publish', inputPath], storePath);
@@ -53,12 +54,11 @@ test('published history survives a new process and a correction replaces the vis
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}));
 
-test('an incomplete or corrupt candidate fails without replacing published history', async () => {
+for (const withHistory of stores) test(`an incomplete or corrupt candidate fails without replacing published history (${withHistory.name})`, () => withHistory(async storePath => {
   const directory = await mkdtemp(join(tmpdir(), 'museum-recovery-'));
   try {
-    const storePath = join(directory, 'history.json');
     const inputPath = join(directory, 'candidate.json');
     await writeFile(inputPath, JSON.stringify(candidate()));
     assert.equal(publication(['publish', inputPath], storePath).status, 0);
@@ -76,4 +76,4 @@ test('an incomplete or corrupt candidate fails without replacing published histo
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
+}));
