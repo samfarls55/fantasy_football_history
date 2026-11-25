@@ -99,6 +99,20 @@ test('published one-year changes compare a person’s consecutive finished seaso
   await published(seasonsSource(placed([1, 2, 3, 4])), async storePath => assert.equal(await column(storePath, 'one-year-change'), undefined));
 });
 
+test('published counts of titles, finals and playoffs show the seasons they come from', async () => {
+  const samples = async (storePath: string, key: string) => (await careers(storePath)).get(key)!.rows.map(row => [row.name, row.sample]).sort();
+  await published(seasonsSource(...finishes), async storePath => {
+    // The 2024 title is unresolved, so it was nobody's chance at one.
+    const resolved = [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '2 seasons'], ['M4', '3 seasons'], ['M5', '1 season']];
+    assert.deepEqual(await samples(storePath, 'titles'), resolved);
+    assert.deepEqual(await samples(storePath, 'finals-lost'), resolved);
+    // The 2025 bracket is set, with its final still to come.
+    assert.deepEqual(await samples(storePath, 'playoffs'), [['M1', '5 seasons'], ['M2', '5 seasons'], ['M3', '4 seasons'], ['M4', '5 seasons'], ['M5', '1 season']]);
+    // A finish the bracket doesn't establish can't have changed.
+    assert.deepEqual(await samples(storePath, 'one-year-change'), [['M1', '3 seasons'], ['M2', '3 seasons'], ['M3', '3 seasons'], ['M4', '4 seasons']]);
+  });
+});
+
 test('published finals lost count resolved finals alone, and the most without a title is a record', async () => {
   const bridesmaids = async (storePath: string) => (await readCategory('bridesmaid', { storePath }))!.rows.map(row => [row.rank, row.name, row.value]);
   await published(seasonsSource(...finishes), async storePath => {
