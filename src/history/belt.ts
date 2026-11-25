@@ -1,6 +1,6 @@
 import { Exact } from './decimal.ts';
 import { readArchive } from './store.ts';
-import { identity, interval } from './game-records.ts';
+import { identity } from './game-records.ts';
 import { completedContests } from './scope.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive, Contest } from './types.ts';
@@ -37,12 +37,12 @@ function beltReigns(archive: Archive): Reign[] {
 export const beltRule = 'The first champion starts with it, and beating the holder in the regular season or championship playoffs takes it. A tie keeps it. If the holder leaves, it goes to the latest champion still playing.';
 export function reignStart({ year, week }: Reign['from']): string { return week === null ? `the start of ${year}` : `Week\u00a0${week}, ${year}`; }
 
-/** Every reign with a defense, over the contests defended. */
+/** Every reign with a defense. */
 export const beltCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   beltReigns(archive).filter(({ from, defenses }) => defenses.length && (!selection.season || from.year === selection.season)).map(({ personId, from, defenses }) => {
     const last = defenses.at(-1)!;
     return { ...identity(archive, personId!, last.year), id: `${personId}:${from.year}:${from.week ?? 'passed'}`, metric: Exact.from(defenses.length), sample: null,
-      leaderContext: interval(defenses), period: { year: last.year, week: lastWeek(last), playedAt: last.playedAt },
+      leaderContext: `from ${reignStart(from)}`, period: { year: last.year, week: lastWeek(last), playedAt: last.playedAt },
       href: `/managers/${personId}/`, historyLabel: 'Open career' };
   });
 

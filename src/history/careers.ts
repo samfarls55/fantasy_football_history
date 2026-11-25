@@ -74,7 +74,7 @@ export const careerStats: ManagerStat[] = [
     rule: 'Championship games lost.' },
   { key: 'record', place: 'legacy', label: 'Record', unit: archive => `${completedContests(archive).some(game => game.tie) ? 'wins–losses–ties' : 'wins–losses'}, regular season`, displayPrecision: 0, better: 'higher',
     values: fromCareer(({ facts }) => ({ value: Exact.from(facts.wins), shown: facts.record })),
-    rule: 'Regular-season games, sorted by wins.' },
+    rule: 'Regular-season games, ranked by wins.' },
   { key: 'win-rate', place: 'legacy', label: 'Win %', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: fromCareer(({ winPercentage }) => winPercentage && { value: winPercentage }),
     rule: 'Regular-season games won, with a tie counting as half a win.' },
   { key: 'playoffs', place: 'legacy', label: 'Playoffs', unit: 'trips', displayPrecision: 0, better: 'higher', values: ofSeasons(season => season.playoffPersonIds.length > 0, (season, personId) => season.playoffPersonIds.includes(personId)),
@@ -94,5 +94,5 @@ export const careerStats: ManagerStat[] = [
       const seasons = personSeasons(archive, person.id);
       return { value: Exact.from(seasons.length), shown: personTenures(archive, seasons).map(tenure => tenure.range).join(', ') };
     }),
-    rule: 'Seasons they’ve had a team in this league, sorted by how many.' },
+    rule: 'Seasons they’ve had a team in this league, ranked by how many.' },
 ];

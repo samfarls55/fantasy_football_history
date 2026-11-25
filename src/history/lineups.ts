@@ -87,7 +87,7 @@ export const lowestStarterCandidates: CategoryDefinition['candidates'] = (archiv
 };
 
 /** Every rule that judges a lineup says whose positions it goes by. */
-export const currentPositions = 'Positions are current ones, plus any slot the player has started in here.';
+export const currentPositions = 'Positions are the players’ current ones, today’s, plus any slot they’ve filled as a starter in this league.';
 
 /** Excuses' Lineups table: the best share of the best lineup ranks first, then the fewest mistakes and the most perfect lineups. */
 export const lineupStats: ManagerStat[] = [

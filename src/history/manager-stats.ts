@@ -58,7 +58,7 @@ export const managerStats: ManagerStat[] = [
   ...moveHabitStats,
 ];
 
-/** How a rank reads from its end: "Highest", "Tied 2nd lowest". */
+/** How a rank reads from its end: "Highest", "Tied 2nd lowest". A stat's last place reads from the other end. */
 export function standing(rank: number, tied: boolean, end: 'highest' | 'lowest'): string {
   const text = `${tied ? 'tied ' : ''}${rank > 1 ? `${ordinal(rank)} ` : ''}${end}`;
   return text[0].toUpperCase() + text.slice(1);
@@ -80,9 +80,10 @@ function rank(archive: Archive, { values, ...stat }: ManagerStat) {
     const value = metric.toNumber();
     const figure = shown ?? `${value.toLocaleString('en-US', { minimumFractionDigits: stat.displayPrecision, maximumFractionDigits: stat.displayPrecision })}${stat.percent ? '%' : ''}`;
     const rank = 1 + known.filter(other => order(other, entry) < 0).length;
+    const last = rank > 1 && !known.some(other => order(other, entry) > 0);
     const tied = known.filter(other => order(other, entry) === 0).length > 1;
     return { ...row, value, exactKey: metric.key, figure, unit: `${shown || stat.displayPrecision ? unit : recordUnit(unit, value)}${entry.names && entry.names.length > 1 ? ' each' : ''}`,
-      rank, tied, standing: standing(rank, tied, stat.better === 'higher' ? 'highest' : 'lowest') };
+      rank, tied, standing: standing(last ? 1 : rank, tied, (stat.better === 'higher') !== last ? 'highest' : 'lowest') };
   }) };
 }
 export type StatView = ReturnType<typeof rank>;

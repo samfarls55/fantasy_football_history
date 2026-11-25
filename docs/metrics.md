@@ -112,7 +112,7 @@ Season award history uses the completed season's latest completed week and its s
 
 A manager stat gives each person one value. `src/history/manager-stats.ts` registers them. An entry owns its key, place, plain label, unit, one-line rule, display precision, better end and calculation, and `readManagerStats` returns every known value with its sample and rank. Tables and manager pages show what it returns and calculate nothing.
 
-Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value, when every value is zero or when a coverage issue blocks its key. A zero beside someone else's value is a value.
+Former managers are ranked with current ones, and marked. Ranks are competition ranks from the better end, and say which end that is: "3rd highest", "Tied 2nd lowest". Last place, tied or not, reads from the other end: "Tied lowest". A value ranks exactly, except one that needs square roots or exponents, which ranks as displayed. A person whose value is unknown has no rank. A stat is left out when nobody has a value, when every value is zero or when a coverage issue blocks its key. A zero beside someone else's value is a value.
 
 A stat whose value is a name carries a number and unit, and ties list every name, with the unit then said of each. A win–loss record ranks by its rate, except the career record, which ranks by wins because Win % stands beside it.
 
@@ -208,7 +208,7 @@ The belt starts with the first resolved champion in the archive, at that title c
 
 A season in the archive whose teams don't include the holder passes the belt as it opens, with no contest played: to the latest champion who has a team in it, or to nobody. A vacant belt goes to the next resolved champion, and a champion's return doesn't claim it. A vacancy is not a reign and holds no record. A league with no resolved title has no belt.
 
-`src/history/belt.ts` supplies the reigns to Home, Legacy, manager pages and `belt-run`, which ranks individual reigns with at least one defense, the current one included. Its interval covers the contests defended, not the one that took the belt, and its season filter selects the reigns that began then. A passed belt's start is the season alone.
+`src/history/belt.ts` supplies the reigns to Home, Legacy, manager pages and `belt-run`, which ranks individual reigns with at least one defense, the current one included. The card says when the belt was taken, and the season filter selects the reigns that began then. A passed belt's start is the season alone.
 
 ## Player contributions and bench records
 

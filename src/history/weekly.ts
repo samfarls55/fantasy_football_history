@@ -57,7 +57,7 @@ export const weeklyStats: ManagerStat[] = [
   { key: 'big-scores', place: 'games', label: archive => `${bigScoreLine(archive)}+ point games`, unit: 'games', displayPrecision: 0, better: 'higher', values: bigScores,
     rule: 'Regular-season scores at or above the league’s line: its 80th-percentile score, to the nearest 10.' },
   { key: 'boom-or-bust', place: 'games', label: 'Boom or bust: typical weekly swing, % of league average', unit: 'of league average', percent: true, displayPrecision: 1, better: 'higher', values: boomOrBust,
-    rule: 'Each regular-season score as a share of that week’s league average, and the standard deviation of those shares.' },
+    rule: 'How far their regular-season scores typically land from their own average, with each score taken as a share of that week’s league average (the standard deviation).' },
   { key: 'early-wins', place: 'games', label: 'Win % in weeks 1–5', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: winRate(1, 5),
     rule: 'Regular-season games won in weeks 1 to 5, with a tie counting as half a win.' },
   { key: 'late-wins', place: 'games', label: 'Win % from week 9', unit: 'of games', percent: true, displayPrecision: 1, better: 'higher', values: winRate(9),

@@ -87,7 +87,7 @@ test('published belt runs rank by defenses, with ties sharing the record and a r
   ], async storePath => {
     const view = (await readCategory('belt-run', { storePath }))!;
     assert.deepEqual(view.rows.map(row => [row.rank, row.manager, row.value, row.leaderContext]), [
-      [1, 'M1', 2, 'Week 1 · 2022 – Week 2 · 2022'], [1, 'M3', 2, 'Week 5 · 2022 – Week 1 · 2023'], [3, 'M1', 1, 'Week 3 · 2023'],
+      [1, 'M1', 2, 'from Week 2, 2021'], [1, 'M3', 2, 'from Week 4, 2022'], [3, 'M1', 1, 'from Week 2, 2023'],
     ]);
     assert.deepEqual((await readCategory('belt-run', { storePath, season: '2023' }))!.rows.map(row => [row.manager, row.value]), [['M1', 1]], 'a season ranks the reigns that began in it');
     assert.ok((await readRecordsHeld('person-960000000000000003', { storePath }))!.some(held => held.category.key === 'belt-run'));

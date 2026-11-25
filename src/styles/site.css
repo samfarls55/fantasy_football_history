@@ -550,7 +550,7 @@ tr.former th { font-weight: 600; }
 .career { list-style: none; margin: 0; padding: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(max(136px, 20%), 1fr)); gap: 20px 28px; border-top: 6px solid var(--paint); }
 .career-label { display: block; font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; color: var(--chalk); }
 .career .play-how:not([open]) + .stat-sample { margin-top: -14px; }
-.career-figure { display: block; margin-top: 6px; font-family: var(--stencil); font-weight: 900; font-size: 52px; line-height: 1; white-space: nowrap; }
+.career-figure { display: block; margin-top: 6px; font-family: var(--stencil); font-weight: 900; font-size: clamp(36px, 11.5vw, 52px); line-height: 1; white-space: nowrap; }
 /* Finishes run down the field left to right, the oldest first, each season behind its own yard line; a title is painted whole. */
 .finishes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 24px 0; }
 .finishes li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 2px 8px 2px 18px; }
