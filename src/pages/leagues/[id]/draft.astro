@@ -1,11 +1,18 @@
 ---
 import Tab from '../../../layouts/Tab.astro';
 import Records from '../../../components/Records.astro';
+import Section from '../../../components/Section.astro';
+import Stats from '../../../components/Stats.astro';
 import { openTab } from '../../../league-page.ts';
 
 const { redirect, frame, view } = await openTab(Astro, 'draft');
 if (redirect) return redirect;
 ---
 <Tab {...frame}>
-  {view && <Records views={view.records} heading="h2" />}
+  {view && (
+    <>
+      <Records views={view.records} heading="h2" />
+      {view.stats.length > 0 && <Section id="scouting" title="Scouting reports"><Stats labelledby="scouting-name" stats={view.stats} /></Section>}
+    </>
+  )}
 </Tab>

@@ -12,7 +12,7 @@ function regularScores(archive: Archive) {
   const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
   return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
 }
-const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+export const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 /** Scores 2nd from one end of their week that got the opposite result. */
 function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {

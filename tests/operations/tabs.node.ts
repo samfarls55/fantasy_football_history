@@ -27,7 +27,7 @@ test('published tabs show only the ones this league has a stat for', async () =>
   });
   await withHistory(async storePath => {
     await publish(storePath, pickupsSource(await base()));
-    assert.deepEqual(await shown(storePath), [['Home', 'home'], ['Legacy', 'legacy'], ['Games', 'games'], ['Excuses', 'luck', 'lineups'], ['Players', 'players'], ['Moves', 'moves']]);
+    assert.deepEqual(await shown(storePath), [['Home', 'home'], ['Legacy', 'legacy'], ['Games', 'games'], ['Excuses', 'luck', 'lineups'], ['Players', 'players'], ['Draft', 'draft'], ['Moves', 'moves']]);
   });
 });
 
@@ -73,7 +73,7 @@ test('published tabs know which anchors from the one-page league moved to them',
     assert.deepEqual(anchors, {
       home: ['champions', 'records', 'best-without-title'], legacy: ['careers', 'rivalries', 'belt-run'],
       games: ['highest-score', 'lowest-score', 'biggest-blowout', 'closest-game', 'winning-streak', 'losing-streak'],
-      excuses: ['luckiest-season', 'unluckiest-season', 'points-in-win', 'points-in-loss', 'benched-player'], players: ['player-contributions'], moves: ['productive-pickup', 'productive-drop', 'the-ex', 'lopsided-trade'],
+      excuses: ['luckiest-season', 'unluckiest-season', 'points-in-win', 'points-in-loss', 'benched-player'], players: ['player-contributions'], draft: ['best-steal', 'worst-bust', 'titles-by-slot'], moves: ['productive-pickup', 'productive-drop', 'the-ex', 'lopsided-trade'],
     });
   });
 });
