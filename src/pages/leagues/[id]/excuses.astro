@@ -1,10 +1,14 @@
 ---
 import Tab from '../../../layouts/Tab.astro';
 import Records from '../../../components/Records.astro';
+import ScheduleSwap from '../../../components/ScheduleSwap.astro';
 import Section from '../../../components/Section.astro';
 import { openTab } from '../../../league-page.ts';
+import { readScheduleSwap } from '../../../history/schedule-swap.ts';
 
-const { redirect, frame, view } = await openTab(Astro, 'excuses');
+const { redirect, frame, view } = await openTab(Astro, 'excuses', async storePath => ({
+  swap: await readScheduleSwap({ storePath, season: Astro.url.searchParams.get('season') ?? undefined }),
+}));
 if (redirect) return redirect;
 const halves = ([['luck', 'Luck'], ['lineups', 'Lineups']] as const).filter(([place]) => frame.tab?.places.includes(place));
 ---
@@ -13,6 +17,7 @@ const halves = ([['luck', 'Luck'], ['lineups', 'Lineups']] as const).filter(([pl
   {halves.map(([place, title]) => (
     <Section id={place} title={title}>
       <Records views={view!.records.filter(record => record.category.place === place)} heading="h3" />
+      {place === 'luck' && <ScheduleSwap swap={view!.swap} />}
     </Section>
   ))}
 </Tab>

@@ -1,10 +1,10 @@
 ---
-// A titled part of a page with its own link.
+// A titled part of a page with its own link; `query` is what else the link needs to open what's shown.
 import ShareLink from './ShareLink.astro';
-interface Props { id: string; title: string }
-const { id, title } = Astro.props;
+interface Props { id: string; title: string; heading?: 'h2' | 'h3'; query?: Record<string, string> }
+const { id, title, heading: Title = 'h2', query } = Astro.props;
 ---
 <section class="block" id={id}>
-  <h2 class="painted"><span id={`${id}-name`}>{title}</span><ShareLink label={`Share ${title}`} hash={`#${id}`} /></h2>
+  <Title class="painted"><span id={`${id}-name`}>{title}</span><ShareLink label={`Share ${title}`} query={query} hash={`#${id}`} /></Title>
   <slot />
 </section>

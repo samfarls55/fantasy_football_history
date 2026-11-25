@@ -119,6 +119,7 @@ a.retry { margin-top: 28px; font-size: 24px; }
 .field > .plays:first-child { margin-top: 20px; }
 .field > .plays:first-child > .play:nth-child(-n + 2) { border-top-color: transparent; }
 h2.painted { font-size: clamp(40px, 6vw, 64px); }
+h3.painted { font-size: clamp(30px, 4.5vw, 44px); }
 /* The yard number, ten more for each heading down the page, shares its row, reaching up into the empty gap above it, so it never sits behind data. */
 .field { counter-reset: yard; }
 .field h2.painted { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 0.25em; counter-increment: yard 10; }
@@ -160,13 +161,13 @@ h2.painted .share { margin-left: 0; }
 }
 .copied:not(:empty) { border-bottom: 2px solid var(--chalk-faint); animation: rise 220ms ease-out both; }
 .copied:empty { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
-/* A mistyped name's way out, a failed page's retry and the halves of Excuses: painted labels on a faint chalk underline. */
-:is(.miss > a, .retry, .halves a) {
+/* A mistyped name's way out, a failed page's retry, the halves of Excuses and the seasons of a grid: painted labels on a faint chalk underline. */
+:is(.miss > a, .retry, .halves a, .seasons a) {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   color: var(--chalk); text-decoration: underline 2px var(--chalk-faint); text-underline-offset: 5px;
 }
-:is(.miss > a, .retry, .halves a):hover { color: var(--paint); text-decoration-color: var(--paint); }
+:is(.miss > a, .retry, .halves a, .seasons a):hover { color: var(--paint); text-decoration-color: var(--paint); }
 
 /* A manager is their Sleeper handle, so it is set as typed, in the heavy sans, wherever it appears: stencil caps
    would turn o into 0 and l into 1. Around it, headings, figures, years and labels stay in paint. */
@@ -380,6 +381,27 @@ tr.former th { font-weight: 600; }
   .table-wrap { animation-timeline: scroll(self inline); }
   .table-wrap th:first-child { animation-timeline: scroll(inline); }
 }
+
+/* A grid of records, every manager by every other. The names over the columns run upward, so a column is only as wide as its records. */
+.grid { width: auto; font-size: 18px; }
+.grid th, .grid td { padding: 0; }
+.grid td { position: relative; min-width: 54px; height: 48px; padding: 0 4px; text-align: center; color: var(--chalk); }
+.grid thead :is(th, td) { height: auto; border-bottom: 0; padding-bottom: 8px; vertical-align: bottom; text-align: left; }
+.grid thead tr:last-child th { border-bottom: 6px solid var(--paint); }
+/* On a phone the side names give way to the records: a long handle wraps. */
+.grid th:first-child { min-width: 112px; max-width: max(112px, 16vw); padding-right: 12px; white-space: normal; }
+.grid thead th[scope='colgroup'] { padding-left: 14px; }
+.grid-axis { position: sticky; left: 126px; }
+.grid-top { display: flex; align-items: center; margin: 0 auto; width: 44px; line-height: 44px; writing-mode: vertical-rl; transform: rotate(180deg); }
+.grid :is(tbody th, .grid-top) { font-family: var(--text); font-weight: 800; font-size: 17px; line-height: 1.2; letter-spacing: 0; text-transform: none; color: var(--paint); }
+/* A better record is a patch of darker, bolder ground and the actual one is chalked around, so neither needs color, white paint or yellow. */
+.grid .better { background: rgba(0, 20, 5, 0.34); font-weight: 800; color: var(--paint); }
+.grid .actual { box-shadow: inset 0 0 0 2px var(--chalk); color: var(--paint); }
+.grid td a { display: flex; align-items: center; justify-content: center; min-height: 44px; text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 5px; }
+.grid td a:hover { text-decoration-color: currentColor; }
+/* A season to choose from; the one shown is painted and underscored. */
+.seasons { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 0 -4px; }
+.seasons a[aria-current] { color: var(--paint); text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
 
 /* Rivalries: the longest gets the headline's painted line and size; the rest line up as a set. */
 .streak-top { margin-top: 20px; padding: 28px 0 36px; border-top: 6px solid var(--paint); }

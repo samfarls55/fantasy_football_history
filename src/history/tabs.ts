@@ -1,5 +1,6 @@
 import { readArchive } from './store.ts';
 import { hasRecord, recordCategories } from './records.ts';
+import { swapSeasons } from './schedule-swap.ts';
 
 /** Where a stat lives. Every place is a tab of its own, except that luck and lineups are the two halves of Excuses. */
 export type Place = 'home' | 'legacy' | 'games' | 'luck' | 'lineups' | 'players' | 'draft' | 'moves';
@@ -23,7 +24,7 @@ export async function readTabs(options: { storePath?: string } = {}) {
   if (!archive) return null;
   const at = (place: Place) => recordCategories.filter(category => category.place === place);
   return tabs.map(tab => ({ key: tab.key, name: tab.name,
-    places: tab.places.filter((place: Place) => always.includes(place) || at(place).some(category => hasRecord(archive, category))) as Place[],
+    places: tab.places.filter((place: Place) => always.includes(place) || place === 'luck' && swapSeasons(archive).length || at(place).some(category => hasRecord(archive, category))) as Place[],
     anchors: [...tab.anchors, ...tab.places.flatMap((place: Place) => at(place).map(category => category.key))],
   })).filter(tab => tab.places.length);
 }
