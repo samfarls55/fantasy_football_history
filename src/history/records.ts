@@ -3,6 +3,7 @@ import { Exact } from './decimal.ts';
 import { careerMetrics } from './metrics.ts';
 import { pickupCandidates } from './pickups.ts';
 import { dropCandidates } from './drops.ts';
+import { repeatPickupCandidates } from './move-habits.ts';
 import { exCandidates } from './ex.ts';
 import { lopsidedTradeCandidates } from './lopsided-trades.ts';
 import { bridesmaidCandidates } from './careers.ts';
@@ -132,6 +133,8 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
   { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
     rule: 'What the player scored in other managers’ starting lineups in the weeks after the drop, through the end of that regular season.' },
+  { key: 'cant-quit-you', name: 'Can’t quit you: most pickups of one player', group: 'Players', place: 'moves', unit: 'pickups', displayPrecision: 0, verb: 'picked up', scope: 'none', candidates: repeatPickupCandidates,
+    rule: 'Completed waiver claims and free-agent moves by one manager for the same player, all seasons together. At least two.' },
   { key: 'the-ex', name: 'The ex: most points against the manager who let him go', group: 'Players', place: 'moves', unit: 'points against that manager', displayPrecision: 2, verb: 'let go of', shame: true, scope: 'games', candidates: exCandidates,
     rule: 'What the player scored as a starter against the manager who dropped or traded him, in later regular-season weeks that season, until that manager got him back.' },
   { key: 'lopsided-trade', name: 'Most lopsided trade', group: 'Players', place: 'moves', unit: 'more points as starters', displayPrecision: 2, scope: 'games', candidates: lopsidedTradeCandidates,

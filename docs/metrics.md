@@ -71,6 +71,7 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | lowest-starter | Players: Lowest starter score | Recorded player/team/week starting score, ascending | Season/all; game scope | Matchup with selected starter row |
 | productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
 | productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
+| cant-quit-you | Players: Can't quit you | One person's completed pickups of one player, at least two, descending | Season/all; no game-scope selector | Person-scoped player history |
 | player-contributions | Players: Most points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
 
 Championship totals are title outcomes, not regular-season game statistics. Completed-season filters omit unfinished years from those award candidates. Underlying season pages can still show partial comparisons from completed eligible weeks.
@@ -278,6 +279,16 @@ Most lopsided trade (`lopsided-trade`, `src/history/lopsided-trades.ts`) ranks t
 A trade is a completed source event of type `trade`, in any recorded week of any season, whatever it exchanged: players, draft picks or waiver budget. Failed, pending and unknown-status events are not trades. The people in it are whoever managed the source's `roster_ids` that season; a completed trade whose `roster_ids` are missing or name an unknown roster rejects the candidate before publication. `completedTrades` in `src/history/trades.ts` is the one read of them.
 
 Each trade counts once for each person in it. The trade map counts the trades each pair of people has shared, so a three-team trade counts once for each of its three pairs. The map holds everyone who has traded, former managers included, and its list holds the same pairs and counts.
+
+## Move habits
+
+These count recorded events in any week of any season, for whoever held the roster that season. `src/history/move-habits.ts` owns them. Every person has a value, zero included, except in a league with nothing of the kind to count, which has no such column. Each carries the chances behind it.
+
+- **Pickups:** completed waiver and free-agent events that add a player, one per event. Failed, pending, commissioner and trade events are never pickups. The sample is the person's seasons.
+- **Failed claims:** failed waiver events, whatever the cause. The sample is their waiver claims, completed and failed; a pending one is neither.
+- **Pickups, midnight–5am ET; pickups, Sunday 11am–1pm ET:** completed free-agent events that add a player, by recorded completion time in America/New_York, daylight saving included. Each window holds its first instant and not its last. A waiver claim completes when Sleeper runs it, so it's neither. Both say nothing about kickoffs or lineup locks, and exact same-week attribution stays forbidden. A completed event without a completion time rejects the candidate at import. The sample is the person's free-agent pickups.
+- **Trades:** the Trades rule above, once for each person in the trade. The sample is the person's seasons.
+- **Can't quit you** (`cant-quit-you`): repeated completed pickups of one player by one person. A player picked up once is not a candidate. The row gives the seasons it happened in, of the person's seasons, and the last week.
 
 ## Recent Home results
 

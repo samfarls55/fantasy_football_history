@@ -4,6 +4,7 @@ import { careerStats } from './careers.ts';
 import { draftStats } from './drafts.ts';
 import { lineupStats } from './lineups.ts';
 import { luckStats } from './luck.ts';
+import { moveHabitStats } from './move-habits.ts';
 import { playerStats } from './player-records.ts';
 import { recordUnit } from './records.ts';
 import { weeklyStats } from './weekly.ts';
@@ -53,6 +54,7 @@ export const managerStats: ManagerStat[] = [
   // Draft
   ...draftStats,
   // Moves
+  ...moveHabitStats,
 ];
 
 function rankStat(archive: Archive, { values, ...stat }: ManagerStat) {
