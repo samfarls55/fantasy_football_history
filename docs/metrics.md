@@ -114,6 +114,15 @@ Former managers are ranked with current ones, and marked. Ranks are competition 
 
 A stat whose value is a name carries a number and unit, and ties list every name. A win–loss record ranks by its rate.
 
+## Week by week
+
+These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. An unpaired bye supplies no score, and a true zero is a score. The most of each ranks first, bottom scores included. `src/history/weekly.ts` calculates them.
+
+- **Top and bottom scores of the week:** every team tied for the week's best or worst score gets one. The sample is the person's scored weeks.
+- **Big-score games:** scores at or above the league's line, which is its 80th-percentile score rounded to the nearest 10, half up. The percentile is the lowest score that at least 80% of the league's scores equal or fall below, over the whole archive, so the line can move with each import. The label names it. Sam authorized this threshold in spec 37; the reference league's line is 147.74, rounded to 150.
+- **Boom or bust:** population standard deviation of the person's scores, each divided by that week's league average. It needs a square root, so it ranks by its displayed one-decimal percentage. A week whose average isn't above zero is left out. One score has no spread, so fewer than two weeks leave it unknown.
+- **Early and late win percentage:** weeks 1 to 5, and week 9 to the end of the regular season, a tie counting half. The sample is the record. No game in those weeks leaves the rate unknown.
+
 ## Luck
 
 These use completed regular-season games and official scores, overrides included, and follow the person who held the roster. The strongest claim to luck, good or bad, ranks first.

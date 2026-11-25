@@ -6,13 +6,13 @@ import type { CategoryDefinition } from './records.ts';
 import type { Archive } from './types.ts';
 
 /** Each regular-season score beside its game and every score of that week. A regular-season game is one week long. */
-function regularScores(archive: Archive) {
+export function regularScores(archive: Archive) {
   const games = new Map(archive.contests.map(game => [game.id, game]));
   const scores = archive.performances.filter(row => row.competition === 'regular');
   const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
   return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
 }
-const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+export const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 /** Scores 2nd from one end of their week that got the opposite result. */
 function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
