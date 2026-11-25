@@ -53,7 +53,7 @@ const highsFaced: ManagerStat['values'] = archive => {
 };
 
 /** One side of each decided regular-season game, with that side's official score. */
-export function resultCandidates(result: 'lost' | 'won'): NonNullable<CategoryDefinition['candidates']> {
+export function resultCandidates(result: 'lost' | 'won'): CategoryDefinition['candidates'] {
   return (archive, selection) => completedContests(archive).filter(game => !game.tie && (!selection.season || game.year === selection.season)).map(game => {
     const side = game.sides.find(side => (side.personId === game.winnerId) === (result === 'won'))!;
     const opponent = game.sides.find(other => other !== side)!;

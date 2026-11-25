@@ -34,7 +34,7 @@ export function seasonComparisons(archive: Archive, season: Season) {
   });
 }
 
-export function seasonCandidates(key: 'dominant-season' | 'luckiest-season' | 'unluckiest-season' | 'best-without-title'): NonNullable<CategoryDefinition['candidates']> {
+export function seasonCandidates(key: 'dominant-season' | 'luckiest-season' | 'unluckiest-season' | 'best-without-title'): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.seasons.filter(season => season.complete && (!selection.season || season.year === selection.season)).flatMap(season =>
     seasonComparisons(archive, season).flatMap(comparison => {
       const team = season.teams.find(team => team.id === comparison.teamId)!;

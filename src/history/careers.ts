@@ -25,7 +25,7 @@ const ofSeasons = (chance: (season: Season) => boolean, happened: (season: Seaso
 });
 
 /** Everyone who lost a final and has never won one. */
-export const bridesmaidCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) => archive.people.flatMap(person => {
+export const bridesmaidCandidates: CategoryDefinition['candidates'] = (archive, selection) => archive.people.flatMap(person => {
   const lost = archive.seasons.filter(season => season.runnerUpId === person.id && (!selection.season || season.year === selection.season)).toReversed();
   if (!lost.length || archive.seasons.some(season => season.championId === person.id)) return [];
   const last = lost.at(-1)!;

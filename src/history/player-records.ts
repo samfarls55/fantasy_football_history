@@ -7,7 +7,7 @@ import type { CategoryDefinition, RecordCandidate, RecordSelection } from './rec
 import type { Archive } from './types.ts';
 
 /** The three players whose teams win most, or least, of the decided games they start. One with as many better players as worse is neither, so nobody is both. */
-export function charmCandidates(end: 'best' | 'worst'): NonNullable<CategoryDefinition['candidates']> {
+export function charmCandidates(end: 'best' | 'worst'): CategoryDefinition['candidates'] {
   return (archive, selection) => {
     const contests = new Map(archive.contests.map(contest => [contest.id, contest]));
     const names = new Map(archive.players.map(player => [player.id, player.name]));
@@ -40,7 +40,7 @@ export function armyCandidates(archive: Archive, selection: RecordSelection): Re
 /** How many people rostered each player in a regular-season week. One who never moved isn't a journeyman, and neither is a team defense. */
 export function journeymanCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   const managers = new Map<string, Set<string>>();
-  for (const row of regularWeeks(archive).filter(row => (!selection.season || row.year === selection.season))) for (const { playerId } of [...row.starters, ...row.bench]) {
+  for (const row of regularWeeks(archive).filter(row => !selection.season || row.year === selection.season)) for (const { playerId } of [...row.starters, ...row.bench]) {
     managers.set(playerId, (managers.get(playerId) ?? new Set()).add(row.personId));
   }
   return archive.players.filter(player => player.position !== 'DEF' && (managers.get(player.id)?.size ?? 0) > 1)

@@ -12,7 +12,7 @@ export function identity(archive: Archive, personId: string, year: string) {
 }
 
 /** Performances are completed weekly legs, including legs of an unresolved contest. */
-export const scoreCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+export const scoreCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   archive.performances.filter(row => (!selection.season || row.year === selection.season) && inScope(row.competition, selection.scope ?? 'regular')).map(row => {
     const opponent = opponentOf(archive, row);
     return { ...identity(archive, row.personId, row.year), id: row.id, metric: Exact.from(row.points), sample: null, opponentId: opponent.personId, result: legResult(row, opponent),
@@ -23,7 +23,7 @@ export const scoreCandidates: NonNullable<CategoryDefinition['candidates']> = (a
   });
 
 /** One final contest, with the two people retained; a tied final has a zero margin. */
-export const marginCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+export const marginCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   completedContests(archive, selection).filter(game => !selection.season || game.year === selection.season).map(game => {
     // The record belongs to the winner, so they lead whichever side the contest stored first; a tie keeps the stored order and says so.
     const [side, opponent] = game.winnerId === game.sides[1].personId ? [game.sides[1], game.sides[0]] : game.sides;
@@ -67,7 +67,7 @@ export function interval(games: Contest[]) {
   return from === through ? from : `${from} – ${through}`;
 }
 
-export function streakCandidates(kind: StreakKind): NonNullable<CategoryDefinition['candidates']> {
+export function streakCandidates(kind: StreakKind): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.people.flatMap(person => {
     const games = longestStreak(archive, person.id, kind, selection);
     if (!games.length) return [];

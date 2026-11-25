@@ -70,10 +70,10 @@ export interface CategoryDefinition {
   /** The places below first show without opening them. */
   open?: boolean;
   scope: 'games' | 'none' | 'regular'; order?: 'ascending' | 'descending'; completedSeasons?: boolean;
-  candidates?: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
+  candidates: (archive: Archive, selection: RecordSelection) => RecordCandidate[];
 }
 type CareerCategory = 'championships' | 'wins' | 'win-percentage' | 'career-points';
-function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['candidates']> {
+function careerCandidates(key: CareerCategory): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.people.filter(person => archive.seasons.some(season => (!selection.season || season.year === selection.season) && season.teams.some(team => team.personId === person.id))).flatMap(person => {
     const metrics = careerMetrics(archive, { personId: person.id }, selection);
     const metric = key === 'career-points' ? metrics.points : key === 'win-percentage' ? metrics.winPercentage : Exact.from(key === 'wins' ? metrics.facts.wins : metrics.facts.championships);
@@ -172,7 +172,7 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons|trips|finals|managers)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons|trips|finals|managers|reigns)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
 const byName = new Intl.Collator(undefined, { numeric: true }).compare;
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
@@ -184,7 +184,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const selection = { season, scope, sort, limit };
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
-  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || byName(a.name, b.name) || a.id.localeCompare(b.id));
+  const candidates = (blocked ? [] : category.candidates(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || byName(a.name, b.name) || a.id.localeCompare(b.id));
   const nameOf = new Map(archive.people.map(person => [person.id, person.name]));
   let rank = 1;
   const ranked = candidates.map((row, index) => {
@@ -233,14 +233,14 @@ export function hasRecord(archive: Archive, category: CategoryDefinition): boole
 }
 /** Visitor reads always load the durable publication, never an in-flight refresh candidate. */
 export async function readCategory(key: string, options: RecordSelection = {}) {
-  const category = recordCategories.find(category => category.key === key && category.candidates);
+  const category = recordCategories.find(category => category.key === key);
   if (!category) return null;
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
 /** What a record card shows. */
 export interface CardView {
-  category: Omit<CategoryDefinition, 'group' | 'scope'>;
+  category: Omit<CategoryDefinition, 'group' | 'scope' | 'candidates'>;
   rows: CardRow[]; leaders: CardRow[];
 }
 type CardRow = Partial<Ranking['rows'][number]> & { names?: string[] } & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
@@ -260,7 +260,7 @@ export async function readPlaceRecords(places: readonly Place[], options: { stor
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  return recordCategories.filter(category => category.candidates).map(category => ranking(archive, category))
+  return recordCategories.map(category => ranking(archive, category))
     .filter(view => isHeld(view) && view.leaders.some(row => row.personId === personId || row.shared && row.opponentId === personId))
     .sort((a, b) => Number(a.category.shame ?? false) - Number(b.category.shame ?? false));
 }
@@ -268,8 +268,8 @@ export async function readRecordCollection(options: { storePath?: string } = {})
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
   return recordGroups.map(name => ({ name, categories: recordCategories.filter(category => category.group === name).map(category => {
-    const view = category.candidates ? ranking(archive, category) : null;
-    return { ...category, displayPrecision: view?.category.displayPrecision, leaders: view?.leaders ?? [], href: view ? categoryHref(category.key) : null };
+    const view = ranking(archive, category);
+    return { ...category, displayPrecision: view.category.displayPrecision, leaders: view.leaders, href: categoryHref(category.key) };
   }) }));
 }
 
@@ -278,7 +278,7 @@ const homeCategories = ['best-without-title', 'benched-player', 'unluckiest-seas
 export async function readHome(options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  const categories = recordCategories.filter(category => category.candidates).map(category => ranking(archive, category));
+  const categories = recordCategories.map(category => ranking(archive, category));
   const identity = (row: Ranking['rows'][number]) => {
     const owner = archive.people.find(person => person.id === row.personId)!;
     return { ...row, owner: { id: owner.id, name: owner.name, avatar: owner.avatar } };

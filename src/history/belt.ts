@@ -38,7 +38,7 @@ export const beltRule = 'The first champion starts with it, and beating the hold
 export function reignStart({ year, week }: Reign['from']): string { return week === null ? `the start of ${year}` : `Week\u00a0${week}, ${year}`; }
 
 /** Every reign with a defense, over the contests defended. */
-export const beltCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+export const beltCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   beltReigns(archive).filter(({ from, defenses }) => defenses.length && (!selection.season || from.year === selection.season)).map(({ personId, from, defenses }) => {
     const last = defenses.at(-1)!;
     return { ...identity(archive, personId!, last.year), id: `${personId}:${from.year}:${from.week ?? 'passed'}`, metric: Exact.from(defenses.length), sample: null,

@@ -17,7 +17,7 @@ function resultsDraft(archive: Archive, season: Season) {
 }
 
 /** What each pick scored in its drafter's regular-season starting lineups: the second half of the rounds for steals, the first round for busts. */
-export function pickCandidates(key: 'best-steal' | 'worst-bust'): NonNullable<CategoryDefinition['candidates']> {
+export function pickCandidates(key: 'best-steal' | 'worst-bust'): CategoryDefinition['candidates'] {
   return (archive, selection) => archive.seasons.filter(season => season.complete && (!selection.season || season.year === selection.season)).flatMap(season => {
     const draft = resultsDraft(archive, season);
     if (!draft) return [];

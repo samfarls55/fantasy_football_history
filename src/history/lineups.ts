@@ -61,7 +61,7 @@ const perManager = (value: (weeks: Lineup[]) => StatValue | null): ManagerStat['
     return result ? [[personId, result]] : [];
   }));
 
-export const worstManagedCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) =>
+export const worstManagedCandidates: CategoryDefinition['candidates'] = (archive, selection) =>
   lineups(archive).filter(({ own, gap }) => (!selection.season || own.year === selection.season) && gap.compare(0) > 0).map(({ own, opponent, gap }) => ({
     ...identity(archive, own.personId, own.year), id: own.id, metric: gap, sample: null, opponentId: opponent.personId, result: legResult(own, opponent),
     detail: own.teamName, leaderContext: `Week ${own.week} · ${own.year}`,
@@ -75,7 +75,7 @@ function managedStarts(archive: Archive, selection: RecordSelection = {}) {
   return recordedStarts(archive, {}, selection).filter(start => managed.has(start.performance));
 }
 
-export const lowestStarterCandidates: NonNullable<CategoryDefinition['candidates']> = (archive, selection) => {
+export const lowestStarterCandidates: CategoryDefinition['candidates'] = (archive, selection) => {
   const people = new Map(archive.people.map(person => [person.id, person.name]));
   const players = new Map(archive.players.map(player => [player.id, player.name]));
   return managedStarts(archive, selection).map(({ performance: own, playerId, points }) => ({
