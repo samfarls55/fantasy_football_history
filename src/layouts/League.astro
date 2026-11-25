@@ -10,8 +10,6 @@ const { title, failure, tabs, tab: current, full = false } = Astro.props;
 const username = viewer(Astro);
 // A failed page keeps the way back to the username's leagues; without one, the lookup under the reason is the way back.
 const leagues = username ? { href: `/?${new URLSearchParams({ u: username, list: '' })}`, label: `${username}’s leagues` } : failure ? undefined : { href: '/', label: 'Find your league' };
-// The yard line each tab is painted on, from the goal line out to midfield and down the other side.
-const yards = { home: 'G', legacy: 10, games: 20, excuses: 30, players: 40, draft: 50, moves: 40 };
 ---
 <Base title={failure === 'missing' ? 'League not found' : failure ? 'League history' : title} back={failure ? leagues : Astro.props.back ?? leagues} full={full || !!failure}>
   <Fragment slot="endzone">
@@ -29,7 +27,7 @@ const yards = { home: 'G', legacy: 10, games: 20, excuses: 30, players: 40, draf
       <p class="copied" role="status"></p>
       <nav class="tabs" aria-label="League">
         {tabs.map(tab => (
-          <a href={tabHref(Astro, tab.key)} aria-current={tab === current ? 'page' : undefined} data-anchors={current?.key === 'home' && tab !== current ? tab.anchors.join(' ') : undefined}><span class="yard-no" aria-hidden="true">{yards[tab.key]}</span>{tab.name}</a>
+          <a href={tabHref(Astro, tab.key)} aria-current={tab === current ? 'page' : undefined} data-anchors={current?.key === 'home' && tab !== current ? tab.anchors.join(' ') : undefined}>{tab.name}</a>
         ))}
       </nav>
     </div>
@@ -46,6 +44,12 @@ const yards = { home: 'G', legacy: 10, games: 20, excuses: 30, players: 40, draf
   };
   follow();
   addEventListener('hashchange', follow);
+
+  // Browsers leave a focused cell that is mostly in view where it is, even half under the managers' column, so it moves clear of the edges (the table's scroll padding).
+  document.addEventListener('focusin', event => {
+    const target = event.target as Element;
+    if (target.closest('.table-wrap') && !target.closest('th:first-child') && target.matches(':focus-visible')) target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
 
   // A shared link is the spot alone: the sharer's ?u= describes their view, not the recipient's.
   const status = document.querySelector('.copied');

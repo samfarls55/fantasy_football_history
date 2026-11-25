@@ -4,4 +4,4 @@ interface Props { label: string; hash?: string; query?: Record<string, string> }
 const { label, hash = '', query = {} } = Astro.props;
 const search = new URLSearchParams(query).toString();
 ---
-<a class="share" href={`${Astro.url.pathname}${search && `?${search}`}${hash}`} aria-label={label} title={label}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2" /></svg></a>
+<a class="share" href={`${Astro.url.pathname}${search && `?${search}`}${hash}`} aria-label={label} title={label}></a>

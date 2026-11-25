@@ -19,6 +19,7 @@
   --stencil: 'Big Shoulders Stencil Display', Impact, sans-serif;
   --text: 'Sofia Sans Semi Condensed', 'Arial Narrow', sans-serif;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0.08 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
 
@@ -98,7 +99,7 @@ a.retry { margin-top: 28px; font-size: 24px; }
 }
 /* A tab change is one tap among many, so its name is simply there: no spray, and smaller than the league's. */
 .tab-name { margin-top: 12px; font-size: clamp(52px, 9vw, 104px); }
-:is(.league-name, .tab-name) .share { width: 28px; height: 28px; vertical-align: baseline; }
+:is(.league-name, .tab-name, .manager-name) .share { font-size: 28px; }
 .halves { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 12px 0 0 -4px; }
 .league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
 
@@ -120,33 +121,30 @@ a.retry { margin-top: 28px; font-size: 24px; }
 .field > .plays:first-child > .play:nth-child(-n + 2) { border-top-color: transparent; }
 h2.painted { font-size: clamp(40px, 6vw, 64px); }
 h3.painted { font-size: clamp(30px, 4.5vw, 44px); }
-/* The yard number, ten more for each heading down the page, shares its row, reaching up into the empty gap above it, so it never sits behind data. */
+/* The yard number, ten more for each heading down the page, has a column of its own beside the heading, reaching up into the empty gap above it, so it sits behind nothing. */
 .field { counter-reset: yard; }
-.field h2.painted { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 0.25em; counter-increment: yard 10; }
+.field h2.painted { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: 0.4em; counter-increment: yard 10; }
 .field h2.painted::after {
-  content: counter(yard) / ''; margin-left: auto; margin-top: -0.35em;
+  content: counter(yard) / ''; margin-top: -0.35em;
   font-size: 2em; line-height: 0.8; color: rgba(248, 248, 243, 0.1);
 }
-h2.painted .share { margin-left: 0; }
 
-/* Tab bar: a strip of end zone along the bottom edge, the same on every page. Phones get the labels alone, in reach of a thumb;
-   wider screens stretch it edge to edge with the yard markers lined up on the field's column. */
+/* Tab bar: a strip of end zone along the bottom edge, in reach of a thumb and the same on every page, with the field's hash marks along its goal line. */
 .tab-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 3;
   padding: 0 calc(max(20px, (100% - 1080px) / 2)) env(safe-area-inset-bottom);
   /* The solid color is what iOS Safari extends under its floating toolbar; a gradient alone leaves a black band there. */
-  background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px) fixed var(--endzone-b);
+  background: repeating-linear-gradient(90deg, var(--chalk-faint) 0 3px, transparent 3px 32px) 0 0 / 100% 9px no-repeat, repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px) fixed var(--endzone-b);
   border-top: 4px solid var(--paint);
   box-shadow: 0 -8px 24px rgba(0, 10, 3, 0.4);
 }
 .tabs { position: relative; display: flex; justify-content: space-between; }
 .tabs a {
-  position: relative; display: flex; align-items: baseline; gap: 8px; min-height: 64px; min-width: 44px; padding: 18px 0 0; white-space: nowrap;
-  font-family: var(--stencil); font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
+  position: relative; display: flex; align-items: center; min-height: 64px; min-width: 44px; padding: 4px 0 0; white-space: nowrap;
+  font-family: var(--stencil); font-weight: 700; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   text-decoration: none; color: var(--chalk);
   transition: color 160ms ease-out;
 }
-.tabs .yard-no { font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: var(--paint); }
 /* The current tab is painted and thickens the goal line above it, so it reads without color. */
 .tabs a:hover, .tabs a[aria-current] { color: var(--paint); }
 .tabs a[aria-current]::before { content: ''; position: absolute; left: 0; right: 0; top: -4px; height: 9px; background: var(--paint); }
@@ -248,9 +246,10 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
   transform-origin: left; animation: land 2600ms 300ms cubic-bezier(.3, .7, .2, 1) both;
 }
 /* The share mark stays faint beside the record's name; ::after stretches it to a 44px target. */
-.share { position: relative; display: inline-block; width: 20px; height: 20px; margin-left: 8px; vertical-align: -3px; color: var(--chalk-quiet); transition: color 160ms ease-out; }
-.share::after { content: ''; position: absolute; inset: -12px; }
-.share svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+/* It's drawn behind padding on a character that can't break away, so it never leaves the last word for a line of its own. */
+.share { position: relative; margin-left: 8px; font: 400 20px/1 var(--text); text-decoration: none; color: var(--chalk-quiet); transition: color 160ms ease-out; }
+.share::before { content: '0'; padding-left: 1em; background: currentColor; -webkit-mask: var(--link) no-repeat 0 50% / 1em; mask: var(--link) no-repeat 0 50% / 1em; }
+.share::after { content: ''; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 .share:hover, .share:focus-visible { color: var(--paint); }
 .shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
 .play.shame .play-title { padding-right: 64px; }
@@ -524,9 +523,10 @@ tr.former th { font-weight: 600; }
 .manager-name { margin-top: 28px; font-size: clamp(40px, 10vw, 112px); line-height: 1.15; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }
 .manager-name > [data-person] { margin-left: -0.12em; }
 .manager-name .me { text-shadow: none; }
-.manager-name .share { width: 28px; height: 28px; vertical-align: baseline; }
-.career { list-style: none; margin: 0; padding: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)); gap: 12px 28px; border-top: 6px solid var(--paint); }
-.career-figure { display: block; font-family: var(--stencil); font-weight: 900; font-size: 52px; line-height: 1; white-space: nowrap; }
+.career { list-style: none; margin: 0; padding: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(max(136px, 20%), 1fr)); gap: 20px 28px; border-top: 6px solid var(--paint); }
+.career-label { display: block; font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; color: var(--chalk); }
+.career .play-how:not([open]) + .stat-sample { margin-top: -14px; }
+.career-figure { display: block; margin-top: 6px; font-family: var(--stencil); font-weight: 900; font-size: 52px; line-height: 1; white-space: nowrap; }
 /* Finishes run down the field left to right, the oldest first, each season behind its own yard line; a title is painted whole. */
 .finishes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 24px 0; }
 .finishes li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 2px 8px 2px 18px; }
@@ -604,11 +604,10 @@ tr.former th { font-weight: 600; }
   .play.across { border-top: 0; padding-top: 18px; }
   .play.across::before { left: 0; top: 0; bottom: auto; width: 40px; border-left: 0; border-top: 3px solid var(--chalk-faint); }
   .play.across:target::after { top: -3px; }
-  /* The yard numbers would crowd the labels, so the bar keeps the labels alone, each the width of a thumb or its word. */
+  /* Each label is the width of a thumb or its word. */
   .tab-bar { padding: 0 6px env(safe-area-inset-bottom); }
   .copied { padding-left: 8px; font-size: 17px; }
   .tabs a { justify-content: center; align-items: center; min-height: 56px; padding: 4px 0 0; font-size: 15px; letter-spacing: 0.01em; }
-  .tabs .yard-no { display: none; }
 }
 @media (max-width: 560px) {
   /* A rank is two lines on a phone: the stat, then the figure and the place. */
