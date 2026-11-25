@@ -56,16 +56,17 @@ test('published worst bust ranks first-round picks, leaving out known keepers al
 const draftTab = async (storePath: string) => (await readTabs({ storePath }))!.some(tab => tab.key === 'draft');
 
 test('published auction, rookie and unfinished drafts supply no draft result', async () => {
-  for (const draft of [
-    draftOf({ id: '20', source: { type: 'auction' } }),
+  for (const [draft, tab] of [
+    // The tab still opens for the scouting reports.
+    [draftOf({ id: '20', source: { type: 'auction' } }), true],
     // A rookie draft is recorded as one, or fills less than the roster its own settings describe.
-    draftOf({ id: '20', settings: { player_type: 1 } }),
-    draftOf({ id: '20', rounds: 3, slots: 4 }),
-    draftOf({ id: '20', source: { status: 'paused' } }),
-  ]) await withHistory(async storePath => {
+    [draftOf({ id: '20', settings: { player_type: 1 } }), true],
+    [draftOf({ id: '20', rounds: 3, slots: 4 }), true],
+    [draftOf({ id: '20', source: { status: 'paused' } }), false],
+  ] as const) await withHistory(async storePath => {
     await publish(storePath, draftsSource([{ year: '2020', drafts: [draft], lineups }]));
     assert.deepEqual(await readPlaceRecords(['draft'], { storePath }), []);
-    assert.equal(await draftTab(storePath), false);
+    assert.equal(await draftTab(storePath), tab);
   });
   await withHistory(async storePath => {
     await publish(storePath, draftsSource([{ year: '2020', drafts: [draftOf({ id: '20', source: { type: 'linear' } })], lineups }]));

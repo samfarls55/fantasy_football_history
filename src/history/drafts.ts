@@ -1,5 +1,7 @@
 import { playerContributionHref, recordedStarts } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
+import { chances } from './luck.ts';
+import type { ManagerStat } from './manager-stats.ts';
 import type { Archive, Season } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 
@@ -50,3 +52,49 @@ export function slotCandidates(archive: Archive, selection: RecordSelection): Re
     return { id: `slot-${index + 1}`, name: `Slot ${index + 1}`, avatar: null, metric: Exact.from(winners.length), sample: null, period: null, href: '', winners };
   });
 }
+
+/** Each person's picks in finished drafts of every type, keepers included. */
+function personPicks(archive: Archive) {
+  const players = new Map(archive.players.map(player => [player.id, player]));
+  return Map.groupBy(archive.drafts.filter(draft => draft.source.status === 'complete').flatMap(draft => {
+    const { teams } = archive.seasons.find(season => season.id === draft.seasonId)!;
+    return draft.picks.flatMap(pick => {
+      const team = teams.find(team => team.rosterId === pick.rosterId);
+      return team ? [{ personId: team.personId, draft, pick, player: players.get(pick.playerId)! }] : [];
+    });
+  }), row => row.personId);
+}
+type PersonPick = NonNullable<ReturnType<ReturnType<typeof personPicks>['get']>>[number];
+
+/** Each person's most-drafted answer, and every tied one. Answers drafted once each are no tendency. */
+function mostDrafted(answer: (row: PersonPick) => string | null | undefined, sample: (known: PersonPick[]) => string, name = answer): ManagerStat['values'] {
+  return archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
+    const known = picks.filter(answer);
+    const answers = [...Map.groupBy(known, answer).values()];
+    const most = Math.max(...answers.map(rows => rows.length));
+    return most > 1 ? [[personId, { value: Exact.from(most), names: answers.filter(rows => rows.length === most).map(([row]) => name(row)!).sort((a, b) => a.localeCompare(b)), sample: sample(known) }]] : [];
+  }));
+}
+const picksMade = (rows: PersonPick[]) => chances(rows.length, 'pick');
+const draftsMade = (rows: PersonPick[]) => chances(new Set(rows.map(row => row.draft)).size, 'draft');
+
+const easternDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' });
+const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
+  const days = picks.flatMap(({ draft, player }) => {
+    const start = draft.source.start_time as number | null;
+    return start && player.birthDate && player.position !== 'DEF' ? [(Date.parse(easternDay.format(start)) - Date.parse(player.birthDate)) / 86_400_000] : [];
+  });
+  return days.length ? [[personId, { value: exactSum(days).divide(Exact.from('365.25').multiply(days.length)), sample: chances(days.length, 'pick') }]] : [];
+}));
+
+/** Draft's Scouting reports table. */
+export const draftStats: ManagerStat[] = [
+  { key: 'most-drafted', place: 'draft', label: 'Drafted most often', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.id, draftsMade, row => row.player.name),
+    rule: 'The player they picked most, at least twice. Every finished draft of any type, keepers included.' },
+  { key: 'drafted-team', place: 'draft', label: 'Most-drafted NFL team', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => (row.pick.source.metadata as { team?: string | null } | null)?.team, picksMade),
+    rule: 'The NFL team they picked from most, at least twice, going by each player’s team at the draft. Every finished draft of any type, keepers included.' },
+  { key: 'drafted-college', place: 'draft', label: 'Most-drafted college', unit: 'times', displayPrecision: 0, better: 'higher', values: mostDrafted(row => row.player.position === 'DEF' ? null : row.player.college, picksMade),
+    rule: 'The college they picked from most, at least twice. Every finished draft of any type, keepers included; team defenses and unknown colleges don’t count.' },
+  { key: 'draft-age', place: 'draft', label: 'Average age when drafted', unit: 'years', displayPrecision: 1, better: 'lower', values: draftAge,
+    rule: 'The average of each player’s age on the day of the draft. Every finished draft of any type, keepers included; team defenses and unknown birth dates don’t count.' },
+];

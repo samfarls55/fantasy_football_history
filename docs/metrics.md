@@ -254,6 +254,17 @@ Titles by draft slot counts the resolved champions who drafted from each slot, w
 
 `src/history/drafts.ts` selects the draft and calculates all three. Pick results are dated by their season's completion.
 
+## Scouting reports
+
+Drafted most often, Most-drafted NFL team, Most-drafted college and Average age when drafted count every pick of every finished draft: snake, linear, auction or rookie, the current season's included, and a season's second draft as well. A keeper is a pick like any other. A pick belongs to the person whose roster made it that season (`roster_id`), so a replaced manager keeps their own. An unfinished draft counts for nobody.
+
+- **NFL team** is the one recorded with the pick at the draft, and a pick recorded without one is left out. Team defenses count.
+- **College** and **age** come from the player list and leave out team defenses and unknown values. The import reads "No College", "None" and "null" in any letter case as an unknown college; other spellings stay as listed.
+- **Age** is the days from the birth date to the date the draft started in America/New_York, over 365.25. A draft without a start time supplies no age. The sample is the picks with a known age, and the youngest average ranks first.
+- A named answer needs at least two picks, since answers picked once each are no tendency and would list a young league's whole roster. Ties list every answer. The sample is the person's drafts for the player, and their picks with a known answer for the team and college.
+
+`src/history/drafts.ts` calculates all four. They open the Draft tab alone in a league whose drafts supply no draft result.
+
 ## The ex and lopsided trades
 
 Spec 37 authorizes both measures. Both use recorded starting points in weeks strictly after the move week, within its season and the selected game scope, and exact same-week attribution stays forbidden.
