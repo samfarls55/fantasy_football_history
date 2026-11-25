@@ -66,7 +66,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
     )}
     {page && (
       <>
-        <h1 class="manager-name"><span data-person class:list={[{ me: isViewer(Astro, page.manager.name) }]}>{page.manager.name}</span><ShareLink label={`Share ${page.manager.name}`} /></h1>
+        <h1 class="manager-name"><span data-person class:list={[{ me: isViewer(Astro, page.manager.name) }]}>{page.manager.name}{isViewer(Astro, page.manager.name) && <span class="unseen"> (you)</span>}</span><ShareLink label={`Share ${page.manager.name}`} /></h1>
         <p class="league-years">{page.manager.range}{!page.manager.current && ' · Former manager'}</p>
         {page.missed && <Miss {...page.missed} href={name => managerHref(Astro, page.manager.name, { vs: name })} clear={managerHref(Astro, page.manager.name)} />}
       </>
@@ -83,7 +83,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
       </Section>
       )}
 
-      <section class="block" aria-label="Career">
+      <section class="block" id="careers" aria-label="Career">
         <ul class="career">
           {career.map(stat => (
             <li><span class="career-label">{stat.label}</span><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details>{stat.sample && <span class="stat-sample">{stat.sample}</span>}</li>
@@ -142,9 +142,9 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
                 const open = row === page.facing;
                 return (
                   <tr class:list={{ former: !row.current }}>
-                    <th scope="row"><Manager name={row.name} /></th>
+                    <th scope="row"><Manager name={row.name} />{!row.current && <span class="former-mark"> Former</span>}</th>
                     <td class:list={['versus-record', { up: row.edge > 0, down: row.edge < 0 }]}>
-                      <a class="versus-open" href={`${managerHref(Astro, page.manager.name, open ? {} : { vs: row.name })}#${open ? 'rivalries' : 'vs'}`} aria-label={`${row.record} against ${row.name}, every meeting`} aria-current={open ? 'true' : undefined}>{row.record}</a>
+                      <a class="versus-open" href={`${managerHref(Astro, page.manager.name, open ? {} : { vs: row.name })}#${open ? 'rivalries' : 'vs'}`} aria-label={`${row.record} against ${row.name}, ${open ? 'close the meetings' : 'every meeting'}`} aria-current={open ? 'true' : undefined}>{row.record}</a>
                     </td>
                     <td class="versus-streak">{row.streak ?? '—'}</td>
                   </tr>

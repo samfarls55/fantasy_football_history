@@ -23,8 +23,8 @@ const rows = managers.map(manager => ({ ...manager, badge: badges.find(badge => 
         {badge && (
           <>
             <strong class="badge">{badge.badge}</strong>
-            <a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>
-            <div class="badge-value">{badge.names && <div class="stat-text"><Names names={badge.names} /></div>}<span><span class="stat-figure">{badge.figure}</span> {badge.unit}</span>{badge.sample && <span class="stat-sample">{badge.sample}</span>}<span class="stat-sample">{badge.standing} of {badge.of}</span></div>
+            <div><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a><span class="stat-sample">{badge.standing} of {badge.of}</span></div>
+            <div class="badge-value">{badge.names && <div class="stat-text"><Names names={badge.names} /></div>}<span><span class="stat-figure">{badge.figure}</span> {badge.unit}</span>{badge.sample && <span class="stat-sample">{badge.sample}</span>}</div>
           </>
         )}
       </li>
