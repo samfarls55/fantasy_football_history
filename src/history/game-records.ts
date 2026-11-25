@@ -4,7 +4,7 @@ import { readArchive } from './store.ts';
 import type { Archive, Contest } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 
-function identity(archive: Archive, personId: string, year: string) {
+export function identity(archive: Archive, personId: string, year: string) {
   const person = archive.people.find(person => person.id === personId)!;
   const team = archive.seasons.find(season => season.year === year)!.teams.find(team => team.personId === personId)!;
   return { personId, name: person.name, avatar: team.avatar };

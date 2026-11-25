@@ -2,6 +2,7 @@
 import Tab from '../../../layouts/Tab.astro';
 import Records from '../../../components/Records.astro';
 import Section from '../../../components/Section.astro';
+import Stats from '../../../components/Stats.astro';
 import { openTab } from '../../../league-page.ts';
 
 const { redirect, frame, view } = await openTab(Astro, 'excuses');
@@ -13,6 +14,7 @@ const halves = ([['luck', 'Luck'], ['lineups', 'Lineups']] as const).filter(([pl
   {halves.map(([place, title]) => (
     <Section id={place} title={title}>
       <Records views={view!.records.filter(record => record.category.place === place)} heading="h3" />
+      <Stats labelledby={`${place}-name`} stats={view!.stats.filter(stat => stat.place === place)} />
     </Section>
   ))}
 </Tab>

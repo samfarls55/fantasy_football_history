@@ -1,4 +1,5 @@
 import { readArchive } from './store.ts';
+import { hasStat, managerStats } from './manager-stats.ts';
 import { hasRecord, recordCategories } from './records.ts';
 
 /** Where a stat lives. Every place is a tab of its own, except that luck and lineups are the two halves of Excuses. */
@@ -23,7 +24,8 @@ export async function readTabs(options: { storePath?: string } = {}) {
   if (!archive) return null;
   const at = (place: Place) => recordCategories.filter(category => category.place === place);
   return tabs.map(tab => ({ key: tab.key, name: tab.name,
-    places: tab.places.filter((place: Place) => always.includes(place) || at(place).some(category => hasRecord(archive, category))) as Place[],
+    places: tab.places.filter((place: Place) => always.includes(place) || at(place).some(category => hasRecord(archive, category))
+      || managerStats.some(stat => stat.place === place && hasStat(archive, stat))) as Place[],
     anchors: [...tab.anchors, ...tab.places.flatMap((place: Place) => at(place).map(category => category.key))],
   })).filter(tab => tab.places.length);
 }

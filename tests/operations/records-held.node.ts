@@ -23,10 +23,10 @@ test('published records held share ties, list fame before shame and count a tied
     await publish(storePath, recordsSource([[100, 90, 50, 50], [90, 100, 60, 40]]));
     assert.deepEqual(await held(storePath, manager(1)), [
       ['wins', 1, [one, two, three]], ['career-points', 190, [one, two]], ['highest-score', 100, [one, two]],
-      ['winning-streak', 1, [one, two, three]], ['losing-streak', 1, [one, two, four]],
+      ['winning-streak', 1, [one, two, three]], ['points-in-loss', 90, [one, two]], ['losing-streak', 1, [one, two, four]],
     ]);
     assert.deepEqual(await held(storePath, manager(3)), [
-      ['wins', 1, [one, two, three]], ['win-percentage', 75, [three]], ['biggest-blowout', 20, [three]],
+      ['wins', 1, [one, two, three]], ['win-percentage', 75, [three]], ['points-in-win', 60, [three]], ['biggest-blowout', 20, [three]],
       ['closest-game', 0, [three]], ['winning-streak', 1, [one, two, three]],
     ]);
     // Beaten by the most points is the winner's record; the tie belongs to both. Nobody holds a title count of zero.

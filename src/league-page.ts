@@ -1,6 +1,7 @@
 import type { AstroGlobal } from 'astro';
 import { ensureLeague, leagueStorePath } from './leagues.ts';
 import { readSeasons } from './history/read.ts';
+import { readManagerStats } from './history/manager-stats.ts';
 import { readPlaceRecords } from './history/records.ts';
 import { withHistorySnapshot } from './history/store.ts';
 import { readTabs, tabs as allTabs, type TabKey } from './history/tabs.ts';
@@ -26,11 +27,13 @@ export async function openLeague<T>(page: Page & Pick<AstroGlobal, 'response'>, 
   return { failure: status, tabs: [] as Tabs, view: null };
 }
 
-/** A tab's page: its record cards and whatever else it reads, and the frame its layout takes. A tab this league has no stat for sends the visitor Home. */
+/** A tab's page: its record cards, its manager stats and whatever else it reads, and the frame its layout takes. A tab this league has no stat for sends the visitor Home. */
 export async function openTab<T = {}>(page: Page & Pick<AstroGlobal, 'response' | 'redirect'>, key: TabKey, read: (storePath: string) => Promise<T> = async () => ({}) as T) {
+  const { places } = allTabs.find(tab => tab.key === key)!;
   const { failure, tabs, view } = await openLeague(page, async storePath => ({
     league: (await readSeasons(storePath))![0].name,
-    records: (await readPlaceRecords(allTabs.find(tab => tab.key === key)!.places, { storePath }))!,
+    records: (await readPlaceRecords(places, { storePath }))!,
+    stats: (await readManagerStats({ storePath, places }))!,
     ...await read(storePath),
   }));
   const tab = tabs.find(tab => tab.key === key);
