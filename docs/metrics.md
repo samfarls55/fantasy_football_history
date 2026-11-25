@@ -58,14 +58,14 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | luckiest-season | Seasons: Luckiest season | Actual wins minus expected wins, descending | Completed season/all; regular only | Manager-season history |
 | unluckiest-season | Seasons: Unluckiest season | Expected wins minus actual wins, descending | Completed season/all; regular only | Manager-season history |
 | dominant-season | Seasons: Most dominant season | Completed team-season dominance, descending | Completed season/all; regular only | Manager-season history |
-| highest-score | Matchups: Highest team score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
-| lowest-score | Matchups: Lowest team score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
+| highest-score | Matchups: Highest score | Official weekly team performance, descending | Season/all; game scope | Matchup, selected week/team |
+| lowest-score | Matchups: Lowest score | Official weekly team performance, ascending | Season/all; game scope | Matchup, selected week/team |
 | closest-game | Matchups: Closest game | Absolute final contest margin, ascending | Season/all; game scope | Matchup |
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
-| benched-player | Players: Highest-scoring benched player | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
-| productive-pickup | Players: Pickups by starting points | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
-| productive-drop | Players: Dropped players' starting points elsewhere | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
-| player-contributions | Players: Most starting points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
+| benched-player | Players: Most points left on the bench | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
+| productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
+| productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
+| player-contributions | Players: Most points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
 
 Championship totals are title outcomes, not regular-season game statistics. Completed-season filters omit unfinished years from those award candidates. Underlying season pages can still show partial comparisons from completed eligible weeks.
 
@@ -110,6 +110,14 @@ Before a pair is selected, suggest up to three pairs ordered by completed meetin
 Average margin = sum of first person's final scores minus opponent's final scores, divided by meetings. A tie contributes zero margin and ends a winning/losing streak. Zero meetings has no average or streak.
 
 A person's nemesis is the opponent with the largest losses-minus-wins value from that person's perspective. Require a positive value. Ties share the result. Include the underlying record/meetings and link to the selected rivalry. If no opponent has a winning record against the person, assign no nemesis.
+
+## Manager pages
+
+Each current and former person has one page, holding only results they earned. Finishes list their completed seasons with the season's team count; a finish the bracket doesn't establish stays unknown. Their record against everyone, and the list of meetings, use the combined scope and mark championship-playoff contests.
+
+A person holds a record category when they share its first rank in the default selection, all seasons and regular scope. A tied closest game belongs to both managers. A descending category led by zero is held by nobody, and a blocked category has no holder. `readRecordsHeld` in `src/history/records.ts` reads every registered category, fame before shame, so a category's name, unit, precision, one-line rule and shame flag live in the registry.
+
+`src/history/manager-names.ts` resolves a name from a link in any letter case, or offers the nearest one: a name it starts (three letters or more), or one within one edit per four letters, at least one.
 
 ## Player contributions and bench records
 

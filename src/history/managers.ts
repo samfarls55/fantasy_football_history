@@ -52,7 +52,7 @@ function profile(archive: Archive, person: Person, options: HistorySelection) {
   const entries = personSeasons(archive, person.id);
   const tenures = personTenures(archive, entries);
   const latest = entries.at(-1)!;
-  const seasons = entries.filter(({ season }) => !options.season || season.year === options.season).reverse().map(({ season, team }) => ({ ...team, year: season.year, complete: season.complete, facts: careerFacts(archive, { personId: person.id }, { ...options, season: season.year }), championship: season.championId === person.id, runnerUp: season.runnerUpId === person.id, playoffAppearance: season.playoffPersonIds.includes(person.id) }));
+  const seasons = entries.filter(({ season }) => !options.season || season.year === options.season).reverse().map(({ season, team }) => ({ ...team, year: season.year, teams: season.teams.length, complete: season.complete, facts: careerFacts(archive, { personId: person.id }, { ...options, season: season.year }), championship: season.championId === person.id, runnerUp: season.runnerUpId === person.id, playoffAppearance: season.playoffPersonIds.includes(person.id) }));
   return { ...person, avatar: latest.team.avatar, teamName: latest.team.name, franchiseId: latest.team.franchiseId, range: tenures.map(tenure => tenure.range).join(', '), tenures, seasons, years: entries.map(({ season }) => season.year).reverse(), facts: careerFacts(archive, { personId: person.id }, options), scope: options.scope ?? 'regular', selectedSeason: options.season ?? null };
 }
 

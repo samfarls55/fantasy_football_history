@@ -1,0 +1,147 @@
+---
+import League from '../../../../layouts/League.astro';
+import Manager from '../../../../components/Manager.astro';
+import Miss from '../../../../components/Miss.astro';
+import RecordCard from '../../../../components/RecordCard.astro';
+import ShareLink from '../../../../components/ShareLink.astro';
+import { fixed, isViewer, leagueHref, managerHref, openLeague } from '../../../../league-page.ts';
+import { readSeasons } from '../../../../history/read.ts';
+import { readManager, readManagers } from '../../../../history/managers.ts';
+import { readManagerName } from '../../../../history/manager-names.ts';
+import { readRecordsHeld } from '../../../../history/records.ts';
+import { readManagerRivalries } from '../../../../history/rivalries.ts';
+
+const typed = Astro.params.manager!;
+const vsParam = Astro.url.searchParams.get('vs');
+
+const { failure, view } = await openLeague(Astro, async storePath => {
+  const league = (await readSeasons(storePath))![0].name;
+  const named = (await readManagerName(typed, { storePath }))!;
+  const manager = named.id ? await readManager(named.id, { storePath }) : null;
+  if (!manager) return { league, suggestion: named.suggestion, page: null };
+  const currentIds = new Set((await readManagers({ storePath }))!.filter(person => person.current).map(person => person.id));
+  // Most-played leads, since that's where a record settles anything; among equals the most lopsided goes first. Former managers trail.
+  // The streak reads from this manager's side ("Won 3"); a last meeting that tied leaves no streak.
+  const versus = (await readManagerRivalries(manager.id, { storePath, scope: 'combined' }))!.rows
+    .map(row => ({ id: row.b.id, name: row.b.name, current: currentIds.has(row.b.id), record: row.record, edge: row.wins - row.losses, meetings: row.meetings,
+      streak: row.streak && `${row.streak.result === 'W' ? 'Won' : 'Lost'} ${row.streak.count}`, games: row.games }))
+    .sort((a, b) => Number(b.current) - Number(a.current) || b.meetings - a.meetings || Math.abs(b.edge) - Math.abs(a.edge) || a.name.localeCompare(b.name));
+  const opponent = vsParam ? (await readManagerName(vsParam, { storePath }))! : null;
+  return { league, suggestion: null, page: {
+    manager, versus, records: (await readRecordsHeld(manager.id, { storePath }))!,
+    finishes: manager.seasons.filter(season => season.complete).toReversed(),
+    // Every meeting with the opponent ?vs= names; anyone they never played opens nothing.
+    facing: opponent?.id ? versus.find(row => row.id === opponent.id) : undefined,
+    missed: opponent && !opponent.id ? { name: vsParam!, suggestion: opponent.suggestion } : null,
+  } };
+});
+const page = view?.page;
+if (view && !page) Astro.response.status = 404;
+
+const ordinal = (place: number) => `${place}${['th', 'st', 'nd', 'rd'][place % 100 > 10 && place % 100 < 14 ? 0 : place % 10] ?? 'th'}`;
+const facts = page?.manager.facts;
+const plural = (count: number, word: string) => `${word}${count === 1 ? '' : 's'}`;
+const career = facts && [
+  { figure: facts.championships, unit: plural(facts.championships, 'title'), rule: 'Championship games won.' },
+  { figure: facts.record, unit: facts.ties ? 'wins, losses and ties' : 'wins and losses', rule: 'Regular-season games.' },
+  { figure: facts.winPercentage === null ? '—' : `${fixed(facts.winPercentage, 1)}%`, unit: 'of games won', rule: 'Regular-season games won, with a tie counting as half a win.' },
+  { figure: facts.playoffAppearances, unit: plural(facts.playoffAppearances, 'playoff trip'), rule: 'Seasons they reached the championship bracket, a first-round bye included.' },
+  { figure: fixed(facts.points, 0), unit: 'points scored', rule: 'Official regular-season scores added up.' },
+  { figure: fixed(facts.pointsAgainst, 0), unit: 'points against', rule: 'Their opponents’ official scores in those same games.' },
+];
+---
+<League title={page ? `${page.manager.name} · ${view!.league}` : 'Manager not found'} failure={failure} back={view ? { href: leagueHref(Astro), label: view.league } : undefined} full={!page}>
+  <Fragment slot="endzone">
+    {view && !page && (
+      <>
+        <h1 class="painted league-name">{view.league}</h1>
+        <Miss name={typed} suggestion={view.suggestion} href={name => managerHref(Astro, name, vsParam ? { vs: vsParam } : {})} clear={leagueHref(Astro)} />
+      </>
+    )}
+    {page && (
+      <>
+        <h1 class="manager-name"><span data-person class:list={[{ me: isViewer(Astro, page.manager.name) }]}>{page.manager.name}</span><ShareLink label={`Share ${page.manager.name}`} /></h1>
+        <p class="league-years">{page.manager.range}{!page.manager.current && ' · Former manager'}</p>
+        {page.missed && <Miss {...page.missed} href={name => managerHref(Astro, page.manager.name, { vs: name })} clear={managerHref(Astro, page.manager.name)} />}
+      </>
+    )}
+  </Fragment>
+
+  {page && (
+    <>
+      <section class="block" aria-label="Career">
+        <ul class="career">
+          {career!.map(stat => (
+            <li><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details></li>
+          ))}
+        </ul>
+      </section>
+
+      {page.finishes.length > 0 && (
+      <section class="block" id="finishes">
+        <h2 class="painted" data-yard="10">Finishes</h2>
+        <ol class="finishes">
+          {page.finishes.map((season, index) => (
+            <li class:list={{ won: season.finish === 1 }} style={`--i: ${index}`}>
+              <span class="finish-year">{season.year}</span>
+              <span class="finish-place">{season.finish ? ordinal(season.finish) : <><span aria-hidden="true">—</span><span class="unseen">Unknown</span></>}</span>
+              <span class="finish-of">{season.finish === 1 ? 'Champion' : `of ${season.teams}`}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+      )}
+
+      {page.records.length > 0 && (
+      <section class="block" id="records">
+        <h2 class="painted" data-yard="20">Records held</h2>
+        <ul class="plays">
+          {page.records.map((view, index) => <RecordCard view={view} heading="h3" index={Math.floor(index / 2)} across={index % 2 > 0} />)}
+        </ul>
+      </section>
+      )}
+
+      {page.versus.length > 0 && (
+      <section class="block" id="rivalries">
+        <h2 class="painted" data-yard="30" id="rivalries-name">Head to head</h2>
+        <details class="play-how"><summary class="play-unit">playoffs included</summary><p>Regular-season and championship-playoff games. Consolation and placement games don’t count.</p></details>
+        <div class="table-wrap">
+          <table class="versus" aria-labelledby="rivalries-name">
+            <thead><tr><th scope="col">Opponent</th><th scope="col">Record</th><th scope="col">Streak</th></tr></thead>
+            <tbody>
+              {page.versus.map(row => {
+                // The open record closes its meetings again.
+                const open = row === page.facing;
+                return (
+                  <tr class:list={{ former: !row.current }}>
+                    <th scope="row"><Manager name={row.name} /></th>
+                    <td class:list={['versus-record', { up: row.edge > 0, down: row.edge < 0 }]}>
+                      <a class="versus-open" href={`${managerHref(Astro, page.manager.name, open ? {} : { vs: row.name })}#${open ? 'rivalries' : 'vs'}`} aria-label={`${row.record} against ${row.name}, every meeting`} aria-current={open ? 'true' : undefined}>{row.record}</a>
+                    </td>
+                    <td class="versus-streak">{row.streak ?? '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        {page.facing && (
+          <div class="meetings" id="vs">
+            <h3><Manager name={page.manager.name} /> vs <Manager name={page.facing.name} /><ShareLink label={`Share ${page.manager.name} vs ${page.facing.name}`} query={{ vs: page.facing.name }} hash="#vs" /></h3>
+            <p class="meetings-record">{page.facing.record}, playoffs included</p>
+            <ol>
+              {page.facing.games.map(game => (
+                <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>
+                  <span class="meet-result">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span>
+                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)}</span>
+                  <span class="meet-when">Week&nbsp;{game.week}, {game.year}{game.competition === 'playoffs' && <> <span class="meet-playoffs">Playoffs</span></>}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
+      )}
+    </>
+  )}
+</League>

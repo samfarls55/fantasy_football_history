@@ -1,6 +1,6 @@
 /* The page is a football field seen from above: end zone, mowed turf, chalk, a thrown flag. */
 :root {
-  /* Turf, highlight and chalk are tuned together: chalk text holds 4.5:1 on either stripe and under the highlight. */
+  /* Turf, light and chalk are tuned together: chalk text holds 4.5:1 on either stripe and under the light. */
   --turf-a: #246a30;
   --turf-b: #1f5e2a;
   --endzone-a: #133f24;
@@ -68,7 +68,7 @@ p { text-wrap: pretty; }
 /* The far end zone closes the field: goal line on top, room underneath for the jump bar. */
 .endzone.close { border-bottom: 0; border-top: 12px solid var(--paint); box-shadow: none; }
 .close .endzone-inner { padding-top: 56px; padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
-/* A handle has descenders the stencil never did; the extra leading keeps the highlight off the line below.
+/* A handle has descenders the stencil never did; the extra leading keeps the paint off the line below.
    It's set in the wider sans, so it steps down sooner than the league name and a phone keeps it whole. */
 .close-name { font-size: clamp(40px, 12vw, 136px); overflow-wrap: anywhere; line-height: 1.15; }
 .field:not(:has(*)) { display: none; }
@@ -122,7 +122,6 @@ h2[data-yard]::after {
 /* Jump bar: a strip of end zone along the bottom edge. Phones get the labels alone, in reach of a thumb;
    wider screens stretch it edge to edge with the yard markers lined up on the field's column. It rises as the ball lands, last in the load. */
 .jump {
-  --row: 52px;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
   padding: 0 calc(max(20px, (100% - 1080px) / 2)) env(safe-area-inset-bottom);
   /* The solid color is what iOS Safari extends under its floating toolbar; a gradient alone leaves a black band there. */
@@ -143,58 +142,35 @@ h2[data-yard]::after {
 /* The current section is painted and thickens the goal line above it, so it reads without color. */
 .jump-links a:hover, .jump-links a[aria-current] { color: var(--paint); }
 .jump-links a[aria-current]::before { content: ''; position: absolute; left: 0; right: 16px; top: -4px; height: 9px; background: var(--paint); }
-/* The highlight row has one fixed height, so the mark can reach past it to the goal line. */
-.jump:has(.jump-mark:not([hidden]), .copied:not(:empty)) .jump-links a[aria-current]::before { top: calc(-4px - var(--row)); }
-.jump a:focus-visible, .jump button:focus-visible { outline-offset: -5px; }
-/* A section holding the highlighted manager carries a chip of the highlight's paint after its label, counting their appearances in it. */
-.hits {
-  flex: none; align-self: center; min-width: 1.5em; margin-left: -4px; padding: 3px 4px 2px; border-radius: 2px;
-  font-family: var(--text); font-weight: 800; font-size: 15px; line-height: 1; letter-spacing: 0; text-align: center;
-  color: var(--ink-on-paint); background: var(--paint); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+/* A confirmation adds a row of one fixed height, so the mark can reach past it to the goal line. */
+.jump:has(.copied:not(:empty)) .jump-links a[aria-current]::before { top: -56px; }
+.jump a:focus-visible { outline-offset: -5px; }
+/* Confirmations are chalk notes above the sections, so they never cover them or the field; alone, they are the whole bar.
+   Empty, the note is clipped rather than hidden, so the live region stays in the accessibility tree and announces each one. */
+.jump:not(:has(nav, .copied:not(:empty))) { border: 0; background: none; box-shadow: none; }
+.jump:not(:has(nav)) { animation: none; }
+.copied {
+  display: flex; align-items: center; height: 52px;
+  font-family: var(--text); font-weight: 600; font-size: 20px; line-height: 1.1; color: var(--chalk);
 }
-/* While a highlight is on, a row above the sections names it, steps back and forth through its sightings and clears it, in reach of a thumb.
-   A confirmation takes the name's place there for a moment; with nothing highlighted, the row holds the confirmation alone. */
-.jump-row { display: flex; align-items: center; gap: 16px; }
-.jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { height: var(--row); padding-top: 6px; border-bottom: 2px solid var(--chalk-faint); }
-.jump-mark { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px 16px; animation: rise 220ms ease-out both; }
-.jump-mark[hidden] { display: none; }
-.jump-row:has(.copied:not(:empty)) .jump-mark { flex: none; }
-.jump-row:has(.copied:not(:empty)) .marking-name { display: none; }
-.marking-name { flex: 0 1 auto; min-width: 0; font-size: 20px; line-height: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* The bar's controls and a mistyped name's way out: painted labels on a faint chalk underline. */
-.jump-mark :is(button, a), .miss > a, .retry {
+.jump:has(nav) .copied:not(:empty) { border-bottom: 2px solid var(--chalk-faint); }
+.copied:not(:empty) { animation: rise 220ms ease-out both; }
+.copied:empty { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
+/* A mistyped name's way out and a failed page's retry: painted labels on a faint chalk underline. */
+:is(.miss > a, .retry) {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px;
-  border: 0; background: none; cursor: pointer;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   color: var(--chalk); text-decoration: underline 2px var(--chalk-faint); text-underline-offset: 5px;
 }
-.jump-mark .jump-prev { margin-left: auto; }
-/* The highlight row's share: the record share's icon at a full 44px. */
-.jump-mark .share-view { width: 44px; height: 44px; margin: 0; padding: 12px; text-decoration: none; }
-.jump-mark .share-view::after { inset: 0; }
-.jump-mark .share-view:is(:hover, :focus-visible) { color: var(--paint); }
-.jump-mark :is(button, a):hover, .miss > a:hover, .retry:hover { color: var(--paint); text-decoration-color: var(--paint); }
-/* Confirmations are chalk notes in the bar's top row. They may name a handle, so they're set in its face; a long one wraps to a second line.
-   Empty, it's clipped rather than hidden, so the live region stays in the accessibility tree and announces each one. */
-.copied {
-  flex: 1; min-width: 0; padding-left: 0.12em;
-  font-family: var(--text); font-weight: 600; font-size: 20px; line-height: 1.1;
-  color: var(--chalk); overflow-wrap: anywhere;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
-}
-.copied:not(:empty) { animation: rise 220ms ease-out both; }
-.copied:empty { position: absolute; width: 1px; height: 1px; padding: 0; clip-path: inset(50%); }
-/* The rising highlight row would cover the last lines of the field, so the room under it grows to match. */
-html:has(.jump-mark:not([hidden])) { scroll-padding-bottom: 150px; }
-body:has(.jump-mark:not([hidden])) .close .endzone-inner { padding-bottom: calc(166px + env(safe-area-inset-bottom)); }
+:is(.miss > a, .retry):hover { color: var(--paint); text-decoration-color: var(--paint); }
 
 /* A manager is their Sleeper handle, so it is set as typed, in the heavy sans, wherever it appears: stencil caps
    would turn o into 0 and l into 1. Around it, headings, figures, years and labels stay in paint. */
-[data-person], .marking-name {
+[data-person] {
   font-family: var(--text); font-weight: 800; text-transform: none; letter-spacing: 0; font-variant-numeric: proportional-nums;
 }
-/* A highlighted manager gets white paint rolled behind their name, read in the end zone's ink.
-   Every name carries the padding, highlighted or not, so the paint never moves a line; the paint clears the next word by a full space.
+/* The visitor's own name, the one they looked up, gets white paint rolled behind it, read in the end zone's ink.
+   Every name carries the padding, marked or not, so the paint never moves a line; the paint clears the next word by a full space.
    A name that starts a line pulls back so its letters stay on the column edge. */
 .me, [data-person] {
   padding: 0 0.12em; border-radius: 2px;
@@ -203,9 +179,9 @@ body:has(.jump-mark:not([hidden])) .close .endzone-inner { padding-bottom: calc(
   transition: background-size 420ms cubic-bezier(.2, .7, .2, 1), color 200ms ease-out, text-decoration-color 160ms ease-out;
 }
 .me { background-size: 100% 100%; color: var(--ink-on-paint); text-shadow: none; }
-:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, .versus caption, table th) > [data-person]:first-child { margin-left: -0.12em; }
-/* Every name sets the highlight, so every name carries the same chalk line, scaled to its size, at 3:1 on the turf so it reads as a link;
-   it firms up under a pointer or focus, and the paint replaces it once the name is highlighted. */
+:is(.yard-champ, .close-name, .play-holder strong, .streak-who, .streaks p, .meetings h3, table th) > [data-person]:first-child { margin-left: -0.12em; }
+/* Every name opens that manager's page, so every name carries the same chalk line, scaled to its size, at 3:1 on the turf so it reads as a link;
+   it firms up under a pointer or focus, and the paint replaces it once the name is marked. */
 a[data-person] {
   position: relative; overflow-wrap: anywhere;
   text-decoration: underline max(2px, 0.05em) var(--chalk-quiet); text-underline-offset: max(4px, 0.14em);
@@ -216,7 +192,7 @@ a[data-person].me { text-decoration-color: transparent; }
 a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100% - 44px) / 2) min(0px, (100% - 44px) / 2); }
 /* Champion rows sit 60px apart, so their names keep a plain 44px target instead of reaching into the next row. */
 .yard-champ a[data-person]::before { inset-block: min(0px, (100% - 44px) / 2); }
-/* A mistyped ?manager= says so in the end zone, offers the nearest handle, with the way out beside it. */
+/* A mistyped manager says so in the end zone, offers the nearest handle, with the way out beside it. */
 .miss { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-top: 24px; font-size: 20px; animation: rise 320ms ease-out both; }
 .miss strong { font-weight: 800; overflow-wrap: anywhere; }
 
@@ -269,7 +245,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
 .play-title { font-size: 20px; font-weight: 800; color: var(--chalk); }
 /* A linked record lands with its yard line chalked fresh and thick, then settling back. It's a line, never paint behind a name,
-   so a landing can't pass for a highlight. Without motion the fresh line stays. */
+   so a landing can't pass for the visitor's mark. Without motion the fresh line stays. */
 .play:target::after {
   content: ''; position: absolute; left: 0; right: 0; top: -6px; height: 6px; background: var(--paint);
   transform-origin: left; animation: land 2600ms 300ms cubic-bezier(.3, .7, .2, 1) both;
@@ -391,7 +367,7 @@ tr.former th { font-weight: 600; }
 /* Too narrow for every column, the managers hold the left edge like a sideline and the stats run under them.
    Turf fades in at the right edge while columns remain, and the sideline shades once anything has passed under it. */
 .table-wrap th:first-child { position: sticky; left: 0; z-index: 1; }
-/* The wrap's room for a highlight's paint sits left of the column; the shade covers it too. */
+/* The wrap's room for a mark's paint sits left of the column; the shade covers it too. */
 .table-wrap th:first-child::before { content: ''; position: absolute; top: 0; bottom: 0; right: 100%; width: 0.4em; background: inherit; }
 @property --more { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @keyframes more { from, 90% { --more: 56px; } to { --more: 0px; } }
@@ -417,9 +393,8 @@ tr.former th { font-weight: 600; }
 /* Each name's 44px target grows away from the other one, so when "has beaten" wraps the two never overlap. */
 .streaks a[data-person]:first-of-type::before { inset: calc(100% - 44px) 0 0; }
 .streaks a[data-person]:last-of-type::before { inset: 0 0 calc(100% - 44px); }
-/* Highlighted, Rivalries is that manager's record against each opponent: a winning record in paint, a losing one is shame, so it takes the flag's yellow (28px stencil, large text: 4:1). */
+/* A manager's record against each opponent: a winning record in paint, a losing one is shame, so it takes the flag's yellow (28px stencil, large text: 4:1). */
 .versus { max-width: 46rem; }
-.versus caption { padding: 8px 0 24px; text-align: left; white-space: normal; font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: max(44px, 1.15em); }
 .versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
 .versus-record.up { color: var(--paint); }
 .versus-record.down { color: var(--flag); }
@@ -431,7 +406,7 @@ tr.former th { font-weight: 600; }
 }
 .versus-open:is(:hover, :focus-visible) { text-decoration-color: currentColor; }
 .versus-open[aria-current] { text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
-/* Every meeting, newest first: the highlighted manager's result in fame paint or shame yellow, the score from their side, then when. */
+/* Every meeting, newest first: the manager's result in fame paint or shame yellow, the score from their side, then when. */
 .meetings { max-width: 46rem; margin-top: 28px; padding-top: 20px; border-top: 3px dashed var(--chalk-faint); scroll-margin-top: 24px; }
 .meetings h3 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; line-height: max(44px, 1.15em); }
 .meetings-record { margin-top: 4px; font-size: 20px; color: var(--chalk); }
@@ -444,10 +419,29 @@ tr.former th { font-weight: 600; }
 .meet-score { font-weight: 800; font-size: 20px; text-align: right; white-space: nowrap; }
 .meet-when { font-size: 17px; color: var(--chalk); }
 .meet-playoffs { margin-left: 4px; white-space: nowrap; font-family: var(--stencil); font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paint); }
-.meetings + .streak-top, .table-wrap + .streak-top { margin-top: 40px; }
 /* Former opponents' records sit in quiet chalk. */
 .versus .former .versus-record { color: var(--chalk-quiet); }
 .versus .former .versus-streak { font-weight: 600; }
+
+/* A manager's page: their handle as typed across the end zone, then their career in painted figures. */
+.manager-name { margin-top: 28px; font-size: clamp(40px, 10vw, 112px); line-height: 1.15; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }
+.manager-name > [data-person] { margin-left: -0.12em; }
+.manager-name .me { text-shadow: none; }
+.manager-name .share { width: 28px; height: 28px; vertical-align: baseline; }
+.career { list-style: none; margin: 0; padding: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)); gap: 12px 28px; border-top: 6px solid var(--paint); }
+.career-figure { display: block; font-family: var(--stencil); font-weight: 900; font-size: 52px; line-height: 1; white-space: nowrap; }
+/* Finishes run down the field left to right, the oldest first, each season behind its own yard line; a title is painted whole. */
+.finishes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 24px 0; }
+.finishes li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 2px 8px 2px 18px; }
+.finishes li::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--paint);
+  transform-origin: top; animation: chalk-down 500ms cubic-bezier(.3, .7, .2, 1) both; animation-delay: calc(var(--i) * 60ms + 350ms);
+}
+.finish-year { font-family: var(--stencil); font-weight: 700; font-size: 22px; line-height: 1; color: var(--chalk); }
+.finish-place { font-family: var(--stencil); font-weight: 900; font-size: 44px; line-height: 1; color: var(--chalk); }
+.finish-of { color: var(--chalk); }
+.won :is(.finish-place, .finish-of) { color: var(--paint); }
+.won .finish-of { font-weight: 800; }
 
 /* Home: the whole screen is the end zone. */
 .lookup { padding-top: 13vh; max-width: 720px; }
@@ -477,6 +471,7 @@ tr.former th { font-weight: 600; }
 
 @keyframes spray { from { clip-path: inset(0 100% 0 0); filter: blur(6px); } 60% { filter: blur(0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes chalk { from { transform: scaleX(0); } }
+@keyframes chalk-down { from { transform: scaleY(0); } }
 @keyframes land { from { transform: scaleX(0); } 20%, 70% { transform: none; opacity: 1; } to { opacity: 0; } }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 @keyframes toss { from { opacity: 0; transform: translate(-160px, -60px) rotate(-540deg); } }
@@ -493,19 +488,11 @@ tr.former th { font-weight: 600; }
   .group-name + .plays > .play.across { border-top: 0; }
   .play.across:target::after { top: -3px; }
   /* The yard numbers would crowd four labels, so the bar keeps the labels, centered under each thumb. */
-  .jump { --row: 44px; padding: 0 8px env(safe-area-inset-bottom); }
-  /* The highlight row is one 44px line: the name gives way to Prev, Next and Clear, and the sections below tighten under it. */
-  .jump-row { gap: 8px; padding-left: 8px; }
-  .jump-row:has(.jump-mark:not([hidden]), .copied:not(:empty)) { padding-top: 0; }
-  .jump-mark { gap: 4px; }
-  .copied { font-size: 17px; }
-  /* Labels sit on one line along the bottom, so a section without a chip lines up with those that have one. */
-  .jump:has(.jump-mark:not([hidden])) .jump-links a { justify-content: flex-end; min-height: 48px; padding: 4px 2px 8px; gap: 2px; }
+  .jump { padding: 0 8px env(safe-area-inset-bottom); }
+  .copied { padding-left: 8px; font-size: 17px; }
   .jump-links a { flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 56px; padding: 6px 2px 4px; font-size: 16px; letter-spacing: 0.04em; text-align: center; white-space: normal; }
   .jump-links .yard-no { display: none; }
   .jump-links a[aria-current]::before { left: 10px; right: 10px; }
-  /* No room beside a phone's labels, so the chip sits above, centered like a hash mark. */
-  .hits { order: -1; margin: 0; font-size: 13px; padding: 2px 4px 1px; }
 }
 @media (max-width: 560px) {
   /* A meeting is two lines on a phone: the result and score, then when it was. */

@@ -28,7 +28,7 @@ export const marginCandidates: NonNullable<CategoryDefinition['candidates']> = (
     const scope = selection.scope ?? 'regular';
     const owner = identity(archive, side.personId, game.year);
     const other = identity(archive, opponent.personId, game.year);
-    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`, tied: game.tie,
+    return { ...owner, id: game.id, matchupLabel: `${owner.name} vs ${other.name}`, opponentId: opponent.personId, tied: game.tie,
       metric: Exact.from(side.points).subtract(opponent.points).abs(), sample: null,
       period: { year: game.year, week: Math.max(...game.weeks), playedAt: game.playedAt },
       leaderContext: `Week ${Math.max(...game.weeks)} · ${game.year}`,

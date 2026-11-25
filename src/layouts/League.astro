@@ -1,0 +1,57 @@
+---
+// The frame of every page under a league: the way back, why a league can't be shown, and the bar along the bottom that confirms a share.
+import Base from './Base.astro';
+import Lookup from '../components/Lookup.astro';
+import { viewer } from '../league-page.ts';
+
+interface Props { title: string; failure: 'missing' | 'failed' | null; back?: { href: string; label: string }; full?: boolean }
+const { title, failure, full = false } = Astro.props;
+const username = viewer(Astro);
+// A failed page keeps the way back to the username's leagues; without one, the lookup under the reason is the way back.
+const leagues = username ? { href: `/?${new URLSearchParams({ u: username, list: '' })}`, label: `${username}’s leagues` } : failure ? undefined : { href: '/', label: 'Find your league' };
+---
+<Base title={failure === 'missing' ? 'League not found' : failure ? 'League history' : title} back={failure ? leagues : Astro.props.back ?? leagues} full={full || !!failure}>
+  <Fragment slot="endzone">
+    {failure ? (
+      <>
+        {/* A league that can't be shown says why, with the username lookup right there to pick it again. */}
+        <h1 class="painted failure">{failure === 'missing' ? `Sleeper has no league with ID ${Astro.params.id}.` : 'Sleeper didn’t send this league’s history.'}</h1>
+        {failure === 'failed' && <a class="retry" href={Astro.url.pathname + Astro.url.search}>Try again</a>}
+        <Lookup username={username} heading={false} />
+      </>
+    ) : <slot name="endzone" />}
+  </Fragment>
+  {!failure && !full && (
+    <>
+      <div class="jump">
+        <p class="copied" role="status"></p>
+        <slot name="jump" />
+      </div>
+      <slot />
+    </>
+  )}
+  <Fragment slot="close"><slot name="close" /></Fragment>
+</Base>
+
+<script>
+  // A shared link is the spot alone: the sharer's ?u= describes their view, not the recipient's.
+  const status = document.querySelector('.copied');
+  let timer = 0;
+  const say = (text: string, hold = 1800) => {
+    status!.textContent = text;
+    clearTimeout(timer);
+    timer = window.setTimeout(() => { status!.textContent = ''; }, hold);
+  };
+  document.addEventListener('click', event => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a.share');
+    if (!link || !navigator.share && !navigator.clipboard) return;
+    event.preventDefault();
+    if (link.hash) history.replaceState(null, '', link.hash);
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ url: link.href }).catch(() => {});
+    // A refused copy puts the shared link itself in the address bar for copying by hand, as a new entry so Back returns to the sharer's view.
+    else navigator.clipboard.writeText(link.href).then(() => say('Link copied'), () => {
+      history.pushState(null, '', link.href);
+      say('Not copied. Use the address bar.', 5000);
+    });
+  });
+</script>
