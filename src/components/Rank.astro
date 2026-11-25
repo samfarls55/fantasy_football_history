@@ -1,8 +1,9 @@
 ---
-// One row of ranks: a stat that opens its column, what this manager's is, and where that places them.
+// One row of ranks: a stat that opens its column, what this manager's is, and where that puts them among everyone, drawn as a marker on a line from first to last.
 import Names from './Names.astro';
-interface Props { href: string; label: string; rule: string; figure: string; unit: string; names?: string[]; sample?: string; rank: number; standing: string; of: string }
-const { href, label, rule, figure, unit, names, sample, rank, standing, of } = Astro.props;
+import { ordinal } from '../history/careers.ts';
+interface Props { href: string; label: string; rule: string; figure: string; unit: string; names?: string[]; rank: number; tied: boolean; of: number }
+const { href, label, rule, figure, unit, names, rank, tied, of } = Astro.props;
 ---
 <li>
   <a href={href}>{label}</a>
@@ -10,7 +11,7 @@ const { href, label, rule, figure, unit, names, sample, rank, standing, of } = A
     {names && <div class="stat-text"><Names names={names} /></div>}
     <span class="stat-figure">{figure}</span>
     <details class="play-how"><summary class="play-unit">{unit}</summary><p>{rule}</p></details>
-    {sample && <span class="stat-sample">{sample}</span>}
   </div>
-  <p class:list={['rank-place', { first: rank === 1 }]}><strong>{standing}</strong> of {of}</p>
+  <span class="rank-line" style={`--at: ${of > 1 ? (rank - 1) / (of - 1) : 0}; --of: ${of}`} aria-hidden="true"></span>
+  <p class:list={['rank-place', { first: rank === 1 }]}>{tied && <abbr title="Tied">T-</abbr>}{ordinal(rank)}<span class="unseen"> of {of}</span></p>
 </li>

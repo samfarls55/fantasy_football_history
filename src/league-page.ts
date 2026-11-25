@@ -64,6 +64,11 @@ export function isViewer(page: Page, name: string): boolean {
   return name.toLowerCase() === viewer(page).toLowerCase();
 }
 
+/** Whether a stat's label already says its unit, so a figure beside the label needs none: "Pickups" says "pickups". A unit of several words is known by all but its first, which a count of one changes. */
+export function saysUnit(label: string, unit: string): boolean {
+  const words = unit.toLowerCase().split(' ');
+  return label.toLowerCase().includes(words.slice(words.length > 1 ? 1 : 0).join(' '));
+}
 export function fixed(number: number, digits: number): string {
   return number.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }

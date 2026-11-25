@@ -5,7 +5,7 @@ import Miss from '../../../../components/Miss.astro';
 import Rank from '../../../../components/Rank.astro';
 import Records from '../../../../components/Records.astro';
 import ShareLink from '../../../../components/ShareLink.astro';
-import { fixed, isViewer, leagueHref, managerHref, openLeague, statHref } from '../../../../league-page.ts';
+import { fixed, isViewer, leagueHref, managerHref, openLeague, saysUnit, statHref } from '../../../../league-page.ts';
 import { readBadges } from '../../../../history/badges.ts';
 import { beltRule, readManagerBelt } from '../../../../history/belt.ts';
 import { ordinal } from '../../../../history/careers.ts';
@@ -47,6 +47,10 @@ const page = view?.page;
 if (view && !page) Astro.response.status = 404;
 
 const badge = page?.badge;
+/** How far down the field a finish sits: first place 0, last place 1. An unknown finish sits mid-field, off the line. */
+const depth = (season: { finish: number | null; teams: number }) => season.finish && season.teams > 1 ? (season.finish - 1) / (season.teams - 1) : season.finish ? 0 : 0.5;
+/** The widest margin among the open meetings, so each one's bar is a share of it. */
+const widest = Math.max(1, ...(page?.facing?.games ?? []).map(game => Math.abs(Number(game.side.points) - Number(game.opponent.points))));
 const run = recordCategories.find(category => category.key === 'belt-run')!;
 /** The career line: what Legacy's table says of them, then their belt. */
 const career: { label: string; rule: string; figure: string | number; unit: string; sample?: string }[] = page ? [
@@ -68,7 +72,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
         <h1 class="manager-name"><span data-person class:list={[{ me: isViewer(Astro, page.manager.name) }]}>{page.manager.name}{isViewer(Astro, page.manager.name) && <span class="unseen"> (you)</span>}</span><ShareLink label={`Share ${page.manager.name}`} /></h1>
         <p class="league-years">{page.manager.range}{!page.manager.current && ', former manager'}</p>
         {/* The badge is who they are in this league, so it sits with the name, beside the stat that earned it. */}
-        {badge && <p class="manager-badge" id="badge"><strong class="badge">{badge.badge}</strong><span><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>: {badge.names && `${badge.names.join(', ')}, `}{badge.figure}{badge.unit.toLowerCase() !== badge.label.toLowerCase() && ` ${badge.unit}`}, {badge.standing.toLowerCase()} of {badge.of} current managers</span></p>}
+        {badge && <p class="manager-badge" id="badge"><strong class="badge">{badge.badge}</strong><span><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>: {badge.names && `${badge.names.join(', ')}, `}{badge.figure}{!saysUnit(badge.label, badge.unit) && ` ${badge.unit}`}</span></p>}
         {page.missed && <Miss {...page.missed} href={name => managerHref(Astro, page.manager.name, { vs: name })} clear={managerHref(Astro, page.manager.name)} />}
       </>
     )}
@@ -79,7 +83,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
       <section class="block" id="careers" aria-label="Career">
         <ul class="career">
           {career.map(stat => (
-            <li><span class="career-label">{stat.label}</span><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details>{stat.sample && <span class="stat-sample">{stat.sample}</span>}</li>
+            <li><span class="career-label">{stat.label}</span><span class="career-figure">{stat.figure}</span><details class="play-how"><summary class="play-unit">{stat.unit}</summary><p>{stat.rule}</p></details></li>
           ))}
         </ul>
       </section>
@@ -87,15 +91,20 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
       {page.finishes.length > 0 && (
       <section class="block" id="finishes">
         <h2 class="painted">Finishes</h2>
-        <ol class="finishes">
-          {page.finishes.map((season, index) => (
-            <li class:list={{ won: season.finish === 1 }} style={`--i: ${index}`}>
-              <span class="finish-year">{season.year}</span>
-              <span class="finish-place">{season.finish ? ordinal(season.finish) : <><span aria-hidden="true">—</span><span class="unseen">Unknown</span></>}</span>
-              <span class="finish-of">{season.finish === 1 ? 'Champion' : `of ${season.teams}`}</span>
-            </li>
-          ))}
-        </ol>
+        {/* A line through the seasons, the oldest first: first place rides the top line and last place the bottom one. A season with no known finish breaks it. */}
+        <div class="finish-chart" style={`--n: ${page.finishes.length}`}>
+          <svg viewBox={`0 0 ${Math.max(1, page.finishes.length - 1)} 1`} preserveAspectRatio="none" aria-hidden="true">
+            {page.finishes.flatMap((season, index, all) => season.finish && all[index + 1]?.finish ? [<line x1={index} y1={depth(season)} x2={index + 1} y2={depth(all[index + 1])} />] : [])}
+          </svg>
+          <ol>
+            {page.finishes.map((season, index) => (
+              <li class:list={{ won: season.finish === 1 }} style={`--x: ${index}; --y: ${depth(season)}`}>
+                <span class="finish-place">{season.finish ? ordinal(season.finish) : <><span aria-hidden="true">—</span><span class="unseen">Unknown</span></>}<span class="unseen"> of {season.teams}</span></span>
+                <span class="finish-year">{season.year}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
       )}
 
@@ -109,12 +118,12 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
       {page.ranks.length > 0 && (
       <section class="block" id="ranks">
         <h2 class="painted">Ranks</h2>
-        {tabs.map(tab => ({ tab, ranks: page.ranks.filter(stat => tab.places.includes(stat.place)) })).filter(({ ranks }) => ranks.length).map(({ tab, ranks }) => (
+        {tabs.map(tab => ({ tab, ranks: page.ranks.filter(stat => tab.places.includes(stat.place) && stat.key !== 'seasons') })).filter(({ ranks }) => ranks.length).map(({ tab, ranks }) => (
           <>
             <h3>{tab.name}</h3>
             <ul class="ranks">
               {ranks.map(({ key, place, label, rule, row, of }) => (
-                <Rank {...row} href={statHref(Astro, tabs, { place, key })} label={label} rule={rule} of={String(of)} />
+                <Rank {...row} href={statHref(Astro, tabs, { place, key })} label={label} rule={rule} of={of} />
               ))}
             </ul>
           </>
@@ -128,7 +137,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
         <details class="play-how"><summary class="play-unit">playoffs included</summary><p>Regular-season and championship-playoff games. Consolation and placement games don’t count.</p></details>
         <div class="table-wrap">
           <table class="versus" aria-labelledby="rivalries-name">
-            <thead><tr><th scope="col">Opponent</th><th scope="col">Record</th><th scope="col">Streak</th></tr></thead>
+            <thead><tr><th scope="col">Opponent</th><th scope="col">Record</th><th scope="col">Every meeting</th></tr></thead>
             <tbody>
               {page.versus.map(row => {
                 // The open record closes its meetings again.
@@ -139,7 +148,7 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
                     <td class:list={['versus-record', { up: row.edge > 0, down: row.edge < 0 }]}>
                       <a class="versus-open" href={`${managerHref(Astro, page.manager.name, open ? {} : { vs: row.name })}#${open ? 'rivalries' : 'vs'}`} aria-label={`${row.record} against ${row.name}, ${open ? 'close the meetings' : 'every meeting'}`} aria-current={open ? 'true' : undefined}>{row.record}</a>
                     </td>
-                    <td class="versus-streak">{row.streak ?? '—'}</td>
+                    <td class="versus-marks"><span class="unseen">{row.streak ?? 'Tied last time'}</span><span class="marks" aria-hidden="true">{row.games.toReversed().map(game => <i class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]} />)}</span></td>
                   </tr>
                 );
               })}
@@ -148,13 +157,16 @@ const career: { label: string; rule: string; figure: string | number; unit: stri
         </div>
         {page.facing && (
           <div class="meetings" id="vs">
+            <div class="meetings-head">
             <h3><Manager name={page.manager.name} /> vs <Manager name={page.facing.name} /><ShareLink label={`Share ${page.manager.name} vs ${page.facing.name}`} query={{ vs: page.facing.name }} hash="#vs" /></h3>
-            <p class="meetings-record">{page.facing.record} {page.facing.ties ? 'wins–losses–ties' : 'wins–losses'}</p>
+            <p class="meetings-record">{page.facing.record}<span class="unseen"> {page.facing.ties ? 'wins–losses–ties' : 'wins–losses'}</span>{page.facing.streak && `, ${page.facing.streak.toLowerCase()}`}</p>
+            </div>
             <ol>
               {page.facing.games.map(game => (
                 <li class:list={[{ W: 'won', L: 'lost', T: 'tied' }[game.result]]}>
-                  <span class="meet-result">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span>
-                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)} <span class="meet-unit">points</span></span>
+                  <span class="meet-result"><span aria-hidden="true">{game.result}</span><span class="unseen">{{ W: 'Won', L: 'Lost', T: 'Tied' }[game.result]}</span></span>
+                  <span class="meet-score">{fixed(game.side.points, 2)}–{fixed(game.opponent.points, 2)}<span class="unseen"> points</span></span>
+                  <span class="meet-margin" style={`--share: ${(Math.abs(Number(game.side.points) - Number(game.opponent.points)) / widest).toFixed(3)}`} aria-hidden="true"></span>
                   <span class="meet-when">Week&nbsp;{game.week}, {game.year}{game.competition === 'playoffs' && <> <span class="meet-playoffs">Playoffs</span></>}</span>
                 </li>
               ))}

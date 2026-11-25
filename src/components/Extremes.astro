@@ -1,0 +1,32 @@
+---
+// The week's top and bottom scores as two runs of bars from one line of names: bottom scores run left in flag yellow, top scores run right in chalk.
+// Each bar is a share of the longest on either side, so the two sides compare. The most top scores lead, and former managers trail.
+import Manager from './Manager.astro';
+import Section from './Section.astro';
+import type { StatView } from '../history/manager-stats.ts';
+
+interface Props { top: StatView; bottom: StatView }
+const { top, bottom } = Astro.props;
+const low = new Map(bottom.rows.map(row => [row.personId, row]));
+const rows = top.rows.map(high => ({ high, low: low.get(high.personId) })).sort((a, b) => Number(b.high.current) - Number(a.high.current));
+const longest = Math.max(1, ...top.rows.map(row => row.value), ...bottom.rows.map(row => row.value));
+const share = (value = 0) => `--share: ${(value / longest).toFixed(3)}`;
+---
+<Section id="extremes" title="Hot and cold weeks">
+  <div class="extremes">
+    <div class="extremes-head">
+      <div id={bottom.key}><span class="stat-label">{bottom.label}</span><details class="play-how"><summary class="play-unit">{bottom.unit}</summary><p>{bottom.rule}</p></details></div>
+      <span></span>
+      <div id={top.key}><span class="stat-label">{top.label}</span><details class="play-how"><summary class="play-unit">{top.unit}</summary><p>{top.rule}</p></details></div>
+    </div>
+    <ol>
+      {rows.map(({ high, low }) => (
+        <li class:list={{ former: !high.current }}>
+          <span class="extreme low" style={share(low?.value)}>{low?.figure ?? '—'}<span class="unseen"> {bottom.label}</span></span>
+          <span class="extreme-who"><Manager name={high.name} /></span>
+          <span class="extreme high" style={share(high.value)}>{high.figure}<span class="unseen"> {top.label}</span></span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Section>

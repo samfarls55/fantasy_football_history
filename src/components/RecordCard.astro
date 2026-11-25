@@ -30,8 +30,6 @@ const named = (name?: string) => name !== undefined && (isViewer(Astro, name) ||
 const involves = (row: Row) => [row.manager, row.opponent, ...(row.winners ?? []).map(winner => winner.manager)].some(named);
 // Each thrown flag lands its own way: tilt, mirror and a nudge, fixed per record so reloads match.
 const hash = [...category.key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
-// A name led by a nickname ("Lucky charms: teams win most…") sets the nickname as the title and what it counts under it.
-const [nickname, counts] = category.name.split(': ');
 const landing =`--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
 ---
 <li id={tab ? undefined : category.key} class:list={['play', { shame: category.shame, headline, wide, across }]} style={`--i: ${index}; ${landing}`}>
@@ -43,7 +41,7 @@ const landing =`--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1};
     </svg>
   )}
   <Title class="play-title">{tab ? <a class="play-lead" href={`${tabHref(Astro, tab.key)}#${category.key}`}><span class="painted">{tab.name}</span> <span class="unseen">{category.shame && 'Shame: '}</span><span class="play-name">{category.name}</span></a>
-    : <><span class="unseen">{category.shame ? 'Shame: ' : 'Fame: '}</span>{nickname}<ShareLink label={`Share ${category.name}`} hash={`#${category.key}`} />{counts && <><span class="unseen">: </span><span class="play-counts">{counts}</span></>}</>}</Title>
+    : <><span class="unseen">{category.shame ? 'Shame: ' : 'Fame: '}</span>{category.name}<ShareLink label={`Share ${category.name}`} hash={`#${category.key}`} /></>}</Title>
   <div class="play-figure"><span class="play-value">{value(leaders[0])}</span><details class="play-how"><summary class="play-unit">{unit(leaders[0])}</summary><p>{category.rule}</p></details></div>
   <div class="play-who">
     {first.map(row => (

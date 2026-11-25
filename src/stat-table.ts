@@ -16,8 +16,8 @@ export interface StatCell {
   figure: string;
   /** The number the figure sorts by. */
   sort: number;
-  /** A figure's own unit, where the column is one of names: "44 starts". */
-  unit?: string;
+  /** Several names share the figure: "24 each". */
+  each?: boolean;
   /** Whom the figure is about, above it. */
   names?: string[];
   /** The chances behind the figure, below it. */

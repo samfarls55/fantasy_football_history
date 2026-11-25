@@ -12,6 +12,19 @@
   --chalk-quiet: rgba(248, 248, 243, 0.62);
   /* The hairline under a definition or a secondary link. A manager's name keeps the heavier chalk line, so names stay the links that stand out. */
   --chalk-line: rgba(248, 248, 243, 0.42);
+  /* One spacing scale. Every gap on the field is one of these. */
+  --s-1: 4px;   /* a painted figure to the line under it */
+  --s-2: 8px;   /* the parts of one record */
+  --s-3: 12px;  /* a caption to what it labels; a list row's padding */
+  --s-4: 20px;  /* a heading to its content */
+  --s-5: 24px;  /* either side of a rule; the gutters of lists and tables */
+  --s-6: 48px;  /* the goal line to the first block; a run of cards to its neighbours */
+  --s-7: 72px;  /* between sections */
+  --gutter: 56px; /* between the two halves of a row */
+  /* A thumb needs a 44px target, which leaves a band of air above and below a line of small text. A pointer needs neither,
+     so both are zero there and every gap that would have counted the air reads the same on either. */
+  --tap: 44px;
+  --tap-pad: 12px;
   /* Shame only: flags and shame figures. 4:1 on the lightest turf, so large text alone. */
   --flag: #ffd21f;
   --flag-deep: #d9a900;
@@ -24,6 +37,9 @@
   --link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M8.5 11.5l3-3M7 9.5l-2 2a2.8 2.8 0 004 4l2-2M13 10.5l2-2a2.8 2.8 0 00-4-4l-2 2'/%3E%3C/svg%3E");
   color-scheme: dark;
 }
+
+@media (pointer: fine) { :root { --tap: 0px; --tap-pad: 0px; } }
+@media (max-width: 560px) { :root { --s-6: 40px; --s-7: 56px; --gutter: 24px; } }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-bottom: 96px; }
@@ -48,6 +64,8 @@ body::before {
 body > * { position: relative; z-index: 1; }
 a { color: inherit; }
 h1, h2, h3, h4, p { margin: 0; }
+/* Lists and the belt's fieldset carry no space of their own: the field's one rule for the space above a block gives it. */
+:where(ul, ol, fieldset) { margin: 0; padding: 0; }
 h1, h2, h3, h4 { text-wrap: balance; }
 p { text-wrap: pretty; }
 /* Focus is white paint, like the tab bar's current mark: 5.4:1 on the lightest turf, 11:1 on the end zone. Yellow is kept for shame. */
@@ -96,17 +114,17 @@ a.retry { margin-top: 28px; font-size: 24px; }
 
 .league-name, .close-name { text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
 .league-name {
-  margin-top: 28px; font-size: clamp(56px, 10.5vw, 136px); overflow-wrap: anywhere;
+  margin-top: var(--s-3); font-size: clamp(56px, 10.5vw, 136px); overflow-wrap: anywhere;
   animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both;
 }
 /* A tab change is one tap among many, so its name is simply there: no spray, and smaller than the league's. */
-.tab-name { margin-top: 12px; font-size: clamp(52px, 9vw, 104px); }
+.tab-name { margin-top: var(--s-3); font-size: clamp(52px, 9vw, 104px); }
 :is(.league-name, .tab-name, .manager-name) .share { font-size: 28px; }
-.halves { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 12px 0 0 -4px; }
-.league-years { margin-top: 8px; font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
+.halves { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); margin: var(--s-3) 0 0 -4px; }
+.league-years { margin-top: var(--s-2); font-family: var(--stencil); font-weight: 700; font-size: 28px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--chalk); }
 
 /* Field: sidelines with hash marks, faint painted yard numbers in the margin. */
-.field { flex: 1 0 auto; width: 100%; padding-top: 8px; padding-bottom: 120px; position: relative; z-index: 2; }
+.field { flex: 1 0 auto; width: 100%; padding-bottom: 120px; position: relative; z-index: 2; }
 .field::before, .field::after {
   content: ''; position: absolute; top: 0; bottom: 0; width: 22px; pointer-events: none;
   background:
@@ -116,10 +134,19 @@ a.retry { margin-top: 28px; font-size: 24px; }
 }
 .field::before { left: -40px; background-position: left top, left top; }
 .field::after { right: -40px; background-position: right top, right top; }
-.block { margin-top: 72px; }
-.field > .block:first-of-type { margin-top: 44px; }
-.field > .plays { margin-top: 56px; }
-.field > .plays:first-child { margin-top: 20px; }
+/* One rule spaces the field. Blocks stand a section apart, and the first sits a short drive off the goal line. A run of record cards pads itself
+   by one rule gap, top and bottom, so it stands that much closer to its neighbours and its first title lands where a heading would. */
+.field > * + *, .home-top > * + * { margin-top: var(--s-7); }
+.field > :first-child { margin-top: var(--s-6); }
+.field > * + .plays, .field > .plays + *, .home-side > * + * { margin-top: var(--s-6); }
+.field > .plays:first-child { margin-top: var(--s-5); }
+/* Inside a section: a heading stands off its content; a caption or a picker hangs under its heading and close over what it labels;
+   whatever else follows sits one rule gap down, and a second titled group half a section down. */
+.block > * + * { margin-top: var(--s-5); }
+.block > :is(h2, h3) + * { margin-top: var(--s-4); }
+.block > :is(h2, h3) + :is(.play-how, .seasons) { margin-top: calc(var(--s-1) - var(--tap-pad)); }
+.block > :is(.play-how, .seasons) + * { margin-top: calc(var(--s-3) - var(--tap-pad)); }
+.block > * + .block { margin-top: var(--s-6); }
 .field > .plays:first-child > .play:nth-child(-n + 2) { border-top-color: transparent; }
 h2.painted { font-size: clamp(40px, 6vw, 64px); }
 h3.painted { font-size: clamp(30px, 4.5vw, 44px); }
@@ -132,12 +159,10 @@ h3.painted { font-size: clamp(30px, 4.5vw, 44px); }
 }
 /* Home opens on the champions. Wide screens stand who holds the belt and the headline record beside them, so the first screen answers both.
    Two headings share that row, so neither carries a yard number and the count starts with the next one; the side column's is sized to its column. */
-.home-top > .block { margin-top: 44px; }
-.home-side .plays { margin-top: 56px; }
 @media (min-width: 900px) {
-  .home-top:has(.home-side > *) { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); column-gap: 56px; align-items: start; }
-  .home-side > .block { margin-top: 60px; }
-  .home-side .plays { margin-top: 44px; grid-template-columns: 1fr; }
+  .home-top:has(.home-side > *) { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); column-gap: var(--gutter); align-items: start; }
+  .home-top:has(.home-side > *) > * { margin-top: 0; }
+  .home-side .plays { grid-template-columns: 1fr; }
   .home-top:has(.home-side > *) h2.painted { counter-increment: none; }
   .home-top:has(.home-side > *) h2.painted::after { content: none; }
   .home-side h2.painted { font-size: 44px; }
@@ -177,7 +202,7 @@ h3.painted { font-size: clamp(30px, 4.5vw, 44px); }
 .copied:empty { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
 /* A mistyped name's way out, a failed page's retry, the halves of Excuses, the seasons of a grid and the way to every reign: painted labels on a chalk underline. */
 :is(.miss > a, .retry, .halves a, .seasons a, .belt-all) {
-  display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 4px;
+  display: inline-flex; align-items: center; justify-content: center; min-height: max(var(--tap), 28px); min-width: var(--tap); padding: 0 4px;
   font-family: var(--stencil); font-weight: 700; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1;
   color: var(--chalk); text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 5px;
 }
@@ -216,10 +241,10 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .miss strong { font-weight: 800; overflow-wrap: anywhere; }
 
 /* Champions: one chalked yard line per season, the oldest first, down to the ball in play. */
-.drive { list-style: none; padding: 0; margin: 20px 0 0; }
+.drive { list-style: none; }
 .yard {
-  position: relative; display: grid; grid-template-columns: 7.5rem 1fr; align-items: center; gap: 20px;
-  min-height: 56px; padding: 6px 0;
+  position: relative; display: grid; grid-template-columns: 7.5rem 1fr; align-items: center; gap: var(--s-4);
+  min-height: 60px;
 }
 .yard::before {
   content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--paint);
@@ -250,22 +275,21 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 }
 
 /* Records: opposites face each other across a chalk line; fame in white paint, shame under a thrown flag. */
-.plays { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
+.plays { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gutter); }
 /* Title, figure and holders are three rows a card shares with the one across the line, so a pair's numbers and names sit level however long a title runs. */
-.play { position: relative; min-width: 0; padding: 24px 0 26px; border-top: 3px dashed var(--chalk-faint); display: grid; grid-row: span 3; grid-template-rows: subgrid; }
+.play { position: relative; min-width: 0; padding: var(--s-5) 0; border-top: 3px dashed var(--chalk-faint); display: grid; grid-row: span 3; grid-template-rows: subgrid; }
 .play.wide { grid-column: 1 / -1; }
 /* A record alone on its row keeps a card's shape. One whose holders run long (several tied, or a trade's two sides) uses the row:
    the figure on the left, the holders across the line where a facing record would stand, level with the figure. */
 @media (min-width: 900px) {
-  .play.wide:has(.play-holder + .play-holder, .play-context + .play-context) { grid-template-columns: 1fr 1fr; column-gap: 56px; }
+  .play.wide:has(.play-holder + .play-holder, .play-context + .play-context) { grid-template-columns: 1fr 1fr; column-gap: var(--gutter); }
+  .play.wide.shame:has(.play-holder + .play-holder, .play-context + .play-context) > .play-who { padding-right: 72px; }
   .play.wide:has(.play-holder + .play-holder, .play-context + .play-context) > :is(.play-title, .play-figure) { grid-column: 1; }
   .play.wide:has(.play-holder + .play-holder, .play-context + .play-context) > .play-who { grid-column: 2; grid-row: 2 / span 2; align-self: start; }
 }
 .play.across::before { content: ''; position: absolute; left: -29px; top: 24px; bottom: 24px; border-left: 3px dashed var(--chalk-faint); }
-.play-title { font-size: 20px; font-weight: 800; color: var(--chalk); }
-/* A nicknamed record says what it counts on a line of its own, lighter than the nickname. */
-.play-counts { display: block; margin-top: 2px; font-size: 17px; font-weight: 400; line-height: 1.3; }
-.play-counts::first-letter { text-transform: uppercase; }
+/* A title sits on its figure, so when the card across the line has a longer one the slack falls above, where it reads as the card's own padding. */
+.play-title { align-self: end; font-size: 20px; font-weight: 800; color: var(--chalk); }
 /* A linked record lands with its yard line chalked fresh and thick, then settling back. It's a line, never paint behind a name,
    so a landing can't pass for the visitor's mark. Without motion the fresh line stays. */
 .play:target::after {
@@ -286,38 +310,39 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
 .play.shame .play-title { padding-right: 64px; }
 /* A lead names its tab over the stat; both are the one link there. */
-.play-lead { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; text-decoration: none; }
+.play-lead { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); text-decoration: none; }
 .play-lead .painted { font-size: clamp(30px, 4.5vw, 44px); }
 .play-name { text-decoration: underline 1px var(--chalk-line); text-underline-offset: 5px; }
 .play-lead:hover .play-name { text-decoration-color: currentColor; }
 /* The unit sits under the figure on every card, so no card changes shape with the length of its unit. */
-.play-figure { display: flex; flex-direction: column; align-items: flex-start; margin-top: 6px; }
-.play-figure .play-how { margin: -6px 0 0; }
+.play-figure { display: flex; flex-direction: column; align-items: flex-start; margin-top: var(--s-2); }
+.play-figure .play-how { margin-top: calc(var(--s-1) - var(--tap-pad)); }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }
 .shame .play-value { color: var(--flag); }
 .play-unit { font-size: 17px; font-weight: 600; color: var(--chalk); }
-.play-holder { display: flex; flex-direction: column; margin-top: 8px; }
+.play-holder { display: flex; flex-direction: column; margin-top: var(--s-2); }
+.play-who > .play-holder:first-child { margin-top: calc(var(--s-2) - var(--tap-pad)); }
 /* "X beat Y" may wrap; its lines then sit a full 44px apart, so each name keeps its own target. */
 .play-holder strong { align-self: flex-start; font-size: 24px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
-.play-holder strong:has(a + a) { display: flex; flex-wrap: wrap; gap: 20px 0.25em; }
+.play-holder strong:has(a + a) { display: flex; flex-wrap: wrap; gap: calc(var(--tap-pad) * 1.67) 0.25em; }
 .play-context { color: var(--chalk); }
 /* A name in the line under a holder's, so the two targets grow away from each other. */
 .play-context a[data-person]::before, .next-when a[data-person]::before { inset: 0 min(0px, (100% - 44px) / 2) min(0px, 100% - 44px); }
 .play-holder:has(.play-context > a) strong a::before, li:has(.next-when > a) .next-who a::before { inset: min(0px, 100% - 44px) min(0px, (100% - 44px) / 2) 0; }
-.play-context + .play-context { margin-top: 8px; }
+.play-context + .play-context { margin-top: var(--s-2); }
 /* The headline record: a solid painted line and the biggest number on the field. */
-.play.headline { padding: 28px 0 40px; border-top: 6px solid var(--flag); }
+.play.headline { padding: var(--s-5) 0; border-top: 6px solid var(--flag); }
 .play.headline .play-title { font-size: 24px; color: var(--paint); padding-right: 80px; }
 .play.headline .play-value { font-size: clamp(88px, 12vw, 112px); line-height: 0.85; }
 .streak-big { font-size: clamp(80px, 10vw, 128px); line-height: 0.85; }
 .play.headline .play-unit { font-size: 20px; line-height: 1.2; }
-.play.headline .play-figure .play-how { margin-top: 0; }
+.play.headline .play-figure .play-how { margin-top: calc(var(--s-2) - var(--tap-pad)); }
 .play.headline .play-holder strong { font-size: 28px; }
 /* The holder's record and scoring are what the league remembers, so they read at the unit's size. */
-.play.headline .play-context { margin-top: 4px; font-size: 20px; color: var(--paint); }
+.play.headline .play-context { font-size: 20px; color: var(--paint); }
 .play.headline .flag { width: 66px; height: 54px; top: 18px; }
 /* Runners-up wait behind a chalked count with a caret; opening it turns the caret down and paints the count. */
-.play-next { margin-top: 6px; }
+.play-next { margin-top: var(--s-2); }
 .play-next summary, .play-how summary { position: relative; cursor: pointer; list-style: none; }
 .play-next summary::-webkit-details-marker, .play-how summary::-webkit-details-marker { display: none; }
 /* ::after stretches each small disclosure to a 44px target. */
@@ -335,16 +360,14 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .play-next[open] summary::before { transform: rotate(90deg); }
 /* A derived record's unit is its own disclosure: a dotted chalk underline, opening onto how it's counted. */
 /* The summary is its own 44px box, so opening it never puts the explanation over its target. */
-.play-how summary { display: flex; align-items: center; min-height: 44px; min-width: 44px; text-decoration: underline dotted var(--chalk-line) 1px; text-underline-offset: 4px; }
+.play-how summary { display: flex; align-items: center; min-height: var(--tap); min-width: var(--tap); text-decoration: underline dotted var(--chalk-line) 1px; text-underline-offset: 4px; }
 .play-how summary:hover, .play-how[open] summary { color: var(--paint); }
-/* Clear of the holder's name below, whose target reaches up past its line. */
-.play-how { margin-bottom: 6px; }
 .play-how p { margin-top: 0; max-width: 32ch; font-size: 15px; line-height: 1.35; color: var(--chalk); }
 .play-how[open] p { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 /* Each runner-up reads like the leader, small: its rank, then value, who and when under each other.
    A row naming two managers sets its lines a full 44px apart, so a wrap never puts one name's target over the other's. */
-.play-next ol { display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 12px; margin: 8px 0 0; padding: 0; list-style: none; color: var(--chalk); overflow-wrap: anywhere; }
-.play-next li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 4px 0; }
+.play-next ol { display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: var(--s-3); margin: var(--s-2) 0 0; padding: 0; list-style: none; color: var(--chalk); overflow-wrap: anywhere; }
+.play-next li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: var(--s-1) 0; }
 .play-next[open] li { animation: rise 320ms cubic-bezier(.2, .7, .2, 1) both; }
 .play-next[open] li + li { animation-delay: 60ms; }
 .next-rank { font-weight: 800; color: var(--paint); }
@@ -352,11 +375,11 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 /* A runner-up's unit is the leader's, shown once above; here it is only read aloud. */
 .next-unit { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .next-who { grid-column: 3; }
-.next-who:has(a + a) { line-height: 44px; }
-.winners:has(a + a) { line-height: 44px; }
+.next-who:has(a + a) { line-height: max(var(--tap), 1.45em); }
+.winners:has(a + a) { line-height: max(var(--tap), 1.45em); }
 /* Dates hold together with no-break spaces, so a season's longer line can still wrap. */
 .next-when { grid-column: 3; font-size: 15px; line-height: 1.3; color: var(--chalk); }
-.next-who:has(a + a) + .next-when { margin-top: -8px; }
+.next-who:has(a + a) + .next-when { margin-top: calc(var(--tap-pad) * -0.67); }
 .flag {
   position: absolute; right: 0; top: 18px; width: 56px; height: 46px; overflow: visible; pointer-events: none;
   transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--tilt, -8deg)) scaleX(var(--flip, 1)); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, 0.35));
@@ -373,16 +396,16 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
    Labels are sentences as often as words, so every table sets them in the sans like the figures under them.
    Former managers trail under a dashed line. The wrap holds its unseen words, so they scroll with it and never widen the page. */
 /* Focus stays clear of the sideline on one side and the fade on the other: nothing a reader reaches by keyboard lands under either. */
-.table-wrap { position: relative; overflow-x: auto; margin: 14px 0 0 -0.3em; padding: 6px 0 0 0.3em; scroll-padding-inline: 11.5rem 60px; }
+.table-wrap { position: relative; overflow-x: auto; margin-inline: -0.3em -8px; padding: 6px 8px 0 0.3em; scroll-padding-inline: 11.5rem 60px; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
-th, td { padding: 10px 7px; text-align: right; }
+th, td { padding: var(--s-3) 7px; text-align: right; }
 th:last-child, td:last-child { padding-right: 0; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
 thead th { font: 800 15px/1.2 var(--text); color: var(--paint); border-bottom: 6px solid var(--paint); }
 /* Each column's unit sits under its label and opens its rule, which takes a fixed width so an open one never stretches the table far.
    With JS the label is a full-width button; the sorted one is painted and carries a caret pointing the way it runs. */
 /* A stat table's columns keep one gap between them, and a column of names stands a little further off the figures before it. */
-.stats :is(th, td) { padding-inline: 24px 0; }
+.stats :is(th, td) { padding-inline: var(--s-5) 0; }
 .stats :is(th, td).named { padding-left: 40px; }
 /* A table of many columns wraps its labels sooner, so the columns stay narrow enough to keep a clear gap between them. */
 .stats.many :is(th, td) { padding-left: 20px; }
@@ -391,23 +414,17 @@ thead th { font: 800 15px/1.2 var(--text); color: var(--paint); border-bottom: 6
 .stats :is(th, td):first-child { padding-left: 0; }
 /* Wide screens share the room out: every column of figures the same width, a column of names twice that. A phone's table keeps to its content and scrolls. */
 @media (min-width: 900px) { .stats thead th { width: var(--share, auto); } }
-/* A nickname or a short label is heavy; what it counts sits lighter below. */
-.stats thead th { vertical-align: top; padding-block: 0 8px; }
-/* Labels of up to three lines end on one line, so the units under them do too. */
-.stats thead :is(button, th > .stat-label) { display: inline-flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; min-height: 54px; }
-/* A label that says what's counted can run long, so it wraps instead of widening its column. */
-.stats thead .stat-label.long { min-width: 7rem; }
-.stats thead .stat-label { max-width: 10rem; white-space: normal; text-align: right; text-wrap: balance; }
-.stat-counts { display: block; font-weight: 400; font-size: 14px; }
-.stat-counts::first-letter { text-transform: uppercase; }
+/* A column's label stands on its unit and the unit on the goal line, so every label and every unit of a table ends on one line however long a label runs. */
+.stats thead th { vertical-align: bottom; padding-block: 0 var(--s-2); }
+.stats thead .stat-label { display: inline-block; max-width: 10rem; white-space: normal; text-align: right; text-wrap: balance; }
 .stats thead button { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
-.stats thead button:hover .stat-label > :first-child { text-decoration: underline 1px; text-underline-offset: 4px; }
+.stats thead button:hover .stat-label { text-decoration: underline 1px; text-underline-offset: 4px; }
 /* The sorted column carries a caret pointing the way it runs. */
-.stats thead th[aria-sort] .stat-label > :first-child::after { content: '\00a0\25BE'; }
-.stats thead th[aria-sort='ascending'] .stat-label > :first-child::after { content: '\00a0\25B4'; }
+.stats thead th[aria-sort] .stat-label::after { content: '\00a0\25BE'; }
+.stats thead th[aria-sort='ascending'] .stat-label::after { content: '\00a0\25B4'; }
 .stats thead .play-how { margin: 0; font-weight: 400; }
-.stats thead .play-unit { max-width: 9rem; margin-left: auto; align-items: flex-start; justify-content: flex-end; padding-top: 5px; white-space: normal; font-size: 14px; line-height: 1.2; }
-.stats thead .named :is(button, .stat-label) { align-items: flex-start; text-align: left; }
+.stats thead .play-unit { max-width: 11rem; margin-left: auto; align-items: flex-start; justify-content: flex-end; padding-top: var(--s-1); white-space: normal; font-size: 14px; line-height: 1.2; }
+.stats thead .named .stat-label { text-align: left; }
 .stats thead .named .play-unit { margin-left: 0; justify-content: flex-start; }
 .stats thead .named .play-how p { margin-left: 0; }
 .stats thead .play-how p { width: min(11rem, 40vw); margin: 0 0 10px auto; white-space: normal; font-weight: 400; }
@@ -415,6 +432,8 @@ thead th { font: 800 15px/1.2 var(--text); color: var(--paint); border-bottom: 6
 .stats tbody :is(th, td) { vertical-align: baseline; line-height: 1.25; }
 /* A figure is what a row is read for, so it is heavier than the sample under it. */
 .stats td:not(.named) .stat-figure { font-size: 18px; font-weight: 600; }
+/* The current manager who leads a column stands on a patch of darker ground, as a better record does in the grids. */
+.stats td.top .stat-figure { padding: 2px 0; background: rgba(0, 20, 5, 0.38); box-shadow: -8px 0 0 rgba(0, 20, 5, 0.38), 8px 0 0 rgba(0, 20, 5, 0.38); font-weight: 800; }
 .stat-sample { display: block; font-size: 15px; line-height: 1.3; color: var(--chalk); }
 .stats .stat-sample { font-size: 14px; }
 /* Names read from the left, each one whole; several share a line while the column has room. The figure under them carries its chances beside it. */
@@ -475,18 +494,19 @@ tr.former th { font-weight: 600; }
 .grid-top a[data-person]:not(:hover, :focus-visible) { text-decoration-color: transparent; }
 @media (hover: hover) { .grid td a:not(:hover, :focus-visible) { text-decoration-color: transparent; } }
 /* A season to choose from; the one shown is painted and underscored. */
-.seasons { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 0 -4px; }
-.seasons a[aria-current] { color: var(--paint); text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
+.seasons { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); margin-left: -4px; }
+.seasons a[aria-current] { color: var(--paint); text-decoration: underline 4px currentColor; }
 
 /* Rivalries: the longest gets the headline's painted line and size; the rest line up as a set. */
-.streak-top { margin-top: 20px; padding: 28px 0 36px; border-top: 6px solid var(--paint); }
-.streak-run { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 20px; }
+.streak-top { padding: var(--s-5) 0; border-top: 6px solid var(--paint); }
+.streak-run { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s-4); }
 .streak-big { font-family: var(--stencil); font-weight: 900; }
 .streak-run .painted { font-size: clamp(40px, 6vw, 72px); color: var(--chalk); }
-.streak-who { margin-top: 20px; font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: max(44px, 1.15em); }
-.streak-record { margin-top: 8px; font-size: 20px; color: var(--chalk); }
-.streaks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
-.streaks li { display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: center; padding: 14px 0; border-top: 3px dashed var(--chalk-faint); }
+.streak-who { margin-top: var(--s-3); font-size: clamp(24px, 3vw, 36px); font-weight: 600; line-height: max(var(--tap), 1.15em); }
+.streak-record { margin-top: var(--s-1); font-size: 20px; color: var(--chalk); }
+/* The set starts on the longest streak's own bottom line, so the two read as one list. */
+.streaks { list-style: none; margin: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gutter); }
+.streaks li { display: grid; grid-template-columns: 3rem 1fr; gap: var(--s-3); align-items: center; padding: var(--s-3) 0; border-top: 3px dashed var(--chalk-faint); }
 .streak-count { font-family: var(--stencil); font-weight: 900; font-size: 52px; line-height: 0.9; }
 /* The longest streak says "straight wins" in paint; under it each count is read aloud with the same words. */
 .streak-count span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -498,86 +518,99 @@ tr.former th { font-weight: 600; }
 /* A manager's record against each opponent: a winning record in paint, the rest in chalk. Losing to a rival is no shame. */
 /* Wide screens open a head-to-head beside the records, on the same two columns as the record cards. */
 @media (min-width: 900px) {
-  .versus-block { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; align-items: start; }
+  .versus-block { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gutter); align-items: start; }
   .versus-block > :is(h2, .play-how) { grid-column: 1 / -1; }
-  .versus-block .meetings { margin-top: 20px; padding-top: 0; border-top: 0; }
+  /* The meetings stand level with the records: their heading where the column labels are, their first line on the goal line. */
+  .versus-block .meetings { margin-top: calc(var(--s-3) - var(--tap-pad)); padding-top: 6px; border-top: 0; }
 }
 /* The opponent whose meetings are open stands on darker ground. */
+/* The dark ground runs a little past the row on either side, so no name or mark moves to make room for it. */
+.versus-block .table-wrap { margin-inline: -12px; padding-inline: 12px; }
 .versus tr:has(.versus-open[aria-current]) { background: rgba(0, 20, 5, 0.34); }
-.versus tr:has(.versus-open[aria-current]) > :first-child { padding-left: 12px; }
-.versus tr:has(.versus-open[aria-current]) > :last-child { padding-right: 12px; }
+.versus tr:has(.versus-open[aria-current]) > :first-child { box-shadow: -12px 0 0 rgba(0, 20, 5, 0.34); }
+.versus tr:has(.versus-open[aria-current]) > :last-child { box-shadow: 12px 0 0 rgba(0, 20, 5, 0.34); }
 .versus-record { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; color: var(--chalk); }
 .versus-record.up { color: var(--paint); }
-.versus-streak { font-weight: 800; }
+/* Every meeting as a mark, the oldest first: a win is a solid block of chalk, a loss an empty one, a tie half. The run at the right end is the streak. */
+.versus-marks .marks { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 3px; max-width: 13rem; vertical-align: middle; }
+.versus-marks i { width: 10px; height: 18px; border: 2px solid var(--chalk); border-radius: 1px; }
+.versus-marks i.won { background: var(--chalk); }
+.versus-marks i.tied { background: linear-gradient(var(--chalk), var(--chalk)) no-repeat 0 100% / 100% 50%; }
 /* Each head-to-head record is the link to every meeting with that opponent; the open one is underscored in its own color. */
 .versus-open {
-  position: relative; display: inline-flex; align-items: center; justify-content: flex-end; min-height: 44px; min-width: 44px;
+  position: relative; display: inline-flex; align-items: center; justify-content: flex-end; min-height: max(var(--tap), 32px); min-width: var(--tap);
   color: inherit; text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 5px;
 }
 .versus-open:is(:hover, :focus-visible) { text-decoration-color: currentColor; }
 .versus-open[aria-current] { text-decoration: none; box-shadow: inset 0 -4px 0 currentColor; }
 /* Every meeting, newest first: the manager's result, a win in paint, the score from their side, then when. */
-.meetings { margin-top: 28px; padding-top: 20px; border-top: 3px dashed var(--chalk-faint); scroll-margin-top: 24px; }
-.meetings h3 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; line-height: max(44px, 1.15em); }
-.meetings-record { margin-top: 4px; font-size: 20px; color: var(--chalk); }
-.meetings ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 20px; }
-.meetings li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; padding: 10px 0; border-top: 2px solid var(--chalk-faint); }
+.meetings { margin-top: var(--s-6); padding-top: var(--s-5); border-top: 3px dashed var(--chalk-faint); scroll-margin-top: 24px; }
+/* Who met whom and how it stands, on one line the height of the records' column labels. */
+.meetings-head { display: flex; flex-wrap: wrap; align-items: baseline; align-content: flex-end; gap: 0 var(--s-3); min-height: 42px; padding-bottom: var(--s-3); }
+.meetings h3 { font-size: 24px; font-weight: 600; line-height: max(var(--tap), 1.15em); }
+.meetings-record { font-size: 20px; color: var(--chalk); }
+.meetings ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto minmax(2rem, 1fr) auto; column-gap: var(--s-5); border-top: 6px solid var(--paint); }
+.meetings li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; min-height: 58px; border-bottom: 2px solid var(--chalk-faint); }
 .meet-result { font-family: var(--stencil); font-weight: 900; font-size: 24px; text-transform: uppercase; letter-spacing: 0.04em; }
 /* A loss is quiet chalk, so the wins count at a glance. */
 .meet-result { color: var(--chalk-quiet); }
 .meetings .won .meet-result { color: var(--paint); }
 .meet-score { font-weight: 800; font-size: 20px; text-align: right; white-space: nowrap; }
-.meet-unit { font-weight: 400; font-size: 17px; }
+/* The margin as a bar, the widest of these meetings filling the room: a win is solid chalk, a loss an outline. */
+.meet-margin { align-self: center; height: 14px; width: max(4px, calc(var(--share) * 100%)); border: 2px solid var(--chalk); border-radius: 1px; }
+.won .meet-margin { background: var(--chalk); }
 .meet-when { font-size: 17px; color: var(--chalk); }
 .meet-playoffs { margin-left: 4px; white-space: nowrap; font-family: var(--stencil); font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paint); }
 /* Former opponents' records sit in quiet chalk. */
 .versus .former .versus-record { color: var(--chalk-quiet); }
-.versus .former .versus-streak { font-weight: 600; }
 
 /* A manager's place in every table, under the tab each is on. */
-#ranks h3 { margin-top: 28px; font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
-.ranks { list-style: none; margin: 12px 0 0; padding: 0; border-top: 6px solid var(--paint); }
-/* A rank is one line: the stat, the figure with its unit, the sample in a column of its own so "0 won" never runs into "7 seasons", then the place. */
-.ranks li { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); gap: 0 28px; align-items: baseline; border-bottom: 2px solid var(--chalk-faint); }
-.ranks a { padding-block: 11px; font-size: 18px; font-weight: 600; line-height: 1.3; text-wrap: balance; text-decoration: underline 1px var(--chalk-line); text-underline-offset: 4px; }
+#ranks .ranks + h3 { margin-top: var(--s-6); }
+#ranks h3 + .ranks { margin-top: var(--s-3); }
+#ranks h3 { font-family: var(--stencil); font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; letter-spacing: 0.04em; }
+.ranks { list-style: none; border-top: 6px solid var(--paint); }
+/* A rank is one line: the stat, the figure with its unit, then where that puts them: a ball on a line of hash marks, one per manager, first place at the left. */
+.ranks li { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr) 4.5rem; gap: 0 var(--s-5); align-items: baseline; border-bottom: 2px solid var(--chalk-faint); }
+.rank-line {
+  position: relative; align-self: center; height: 14px;
+  background: repeating-linear-gradient(90deg, var(--chalk-quiet) 0 2px, transparent 2px calc((100% - 2px) / (var(--of) - 1))) 0 0 / 100% 100%;
+}
+.rank-line::after {
+  content: ''; position: absolute; top: 50%; left: calc(var(--at) * (100% - 2px) + 1px); width: 20px; height: 12px; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 30%, #a65530, var(--leather) 60%, #4f220f); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+}
+.ranks a { padding-block: var(--s-3); font-size: 18px; font-weight: 600; line-height: 1.3; text-wrap: balance; text-decoration: underline 1px var(--chalk-line); text-underline-offset: 4px; }
 .ranks a:is(:hover, :focus-visible) { text-decoration-color: var(--paint); }
-.rank-value { display: grid; grid-template-columns: auto minmax(0, 1fr) 10.5rem; align-items: baseline; column-gap: 8px; }
-.rank-value .stat-text { grid-column: 1 / -1; padding-top: 8px; }
+.rank-value { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s-2); }
+.rank-value .stat-text { flex-basis: 100%; padding-top: var(--s-3); }
 .rank-value .stat-figure { font-weight: 800; font-size: 20px; }
 .rank-value .play-how { margin: 0; }
-/* A unit with no sample after it, or an opened rule, takes the sample's room too. */
-.rank-value .play-how:is(:last-child, [open]) { grid-column: 2 / -1; }
-.rank-value .play-how[open] { padding-bottom: 10px; }
+.rank-value .play-how[open] { flex-basis: 100%; padding-bottom: 10px; }
 .rank-value .play-unit { font-size: 15px; }
-.rank-value .stat-sample { grid-column: 3; }
-/* A unit keeps a thumb's size only where a thumb is what taps it: under a pointer a short one hugs its figure, and a column's sits close over the goal line. */
-@media (pointer: fine) {
-  .rank-value .play-unit { min-width: 0; }
-  .stats thead .play-unit { min-height: 0; padding-bottom: 6px; }
-}
-.rank-place { text-align: right; color: var(--chalk); }
-.rank-place strong { font-weight: 800; }
+/* The place is an ordinal, T- for a tie: the line beside it says out of how many. */
+.rank-place { text-align: right; font-size: 18px; font-weight: 800; color: var(--chalk); }
+.rank-place abbr { text-decoration: none; }
 .rank-place.first { color: var(--paint); }
 
 /* Every manager beside their badge and its stat; a phone stacks the two. */
-.managers { list-style: none; margin: 20px 0 0; padding: 0; border-top: 6px solid var(--paint); }
-.managers li { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr); gap: 0 28px; align-items: baseline; min-height: 56px; padding: 12px 0; border-bottom: 2px solid var(--chalk-faint); }
+.managers { list-style: none; border-top: 6px solid var(--paint); }
+.managers li { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 3fr) minmax(0, 4fr) minmax(0, 3fr); gap: 0 var(--s-5); align-items: baseline; min-height: 56px; padding: var(--s-3) 0; border-bottom: 2px solid var(--chalk-faint); }
 .managers [data-person] { justify-self: start; margin-left: -0.12em; font-size: 22px; line-height: 1.2; }
 .badge { font-family: var(--stencil); font-weight: 900; font-size: 24px; line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase; color: var(--chalk); }
 /* Inline, so a stat that wraps still sits on its row's first baseline. */
 .badge-stat { position: relative; line-height: 1.3; text-decoration: underline 1px var(--chalk-line); text-underline-offset: 4px; }
 .badge-stat:is(:hover, :focus-visible) { text-decoration-color: var(--paint); }
 .badge-stat::before { content: ''; position: absolute; inset: min(0px, (100% - 44px) / 2) 0; }
-.managers .stat-sample { margin-top: 3px; }
 .badge-value { text-align: right; color: var(--chalk); }
+.badge-value .stat-text { margin-right: var(--s-2); }
 .badge-value .stat-figure { font-weight: 800; font-size: 20px; color: var(--paint); }
 /* On their own page the badge sits under the name, in paint beside the stat that earned it. */
-.manager-badge { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; margin-top: 16px; font-size: 18px; color: var(--chalk); }
+.manager-badge { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-1) var(--s-3); margin-top: var(--s-3); font-size: 18px; color: var(--chalk); }
 .manager-badge .badge { font-size: 32px; color: var(--paint); }
 
 /* The belt: a row of weeks per season, each reign a block from the week it began. The chosen one is hollow, and its holder and start stand painted on a strip of end zone
    over the rows, which stays in view while they scroll under it. A block with room carries its holder's name; the looked-up manager's are white. */
-.belt { position: relative; display: grid; grid-template-columns: 5rem repeat(var(--weeks), minmax(0, 1fr)); grid-template-rows: 92px; row-gap: 8px; align-items: center; min-width: 0; margin: 8px 0 0; padding: 0; border: 0; border-top: 6px solid var(--paint); }
+.belt { position: relative; display: grid; grid-template-columns: 5rem repeat(var(--weeks), minmax(0, 1fr)); grid-template-rows: 92px; row-gap: var(--s-2); align-items: center; min-width: 0; border: 0; border-top: 6px solid var(--paint); }
 .belt-year, .reign { display: contents; }
 .belt-year > *, .reign > * { grid-row: var(--row); }
 .belt-year > .finish-year { grid-column: 1; }
@@ -604,56 +637,96 @@ tr.former th { font-weight: 600; }
 .reign input:not(:checked) ~ .reign-says { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .reign-says strong { display: block; width: fit-content; margin-left: -0.12em; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; overflow-wrap: anywhere; }
 .reign-says > span { color: var(--chalk); }
-.belt-list { margin-top: 16px; }
+.belt-list { margin-top: var(--s-3); }
 .belt-list li > :last-child { display: flex; flex-wrap: wrap; gap: 0 16px; }
-.belt-list li { align-items: center; min-height: 44px; padding: 0; font-size: 15px; }
+.belt-list li { align-items: center; min-height: max(var(--tap), 32px); padding: 0; font-size: 15px; }
 .belt-list li > :first-child { font-size: 18px; color: var(--paint); }
 .belt-all { margin-left: -4px; }
-.belt-holder { margin-top: 12px; font-size: clamp(36px, 6vw, 64px); line-height: 1.15; }
+/* The holder stands close under the heading, with since-when hanging from the name. */
+.belt-holder { font-size: clamp(36px, 6vw, 64px); line-height: 1.15; }
+.block > .belt-holder { margin-top: var(--s-2); }
+.block > .belt-holder + .play-how { margin-top: calc(var(--s-1) - var(--tap-pad)); }
 .belt-holder > [data-person] { margin-left: -0.12em; }
 
 /* A manager's page: their handle as typed across the end zone, then their career in painted figures. */
-.manager-name { margin-top: 28px; font-size: clamp(40px, 10vw, 112px); line-height: 1.15; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }
+.manager-name { margin-top: var(--s-3); font-size: clamp(40px, 10vw, 112px); line-height: 1.05; overflow-wrap: anywhere; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); animation: spray 900ms cubic-bezier(.2, .7, .2, 1) both; }
 .manager-name > [data-person] { margin-left: -0.12em; }
 .manager-name .me { text-shadow: none; }
-.career { list-style: none; margin: 0; padding: 20px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(max(136px, 20%), 1fr)); gap: 20px 28px; border-top: 6px solid var(--paint); }
+.career { list-style: none; padding-top: var(--s-4); display: grid; grid-template-columns: repeat(auto-fit, minmax(max(136px, 20%), 1fr)); gap: var(--s-5); border-top: 6px solid var(--paint); }
+.career .play-how { margin-top: calc(var(--s-1) - var(--tap-pad)); }
 .career-label { display: block; font-family: var(--stencil); font-weight: 700; font-size: 19px; letter-spacing: 0.05em; line-height: 1.1; text-transform: uppercase; color: var(--chalk); }
-.career .play-how:not([open]) + .stat-sample { margin-top: -14px; }
-.career-figure { display: block; margin-top: 6px; font-family: var(--stencil); font-weight: 900; font-size: clamp(36px, 11.5vw, 52px); line-height: 1; white-space: nowrap; }
-/* Finishes run down the field left to right, the oldest first, each season behind its own yard line; a title is painted whole. */
-.finishes { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 24px 0; }
-.finishes li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 2px 8px 2px 18px; }
-.finishes li::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--paint);
-  transform-origin: top; animation: chalk-down 500ms cubic-bezier(.3, .7, .2, 1) both; animation-delay: calc(var(--i) * 60ms + 350ms);
-}
+.career-figure { display: block; margin-top: var(--s-2); font-family: var(--stencil); font-weight: 900; font-size: clamp(36px, 11.5vw, 52px); line-height: 1; white-space: nowrap; }
+/* Finishes: a line through the seasons, the oldest first, between the dashed lines of first place and last. Each season is a dot with its place over it
+   and its year along the bottom; a title is a football. The plot keeps room above for a place and below for the years. */
+.finish-chart { --plot: 140px; position: relative; height: calc(var(--plot) + 96px); }
+.finish-chart :is(svg, ol) { position: absolute; inset: 52px 44px 44px; }
+.finish-chart svg { width: calc(100% - 88px); height: var(--plot); overflow: visible; }
+.finish-chart line { stroke: var(--chalk); stroke-width: 3; vector-effect: non-scaling-stroke; }
+.finish-chart ol { list-style: none; border-block: 2px dashed var(--chalk-faint); }
+.finish-chart li { position: absolute; left: calc(var(--x) / max(1, var(--n) - 1) * 100%); top: calc(var(--y) * 100%); width: 0; height: 0; }
+.finish-chart li::before { content: ''; position: absolute; width: 14px; height: 14px; translate: -50% -50%; border: 3px solid var(--paint); border-radius: 50%; background: var(--turf-b); }
+.finish-chart .won::before { width: 30px; height: 18px; border: 0; background: radial-gradient(ellipse at 40% 30%, #a65530, var(--leather) 60%, #4f220f); box-shadow: 0 3px 4px rgba(0, 0, 0, 0.35); }
+.finish-place { position: absolute; bottom: 14px; left: 0; translate: -50% 0; font-family: var(--stencil); font-weight: 900; font-size: 30px; line-height: 1; white-space: nowrap; color: var(--paint); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3); }
 .finish-year { font-family: var(--stencil); font-weight: 700; font-size: 22px; line-height: 1; color: var(--chalk); }
-.finish-place { font-family: var(--stencil); font-weight: 900; font-size: 44px; line-height: 1; color: var(--chalk); }
-.finish-of { color: var(--chalk); }
-.won :is(.finish-place, .finish-of) { color: var(--paint); }
-.won .finish-of { font-weight: 800; }
+.finish-chart .finish-year { position: absolute; top: calc((1 - var(--y)) * var(--plot) + 16px); left: 0; translate: -50% 0; }
 
-/* Trade map: managers hold the left sideline and each pair's arc runs out to its own count. The arcs stretch to the width there is;
-   rows and counts keep their size, so a 16-manager league still reads on a phone. White is the visitor's own name and trades,
-   so the rest are a solid mix of chalk and turf: where they cross they never build up to it. */
-.trade-map { --line: color-mix(in srgb, var(--chalk) 78%, var(--turf-b)); display: grid; grid-template-columns: fit-content(42%) minmax(0, calc(var(--reach) * 104px)); margin-top: 12px; }
-.trade-names > div { display: flex; align-items: center; justify-content: flex-end; height: 36px; padding-right: 8px; font-size: 16px; line-height: 1.05; text-align: right; overflow-wrap: anywhere; }
-.trade-arcs { position: relative; margin-right: 14px; border-left: 4px solid var(--line); }
-.trade-arcs svg { position: absolute; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--line); }
-.trade-arcs path { vector-effect: non-scaling-stroke; }
-.trade-arcs path.mine { stroke: var(--paint); }
-.trade-count {
-  position: absolute; transform: translate(-50%, -50%); min-width: 19px; padding: 0 2px; border-radius: 9px;
-  font-size: 14px; font-weight: 800; line-height: 18px; text-align: center; color: var(--chalk); background: var(--endzone-b);
-}
-.trade-count.mine { color: var(--ink-on-paint); background: var(--paint); }
-.trade-pairs { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); column-gap: 48px; }
-.trade-pairs li { display: grid; grid-template-columns: 5rem minmax(0, 1fr); align-items: baseline; padding: 4px 0; border-top: 2px solid var(--chalk-faint); }
-.trade-total { color: var(--chalk); }
-/* Every count takes the same width, so "trades" starts on one line down the list. */
-.trade-total strong { display: inline-block; min-width: 0.62em; font-family: var(--stencil); font-weight: 900; font-size: 24px; }
+/* Trade map: managers stand around a ring and a line joins each pair that has traded, thicker the more they have; a dot grows with its manager's trades.
+   Dots and names keep their size while the ring takes the width there is, so it still reads on a phone. White is the visitor's own name and trades,
+   so the rest are a solid mix of chalk and turf: where lines cross they never build up to it. Beside the ring, every pair with its count. */
+.trade { --line: color-mix(in srgb, var(--chalk) 72%, var(--turf-b)); display: grid; gap: var(--s-5) var(--gutter); }
+@media (min-width: 900px) { .trade { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; } }
+.trade-ring { position: relative; aspect-ratio: 1; width: min(100% - 14rem, 26rem); margin: 36px auto; }
+.trade-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--line); }
+.trade-ring line { vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.trade-ring line.mine { stroke: var(--paint); }
+.trade-node { position: absolute; width: var(--size); height: var(--size); translate: -50% -50%; border: 3px solid var(--paint); border-radius: 50%; background: var(--endzone-b); }
+.trade-node.mine { background: var(--paint); }
+.trade-node > span { position: absolute; white-space: nowrap; font-size: 16px; line-height: 1.3; }
+.trade-node.right > span { left: calc(100% + 8px); top: 50%; translate: 0 -50%; }
+.trade-node.left > span { right: calc(100% + 8px); top: 50%; translate: 0 -50%; }
+.trade-node.top > span { bottom: calc(100% + 6px); left: 50%; translate: -50% 0; }
+.trade-node.bottom > span { top: calc(100% + 6px); left: 50%; translate: -50% 0; }
+.trade-pairs { list-style: none; border-top: 6px solid var(--paint); }
+.trade-pairs li { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); align-items: baseline; border-bottom: 2px solid var(--chalk-faint); }
+.trade-total { font-family: var(--stencil); font-weight: 900; font-size: 24px; }
 /* A wrapped pair's lines sit a full 44px apart, so each name keeps its own target. */
-.trade-who { line-height: 44px; overflow-wrap: anywhere; }
+.trade-who { line-height: max(var(--tap), 2.2em); overflow-wrap: anywhere; }
+
+/* Hot and cold weeks: one line of names down the middle, the week's bottom scores running left from it in flag yellow and its top scores running right in chalk.
+   Each bar is a share of the longest on either side. Former managers trail under a dashed line, as in the tables. */
+.extremes-head, .extremes li { display: grid; grid-template-columns: minmax(0, 1fr) 11rem minmax(0, 1fr); column-gap: var(--s-3); }
+.extremes-head { align-items: end; padding-bottom: var(--s-2); border-bottom: 6px solid var(--paint); font: 800 15px/1.2 var(--text); }
+.extremes-head > :first-child { text-align: right; }
+.extremes-head .play-how { font-weight: 400; }
+.extremes-head .play-unit { padding-top: var(--s-1); font-size: 14px; line-height: 1.2; }
+.extremes-head > :first-child .play-unit { justify-content: flex-end; }
+.extremes-head > :first-child .play-how p { margin-left: auto; }
+.extremes-head [id]:target { box-shadow: 0 -6px 0 var(--paint); }
+.extremes ol { list-style: none; }
+.extremes li { align-items: center; min-height: 48px; border-bottom: 2px solid var(--chalk-faint); }
+.extremes li:not(.former) + .former { border-top: 3px dashed var(--chalk-faint); }
+.extreme-who { text-align: center; font-size: 18px; }
+.extreme { display: flex; align-items: center; gap: var(--s-2); font-size: 18px; font-weight: 800; }
+.extreme::before { content: ''; flex: none; width: calc(var(--share) * (100% - 3rem)); height: 18px; border-radius: 1px; background: color-mix(in srgb, var(--chalk) 72%, var(--turf-b)); }
+.extreme.low { flex-direction: row-reverse; }
+.extreme.low::before { background: var(--flag); }
+
+/* Titles by draft slot: the slots stand along a rafter and a banner hangs under each for every title won from it. The visitor's own are white.
+   A banner's cloth is a layer behind its words, so the cut never clips a name's focus ring. A big league's rafter scrolls. */
+.slots-wrap { position: relative; overflow-x: auto; }
+.slots { list-style: none; display: grid; grid-template-columns: repeat(var(--n), minmax(88px, 1fr)); }
+.slots > li { display: flex; flex-direction: column; min-width: 0; }
+.slot-number { padding-bottom: var(--s-2); border-bottom: 6px solid var(--paint); font-family: var(--stencil); font-weight: 900; font-size: 34px; line-height: 1; text-align: center; color: var(--chalk); }
+.slots > li:not(:has(.banners li)) .slot-number { color: var(--chalk-quiet); }
+.banners { list-style: none; display: flex; flex-direction: column; gap: var(--s-1); padding: 0 var(--s-1) var(--s-1); }
+.banners li { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; gap: var(--s-1); padding: var(--s-3) var(--s-1) var(--s-5); text-align: center; font-size: 14px; line-height: 1.2; }
+.banners li::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 14px), 0 100%);
+  background: repeating-linear-gradient(135deg, var(--endzone-a) 0 14px, var(--endzone-b) 14px 28px);
+}
+.banners .mine::before { background: var(--paint); }
+.banners .mine { color: var(--ink-on-paint); }
+.banner-year { font-family: var(--stencil); font-weight: 900; font-size: 26px; line-height: 1; }
 
 /* Home: the whole screen is the end zone. */
 .lookup { padding-top: 13vh; max-width: 720px; }
@@ -704,34 +777,35 @@ tr.former th { font-weight: 600; }
   .tabs a { justify-content: center; align-items: center; min-height: 56px; padding: 4px 0 0; font-size: 15px; letter-spacing: 0.01em; }
 }
 @media (max-width: 560px) {
-  /* A rank is two lines on a phone: the stat, then the figure and the place. */
-  .ranks li { grid-template-columns: minmax(0, 1fr) auto; }
-  .ranks a { grid-column: 1 / -1; }
-  .ranks .rank-place strong { display: block; }
-  .rank-value { display: flex; flex-wrap: wrap; }
-  .rank-value :is(.stat-text, .play-how[open]) { flex-basis: 100%; }
+  /* A rank is two lines on a phone: the stat, then the figure, the line and the place. */
+  .ranks li { grid-template-columns: minmax(0, 1fr) 5.5rem 3.5rem; }
+  .ranks a { grid-column: 1 / -1; padding-bottom: 0; }
   /* A badge too: whose it is, then its stat. */
   .managers li { grid-template-columns: minmax(0, 1fr) auto; }
   .managers .badge { font-size: 20px; text-align: right; }
   .manager-badge .badge { font-size: 26px; }
-  .finishes { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
-  .finishes li { padding: 2px 4px 2px 12px; }
-  .finish-place { font-size: 34px; }
-  /* A meeting is two lines on a phone: the result and score, then when it was. */
-  .meetings ol { grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; }
+  .finish-chart :is(svg, ol) { inset-inline: 24px; }
+  .finish-chart svg { width: calc(100% - 48px); }
+  .finish-place { font-size: 22px; }
+  .finish-chart .finish-year { font-size: 17px; }
+  /* A meeting is two lines on a phone: the result, score and margin, then when it was. */
+  .meetings ol { grid-template-columns: auto auto minmax(1.5rem, 1fr); column-gap: var(--s-3); }
+  .meetings li { padding: var(--s-2) 0; }
   .meet-score { text-align: left; }
-  .meet-when { grid-column: 2; }
+  .meet-when { grid-column: 2 / -1; }
   .meet-result { font-size: 20px; }
+  .extremes-head, .extremes li { grid-template-columns: minmax(0, 1fr) 7.5rem minmax(0, 1fr); column-gap: var(--s-2); }
+  .extreme-who { font-size: 15px; }
+  .trade-ring { width: min(100% - 11rem, 26rem); }
   tbody th { font-size: 17px; }
-  .stats thead th { font-size: 17px; }
   .several .stat-sample { display: block; }
   /* The table runs on to the edge of the screen, so the next column shows before the fade. */
   .table-wrap { margin-right: -20px; padding-right: 20px; scroll-padding-inline: 9rem 48px; }
   @keyframes more { from, 90% { --more: 28px; } to { --more: 0px; } }
   body { font-size: 16px; }
-  .yard { grid-template-columns: 4rem 1fr; gap: 12px; min-height: 52px; }
+  .yard { grid-template-columns: 4rem 1fr; gap: var(--s-3); min-height: 52px; }
   .yard-year { font-size: 28px; }
-  .play { padding: 20px 0 22px; }
+  .play { padding: var(--s-4) 0; }
   .play-title { font-size: 18px; line-height: 1.2; }
   .play.shame .play-title { padding-right: 52px; }
   .play .flag { width: 44px; height: 36px; top: 8px; --dx: 0px; }
@@ -746,11 +820,9 @@ tr.former th { font-weight: 600; }
   .play.headline .play-holder strong { font-size: 24px; }
   .play.headline .play-context { font-size: 17px; }
   .play.headline .flag { width: 72px; height: 60px; }
-  .block { margin-top: 56px; }
   .league-title { font-size: 28px; }
   .belt { grid-template-columns: 3.5rem repeat(var(--weeks), minmax(0, 1fr)); }
   .streaks { grid-template-columns: 1fr; }
-  .streaks li { gap: 12px; padding: 12px 0; }
   .streak-count { font-size: 44px; }
   .streaks p { font-size: 19px; }
   .streaks p span { font-size: 15px; }

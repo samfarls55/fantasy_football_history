@@ -18,7 +18,7 @@ const rows = seasons.map(({ year, weeks }) => ({ year, spans: reigns.flatMap((re
 ---
 {reigns.length > 0 && (
   <Section id="belt" title="The belt">
-    <details class="play-how"><summary class="play-unit">holder by week, playoffs included</summary><p>{beltRule}</p></details>
+    <details class="play-how"><summary class="play-unit">holder by week</summary><p>{beltRule}</p></details>
     <fieldset class="belt" style={`--weeks: ${Math.max(...seasons.map(season => season.weeks))}; --rows: ${rows.length}`}>
       <legend class="unseen">Reigns</legend>
       {rows.map(({ year, spans }, row) => (

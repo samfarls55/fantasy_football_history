@@ -31,16 +31,26 @@ const shares = columns.reduce((sum, column) => sum + (column.named ? 2 : 1), 0);
 // A table of many columns has no room to share out: each takes what its figures need, on a tighter gap.
 const many = shares > 7;
 const share = (named: boolean) => many ? undefined : `--share: ${(78 / shares * (named ? 2 : 1)).toFixed(2)}%`;
-// Columns whose samples match on every row ("105 weeks", "of 105 weeks") say it once, under the manager, and the other columns keep their own.
+// Columns whose samples match on every row ("105 weeks") say it once, under the manager, and the other columns keep their own. A share of something ("of 243") stays with its figure.
 // The largest such set of columns wins, the first on a tie, so every row of a table shares the same ones.
-const counted = (sample?: string) => sample?.replace(/^(of|in|over) /, '');
-const sampled = columns.filter(column => [...column.cells.values()].some(cell => cell.sample));
+const counted = (sample?: string) => sample;
+const sampled = columns.filter(column => [...column.cells.values()].some(cell => cell.sample && !cell.sample.startsWith('of ')));
 const sets = sampled.map(lead => sampled.filter(other => managers.every(({ id }) => {
   const [a, b] = [lead.cells.get(id), other.cells.get(id)];
   return !a || !b || counted(a.sample) === counted(b.sample);
 })));
 const shared = new Set(sets.toSorted((a, b) => b.length - a.length).find(set => set.length > 1));
 const sampleOf = (id: string) => counted([...shared].map(column => column.cells.get(id)?.sample).find(Boolean));
+// Most managers have been here as long as each other, so only one whose sample differs carries it: that row is the one not to read like for like.
+const usual = [...Map.groupBy(managers.filter(manager => manager.current), manager => sampleOf(manager.id))].sort((a, b) => b[1].length - a[1].length)[0]?.[0];
+const tenure = (id: string) => sampleOf(id) === usual ? undefined : sampleOf(id);
+// The current manager who leads a column of figures stands on darker ground. A lead three or more share is no lead.
+const current = managers.filter(manager => manager.current);
+const leads = new Map(columns.filter(column => !column.named).map(column => {
+  const values = current.flatMap(manager => column.cells.get(manager.id)?.sort ?? []);
+  const best = column.better === 'higher' ? Math.max(...values) : Math.min(...values);
+  return [column, values.filter(value => value === best).length <= 2 ? best : undefined];
+}));
 ---
 <div class="table-wrap">
   <table class:list={['stats', { many }]} aria-labelledby={labelledby}>
@@ -49,7 +59,7 @@ const sampleOf = (id: string) => counted([...shared].map(column => column.cells.
         <th scope="col"><span class="stat-label">Manager</span></th>
         {columns.map(column => (
           <th scope="col" id={column.key} class:list={{ named: column.named }} style={share(column.named)} data-better={column.better} aria-sort={column === keys[0] ? column.better === 'higher' ? 'descending' : 'ascending' : undefined}>
-            <span class:list={['stat-label', { long: column.label.length > 24 }]}>{column.label.replace(' %', ' %').split(': ').map((part, index, all) => index ? <span class="stat-counts">{part}</span> : <span>{part}{all.length > 1 && <span class="unseen">: </span>}</span>)}</span>
+            <span class="stat-label">{column.label.replace(' %', '\u00a0%')}</span>
             <details class="play-how"><summary class="play-unit"><span>{column.unit.replaceAll('–', '⁠–⁠')}</span></summary><p>{column.rule}<ShareLink label={`Share ${column.label}`} hash={`#${column.key}`} /></p></details>
           </th>
         ))}
@@ -58,15 +68,15 @@ const sampleOf = (id: string) => counted([...shared].map(column => column.cells.
     <tbody>
       {order.map(manager => (
         <tr class:list={{ former: !manager.current }}>
-          <th scope="row" data-sort={manager.name}><Manager name={manager.name} />{(!manager.current || sampleOf(manager.id)) && <span class="former-mark"> {[!manager.current && 'Former', sampleOf(manager.id)].filter(Boolean).join(', ')}</span>}</th>
+          <th scope="row" data-sort={manager.name}><Manager name={manager.name} />{(!manager.current || tenure(manager.id)) && <span class="former-mark"> {[!manager.current && 'Former', tenure(manager.id)].filter(Boolean).join(', ')}</span>}</th>
           {columns.map(column => {
             const { key, cells, named } = column;
             const cell = cells.get(manager.id);
             const sample = shared.has(column) ? undefined : cell?.sample;
             return cell ? (
-              <td class:list={{ named, several: cell.names && cell.names.length > 1 }} data-column={key} data-sort={cell.sort}>
+              <td class:list={{ named, several: cell.names && cell.names.length > 1, top: manager.current && cell.sort === leads.get(column) }} data-column={key} data-sort={cell.sort}>
                 {cell.names && <div class="stat-text"><Names names={cell.names} /></div>}
-                <span class="stat-counted"><span class="stat-figure">{cell.figure}</span>{cell.unit && ` ${cell.unit}`}{sample && cell.names && cell.names.length > 1 && ','}</span>{' '}
+                <span class="stat-counted"><span class="stat-figure">{cell.figure}</span>{cell.each && ' each'}{sample && cell.each && ','}</span>{' '}
                 {sample && <span class="stat-sample">{sample}</span>}
               </td>
             ) : <td class:list={{ named }}><span aria-hidden="true">—</span><span class="unseen">No figure</span></td>;

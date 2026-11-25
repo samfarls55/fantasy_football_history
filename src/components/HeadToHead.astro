@@ -14,7 +14,7 @@ const linked = rows?.map(row => ({ ...row, cells: row.cells.map((cell, index) =>
 ---
 {linked && (
   <Section id="head-to-head" title="Head to head">
-    <details class="play-how"><summary class="play-unit">{linked.some(row => row.cells.some(cell => cell?.ties)) ? 'wins–losses–ties' : 'wins–losses'}</summary><p>Regular-season and championship-playoff games between current managers. Streaks count the same games. Bold is a winning record.</p></details>
+    <details class="play-how"><summary class="play-unit">{linked.some(row => row.cells.some(cell => cell?.ties)) ? 'W–L–T' : 'W–L'}</summary><p>Regular-season and championship-playoff games between current managers. Streaks count the same games. Bold is a winning record.</p></details>
     <RecordGrid labelledby="head-to-head-name" rowLabel="Record of" columnLabel="against" rows={linked} />
     <Rivalries streaks={streaks} />
   </Section>

@@ -11,7 +11,7 @@ interface Props {
 }
 const { labelledby, stats, by = [stats[0]?.key] } = Astro.props;
 const managers = [...new Map(stats.flatMap(stat => stat.rows).map(row => [row.personId, { id: row.personId, name: row.name, current: row.current }])).values()];
-const columns = stats.map(({ rows, ...stat }) => ({ ...stat, cells: new Map(rows.map(({ personId, figure, value, sample, names, unit }) =>
-  [personId, { figure, sort: value, sample, ...names && { names, unit } }])) }));
+const columns = stats.map(({ rows, ...stat }) => ({ ...stat, cells: new Map(rows.map(({ personId, figure, value, sample, names }) =>
+  [personId, { figure, sort: value, sample, ...names && { names, each: names.length > 1 } }])) }));
 ---
 {stats.length > 0 && <StatTable labelledby={labelledby} managers={managers} columns={columns} by={by} />}

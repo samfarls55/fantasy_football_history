@@ -3,7 +3,7 @@
 import Manager from './Manager.astro';
 import Names from './Names.astro';
 import Section from './Section.astro';
-import { statHref, type openLeague } from '../league-page.ts';
+import { saysUnit, statHref, type openLeague } from '../league-page.ts';
 import type { readBadges } from '../history/badges.ts';
 
 interface Props {
@@ -19,12 +19,12 @@ const rows = managers.map(manager => ({ ...manager, badge: badges.find(badge => 
     {rows.map(({ name, current, badge }) => (
       <li>
         <Manager name={name} />
-        {!current && <span class="stat-sample">Former manager</span>}
+        {!current && <span class="stat-sample">Former</span>}
         {badge && (
           <>
             <strong class="badge">{badge.badge}</strong>
-            <div><a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a><span class="stat-sample">{badge.standing} of {badge.of}</span></div>
-            <div class="badge-value">{badge.names && <div class="stat-text"><Names names={badge.names} /></div>}<span><span class="stat-figure">{badge.figure}</span> {badge.unit}</span>{badge.sample && <span class="stat-sample">{badge.sample}</span>}</div>
+            <a class="badge-stat" href={statHref(Astro, tabs, badge)}>{badge.label}</a>
+            <div class="badge-value">{badge.names && <span class="stat-text"><Names names={badge.names} /></span>} <span class="stat-figure">{badge.figure}</span>{!saysUnit(badge.label, badge.unit) && ` ${badge.unit}`}</div>
           </>
         )}
       </li>

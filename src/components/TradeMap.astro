@@ -1,6 +1,6 @@
 ---
-// Who trades with whom: managers down a sideline and an arc for each pair, as wide as they stand apart, so no two counts share a spot.
-// The drawing is for the eye alone, and for up to 16 managers; the list under it holds every pair and links the names.
+// Who trades with whom: managers stand around a ring, the busiest at the top, and a line joins each pair that has traded, thicker the more they have.
+// A manager's dot grows with their trades. The drawing is for the eye alone, and for up to 16 managers; the list beside it holds every pair and links the names.
 import Manager from './Manager.astro';
 import Section from './Section.astro';
 import { recordUnit } from '../history/records.ts';
@@ -10,25 +10,29 @@ import type { readTradeMap } from '../history/trades.ts';
 interface Props { map: NonNullable<Awaited<ReturnType<typeof readTradeMap>>> }
 const { managers, pairs } = Astro.props.map;
 const marked = (...people: typeof managers) => people.some(person => isViewer(Astro, person.name));
-const reach = managers.length - 1;
+const spots = managers.map((person, index) => {
+  const turn = -Math.PI / 2 + index * 2 * Math.PI / managers.length;
+  const [x, y] = [Math.cos(turn), Math.sin(turn)];
+  const trades = pairs.filter(pair => pair.a === person || pair.b === person).reduce((sum, pair) => sum + pair.count, 0);
+  return { person, x: 50 + 50 * x, y: 50 + 50 * y, side: x > 0.2 ? 'right' : x < -0.2 ? 'left' : y < 0 ? 'top' : 'bottom', size: 10 + Math.sqrt(trades) * 5 };
+});
+const spot = (person: typeof managers[number]) => spots[managers.indexOf(person)];
 // Drawn with the fewest trades first and the visitor's own last, so nothing covers those.
-const arcs = pairs.map(({ a, b, count }) => ({ from: managers.indexOf(a), to: managers.indexOf(b), count, mine: marked(a, b) }))
-  .sort((a, b) => Number(a.mine) - Number(b.mine) || a.count - b.count);
+const lines = pairs.map(({ a, b, count }) => ({ from: spot(a), to: spot(b), count, mine: marked(a, b) })).sort((a, b) => Number(a.mine) - Number(b.mine) || a.count - b.count);
 ---
 {pairs.length > 0 && (
   <Section id="trade-map" title="Trade map">
     <details class="play-how"><summary class="play-unit">trades between each pair</summary><p>Every completed trade, whether for players, picks or waiver budget. A three-team trade counts once for each pair.</p></details>
-    {managers.length <= 16 && <div class="trade-map" style={`--reach: ${reach}`} aria-hidden="true">
-      <div class="trade-names">{managers.map(person => <div><span data-person class:list={{ me: marked(person) }}>{person.name}</span></div>)}</div>
-      <div class="trade-arcs">
-        <svg viewBox={`0 0 ${reach} ${managers.length}`} preserveAspectRatio="none">
-          {arcs.map(({ from, to, count, mine }) => <path class:list={{ mine }} d={`M0 ${from + 0.5}A${to - from} ${(to - from) / 2} 0 0 1 0 ${to + 0.5}`} stroke-width={1 + Math.min(count, 5)} />)}
+    <div class="trade">
+      {managers.length <= 16 && <div class="trade-ring" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          {lines.map(({ from, to, count, mine }) => <line class:list={{ mine }} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke-width={1 + Math.min(count, 6) * 1.6} />)}
         </svg>
-        {arcs.map(({ from, to, count, mine }) => <span class:list={['trade-count', { mine }]} style={`left: ${(to - from) / reach * 100}%; top: ${(from + to + 1) / 2 / managers.length * 100}%`}>{count}</span>)}
-      </div>
-    </div>}
-    <ul class="trade-pairs" aria-labelledby="trade-map-name">
-      {pairs.map(({ a, b, count }) => <li><span class="trade-total"><strong>{count}</strong> {recordUnit('trades', count)}</span><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
-    </ul>
+        {spots.map(({ person, x, y, side, size }) => <span class:list={['trade-node', side, { mine: marked(person) }]} style={`left: ${x.toFixed(2)}%; top: ${y.toFixed(2)}%; --size: ${size.toFixed(1)}px`}><span data-person class:list={{ me: marked(person) }}>{person.name}</span></span>)}
+      </div>}
+      <ul class="trade-pairs" aria-labelledby="trade-map-name">
+        {pairs.map(({ a, b, count }) => <li><strong class="trade-total">{count}<span class="unseen"> {recordUnit('trades', count)}</span></strong><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
+      </ul>
+    </div>
   </Section>
 )}

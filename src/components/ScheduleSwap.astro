@@ -13,7 +13,7 @@ const { swap } = Astro.props;
     <nav class="seasons" aria-label="Schedule swap season">
       {swap.years.map(year => <a href={`${leagueHref(Astro, '/excuses', { season: year })}#schedule-swap`} aria-current={year === swap.year ? 'true' : undefined}>{year}</a>)}
     </nav>
-    <details class="play-how"><summary class="play-unit">{swap.rows.some(row => row.cells.some(cell => cell?.ties)) ? 'wins–losses–ties' : 'wins–losses'}</summary><p>Their own score each regular-season week against that schedule’s opponent, or against its owner when the two met. The box is the actual record; bold beats it.</p></details>
+    <details class="play-how"><summary class="play-unit">{swap.rows.some(row => row.cells.some(cell => cell?.ties)) ? 'W–L–T' : 'W–L'}</summary><p>Their own score each regular-season week against that schedule’s opponent, or against its owner when the two met. The box is the actual record; bold beats it.</p></details>
     <RecordGrid labelledby="schedule-swap-name" rowLabel="Record of" columnLabel="with the schedule of" rows={swap.rows} />
   </Section>
 )}
