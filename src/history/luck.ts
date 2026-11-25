@@ -26,15 +26,24 @@ function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
   };
 }
 
-const closeGames: ManagerStat['values'] = archive => {
+/** Each person's sides of games decided by more than 0 and under 5 points. */
+function closeSides(archive: Archive) {
   const sides = completedContests(archive).filter(({ sides: [a, b] }) => {
     const margin = Exact.from(a.points).subtract(b.points).abs();
     return margin.compare(0) > 0 && margin.compare(5) < 0;
   }).flatMap(game => game.sides.map(({ personId }) => ({ personId, won: game.winnerId === personId })));
-  return new Map([...Map.groupBy(sides, side => side.personId)].map(([personId, played]) => {
-    const wins = played.filter(side => side.won).length;
-    return [personId, { value: Exact.from(wins * 100).divide(played.length), shown: `${wins}–${played.length - wins}` }];
-  }));
+  return [...Map.groupBy(sides, side => side.personId)].map(([personId, played]) => ({ personId, played: played.length, wins: played.filter(side => side.won).length }));
+}
+const closeGames: ManagerStat = {
+  key: 'close-games', place: 'luck', label: 'Record in games decided by under 5', unit: 'wins–losses', displayPrecision: 1, better: 'higher',
+  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(wins * 100).divide(played), shown: `${wins}–${played - wins}` }])),
+  rule: 'Regular-season games decided by more than 0 and under 5 points, ranked by the share won.',
+};
+/** The losses in that column's records. Only a badge ranks them, so they're no column of their own and keep its key. */
+export const closeLosses: ManagerStat = {
+  ...closeGames, label: 'Losses in games decided by under 5', unit: 'losses', displayPrecision: 0,
+  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${chances(played, 'game')}` }])),
+  rule: 'Regular-season games lost by under 5 points.',
 };
 
 const highsFaced: ManagerStat['values'] = archive => {
@@ -68,8 +77,7 @@ export const luckStats: ManagerStat[] = [
     rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd all count, but a tied game doesn’t.' },
   { key: 'got-away', place: 'luck', label: 'Got away with it: won with the week’s 2nd-worst score', unit: 'wins', displayPrecision: 0, better: 'higher', values: secondScores('won'),
     rule: 'Regular-season weeks with at least four scores. Teams tied for 2nd-worst all count, but a tied game doesn’t.' },
-  { key: 'close-games', place: 'luck', label: 'Record in games decided by under 5', unit: 'wins–losses', displayPrecision: 1, better: 'higher', values: closeGames,
-    rule: 'Regular-season games decided by more than 0 and under 5 points, ranked by the share won.' },
+  closeGames,
   { key: 'highs-faced', place: 'luck', label: 'Opponents’ season highs faced', unit: 'games', displayPrecision: 0, better: 'higher', values: highsFaced,
     rule: 'Completed seasons: games where the opponent had their best score of that regular season. A tied best counts each time.' },
 ];

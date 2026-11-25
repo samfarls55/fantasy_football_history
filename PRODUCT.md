@@ -18,7 +18,7 @@ People in a Sleeper fantasy football league who want to settle arguments and rel
    - Players: which players made or ruined us?
    - Draft: who can draft?
    - Moves: who works the wire?
-4. Open any manager's name for their page: career, finishes, records held, rank in every table and every head-to-head.
+4. Open any manager's name for their page: badge, career, finishes, records held, rank in every table and every head-to-head.
 
 A tab shows once the league has a stat for it. Every stat is a record card or a column of a sortable table, names its unit, and opens one line on how it's counted.
 

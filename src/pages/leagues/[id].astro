@@ -3,10 +3,12 @@ import League from '../../layouts/League.astro';
 import BeltHolder from '../../components/BeltHolder.astro';
 import Champions from '../../components/Champions.astro';
 import Manager from '../../components/Manager.astro';
+import Managers from '../../components/Managers.astro';
 import Miss from '../../components/Miss.astro';
 import RecordCard from '../../components/RecordCard.astro';
 import ShareLink from '../../components/ShareLink.astro';
 import { leagueHref, managerHref, openTab } from '../../league-page.ts';
+import { readBadges } from '../../history/badges.ts';
 import { readBelt } from '../../history/belt.ts';
 import { readSeasons } from '../../history/read.ts';
 import { readManagers } from '../../history/managers.ts';
@@ -30,7 +32,7 @@ const { frame, view } = await openTab(Astro, 'home', async storePath => {
   const winners = lastDone?.teams.filter(team => team.finish === 1) ?? [];
   const reigning = winners.length ? { year: lastDone!.year, champions: winners.map(team => nameOf.get(team.personId) ?? team.name),
     titles: winners.length === 1 ? managers.find(manager => manager.id === winners[0].personId)!.facts.championships : 0 } : null;
-  return { first: seasons.at(-1)!.year, last: seasons[0].year, plates, reigning, belt: (await readBelt({ storePath }))!,
+  return { first: seasons.at(-1)!.year, last: seasons[0].year, plates, reigning, managers, badges: (await readBadges({ storePath }))!, belt: (await readBelt({ storePath }))!,
     manager: named?.id ? nameOf.get(named.id)! : null, missed: named && !named.id ? { name: markParam!, suggestion: named.suggestion } : null };
 });
 // The browser carries the fragment along, so #vs and #rivalries land on the manager's page too.
@@ -53,6 +55,7 @@ if (view?.manager) return Astro.redirect(managerHref(Astro, view.manager, vsPara
       <BeltHolder belt={view.belt} />
       {/* The headline: the best team that went home empty is the record every league argues about. */}
       {view.records.map(record => <ul class="plays" id="records"><RecordCard view={record} heading="h2" index={0} headline wide /></ul>)}
+      <Managers managers={view.managers} badges={view.badges} tabs={frame.tabs} />
     </>
   )}
   {view?.reigning && (

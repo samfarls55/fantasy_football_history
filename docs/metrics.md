@@ -192,6 +192,14 @@ A person holds a record category when they share its first rank in the default s
 
 `src/history/manager-names.ts` resolves a name from a link in any letter case, or offers the nearest one: a name it starts (three letters or more), or one within one edit per four letters, at least one.
 
+## Badges
+
+Each current manager has at most one badge, shown on Home and their page with the stat behind it. `src/history/badges.ts` lists the badges in order, each one manager stat and the end of it that earns the badge: Juggernaut (`top-scores`), Tinkerer (`pickups`), Bridesmaid (`finals-lost`), Night Owl (`late-night`), Wild Card (`boom-or-bust`, highest), Metronome (`boom-or-bust`, lowest), Own Worst Enemy (`losses-better-lineup`), Heartbroken (close-game losses), Cellar Dweller (`bottom-scores`), Rollercoaster (`one-year-change`), Ride or Die (`most-started`), Denied (`failed-claims`), Dealmaker (`trades`), Robbed (`robbed`), Bandit (`got-away`) and Closer (`late-wins`). All but Metronome go to the highest.
+
+A pair is a badge and a current manager whose value is above zero. Its rank is that manager's competition rank among current managers from the badge's end, so a zero still holds its place in the ranking and former managers hold none. Pairs go out lowest rank first, then in list order, then by person ID, each one only if its badge and manager are both free. A stat that is left out, or a manager without a value, makes no pair. Managers left over have no badge.
+
+Close-game losses are the losses in the `close-games` records, from the same contests, with the person's close games as the sample. That column ranks by the share won, so `closeLosses` in `src/history/luck.ts` ranks the count for the badge alone. It shares the column's key, coverage blocks and link, and is neither a column nor a rank of its own. A badge drops the nickname its stat's label starts with, since the badge replaces it.
+
 ## The belt
 
 The belt starts with the first resolved champion in the archive, at that title contest, and moves in contests from the following season. It follows completed regular-season and championship-playoff contests in order of the week each resolves, so a multiweek contest counts once, when it resolves. The holder loses it to whoever beats them, and a tie keeps it. A defense is a decided or tied contest the holder did not lose.

@@ -1,0 +1,15 @@
+---
+// One row of ranks: a stat that opens its column, what this manager's is, and where that places them.
+interface Props { href: string; label: string; rule: string; figure: string; unit: string; names?: string[]; sample?: string; first: boolean }
+const { href, label, rule, figure, unit, names, sample, first } = Astro.props;
+---
+<li>
+  <a href={href}>{label}</a>
+  <div class="rank-value">
+    {names && <span class="stat-text">{names.join(', ')}</span>}
+    <span class="stat-figure">{figure}</span>
+    <details class="play-how"><summary class="play-unit">{unit}</summary><p>{rule}</p></details>
+    {sample && <span class="stat-sample">{sample}</span>}
+  </div>
+  <p class:list={['rank-place', { first }]}><slot /></p>
+</li>
