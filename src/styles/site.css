@@ -254,6 +254,11 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 .share:hover, .share:focus-visible { color: var(--paint); }
 .shame .share:hover, .shame .share:focus-visible { color: var(--flag); }
 .play.shame .play-title { padding-right: 64px; }
+/* A lead names its tab over the stat; both are the one link there. */
+.play-lead { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; text-decoration: none; }
+.play-lead .painted { font-size: clamp(30px, 4.5vw, 44px); }
+.play-name { text-decoration: underline 2px var(--chalk-quiet); text-underline-offset: 5px; }
+.play-lead:hover .play-name { text-decoration-color: currentColor; }
 .play-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
 .play-value { font-family: var(--stencil); font-weight: 900; font-size: 72px; line-height: 0.95; }
 .shame .play-value { color: var(--flag); }
@@ -335,7 +340,7 @@ a[data-person]::before { content: ''; position: absolute; inset: min(-12px, (100
 
 /* Tables: painted column labels over the goal line, a faint yard line under each manager, a painted line to close.
    Former managers trail under a dashed line. The wrap holds its unseen words, so they scroll with it and never widen the page. */
-.table-wrap { position: relative; overflow-x: auto; margin: 20px 0 0 -0.3em; padding-left: 0.3em; }
+.table-wrap { position: relative; overflow-x: auto; margin: 14px 0 0 -0.3em; padding: 6px 0 0 0.3em; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 17px; }
 th, td { padding: 13px 14px; text-align: right; }
 th:first-child, td:first-child { text-align: left; padding-left: 0; }
@@ -345,7 +350,7 @@ thead th {
 }
 /* Each column's unit sits under its label and opens its rule, which takes a fixed width so an open one never stretches the table far.
    With JS the label is a full-width button; the sorted one is painted and carries a caret pointing the way it runs. */
-.stats thead th { vertical-align: top; padding-block: 0 4px; scroll-margin-left: 12rem; }
+.stats thead th { vertical-align: top; padding-block: 0 4px; scroll-margin-inline: 12rem 56px; }
 .stats thead :is(button, .stat-label) { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; justify-content: flex-end; }
 /* A label that says what's counted can run long, so it wraps instead of widening its column. */
 .stats thead .stat-label { width: max-content; max-width: 10.5rem; white-space: normal; text-align: right; text-wrap: balance; }
@@ -356,7 +361,7 @@ thead th {
 .stats thead .play-how { margin: -6px 0 0; font-family: var(--text); font-weight: 600; letter-spacing: 0; text-transform: none; }
 .stats thead .play-unit { width: fit-content; margin-left: auto; justify-content: flex-end; font-size: 15px; }
 .stats thead .play-how p { width: min(11rem, 40vw); margin: 0 0 10px auto; white-space: normal; font-weight: 400; }
-.stats thead th:target { box-shadow: inset 0 6px 0 var(--paint); }
+.stats thead th:target { box-shadow: 0 -6px 0 var(--paint); }
 .stats tbody :is(th, td) { vertical-align: baseline; }
 .stat-text, .stat-sample { display: block; }
 .stat-text { min-width: 9em; white-space: normal; font-weight: 600; }
@@ -617,6 +622,9 @@ tr.former th { font-weight: 600; }
   .meet-result { font-size: 20px; }
   tbody th { font-size: 18px; }
   .stats thead .stat-label { max-width: 9rem; }
+  /* A linked column lands between the managers and the fade, so both leave it room. */
+  .stats thead th { scroll-margin-inline: 8.75rem 28px; }
+  @keyframes more { from, 90% { --more: 28px; } to { --more: 0px; } }
   body { font-size: 16px; }
   .yard { grid-template-columns: 4rem 1fr; gap: 12px; min-height: 52px; }
   .yard-year { font-size: 28px; }

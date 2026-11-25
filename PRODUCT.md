@@ -11,7 +11,7 @@ People in a Sleeper fantasy football league who want to settle arguments and rel
 1. Enter a Sleeper username.
 2. Pick one of that user's leagues. A user with one league goes straight to it.
 3. Browse the league's tabs, each answering one question:
-   - Home: who are the champions?
+   - Home: who are the champions, and what's the headline on every other tab?
    - Legacy: who's the greatest?
    - Games: what were the wildest weeks?
    - Excuses: bad luck or bad managing?

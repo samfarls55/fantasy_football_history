@@ -298,6 +298,12 @@ These count recorded events in any week of any season, for whoever held the rost
 - **Trades:** the Trades rule above, once for each person in the trade. The sample is the person's seasons.
 - **Can't quit you** (`cant-quit-you`): repeated completed pickups of one player by one person. A player picked up once is not a candidate. The row gives the seasons it happened in, of the person's seasons, and the last week.
 
+## Home leads
+
+Home shows one lead for each other visible tab. The chosen leads are `bridesmaid` (Legacy), `highest-score` (Games), `losses-better-lineup` (Excuses), `most-started` (Players), `best-steal` (Draft) and `pickups` (Moves). When nobody holds the chosen stat, the tab leads with the first stat on its page that somebody holds: cards before tables, except on Legacy, whose table comes first. A card the tab leaves out never leads. Although a zero is a value, a count of zero holds nothing, so it leads only where the lowest wins. A tab with no such record or manager stat has no lead.
+
+`src/history/leads.ts` ranks the same registry entry the tab does. Every tie for first is named; managers who tie with different win–loss records each keep their own. The lead may word a column's label for a card, but its figure, unit and rule are the entry's.
+
 ## Recent Home results
 
 Label the list Recent top-ten results. Select performances currently in a category's first ten ranks, including ties, with a supported historical period. Order by historical event date, not import time, then category key and result ID for stable ties. Deduplicate the same category/result identity. Select the newest result from each distinct category until six places are filled, then fill any spare places from the remaining candidates. Present the selected results in their original historical order. A category entry links to its ranking with that result retained. This selection does not establish that a record was newly broken.

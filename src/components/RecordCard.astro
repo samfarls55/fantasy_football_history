@@ -2,23 +2,26 @@
 import Manager from './Manager.astro';
 import ShareLink from './ShareLink.astro';
 import Winners from './Winners.astro';
-import { fixed, isViewer } from '../league-page.ts';
-import { recordUnit, type readCategory } from '../history/records.ts';
+import { fixed, isViewer, tabHref } from '../league-page.ts';
+import { recordUnit, type CardView } from '../history/records.ts';
+import type { TabKey } from '../history/tabs.ts';
 
 interface Props {
-  view: NonNullable<Awaited<ReturnType<typeof readCategory>>>;
+  view: CardView;
   heading: 'h2' | 'h3';
   /** The card's place in its run, for the stagger. */
   index: number;
   headline?: boolean; wide?: boolean; across?: boolean;
+  /** The tab the card leads to from Home. The stat's anchor and share link stay there. */
+  tab?: { key: TabKey; name: string };
 }
-const { view: { category, rows, leaders }, heading: Title, index, headline, wide, across } = Astro.props;
+const { view: { category, rows, leaders }, heading: Title, index, headline, wide, across, tab } = Astro.props;
 type Row = typeof rows[number];
 // Ties share a rank, so every row ranked third or better shows; none drops silently.
 const others = rows.filter(row => row.rank > 1 && (row.rank <= 3 || category.rest));
 // One fixed precision per record so a figure and its runners-up line up; a percentage keeps the precision its category chose so distinct ranked values never share a label (docs/metrics.md).
 const value = (row: Row) => row.shown ?? `${category.signed && row.value > 0 ? '+' : ''}${fixed(row.value, category.displayPrecision)}${category.percent ? '%' : ''}`;
-const unit = category.displayPrecision === 0 ? recordUnit(category.unit, leaders[0].value) : category.unit;
+const unit = category.displayPrecision === 0 && !leaders[0].shown ? recordUnit(category.unit, leaders[0].value) : category.unit;
 // Every context reads "Week 3, 2020" (a streak "Weeks 1–12, 2023"), and a date never breaks across lines. Player records lead it with the manager, already named as the holder.
 // A season record reads the way the league remembers it: "11–3, 128.4 points a game in 2024".
 const when = (row: Row) => row.record ? `${row.record}, ${fixed(row.pointsPerGame!, 1)} points a game in\u00a0${row.leaderContext!.slice(0, 4)}`
@@ -32,7 +35,7 @@ const involves = (row: Row) => [row.manager, row.opponent, ...(row.winners ?? []
 const hash = [...category.key].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
 const landing = `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}; --dx: ${-(hash >> 5) % 10}px; --dy: ${(hash >> 9) % 9 - 3}px`;
 ---
-<li id={category.key} class:list={['play', { shame: category.shame, headline, wide, across }]} style={`--i: ${index}; ${landing}`}>
+<li id={tab ? undefined : category.key} class:list={['play', { shame: category.shame, headline, wide, across }]} style={`--i: ${index}; ${landing}`}>
   {category.shame && (
     <svg class="flag" viewBox="0 0 56 46" aria-hidden="true">
       <path class="flag-cloth" d="M13 11c9-6 20-3 30-6 4-1 8 0 10 2l-3 26c-8 4-17 1-25 4-5 2-10 3-14 1z" />
@@ -40,7 +43,8 @@ const landing = `--tilt: ${hash % 27 - 15}deg; --flip: ${hash >> 4 & 1 ? -1 : 1}
       <circle class="flag-knot" cx="11" cy="11" r="7" />
     </svg>
   )}
-  <Title class="play-title"><span class="unseen">{category.shame ? 'Shame: ' : 'Fame: '}</span>{category.name}<ShareLink label={`Share ${category.name}`} hash={`#${category.key}`} /></Title>
+  <Title class="play-title">{tab ? <a class="play-lead" href={`${tabHref(Astro, tab.key)}#${category.key}`}><span class="painted">{tab.name}</span> <span class="unseen">{category.shame && 'Shame: '}</span><span class="play-name">{category.name}</span></a>
+    : <><span class="unseen">{category.shame ? 'Shame: ' : 'Fame: '}</span>{category.name}<ShareLink label={`Share ${category.name}`} hash={`#${category.key}`} /></>}</Title>
   <div class="play-figure"><span class="play-value">{value(leaders[0])}</span><details class="play-how"><summary class="play-unit">{unit}</summary><p>{category.rule}</p></details></div>
   <div class="play-who">
     {leaders.map(row => (

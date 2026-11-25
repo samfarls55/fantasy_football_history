@@ -223,15 +223,24 @@ export async function readCategory(key: string, options: RecordSelection = {}) {
   const archive = await readArchive(options.storePath);
   return archive ? rankCategory(archive, category, options) : null;
 }
-/** The record cards of these places, in registry order. A record nobody holds has no card, nor does one another record already tells. */
+type Ranking = ReturnType<typeof rankCategory>;
+/** What a record card shows. */
+export interface CardView {
+  category: Omit<CategoryDefinition, 'group' | 'scope'>;
+  rows: CardRow[]; leaders: CardRow[];
+}
+type CardRow = Partial<Ranking['rows'][number]> & Pick<Ranking['rows'][number], 'id' | 'rank' | 'name' | 'value' | 'sample' | 'manager'>;
+/** A record's card in its place. A record nobody holds has no card, nor does one another record already tells. */
+export function recordCard(archive: Archive, category: CategoryDefinition) {
+  const view = rankCategory(archive, category, {});
+  const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => rankCategory(archive, other, {}).leaders);
+  return view.leaders.some(row => !told.some(other => other.id === row.id)) ? view : null;
+}
+/** The record cards of these places, in registry order. */
 export async function readPlaceRecords(places: readonly Place[], options: { storePath?: string } = {}) {
   const archive = await readArchive(options.storePath);
   if (!archive) return null;
-  const rank = (category: CategoryDefinition) => rankCategory(archive, category, {});
-  return recordCategories.filter(category => category.place && places.includes(category.place)).map(rank).filter(({ category, leaders }) => {
-    const told = recordCategories.filter(other => other.key === category.unless).flatMap(other => rank(other).leaders);
-    return leaders.some(row => !told.some(other => other.id === row.id));
-  });
+  return recordCategories.filter(category => category.place && places.includes(category.place)).flatMap(category => recordCard(archive, category) ?? []);
 }
 /** Every record a person holds or shares, fame before shame. A count of zero holds nothing, and a tied game belongs to both managers. */
 export async function readRecordsHeld(personId: string, options: { storePath?: string } = {}) {
