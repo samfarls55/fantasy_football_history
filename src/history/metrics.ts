@@ -1,5 +1,6 @@
 import { Exact, exactSum } from './decimal.ts';
 import { completedContests, inScope } from './scope.ts';
+import { winLoss } from './wording.ts';
 import type { Archive, Scope } from './types.ts';
 export interface MetricSelection { scope?: Scope; season?: string }
 export interface MetricIdentity { personId?: string; franchiseId?: string }
@@ -25,7 +26,7 @@ export function careerMetrics(archive: Archive, identity: MetricIdentity, option
   const winPercentage = games.length ? actualWins.multiply(100).divide(games.length) : null;
   const owned = (season: typeof seasons[number]) => season.teams.filter(includes).map(team => team.personId);
   const titleSeasons = seasons.filter(season => season.championId && owned(season).includes(season.championId));
-  const facts: CareerFacts = { wins, losses, ties, games: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, winPercentage: winPercentage?.toNumber() ?? null,
+  const facts: CareerFacts = { wins, losses, ties, games: games.length, record: winLoss(wins, losses, ties), winPercentage: winPercentage?.toNumber() ?? null,
     points: points.toNumber(), pointsAgainst: pointsAgainst.toNumber(), championships: titleSeasons.length, playoffAppearances: seasons.filter(season => season.playoffPersonIds.some(id => owned(season).includes(id))).length };
   return { facts, points, pointsAgainst, actualWins, winPercentage, games, performances, titleSeasons };
 }

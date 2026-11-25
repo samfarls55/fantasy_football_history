@@ -1,9 +1,9 @@
 import { Exact } from './decimal.ts';
 import { identity } from './game-records.ts';
-import { chances } from './luck.ts';
 import { personSeasons, personTenures } from './managers.ts';
 import { careerMetrics } from './metrics.ts';
 import { completedContests } from './scope.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat, StatValue } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive, Person, Season } from './types.ts';
@@ -21,7 +21,7 @@ const fromCareer = (read: (career: ReturnType<typeof careerMetrics>, person: Per
 /** Counts that can only happen in some seasons, beside how many of those the person had. */
 const ofSeasons = (chance: (season: Season) => boolean, happened: (season: Season, personId: string) => boolean) => perPerson(({ id }, { seasons }) => {
   const played = seasons.filter(season => chance(season) && season.teams.some(team => team.personId === id));
-  return { value: Exact.from(played.filter(season => happened(season, id)).length), sample: chances(played.length, 'season') };
+  return { value: Exact.from(played.filter(season => happened(season, id)).length), sample: plural(played.length, 'season') };
 });
 
 /** Everyone who lost a final and has never won one. */
@@ -63,7 +63,7 @@ const yearChanges: ManagerStat['values'] = archive => new Map(archive.people.fla
   if (!changes.length) return [];
   const size = Math.max(...changes.map(change => change.size));
   return [[person.id, { value: Exact.from(size), names: changes.filter(change => change.size === size).map(change => change.name),
-    sample: chances(seasons.filter(({ season, team }) => season.complete && team.finish).length, 'season') }]];
+    sample: plural(seasons.filter(({ season, team }) => season.complete && team.finish).length, 'season') }]];
 }));
 
 /** Legacy's careers table. The numbers a league argues over come first, so a phone shows them before any scroll; the years trail. */

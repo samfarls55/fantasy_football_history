@@ -1,6 +1,6 @@
 import { playerContributionHref, recordedStarts } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
-import { chances } from './luck.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { Archive, Season } from './types.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
@@ -28,7 +28,7 @@ export function pickCandidates(key: 'best-steal' | 'worst-bust'): NonNullable<Ca
       const person = archive.people.find(person => person.id === team.personId)!;
       const own = starts.filter(start => start.playerId === pick.playerId && start.performance.personId === person.id);
       return [{ id: `${draft.id}:${pick.playerId}`, personId: person.id, name: archive.players.find(player => player.id === pick.playerId)!.name, avatar: null, metric: exactSum(own.map(start => start.points)),
-        sample: `${own.length} ${own.length === 1 ? 'start' : 'starts'}`, leaderContext: `${person.name} · ${key === 'worst-bust' ? `Pick ${pick.source.pick_no}` : `Round ${pick.source.round}`} · ${season.year}`,
+        sample: plural(own.length, 'start'), leaderContext: `${person.name} · ${key === 'worst-bust' ? `Pick ${pick.source.pick_no}` : `Round ${pick.source.round}`} · ${season.year}`,
         period: { year: season.year, week: Math.max(...season.completedWeeks), playedAt: null }, href: playerContributionHref({ personId: person.id }, pick.playerId, { season: season.year }), historyLabel: 'Open player history' }];
     });
   });
@@ -74,8 +74,8 @@ function mostDrafted(answer: (row: PersonPick) => string | null | undefined, sam
     return most > 1 ? [[personId, { value: Exact.from(most), names: answers.filter(rows => rows.length === most).map(([row]) => name(row)!).sort((a, b) => a.localeCompare(b)), sample: sample(known) }]] : [];
   }));
 }
-const picksMade = (rows: PersonPick[]) => chances(rows.length, 'pick');
-const draftsMade = (rows: PersonPick[]) => chances(new Set(rows.map(row => row.draft)).size, 'draft');
+const picksMade = (rows: PersonPick[]) => plural(rows.length, 'pick');
+const draftsMade = (rows: PersonPick[]) => plural(new Set(rows.map(row => row.draft)).size, 'draft');
 
 const easternDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' });
 const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archive)].flatMap(([personId, picks]) => {
@@ -83,7 +83,7 @@ const draftAge: ManagerStat['values'] = archive => new Map([...personPicks(archi
     const start = draft.source.start_time;
     return start && player.birthDate && player.position !== 'DEF' ? [(Date.parse(easternDay.format(start)) - Date.parse(player.birthDate)) / 86_400_000] : [];
   });
-  return days.length ? [[personId, { value: exactSum(days).divide(Exact.from('365.25').multiply(days.length)), sample: chances(days.length, 'pick') }]] : [];
+  return days.length ? [[personId, { value: exactSum(days).divide(Exact.from('365.25').multiply(days.length)), sample: plural(days.length, 'pick') }]] : [];
 }));
 
 /** Draft's Scouting reports table. */

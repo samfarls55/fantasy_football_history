@@ -1,4 +1,5 @@
 import { Exact, exactSum } from './decimal.ts';
+import { plural, winLoss } from './wording.ts';
 import type { Archive, Season } from './types.ts';
 import type { CategoryDefinition } from './records.ts';
 
@@ -27,7 +28,7 @@ export function seasonComparisons(archive: Archive, season: Season) {
     const actualWins = Exact.from(games.filter(game => game.winnerId === team.personId).length).add(Exact.from(games.filter(game => game.tie).length).divide(2));
     const winsVsExpected = expectedWins ? actualWins.subtract(expectedWins) : null;
     const ties = games.filter(game => game.tie).length;
-    const record = [games.filter(game => game.winnerId === team.personId).length, games.filter(game => game.winnerId && game.winnerId !== team.personId).length, ...ties ? [ties] : []].join('–');
+    const record = winLoss(games.filter(game => game.winnerId === team.personId).length, games.filter(game => game.winnerId && game.winnerId !== team.personId).length, ties);
     const pointsPerGame = played.length ? points.divide(played.length).toNumber() : null;
     return { teamId: team.id, dominance, record, pointsPerGame, expectedWins, actualWins, winsVsExpected, fullSeasonCoverage, playedWeeks: played.length, lastWeek: played.at(-1)?.week ?? null };
   });
@@ -41,7 +42,7 @@ export function seasonCandidates(key: 'dominant-season' | 'luckiest-season' | 'u
       if (!comparison.fullSeasonCoverage || key === 'best-without-title' && (!season.championId || season.championId === team.personId)) return [];
       const metric = key === 'unluckiest-season' ? comparison.winsVsExpected?.multiply(-1) : key === 'luckiest-season' ? comparison.winsVsExpected : comparison.dominance;
       if (!metric) return [];
-      const sample = `${comparison.playedWeeks} regular-season ${comparison.playedWeeks === 1 ? 'week' : 'weeks'}`;
+      const sample = plural(comparison.playedWeeks, 'regular-season week');
       return [{ id: team.id, personId: person.id, name: person.name, avatar: team.avatar, metric,
         detail: team.name === person.name ? undefined : team.name,
         sample, leaderContext: `${season.year} season`, record: comparison.record, pointsPerGame: comparison.pointsPerGame ?? undefined,

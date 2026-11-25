@@ -5,6 +5,7 @@ import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
 import { perArchive } from './per-archive.ts';
 import { inScope } from './scope.ts';
+import { plural } from './wording.ts';
 import type { Archive, Performance, Scope } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
@@ -126,7 +127,7 @@ export function contributionCandidates(archive: Archive, selection: RecordSelect
   return contributors(archive, {}, selection).map(row => {
     const latest = [...row.performances].sort((a, b) => b.performance.year.localeCompare(a.performance.year) || b.performance.week - a.performance.week)[0].performance;
     return { id: row.id, personId: row.owner.id, name: row.name, avatar: null, metric: row.metric,
-      sample: `${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, leaderContext: `${row.owner.name} · ${row.starts} ${row.starts === 1 ? 'start' : 'starts'}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
+      sample: plural(row.starts, 'start'), leaderContext: `${row.owner.name} · ${plural(row.starts, 'start')}`, period: { year: latest.year, week: latest.week, playedAt: latest.playedAt }, href: row.href, historyLabel: 'Open player history',
       secondary: [{ name: row.owner.name, href: `/managers/${row.owner.id}/?tab=players&${query(selection.scope ?? 'regular', selection.season)}` }] };
   });
 }

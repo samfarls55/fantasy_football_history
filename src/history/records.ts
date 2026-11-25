@@ -18,6 +18,7 @@ import { armyCandidates, charmCandidates, journeymanCandidates } from './player-
 import { perArchive } from './per-archive.ts';
 import { gameScopes } from './scope.ts';
 import { seasonCandidates } from './season-comparisons.ts';
+import { plural } from './wording.ts';
 import type { Place } from './tabs.ts';
 import type { Archive, Scope } from './types.ts';
 
@@ -84,7 +85,7 @@ function careerCandidates(key: CareerCategory): NonNullable<CategoryDefinition['
     if (selection.season) query.set('season', selection.season);
     if (key !== 'championships') query.set('scope', selection.scope ?? 'regular');
     return [{ id: person.id, personId: person.id, name: person.name, avatar: latestTeam.avatar, metric,
-      sample: key === 'win-percentage' ? `${metrics.facts.record} · ${metrics.facts.games} ${metrics.facts.games === 1 ? 'game' : 'games'}` : null,
+      sample: key === 'win-percentage' ? `${metrics.facts.record} · ${plural(metrics.facts.games, 'game')}` : null,
       period: latestPeriod(periods), href: `/managers/${person.id}/${query.size ? `?${query}` : ''}`, historyLabel: 'Open career' }];
   });
 }

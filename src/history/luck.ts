@@ -1,6 +1,7 @@
 import { Exact } from './decimal.ts';
 import { identity } from './game-records.ts';
 import { completedContests } from './scope.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition } from './records.ts';
 import type { Archive } from './types.ts';
@@ -12,7 +13,6 @@ export function regularScores(archive: Archive) {
   const weeks = Map.groupBy(scores, row => `${row.seasonId}/${row.week}`);
   return scores.map(own => ({ own, game: games.get(own.contestId)!, week: weeks.get(`${own.seasonId}/${own.week}`)! }));
 }
-export const chances = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
 /** Scores 2nd from one end of their week that got the opposite result. */
 function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
@@ -21,7 +21,7 @@ function secondScores(result: 'lost' | 'won'): ManagerStat['values'] {
     return new Map([...Map.groupBy(counted, ({ own }) => own.personId)].map(([personId, scores]) => [personId, {
       value: Exact.from(scores.filter(({ own, game, week }) => !game.tie && (game.winnerId === personId) === (result === 'won')
         && week.filter(other => result === 'lost' ? other.points > own.points : other.points < own.points).length === 1).length),
-      sample: chances(scores.length, 'week'),
+      sample: plural(scores.length, 'week'),
     }]));
   };
 }
@@ -42,7 +42,7 @@ const closeGames: ManagerStat = {
 /** The losses in that column's records. Only a badge ranks them, so they're no column of their own and keep its key. */
 export const closeLosses: ManagerStat = {
   ...closeGames, label: 'Losses in games decided by under 5', unit: 'losses', displayPrecision: 0,
-  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${chances(played, 'game')}` }])),
+  values: archive => new Map(closeSides(archive).map(({ personId, played, wins }) => [personId, { value: Exact.from(played - wins), sample: `of ${plural(played, 'game')}` }])),
   rule: 'Regular-season games lost by under 5 points.',
 };
 
@@ -55,7 +55,7 @@ const highsFaced: ManagerStat['values'] = archive => {
     return { personId: own.personId, high: seasonScores.get(`${own.seasonId}/${opponent.personId}`)!.every(other => other.own.points <= opponent.points) };
   });
   return new Map([...Map.groupBy(faced, row => row.personId)].map(([personId, games]) =>
-    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: chances(games.length, 'game') }]));
+    [personId, { value: Exact.from(games.filter(game => game.high).length), sample: plural(games.length, 'game') }]));
 };
 
 /** One side of each decided regular-season game, with that side's official score. */

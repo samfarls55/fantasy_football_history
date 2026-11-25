@@ -2,6 +2,7 @@ import { readArchive } from './store.ts';
 import { exactSum } from './decimal.ts';
 import { playerStarts, playerContributionHref, type ContributionIdentity, type ContributionSelection } from './contributions.ts';
 import { resolveOwnership, type OwnershipSpell } from './ownership.ts';
+import { plural } from './wording.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
@@ -31,7 +32,7 @@ export async function readPickups(identity: ContributionIdentity = {}, selection
 }
 export function pickupCandidates(archive: Archive, selection: RecordSelection): RecordCandidate[] {
   return pickups(archive, {}, selection).map(row => ({ id: row.spell.id, personId: row.person.id, name: row.player.name, avatar: null, metric: row.metric,
-    sample: `${row.starts.length} ${row.starts.length === 1 ? 'start' : 'starts'}`, leaderContext: `${row.person.name} · Week ${row.spell.addWeek} · ${row.spell.year}`,
+    sample: plural(row.starts.length, 'start'), leaderContext: `${row.person.name} · Week ${row.spell.addWeek} · ${row.spell.year}`,
     period: row.starts.length ? { year: row.spell.year, week: Math.max(...row.starts.map(start => start.performance.week)), playedAt: null } : null, href: row.href, historyLabel: 'Open pickup history',
     secondary: [{ name: `${row.person.name} · Week ${row.spell.addWeek} · ${row.spell.year}`, href: `/managers/${row.person.id}/seasons/${row.spell.year}/?tab=players&scope=${selection.scope ?? 'regular'}` }] }));
 }

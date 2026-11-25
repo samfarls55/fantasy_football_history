@@ -3,6 +3,7 @@ import { recordedStarts, type RecordedStart } from './contributions.ts';
 import { dropHref } from './drops.ts';
 import { resolveOwnership } from './ownership.ts';
 import { opponentOf } from './performances.ts';
+import { plural } from './wording.ts';
 import type { Archive } from './types.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 
@@ -22,7 +23,7 @@ export function exCandidates(archive: Archive, selection: RecordSelection): Reco
     const starts = against.filter(({ performance: { week } }) => week > event.week && (!back || week < back.week));
     if (!starts.length) return [];
     return [{ id: event.id, personId: event.personId, name: archive.players.find(player => player.id === event.playerId)!.name, avatar: null, metric: exactSum(starts.map(start => start.points)), sample: null,
-      leaderContext: `${people.get(event.personId)!.name} · ${event.kind === 'trade' ? 'Traded' : 'Dropped'} Week ${event.week} · ${event.year} · ${starts.length} ${starts.length === 1 ? 'start' : 'starts'}`, startedForIds: [...new Set(starts.map(start => start.performance.personId))],
+      leaderContext: `${people.get(event.personId)!.name} · ${event.kind === 'trade' ? 'Traded' : 'Dropped'} Week ${event.week} · ${event.year} · ${plural(starts.length, 'start')}`, startedForIds: [...new Set(starts.map(start => start.performance.personId))],
       period: { year: event.year, week: Math.max(...starts.map(start => start.performance.week)), playedAt: null }, href: dropHref(event, selection) }];
   });
 }

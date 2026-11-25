@@ -1,7 +1,7 @@
 import { playerContributionHref } from './contributions.ts';
 import { Exact } from './decimal.ts';
-import { chances } from './luck.ts';
 import { completedTrades } from './trades.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { RecordCandidate, RecordSelection } from './records.ts';
 import type { Archive, Transaction } from './types.ts';
@@ -20,8 +20,8 @@ const failedClaims = (archive: Archive) => adds(archive, archive.transactions.fi
 function counts(archive: Archive, counted: { personId: string }[], of?: { word: string; tries: { personId: string }[] }): ReturnType<ManagerStat['values']> {
   return new Map(archive.people.map(({ id }) => [id, {
     value: Exact.from(counted.filter(row => row.personId === id).length),
-    sample: of ? `of ${chances(of.tries.filter(row => row.personId === id).length, of.word)}`
-      : chances(archive.seasons.filter(season => season.teams.some(team => team.personId === id)).length, 'season'),
+    sample: of ? `of ${plural(of.tries.filter(row => row.personId === id).length, of.word)}`
+      : plural(archive.seasons.filter(season => season.teams.some(team => team.personId === id)).length, 'season'),
   }]));
 }
 
@@ -49,7 +49,7 @@ export function repeatPickupCandidates(archive: Archive, selection: RecordSelect
     const years = new Set(rows.map(({ move }) => move.year)).size;
     const managed = seasons.filter(season => season.teams.some(team => team.personId === personId)).length;
     return { id, personId, name: archive.players.find(player => player.id === playerId)!.name, avatar: null, metric: Exact.from(rows.length), sample: null,
-      leaderContext: `${archive.people.find(person => person.id === personId)!.name} · In ${years} of ${chances(managed, 'season')} · last in Week ${last.week} · ${last.year}`,
+      leaderContext: `${archive.people.find(person => person.id === personId)!.name} · In ${years} of ${plural(managed, 'season')} · last in Week ${last.week} · ${last.year}`,
       period: { year: last.year, week: last.week, playedAt: null }, href: playerContributionHref({ personId }, playerId, { season: selection.season }) };
   });
 }

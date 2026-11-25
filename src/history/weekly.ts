@@ -1,6 +1,7 @@
 import { Exact } from './decimal.ts';
-import { chances, regularScores } from './luck.ts';
+import { regularScores } from './luck.ts';
 import { completedContests } from './scope.ts';
+import { plural, winLoss } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { Archive } from './types.ts';
 
@@ -8,7 +9,7 @@ import type { Archive } from './types.ts';
 function extremes(end: 'top' | 'bottom'): ManagerStat['values'] {
   return archive => new Map([...Map.groupBy(regularScores(archive), ({ own }) => own.personId)].map(([personId, scores]) => [personId, {
     value: Exact.from(scores.filter(({ own, week }) => week.every(other => end === 'top' ? other.points <= own.points : other.points >= own.points)).length),
-    sample: chances(scores.length, 'week'),
+    sample: plural(scores.length, 'week'),
   }]));
 }
 
@@ -20,7 +21,7 @@ function bigScoreLine(archive: Archive) {
 const bigScores: ManagerStat['values'] = archive => {
   const line = bigScoreLine(archive);
   return new Map([...Map.groupBy(regularScores(archive), ({ own }) => own.personId)].map(([personId, scores]) =>
-    [personId, { value: Exact.from(scores.filter(({ own }) => own.points >= line).length), sample: chances(scores.length, 'game') }]));
+    [personId, { value: Exact.from(scores.filter(({ own }) => own.points >= line).length), sample: plural(scores.length, 'game') }]));
 };
 
 /** Standard deviation of each score as a share of its week's average. An all-zero week has no such share, and one score has no swing. */
@@ -30,7 +31,7 @@ const boomOrBust: ManagerStat['values'] = archive => {
   return new Map([...Map.groupBy(shares, ({ personId }) => personId)].filter(([, weeks]) => weeks.length > 1).map(([personId, weeks]) => {
     const mean = weeks.reduce((sum, { share }) => sum + share, 0) / weeks.length;
     const variance = weeks.reduce((sum, { share }) => sum + (share - mean) ** 2, 0) / weeks.length;
-    return [personId, { value: Math.sqrt(variance) * 100, sample: chances(weeks.length, 'week') }];
+    return [personId, { value: Math.sqrt(variance) * 100, sample: plural(weeks.length, 'week') }];
   }));
 };
 
@@ -42,7 +43,7 @@ function winRate(from: number, through = Infinity): ManagerStat['values'] {
       const wins = played.filter(({ game }) => game.winnerId === personId).length;
       const ties = played.filter(({ game }) => game.tie).length;
       return [personId, { value: Exact.from(wins).add(Exact.from(ties).divide(2)).multiply(100).divide(played.length),
-        sample: [wins, played.length - wins - ties, ...ties ? [ties] : []].join('–') }];
+        sample: winLoss(wins, played.length - wins - ties, ties) }];
     }));
   };
 }

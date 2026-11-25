@@ -3,6 +3,7 @@
 // The drawing is for the eye alone, and for up to 16 managers; the list under it holds every pair and links the names.
 import Manager from './Manager.astro';
 import Section from './Section.astro';
+import { recordUnit } from '../history/records.ts';
 import { isViewer } from '../league-page.ts';
 import type { readTradeMap } from '../history/trades.ts';
 
@@ -27,7 +28,7 @@ const arcs = pairs.map(({ a, b, count }) => ({ from: managers.indexOf(a), to: ma
       </div>
     </div>}
     <ul class="trade-pairs" aria-labelledby="trade-map-name">
-      {pairs.map(({ a, b, count }) => <li><span class="trade-total"><strong>{count}</strong> {count === 1 ? 'trade' : 'trades'}</span><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
+      {pairs.map(({ a, b, count }) => <li><span class="trade-total"><strong>{count}</strong> {recordUnit('trades', count)}</span><span class="trade-who"><Manager name={a.name} /> and <Manager name={b.name} /></span></li>)}
     </ul>
   </Section>
 )}

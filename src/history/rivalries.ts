@@ -2,6 +2,7 @@ import { readArchive } from './store.ts';
 import { Exact, exactSum } from './decimal.ts';
 import { completedContests } from './scope.ts';
 import { comparePeriods } from './records.ts';
+import { plural, winLoss } from './wording.ts';
 import type { HistorySelection } from './managers.ts';
 import type { Archive, Person } from './types.ts';
 
@@ -31,7 +32,7 @@ function rivalry(archive: Archive, a: Person, b: Person, options: HistorySelecti
   const latest = games[0]?.result;
   const streak = latest && latest !== 'T' ? { result: latest, count: games.findIndex(game => game.result !== latest) < 0 ? games.length : games.findIndex(game => game.result !== latest), person: latest === 'W' ? a : b } : null;
   const averageMargin = games.length ? exactSum(games.map(game => Exact.from(game.side.points).subtract(game.opponent.points))).divide(games.length).toNumber() : null;
-  return { a, b, scope: options.scope ?? 'regular', wins, losses, ties, meetings: games.length, record: `${wins}–${losses}${ties ? `–${ties}` : ''}`, averageMargin, streak, games, href: rivalryHref(a.id, b.id, options) };
+  return { a, b, scope: options.scope ?? 'regular', wins, losses, ties, meetings: games.length, record: winLoss(wins, losses, ties), averageMargin, streak, games, href: rivalryHref(a.id, b.id, options) };
 }
 
 /** Every public comparison reads the last durable publication. An absent history is not zero meetings. */
@@ -64,7 +65,7 @@ export async function readRivalryStreaks(options: { storePath?: string } = {}) {
     const { streak, wins, losses, ties } = rivalry(archive, a, b, { scope: 'combined' });
     if (!streak || streak.count < 3) return [];
     const won = streak.person === a;
-    return [{ winner: streak.person, loser: won ? b : a, count: streak.count, record: [...won ? [wins, losses] : [losses, wins], ...ties ? [ties] : []].join('–') }];
+    return [{ winner: streak.person, loser: won ? b : a, count: streak.count, record: won ? winLoss(wins, losses, ties) : winLoss(losses, wins, ties) }];
   })).sort((a, b) => b.count - a.count || a.winner.name.localeCompare(b.winner.name));
   return runs.filter(run => run.count >= (runs[4]?.count ?? 0));
 }
@@ -123,5 +124,5 @@ export async function readRivalriesPage(options: HistorySelection & { a?: string
 }
 
 export function streakLabel(row: { meetings: number; streak: { person: Person; count: number } | null }): string {
-  return row.streak ? `${row.streak.person.name}, ${row.streak.count} ${row.streak.count === 1 ? 'win' : 'wins'}` : row.meetings ? 'Last meeting tied' : '—';
+  return row.streak ? `${row.streak.person.name}, ${plural(row.streak.count, 'win')}` : row.meetings ? 'Last meeting tied' : '—';
 }

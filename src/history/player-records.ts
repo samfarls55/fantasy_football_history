@@ -1,7 +1,7 @@
 import { recordedStarts, type RecordedStart } from './contributions.ts';
 import { Exact, exactSum } from './decimal.ts';
-import { chances } from './luck.ts';
 import { opponentOf } from './performances.ts';
+import { plural } from './wording.ts';
 import type { ManagerStat } from './manager-stats.ts';
 import type { CategoryDefinition, RecordCandidate, RecordSelection } from './records.ts';
 import type { Archive } from './types.ts';
@@ -56,7 +56,7 @@ function topPlayer(side: 'own' | 'opponent', total: (starts: RecordedStart[]) =>
     return new Map([...starts].map(([personId, starts]) => {
       const players = [...Map.groupBy(starts, start => start.playerId)].map(([id, starts]) => ({ name: names.get(id)!, total: total(starts) })).sort((a, b) => b.total.compare(a.total) || a.name.localeCompare(b.name));
       const value = players[0].total;
-      return [personId, { value, names: players.filter(player => !player.total.compare(value)).map(player => player.name), sample: chances(weeks.get(personId)!.length, 'week') }];
+      return [personId, { value, names: players.filter(player => !player.total.compare(value)).map(player => player.name), sample: plural(weeks.get(personId)!.length, 'week') }];
     }));
   };
 }
