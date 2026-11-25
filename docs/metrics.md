@@ -65,7 +65,9 @@ Use these plain names in the four approved Records groups. Legacy exhibit names 
 | biggest-blowout | Matchups: Biggest blowout | Absolute final contest margin, descending | Season/all; game scope | Matchup |
 | points-in-win | Matchups: Fewest points in a win | Winner's official score in one decided contest, ascending | Season/all; regular only | Matchup, selected week/team |
 | points-in-loss | Matchups: Most points in a loss | Loser's official score in one decided contest, descending | Season/all; regular only | Matchup, selected week/team |
+| worst-managed-week | Matchups: Worst-managed week | Best-lineup gap of one known lineup, descending | Season/all; regular only | Matchup, selected week/team |
 | benched-player | Players: Most points left on the bench | Recorded player/team/week bench score, descending | Season/all; game scope | Matchup with selected bench row |
+| lowest-starter | Players: Lowest starter score | Recorded player/team/week starting score, ascending | Season/all; game scope | Matchup with selected starter row |
 | productive-pickup | Players: Best pickup | One completed waiver/free-agent acquisition spell's subsequent starting points, descending | Season/all; game scope | Scoped player contributions with spell/year retained |
 | productive-drop | Players: Worst drop | One completed drop's later starting points for other people in that season, descending | Season/all; game scope | Dropping person's season Players view, selected drop event and receiving-person history |
 | player-contributions | Players: Most points for one manager | Player/person starting points, descending | Season/all; game scope | Person-scoped player history |
@@ -121,6 +123,25 @@ These use completed regular-season games and official scores, overrides included
 - **Opponents' season highs faced:** completed seasons, counting each contest where the opponent had their highest score of that regular season. A tied high counts each time. The sample is the person's regular-season contests in completed seasons.
 - **Most points in a loss, fewest points in a win:** the loser's and winner's official score in a decided contest. A tie is neither.
 
+## Lineups
+
+Sam authorized these counterfactual lineup claims in spec 37. `src/history/lineups.ts` owns them. They cover completed regular-season weeks and follow the person who held the roster.
+
+The best lineup is the highest total of recorded player points from that week's roster that legally fills the season's starting slots, as many of them as the roster can fill. Bench, IR and taxi slots are not starting slots, but Sleeper's weekly roster doesn't say who held one, so every rostered player is available. A player fits a slot through their current player-list position, or by having started in that slot type anywhere in this league's history, in any game scope. Every rule line says positions are current ones. It is a best assignment, because flex slots overlap: players enter best first, and those already in move to make room. Player points don't depend on the slot, so this finds the highest total.
+
+What the manager started is the floor, so filling a slot they left empty never lowers it. The gap is the best lineup less the starters' points. Both are player points, so a commissioner override never changes the gap.
+
+A week is left out, never zero, when the season has an unrecognized starting slot, a starter has no slot, any rostered player's score is unknown, or no roster was recorded. Recognized slots are QB, RB, WR, TE, K, DEF, FLEX (RB, WR, TE), WRRB_FLEX (RB, WR), REC_FLEX (WR, TE), SUPER_FLEX (QB, RB, WR, TE), DL, LB, DB and IDP_FLEX. A fullback counts as an RB, and specific defensive positions count as their DL, LB or DB group.
+
+- **Points started, % of best lineup:** 100 × starters' points / best-lineup points, summed over the person's counted weeks. A best total that isn't above zero leaves it unknown.
+- **Losses a better lineup wins:** lost contests whose official score plus the gap is above the opponent's official score. The sample is the person's losses in counted weeks.
+- **Perfect lineups:** counted weeks with no gap. **Worst-managed week:** the largest gap above zero.
+- **Starters who scored 0:** starts with a recorded score of exactly 0. **Lowest starter score:** the lowest recorded score of one start. An empty slot or unknown score is neither, and neither needs a known best lineup.
+
+The share ranks from its highest; the counts rank from the most.
+
+The archive's best lineups are solved once per archive object and kept beside it.
+
 ## Schedule swap
 
 A manager's record with the schedule of another manager compares the first one's official score, each regular-season week, with the score of the second one's opponent that week. When that opponent is the first manager, use the second one's score instead. The diagonal is the actual record. Equal scores are a tie. A week in which either manager had an unpaired bye holds no game, and a pair with no such week has no record, not 0–0.
@@ -159,13 +180,13 @@ A contribution is a player appearing in the actual starting lineup with a usable
 
 A person scope stops when that person's ownership stops. A franchise scope includes successive owners while retaining attribution. Season totals and linked contributing games must sum consistently.
 
-A bench performance is a player present on the weekly roster and absent from its actual starters, with a usable recorded score. The bench record does not assert that a replacement was legal, avoidable, or would have won the game. The full platform makes no counterfactual substitution claim.
+A bench performance is a player present on the weekly roster and absent from its actual starters, with a usable recorded score. The bench record does not assert that a replacement was legal, avoidable, or would have won the game. Only the measures under Lineups make a counterfactual substitution claim.
 
 `src/history/bench.ts` ranks individual completed weekly player/team performances with the shared `Exact` comparison and category registry. Repeated people and players remain separate results; ties retain all cutoff places. Links select the actual contest, weekly leg, roster and bench player. Scoped player history still includes actual starts only. No supported historical player portrait is supplied, so these player identities use the shared initials frame rather than a manager avatar.
 
 Missing bench points remain `null` with an internal `player-points` coverage issue blocking `benched-player`. Category reads honor that block for all seasons or the affected selected season, suppressing both rankings and leading holders; a genuine empty selection remains distinct. The block conservatively applies to every game scope within that season. An initial archive can retain unknown lineup rows while the affected record claim stays unavailable. Once a complete bench publication exists, a later missing score rejects the candidate before publication with endpoint/roster/player diagnostics and retains the previous complete history. Numeric zero remains eligible, and empty slots and byes create no bench record.
 
-Current position metadata is not proof of historical lineup eligibility. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
+Current position metadata is not proof of historical lineup eligibility; Lineups uses it and says so. A current team avatar is not an NFL player's photo. All four Players category leaders and rows use player initials when no supported player portrait exists, including pickup and contribution rankings. Home independently resolves team artwork through the owning person and captions it as team artwork; this does not change player attribution or supported original-image URL mappings.
 
 ## Acquisition and drop attribution
 
