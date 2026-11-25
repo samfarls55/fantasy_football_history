@@ -9,6 +9,7 @@ import { contributionCandidates } from './contributions.ts';
 import { beltCandidates } from './belt.ts';
 import { pickCandidates, slotCandidates } from './drafts.ts';
 import { benchCandidates } from './bench.ts';
+import { lowestStarterCandidates, worstManagedCandidates } from './lineups.ts';
 import { marginCandidates, scoreCandidates, streakCandidates } from './game-records.ts';
 import { resultCandidates } from './luck.ts';
 import { gameScopes } from './scope.ts';
@@ -111,8 +112,12 @@ export const recordCategories: CategoryDefinition[] = [
     rule: 'Regular-season wins in a row, carried from one season into the next. A tie ends it.' },
   { key: 'losing-streak', name: 'Longest losing streak', group: 'Careers', place: 'games', unit: 'losses in a row', displayPrecision: 0, shame: true, scope: 'games', candidates: streakCandidates('losing'),
     rule: 'Regular-season losses in a row, carried from one season into the next. A tie ends it.' },
+  { key: 'worst-managed-week', name: 'Worst-managed week', group: 'Matchups', place: 'lineups', unit: 'points short of their best lineup', displayPrecision: 2, shame: true, scope: 'regular', candidates: worstManagedCandidates,
+    rule: 'What the best legal lineup from that regular-season week’s roster would have added. Positions are current ones, plus any slot the player has started in here.' },
   { key: 'benched-player', name: 'Most points left on the bench', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'benched', shame: true, scope: 'games', candidates: benchCandidates,
     rule: 'A player’s score in a regular-season week spent on the bench.' },
+  { key: 'lowest-starter', name: 'Lowest starter score', group: 'Players', place: 'lineups', unit: 'points', displayPrecision: 2, verb: 'started', shame: true, scope: 'games', order: 'ascending', candidates: lowestStarterCandidates,
+    rule: 'A player’s recorded score in a regular-season starting lineup. An empty slot doesn’t count.' },
   { key: 'productive-pickup', name: 'Best pickup', group: 'Players', place: 'moves', unit: 'points as a starter', displayPrecision: 2, verb: 'picked up', scope: 'games', candidates: pickupCandidates,
     rule: 'What the player scored as a starter for that manager in the weeks after the pickup, until the manager let the player go or the regular season ended.' },
   { key: 'productive-drop', name: 'Worst drop', group: 'Players', place: 'moves', unit: 'points for other teams', displayPrecision: 2, verb: 'dropped', shame: true, scope: 'games', candidates: dropCandidates,
@@ -142,8 +147,9 @@ export function categoryHref(key: string, selection: RecordSelection = {}): stri
   if (selection.result) query.set('result', selection.result);
   return `/records/${key}/${query.size ? `?${query}` : ''}`;
 }
-export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|places|seasons)\b/g, word => word.slice(0, -1)) : unit; }
+export function recordUnit(unit: string, value: number): string { return value === 1 ? unit.replace(/\blosses\b/, 'loss').replace(/\b(points|titles|wins|games|defenses|starts|times|pickups|claims|trades|lineups|starters|places|seasons)\b/g, word => word.slice(0, -1)) : unit; }
 export function formatRecordValue(value: number, maximumFractionDigits = 8): string { return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(value); }
+const byName = new Intl.Collator(undefined, { numeric: true }).compare;
 function rankCategory(archive: Archive, category: CategoryDefinition, options: RecordSelection) {
   const seasons = archive.seasons.filter(season => !category.completedSeasons || season.complete).map(season => season.year);
   const season = seasons.includes(options.season!) ? options.season : undefined;
@@ -153,7 +159,7 @@ function rankCategory(archive: Archive, category: CategoryDefinition, options: R
   const selection = { season, scope, sort, limit };
   const seasonId = archive.seasons.find(row => row.year === season)?.id;
   const blocked = archive.coverage.some(issue => issue.blocks.includes(category.key) && (!seasonId || !issue.seasonId || issue.seasonId === seasonId));
-  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || a.name.localeCompare(b.name, undefined, { numeric: true }) || a.id.localeCompare(b.id));
+  const candidates = (blocked ? [] : category.candidates!(archive, selection)).sort((a, b) => (category.order === 'ascending' ? a.metric.compare(b.metric) : b.metric.compare(a.metric)) || byName(a.name, b.name) || a.id.localeCompare(b.id));
   let displayPrecision = category.displayPrecision;
   if (category.percent) {
     const values = [...new Map(candidates.map(row => [row.metric.key, row.metric.toNumber()])).values()];

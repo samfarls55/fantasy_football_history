@@ -4,6 +4,7 @@ import { sumPoints } from './decimal.ts';
 import { importOwnershipInputs } from './ownership-import.ts';
 import { ownerArtwork } from './artwork.ts';
 import { playerBackground } from './players.ts';
+import { startingSlots } from './lineups.ts';
 
 type ObjectValue = Record<string, unknown>;
 function object(value: unknown, path: string): ObjectValue {
@@ -180,7 +181,7 @@ export async function refresh(options: RefreshOptions = {}): Promise<RefreshResu
         const players = list(row.players, `${weekPath} players`).map(value => string(value, `${weekPath} player`));
         const playerPoints = object(row.players_points, `${weekPath} players_points`);
         const starterPoints = list(row.starters_points, `${weekPath} starters_points`);
-        const slots = rosterPositions.filter(slot => !['BN', 'IR', 'TAXI'].includes(slot));
+        const slots = startingSlots(rosterPositions);
         const lineup = starters.flatMap((playerId, index) => {
           if (playerId === '0') return [];
           const recorded = playerPoints[playerId] ?? starterPoints[index];
